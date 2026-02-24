@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="House.Of.Arbitration.Maui.Designer.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:House.Of.Arbitration.Maui.Designer"
+    Title="House.Of.Arbitration.Maui.Designer">
+
+    <ShellContent
+        Title="Home"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
+
+    <ShellContent
+        Title="Search"
+        ContentTemplate="{DataTemplate local:SearchPage}"
+        Route="SearchPage" />
+
+    <ShellContent
+        Title="Add"
+        ContentTemplate="{DataTemplate local:AddPage}"
+        Route="AddPage" />
+
+    <ShellContent
+        Title="Notifications"
+        ContentTemplate="{DataTemplate local:NotificationsPage}"
+        Route="NotificationsPage" />
+
+    <ShellContent
+        Title="Profile"
+        ContentTemplate="{DataTemplate local:ProfilePage}"
+        Route="ProfilePage" />
+
+</Shell>

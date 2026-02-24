@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:TabletTalk.ViewModels"
+             x:Class="TabletTalk.MainPage"
+             x:DataType="viewmodels:MainViewModel">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="15" Spacing="10">
+            <Label Text="Tablet Talk" FontSize="24" HorizontalOptions="Center" />
+            <Label Text="{Binding StatusText}" HorizontalOptions="Center" TextColor="Gray" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Button Grid.Column="0" Text="Mode: WiFi" Command="{Binding SetModeCommand}" CommandParameter="WiFi"/>
+                <Button Grid.Column="1" Text="Mode: Bluetooth" Command="{Binding SetModeCommand}" CommandParameter="Bluetooth"/>
+            </Grid>
+
+            <Button Text="Démarrer comme Serveur / Hub" Command="{Binding StartServerCommand}" />
+            <Button Text="Connexion Automatique" Command="{Binding AutoConnectCommand}"/>
+
+            <Frame Padding="10" BorderColor="LightGray">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Connexion Manuelle" FontAttributes="Bold"/>
+                    <Entry Placeholder="IP du serveur ou nom du Hub" Text="{Binding PeerInput}"/>
+                    <Button Text="Scanner les Peers" Command="{Binding ScanCommand}"/>
+                    <Button Text="Se connecter au Peer" Command="{Binding ConnectCommand}"/>
+                    <ListView ItemsSource="{Binding FoundPeers}" HeightRequest="100">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextCell Text="{Binding .}" />
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </VerticalStackLayout>
+            </Frame>
+            
+            <Frame Padding="10" BorderColor="LightGray" HeightRequest="200">
+                <CollectionView ItemsSource="{Binding Messages}"/>
+            </Frame>
+
+            <Grid ColumnDefinitions="*, Auto" Margin="0,10,0,0">
+                <Entry Grid.Column="0" Placeholder="Écrire un message..." Text="{Binding MessageToSend}" ReturnCommand="{Binding SendCommand}"/>
+                <Button Grid.Column="1" Text="Envoyer" Command="{Binding SendCommand}"/>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

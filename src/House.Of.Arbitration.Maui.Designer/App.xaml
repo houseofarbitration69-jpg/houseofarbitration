@@ -1,0 +1,39 @@
+﻿<?xml version = "1.0" encoding = "UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:House.Of.Arbitration.Maui.Designer"
+             xmlns:controls="clr-namespace:House.Of.Arbitration.Maui.Designer.Controls"
+             x:Class="House.Of.Arbitration.Maui.Designer.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <ControlTemplate x:Key="MasterPageTemplate">
+                <Grid RowDefinitions="Auto, *, Auto">
+                    <!-- Header with Back Arrow -->
+                    <ContentView Grid.Row="0" 
+                                 Padding="20,10" 
+                                 IsVisible="{TemplateBinding IsBackButtonVisible}"
+                                 HorizontalOptions="Start">
+                        <Path Data="M10,0 L0,10 L10,20" 
+                              Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" 
+                              StrokeThickness="3" 
+                              VerticalOptions="Center"
+                              HorizontalOptions="Center" />
+                        <ContentView.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding BackCommand, Source={RelativeSource TemplatedParent}}" />
+                        </ContentView.GestureRecognizers>
+                    </ContentView>
+
+                    <ContentPresenter Grid.Row="1" Grid.RowSpan="2" />
+                    
+                    <controls:BottomMenuView Grid.Row="2" 
+                                            IsVisible="{TemplateBinding IsMenuVisible}" />
+                </Grid>
+            </ControlTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

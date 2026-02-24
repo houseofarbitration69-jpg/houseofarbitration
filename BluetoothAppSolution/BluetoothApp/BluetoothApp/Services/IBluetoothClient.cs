@@ -1,0 +1,17 @@
+using System.Collections.ObjectModel;
+
+namespace BluetoothApp.Services;
+
+public interface IBluetoothClient
+{
+    event EventHandler<string> MessageReceived;
+    event EventHandler<string> DeviceDiscovered;
+    event EventHandler<string> DeviceConnected;
+    event EventHandler<string> DeviceDisconnected;
+
+    Task StartScan();
+    Task StopScan();
+    Task ConnectToDevice(string deviceId);
+    Task DisconnectFromDevice(string deviceId);
+    Task SendMessage(string deviceId, string message);
+}

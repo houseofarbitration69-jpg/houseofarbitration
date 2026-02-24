@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/BluetoothApp/">
+    <Project Path="BluetoothApp/BluetoothApp/BluetoothApp.csproj" />
+  </Folder>
+</Solution>

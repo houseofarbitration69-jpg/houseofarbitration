@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:BluetoothApp.ViewModels"
+             x:DataType="viewmodels:MainViewModel"
+             x:Class="BluetoothApp.MainPage"
+             Title="Bluetooth App">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="10"
+            Spacing="10">
+
+            <!-- Bluetooth Status -->
+            <Frame BorderColor="LightGray" CornerRadius="5" HasShadow="True">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Bluetooth Status" FontAttributes="Bold" FontSize="Medium" TextColor="Black"/>
+                    <Label Text="{Binding BluetoothStatus}" TextColor="Black"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Server Section -->
+            <Frame BorderColor="LightGray" CornerRadius="5" HasShadow="True">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Server" FontAttributes="Bold" FontSize="Medium" TextColor="Black"/>
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Start Server" Command="{Binding StartServerCommand}" HorizontalOptions="FillAndExpand" />
+                        <Button Text="Stop Server" Command="{Binding StopServerCommand}" HorizontalOptions="FillAndExpand" />
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding ServerStatus}" TextColor="Black" />
+                    <Label Text="Message Received (Server):" TextColor="Black"/>
+                    <Label Text="{Binding ServerMessageReceived}" FontAttributes="Italic" TextColor="Black"/>
+                    <HorizontalStackLayout Spacing="10">
+                        <Entry Text="{Binding MessageToSend}" Placeholder="Message to send" HorizontalOptions="FillAndExpand" TextColor="Black"/>
+                        <Button Text="Send Broadcast" Command="{Binding SendBroadcastMessageAsServerCommand}" />
+                    </HorizontalStackLayout>
+                    <Label Text="Connected Clients:" FontAttributes="Bold" TextColor="Black"/>
+                    <CollectionView ItemsSource="{Binding ConnectedClients}" SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedClient}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Text="{Binding}" Padding="5,0" TextColor="Black"/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <Button Text="Send to Selected Client" Command="{Binding SendToSelectedClientCommand}" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Client Section -->
+            <Frame BorderColor="LightGray" CornerRadius="5" HasShadow="True">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Client" FontAttributes="Bold" FontSize="Medium" TextColor="Black"/>
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Start Scan" Command="{Binding StartClientScanCommand}" HorizontalOptions="FillAndExpand" />
+                        <Button Text="Stop Scan" Command="{Binding StopClientScanCommand}" HorizontalOptions="FillAndExpand" />
+                    </HorizontalStackLayout>
+                    <Label Text="{Binding ClientStatus}" TextColor="Black"/>
+                    <Label Text="Discovered Devices:" FontAttributes="Bold" TextColor="Black"/>
+                    <CollectionView ItemsSource="{Binding DiscoveredDevices}" SelectionMode="Single"
+                                    SelectedItem="{Binding SelectedDevice}">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Label Text="{Binding}" Padding="5,0" TextColor="Black"/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Connect" Command="{Binding ConnectClientToDeviceCommand}" CommandParameter="{Binding SelectedDevice}" HorizontalOptions="FillAndExpand" />
+                        <Button Text="Disconnect" Command="{Binding DisconnectClientFromDeviceCommand}" CommandParameter="{Binding SelectedDevice}" HorizontalOptions="FillAndExpand" />
+                    </HorizontalStackLayout>
+                    <Label Text="Message Received (Client):" TextColor="Black"/>
+                    <Label Text="{Binding ClientMessageReceived}" FontAttributes="Italic" TextColor="Black"/>
+                    <HorizontalStackLayout Spacing="10">
+                        <Entry Text="{Binding MessageToSend}" Placeholder="Message to send" HorizontalOptions="FillAndExpand" TextColor="Black"/>
+                        <Button Text="Send (Client)" Command="{Binding SendMessageAsClientCommand}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
