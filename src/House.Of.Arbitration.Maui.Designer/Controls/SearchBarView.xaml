@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:helpers="clr-namespace:House.Of.Arbitration.Maui.Designer.Helpers"
+             x:Class="House.Of.Arbitration.Maui.Designer.Controls.SearchBarView"
+             x:Name="thisSearch">
+
+    <Border StrokeShape="RoundRectangle 25"
+            StrokeThickness="1"
+            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+            BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}"
+            HeightRequest="50"
+            Padding="15,0">
+        
+        <Grid ColumnDefinitions="Auto, *">
+            <!-- Search Icon from FontAwesome -->
+            <Label Grid.Column="0"
+                   Text="{x:Static helpers:IconFont.MagnifyingGlass}"
+                   FontFamily="FA-Solid"
+                   FontSize="18"
+                   VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Gray400}}"
+                   Margin="0,0,10,0" />
+
+            <!-- Input Field -->
+            <Entry Grid.Column="1"
+                   Text="{Binding SearchText, Source={x:Reference thisSearch}}"
+                   Placeholder="{Binding Placeholder, Source={x:Reference thisSearch}}"
+                   PlaceholderColor="{AppThemeBinding Light={StaticResource Gray400}, Dark={StaticResource Gray500}}"
+                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                   VerticalOptions="Center"
+                   ReturnType="Search"
+                   ReturnCommand="{Binding SearchCommand, Source={x:Reference thisSearch}}" />
+        </Grid>
+
+        <Border.Shadow>
+            <Shadow Brush="Black" Offset="0,2" Opacity="0.05" Radius="5" />
+        </Border.Shadow>
+    </Border>
+</ContentView>

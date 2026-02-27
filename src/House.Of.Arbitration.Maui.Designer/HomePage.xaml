@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<local:BasePage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:House.Of.Arbitration.Maui.Designer"
+             xmlns:controls="clr-namespace:House.Of.Arbitration.Maui.Designer.Controls"
+             x:Class="House.Of.Arbitration.Maui.Designer.HomePage">
+    <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*">
+        <StackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
+            <controls:IconButton
+                WidthRequest="200"
+                Text="Préparation"
+                Icon="&#xf013;"
+                ButtonBackgroundColor="LightGray"
+                IconColor="Black"
+                TextColor="Black"
+                Command="{Binding NavigateToCommand}"
+                CommandParameter="SettingsPage"
+            />
+            <controls:IconButton
+                WidthRequest="200"
+                Text="Compétition"
+                Icon="&#xf091;"
+                ButtonBackgroundColor="LightGray"
+                IconColor="Black"
+                TextColor="Black"
+                Command="{Binding NavigateToCommand}"
+                CommandParameter="CompetitionsPage"
+            />
+
+        </StackLayout>
+    </Grid>
+</local:BasePage>

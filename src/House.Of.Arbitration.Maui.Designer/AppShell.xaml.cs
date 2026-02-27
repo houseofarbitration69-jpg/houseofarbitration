@@ -1,10 +1,12 @@
-﻿namespace House.Of.Arbitration.Maui.Designer
+﻿namespace House.Of.Arbitration.Maui.Designer;
+
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+
+        Routing.RegisterRoute("SettingsPage", typeof(Settings.WizardPage));
+        Routing.RegisterRoute("CompetitionsPage", typeof(CompetitionsPage));
     }
 }

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:settings="clr-namespace:House.Of.Arbitration.Maui.Designer.Settings"
+             x:Class="House.Of.Arbitration.Maui.Designer.Settings.Views.TermsStepView"
+             x:DataType="settings:TermsStepViewModel">
+    <VerticalStackLayout Spacing="20" Padding="10">
+        <Label Text="Accept our terms and conditions to proceed:" FontSize="18" />
+        <HorizontalStackLayout Spacing="10">
+            <CheckBox IsChecked="{Binding IsAccepted, Mode=TwoWay}" />
+            <Label Text="I accept the Terms and Conditions" VerticalOptions="Center" />
+        </HorizontalStackLayout>
+    </VerticalStackLayout>
+</ContentView>
