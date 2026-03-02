@@ -53,8 +53,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui.Core" />
 		<PackageReference Include="Microsoft.Maui.Controls" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\House.Of.Arbitration.Localization\House.Of.Arbitration.Localization.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Services.Abstractions\House.Of.Arbitration.Services.Abstractions.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Services\House.Of.Arbitration.Services.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.ViewModels.Core\House.Of.Arbitration.ViewModels.Core.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.ViewModels\House.Of.Arbitration.ViewModels.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Views.Core\House.Of.Arbitration.Views.Core.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Views\House.Of.Arbitration.Views.csproj" />
 	</ItemGroup>
 
 </Project>

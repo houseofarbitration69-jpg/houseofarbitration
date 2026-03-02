@@ -16,4 +16,8 @@
     <PackageReference Include="Microsoft.Maui.Controls" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\House.Of.Arbitration.ViewModels.Core\House.Of.Arbitration.ViewModels.Core.csproj" />
+  </ItemGroup>
+
 </Project>

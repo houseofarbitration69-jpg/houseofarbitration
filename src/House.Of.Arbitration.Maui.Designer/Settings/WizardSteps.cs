@@ -2,7 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace House.Of.Arbitration.Maui.Designer.Settings;
 
-public class CreateCompetitionStepViewModel : WizardStepViewModel
+public class CompetitionStepViewModel : WizardStepViewModel
 {
     private string _name = String.Empty;
     private DateTime _date = DateTime.Now;
@@ -44,6 +44,19 @@ public class CreateCompetitionStepViewModel : WizardStepViewModel
 public class CategoriesStepViewModel : WizardStepViewModel
 {
     public override string Title => "Catégories";
+}
+
+public class CompetitorsStepViewModel : WizardStepViewModel
+{
+    public override string Title => "Competitors";
+}
+
+public class CategoryViewModel
+{
+}
+
+public class CompetitorViewModel
+{
 }
 
 public class UserStepViewModel : WizardStepViewModel

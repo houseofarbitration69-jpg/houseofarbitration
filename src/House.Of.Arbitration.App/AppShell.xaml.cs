@@ -1,10 +1,15 @@
-﻿namespace House.Of.Arbitration.App
+﻿#region Importd
+using House.Of.Arbitration.Views;
+#endregion
+
+namespace House.Of.Arbitration.App;
+
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+
+        Routing.RegisterRoute("HomePage", typeof(HomePage));
     }
 }
