@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--<TargetFrameworks>$(NetVersion)-android;$(NetVersion)-ios</TargetFrameworks>-->
+    <TargetFrameworks>$(NetVersion)-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);$(NetVersion);$(NetVersion)-windows10.0.19041.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+
+    <!-- App Identifier -->
+    <ApplicationId>com.biocinov.neptune</ApplicationId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <!--<PackageReference Include="Microsoft.Extensions.Http" />-->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="NSubstitute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--<ProjectReference Include="..\Biocinov.Neptune.Mobile.Controls\Biocinov.Neptune.Mobile.Controls.csproj" />
+    <ProjectReference Include="..\Biocinov.Neptune.Mobile.ViewModels\Biocinov.Neptune.Mobile.ViewModels.csproj" />
+    <ProjectReference Include="..\Biocinov.Neptune.Mobile.Services\Biocinov.Neptune.Mobile.Services.csproj" />-->
+  </ItemGroup>
+
+</Project>

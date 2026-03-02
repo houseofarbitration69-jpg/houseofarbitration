@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:settings="clr-namespace:House.Of.Arbitration.Maui.Designer.Settings"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Maui.Designer.Controls"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Maui.Designer.Models"
+    x:Class="House.Of.Arbitration.Maui.Designer.Settings.Views.CompetitorsStepView"
+    x:DataType="settings:CompetitorsStepViewModel">
+    <ScrollView>
+        <VerticalStackLayout>
+            <controls:IconButton
+                WidthRequest="200"
+                Text="Add Competiteurs"
+                Icon="&#xf013;"
+                ButtonBackgroundColor="LightGray"
+                IconColor="Black"
+                TextColor="Black"
+                Command="{Binding AddCommand}"
+                CommandParameter="SettingsPage"
+            />
+
+            <CollectionView ItemsSource="{Binding Categories}" SelectionMode="Single" SelectedItem="{Binding SelectedCategory}" SelectionChangedCommand="{Binding ChangedCategoryCommand}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:CategoryModel">
+                        <Label Text="{Binding Name}"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+                <CollectionView.EmptyView>
+                    <Label Text="EMPTY"/>
+                </CollectionView.EmptyView>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

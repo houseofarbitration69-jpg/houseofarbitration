@@ -1,5 +1,6 @@
 src/.vs/House.Of.Arbitration.slnx/DesignTimeBuild/*
 src/.vs/House.Of.Arbitration.slnx/FileContentIndex/*
 src/.vs/House.Of.Arbitration.slnx/v18/*
-src/House.Of.Arbitration.Maui.Designer/bin/*
-src/House.Of.Arbitration.Maui.Designer/obj/*
+src/.vs/*
+obj
+bin
