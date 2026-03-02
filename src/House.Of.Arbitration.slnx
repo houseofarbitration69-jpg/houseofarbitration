@@ -8,4 +8,29 @@
       <Deploy Solution="Debug|*" />
     </Project>
   </Folder>
+  <Folder Name="/02 - Application/">
+    <Project Path="House.Of.Arbitration.App/House.Of.Arbitration.App.csproj" />
+  </Folder>
+  <Folder Name="/03 - Models/">
+    <Project Path="House.Of.Arbitration.Models/House.Of.Arbitration.Models.csproj" />
+  </Folder>
+  <Folder Name="/04 - Services/">
+    <Project Path="House.Of.Arbitration.Data.Abstractions/House.Of.Arbitration.Data.Abstractions.csproj" />
+    <Project Path="House.Of.Arbitration.Data/House.Of.Arbitration.Data.csproj" />
+    <Project Path="House.Of.Arbitration.Localization/House.Of.Arbitration.Localization.csproj" />
+    <Project Path="House.Of.Arbitration.Services.Abstractions/House.Of.Arbitration.Services.Abstractions.csproj" />
+    <Project Path="House.Of.Arbitration.Services/House.Of.Arbitration.Services.csproj" />
+  </Folder>
+  <Folder Name="/05 - Views/">
+    <Project Path="House.Of.Arbitration.Controls/House.Of.Arbitration.Controls.csproj" />
+    <Project Path="House.Of.Arbitration.Views.Core/House.Of.Arbitration.Views.Core.csproj" />
+    <Project Path="House.Of.Arbitration.Views/House.Of.Arbitration.Views.csproj" />
+  </Folder>
+  <Folder Name="/06 - ViewModels/">
+    <Project Path="House.Of.Arbitration.ViewModels.Core/House.Of.Arbitration.ViewModels.Core.csproj" />
+    <Project Path="House.Of.Arbitration.ViewModels/House.Of.Arbitration.ViewModels.csproj" />
+  </Folder>
+  <Folder Name="/07 - Tests/">
+    <Project Path="House.Of.Arbitration.Tests.Unit/House.Of.Arbitration.Tests.Unit.csproj" />
+  </Folder>
 </Solution>
