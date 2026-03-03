@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\House.Of.Arbitration.ViewModels\House.Of.Arbitration.ViewModels.csproj" />
     <ProjectReference Include="..\House.Of.Arbitration.Views.Core\House.Of.Arbitration.Views.Core.csproj" />
   </ItemGroup>
 
@@ -24,10 +25,16 @@
     <Compile Update="HomePage.xaml.cs">
       <DependentUpon>HomePage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="TestPage.xaml.cs">
+      <DependentUpon>TestPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <MauiXaml Update="HomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="TestPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>

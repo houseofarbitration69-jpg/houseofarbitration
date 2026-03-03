@@ -12,7 +12,7 @@ namespace House.Of.Arbitration.Views.Core.Helpers
     {
         public static void SetTheme(AppThemeType themeType)
         {
-            var mergedDictionaries = Application.Current.Resources.MergedDictionaries;
+            var mergedDictionaries = Application.Current?.Resources.MergedDictionaries;
             if (mergedDictionaries != null)
             {
                 // On cherche le dictionnaire de thème actuel

@@ -51,7 +51,7 @@ public partial class BottomMenuView : ContentView
         }
     }
 
-    private void OnBottomMenuViewLoaded(object sender, EventArgs e)
+    private void OnBottomMenuViewLoaded(object? sender, EventArgs e)
     {
         this.Loaded -= OnBottomMenuViewLoaded;
         UpdateGridColumns();
@@ -82,7 +82,7 @@ public partial class BottomMenuView : ContentView
             double itemWidth = ContainerGrid.Width / items.Count;
             double targetTranslation = (targetIndex - _currentIndex) * itemWidth;
 
-            await SelectionIndicator.TranslateTo(targetTranslation, 0, 300, Easing.CubicInOut);
+            await SelectionIndicator.TranslateToAsync(targetTranslation, 0, 300, Easing.CubicInOut);
             
             SelectionIndicator.TranslationX = 0;
             _currentIndex = targetIndex;

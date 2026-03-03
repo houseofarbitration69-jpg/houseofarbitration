@@ -1,6 +1,6 @@
 ﻿namespace House.Of.Arbitration.ViewModels;
 
-public static class ViewModelsExtensions
+public static class BuilderExtensions
 {
     /// <summary>
     /// Registers localization services with the dependency injection container.
@@ -9,6 +9,8 @@ public static class ViewModelsExtensions
     /// <returns>The configured <see cref="MauiAppBuilder"/>.</returns>
     public static MauiAppBuilder RegisterViewModels(this MauiAppBuilder builder)
     {
+        builder.Services.AddTransient<HomeViewModel>();
+
         return builder;
     }
 }

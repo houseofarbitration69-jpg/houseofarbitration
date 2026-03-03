@@ -12,15 +12,11 @@ public abstract class WizardStepViewModel : ObservableObject
     private bool _isValid;
     public bool IsValid 
     { 
-        get => _isValid; 
-        set { _isValid = value; OnPropertyChanged(); } 
+        get => _isValid;
+        set => SetProperty(ref _isValid, value);
     }
 
     public abstract string Title { get; }
-    
-    public event PropertyChangedEventHandler PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
 
 public class WizardViewModel : INotifyPropertyChanged
@@ -47,7 +43,7 @@ public class WizardViewModel : INotifyPropertyChanged
         }
     }
 
-    public WizardStepViewModel CurrentStep => (Steps != null && CurrentStepIndex >= 0 && CurrentStepIndex < Steps.Count) ? Steps[CurrentStepIndex] : null;
+    public WizardStepViewModel? CurrentStep => (Steps != null && CurrentStepIndex >= 0 && CurrentStepIndex < Steps.Count) ? Steps[CurrentStepIndex] : null;
     public bool IsLastStep => Steps.Count > 0 && CurrentStepIndex == Steps.Count - 1;
 
     public ObservableCollection<WizardStepViewModel> Steps { get; } = new();
@@ -55,7 +51,7 @@ public class WizardViewModel : INotifyPropertyChanged
     public ICommand NextCommand { get; }
     public ICommand PreviousCommand { get; }
 
-    public event Action<int> ScrollToRequested;
+    public event Action<int>? ScrollToRequested;
 
     public WizardViewModel()
     {
@@ -88,7 +84,7 @@ public class WizardViewModel : INotifyPropertyChanged
         }
         else
         {
-            await Shell.Current.DisplayAlert("Wizard", "Information processed!", "OK");
+            await Shell.Current.DisplayAlertAsync("Wizard", "Information processed!", "OK");
         }
     }
 
@@ -102,7 +98,7 @@ public class WizardViewModel : INotifyPropertyChanged
         }
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

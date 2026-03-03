@@ -1,35 +1,14 @@
-using House.Of.Arbitration.Views.Core.Helpers;
+#region Imports
+using House.Of.Arbitration.ViewModels;
+using House.Of.Arbitration.Views.Core;
+#endregion
 
 namespace House.Of.Arbitration.Views;
 
-public partial class HomePage : ContentPage
+public partial class HomePage : BasePage<HomeViewModel>
 {
-	int count = 0;
-
-	public HomePage()
+	public HomePage(HomeViewModel viewModel) : base(viewModel)
 	{
 		InitializeComponent();
 	}
-
-	private void OnCounterClicked(object sender, EventArgs e)
-	{
-		count++;
-
-		if (count == 1)
-			CounterBtn.Text = $"Clicked {count} time";
-		else
-			CounterBtn.Text = $"Clicked {count} times";
-
-		SemanticScreenReader.Announce(CounterBtn.Text);
-	}
-
-    private void OnMartialThemeClicked(object sender, EventArgs e)
-    {
-        ThemeHelper.SetTheme(AppThemeType.Martial);
-    }
-
-    private void OnPastelThemeClicked(object sender, EventArgs e)
-    {
-        ThemeHelper.SetTheme(AppThemeType.Pastel);
-    }
 }

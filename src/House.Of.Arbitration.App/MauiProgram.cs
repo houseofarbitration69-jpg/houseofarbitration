@@ -5,6 +5,7 @@ using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Services;
 using House.Of.Arbitration.ViewModels;
 using House.Of.Arbitration.Views;
+using House.Of.Arbitration.Data;
 #endregion
 
 namespace House.Of.Arbitration.App
@@ -38,6 +39,9 @@ namespace House.Of.Arbitration.App
 
             // Register Views
             builder.RegisterViews();
+
+            // Register DbContext
+            builder.RegisterDbContext();
 
             return builder.Build();
         }

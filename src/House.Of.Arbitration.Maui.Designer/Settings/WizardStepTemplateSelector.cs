@@ -14,7 +14,7 @@ public class WizardStepTemplateSelector : DataTemplateSelector
     {
         return item switch
         {
-            CreateCompetitionStepViewModel => CreateCompetitionStepTemplate,
+            CompetitionStepViewModel => CreateCompetitionStepTemplate,
             CategoriesStepViewModel => CategoriesStepTemplate,
             UserStepViewModel => UserStepTemplate,
             TermsStepViewModel => TermsStepTemplate,

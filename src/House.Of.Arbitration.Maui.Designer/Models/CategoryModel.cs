@@ -9,7 +9,6 @@ public class CategoryModel : ObservableObject
     private int _minOld = 0;
     private int _maxOld = 0;
     private Genre _genre = Genre.None;
-    private int _weight = 0;
     private CategoryType _type = CategoryType.None;
     #endregion
 

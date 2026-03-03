@@ -10,7 +10,7 @@ public partial class WizardPage : BasePage
         
         _viewModel = new WizardViewModel();
 
-        var createCompetitionStep = new CreateCompetitionStepViewModel();
+        var createCompetitionStep = new CompetitionStepViewModel();
         var categoriesStep = new CategoriesStepViewModel();
         var userStep = new UserStepViewModel();
         var termsStep = new TermsStepViewModel();

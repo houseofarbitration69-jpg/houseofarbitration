@@ -11,10 +11,7 @@ namespace House.Of.Arbitration.Data;
 public class AppDbContext : DbContext
 {
     #region Properties
-    /// <summary>
-    /// 
-    /// </summary>
-    //public DbSet<TodoItem> TodoItems { get; set; }
+    public DbSet<CompetitionModel> Competitions { get; set; }
     #endregion
 
     #region Constructors
@@ -31,10 +28,24 @@ public class AppDbContext : DbContext
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
         var dbPath = GetDbPath(Constants.LocalDatabase.DATABASE_NAME);
-        optionsBuilder.UseSqlite($"Filename={dbPath}");
+        builder.UseSqlite($"Filename={dbPath}");
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<CompetitionModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+        });
     }
     #endregion
 

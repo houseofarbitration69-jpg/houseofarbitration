@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\House.Of.Arbitration.Services.Abstractions\House.Of.Arbitration.Services.Abstractions.csproj" />
+    <ProjectReference Include="..\House.Of.Arbitration.ViewModels.Core\House.Of.Arbitration.ViewModels.Core.csproj" />
   </ItemGroup>
 
 </Project>

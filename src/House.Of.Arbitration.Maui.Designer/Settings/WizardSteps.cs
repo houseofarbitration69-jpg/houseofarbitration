@@ -61,7 +61,7 @@ public class CompetitorViewModel
 
 public class UserStepViewModel : WizardStepViewModel
 {
-    private string _name;
+    private string _name = String.Empty;
     public string Name
     {
         get => _name;
