@@ -120,4 +120,10 @@
   <data name="APPLICATION_NAME" xml:space="preserve">
     <value>House Of Arbitration</value>
   </data>
+  <data name="ADD_COMPETITION" xml:space="preserve">
+    <value>Ajouter une compétition</value>
+  </data>
+  <data name="START_COMPETITION" xml:space="preserve">
+    <value>Démarrer une compétition</value>
+  </data>
 </root>

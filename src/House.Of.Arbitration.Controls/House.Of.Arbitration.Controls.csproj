@@ -17,8 +17,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Converters\" />
     <Folder Include="Selectors\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\House.Of.Arbitration.Models\House.Of.Arbitration.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="IconButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
   </ItemGroup>
 
 </Project>

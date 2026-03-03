@@ -61,11 +61,29 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ADD COMPETITION].
+        /// </summary>
+        public static string ADD_COMPETITION {
+            get {
+                return ResourceManager.GetString("ADD_COMPETITION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [APPLICATION NAME].
         /// </summary>
         public static string APPLICATION_NAME {
             get {
                 return ResourceManager.GetString("APPLICATION_NAME", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [START COMPETITION].
+        /// </summary>
+        public static string START_COMPETITION {
+            get {
+                return ResourceManager.GetString("START_COMPETITION", resourceCulture);
             }
         }
     }

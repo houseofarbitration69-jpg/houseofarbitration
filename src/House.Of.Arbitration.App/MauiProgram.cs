@@ -1,11 +1,12 @@
 ﻿#region Imports
 using CommunityToolkit.Maui.Core;
-using Microsoft.Extensions.Logging;
+using House.Of.Arbitration.Data;
 using House.Of.Arbitration.Localization;
+using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.Services;
 using House.Of.Arbitration.ViewModels;
 using House.Of.Arbitration.Views;
-using House.Of.Arbitration.Data;
+using Microsoft.Extensions.Logging;
 #endregion
 
 namespace House.Of.Arbitration.App
@@ -20,8 +21,14 @@ namespace House.Of.Arbitration.App
                 .UseMauiCommunityToolkitCore()
                 .ConfigureFonts(fonts =>
                 {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont(FontHelper.OPENSANS_REGULAR_FILENAME, FontHelper.OPENSANS_REGULAR_NAME);
+                    fonts.AddFont(FontHelper.OPENSANS_SEMIBOLD_FILENAME, FontHelper.OPENSANS_SEMIBOLD_NAME);
+
+                    // Register FontAwesome
+                    fonts.AddFont(FontHelper.FONTAWESOME_SOLID_FILENAME, FontHelper.FONTAWESOME_SOLID_NAME);
+
+                    // Register Cutom
+                    fonts.AddFont(FontHelper.CUSTOM_FILENAME, FontHelper.CUSTOM_NAME);
                 });
 
 #if DEBUG

@@ -4,12 +4,42 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     x:TypeArguments="vm:HomeViewModel"
     x:Class="House.Of.Arbitration.Views.HomePage"
     x:DataType="vm:HomeViewModel"
     x:Name="this"
-    Title="{Binding Title}">
+    Shell.NavBarIsVisible="False">
 
-    <Label Text="[HOME]" TextColor="Red"/>
+    <ScrollView>
+        <Grid>
+            <Label Text="{Binding Title}" TextColor="White" HorizontalOptions="Center" FontSize="60"/>
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20" Margin="0,20,0,0">
+                <controls:IconButton
+                    WidthRequest="250"
+                    Text="{Binding Resources.ADD_COMPETITION}"
+                    IsFullWidth="True"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.ADD}"
+                    ButtonBackgroundColor="{StaticResource Primary}"
+                    IconColor="{StaticResource PrimaryTextColor}"
+                    TextColor="{StaticResource PrimaryTextColor}"
+                />
+                <controls:IconButton
+                    WidthRequest="250"
+                    Text="{Binding Resources.START_COMPETITION}"
+                    IsFullWidth="True"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.TROPHY}"
+                    ButtonBackgroundColor="{StaticResource Primary}"
+                    IconColor="{StaticResource PrimaryTextColor}"
+                    TextColor="{StaticResource PrimaryTextColor}"
+                    Command="{Binding ShowCompetitionsCommand}"
+                    IsEnabled="{Binding StartCompetitionIsEnabled}"
+                />
+            </VerticalStackLayout>
+        </Grid>
+    </ScrollView>
 
 </base:BasePage>

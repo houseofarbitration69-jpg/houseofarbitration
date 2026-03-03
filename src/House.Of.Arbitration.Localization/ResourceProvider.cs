@@ -27,6 +27,16 @@ public class ResourceProvider : INotifyPropertyChanged
     /// </summary>
     public string APPLICATION_NAME =>
 LocalizationResourceManager.Instance.GetValue(nameof(APPLICATION_NAME));
+    /// <summary>
+    /// Gets the translated "ADD_COMPETITION" string.
+    /// </summary>
+    public string ADD_COMPETITION =>
+LocalizationResourceManager.Instance.GetValue(nameof(ADD_COMPETITION));
+    /// <summary>
+    /// Gets the translated "START_COMPETITION" string.
+    /// </summary>
+    public string START_COMPETITION =>
+LocalizationResourceManager.Instance.GetValue(nameof(START_COMPETITION));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

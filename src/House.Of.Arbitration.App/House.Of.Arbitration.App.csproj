@@ -62,6 +62,7 @@
 	  <ProjectReference Include="..\House.Of.Arbitration.Data.Abstractions\House.Of.Arbitration.Data.Abstractions.csproj" />
 	  <ProjectReference Include="..\House.Of.Arbitration.Data\House.Of.Arbitration.Data.csproj" />
 	  <ProjectReference Include="..\House.Of.Arbitration.Localization\House.Of.Arbitration.Localization.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Models\House.Of.Arbitration.Models.csproj" />
 	  <ProjectReference Include="..\House.Of.Arbitration.Services.Abstractions\House.Of.Arbitration.Services.Abstractions.csproj" />
 	  <ProjectReference Include="..\House.Of.Arbitration.Services\House.Of.Arbitration.Services.csproj" />
 	  <ProjectReference Include="..\House.Of.Arbitration.ViewModels.Core\House.Of.Arbitration.ViewModels.Core.csproj" />
