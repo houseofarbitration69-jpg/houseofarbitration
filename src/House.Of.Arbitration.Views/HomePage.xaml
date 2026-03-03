@@ -25,6 +25,8 @@
                     ButtonBackgroundColor="{StaticResource Primary}"
                     IconColor="{StaticResource PrimaryTextColor}"
                     TextColor="{StaticResource PrimaryTextColor}"
+                    Command="{Binding NavigateToCommand}"
+                    CommandParameter="CompetitionWizard"
                 />
                 <controls:IconButton
                     WidthRequest="250"
@@ -35,8 +37,9 @@
                     ButtonBackgroundColor="{StaticResource Primary}"
                     IconColor="{StaticResource PrimaryTextColor}"
                     TextColor="{StaticResource PrimaryTextColor}"
-                    Command="{Binding ShowCompetitionsCommand}"
                     IsEnabled="{Binding StartCompetitionIsEnabled}"
+                    Command="{Binding NavigateToCommand}"
+                    CommandParameter="Competitions"
                 />
             </VerticalStackLayout>
         </Grid>

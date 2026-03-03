@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Localization;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
+using System.Xml.Linq;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels.Core;
@@ -94,6 +95,14 @@ public partial class BaseViewModel : ObservableObject
 
             return status;
         });
+    }
+    #endregion
+
+    #region Commands
+    [RelayCommand]
+    private async Task NavigateTo(string page)
+    {
+        await Shell.Current.GoToAsync($"/{page}");
     }
     #endregion
 

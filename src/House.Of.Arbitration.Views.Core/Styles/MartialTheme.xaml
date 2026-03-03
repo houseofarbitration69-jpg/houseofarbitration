@@ -7,7 +7,7 @@
     <Color x:Key="Primary">#D32F2F</Color>
     <Color x:Key="Secondary">#FFC107</Color>
     <Color x:Key="Tertiary">#1E1E1E</Color>
-    <Color x:Key="PageBackgroundColor">#121212</Color>
+    <Color x:Key="PageBackgroundColor">Gray</Color>
     <Color x:Key="SurfaceColor">#1E1E1E</Color>
     <Color x:Key="PrimaryTextColor">#FFFFFF</Color>
     <Color x:Key="SecondaryTextColor">#B0B0B0</Color>

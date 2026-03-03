@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.SettingsStepView"
+    x:DataType="vm:SettingsStepViewModel">
+
+    <ContentView.Resources>
+        <converters:StringToBoolConverter x:Key="LocalStringToBoolConverter" />
+    </ContentView.Resources>
+
+    <ScrollView Padding="0" Margin="0">
+        <VerticalStackLayout Spacing="24" Padding="20">
+            <!-- Header Section -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Configuration de la Compétition" 
+                       Style="{DynamicResource Headline}" 
+                       HorizontalOptions="Start"
+                       FontSize="24" />
+                <Label Text="Veuillez renseigner les détails principaux" 
+                       Style="{DynamicResource SubHeadline}" 
+                       HorizontalOptions="Start"
+                       FontSize="14" 
+                       Opacity="0.7" />
+            </VerticalStackLayout>
+
+            <!-- Name Field -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Nom de la compétition" FontAttributes="Bold" FontSize="14" Margin="4,0" />
+                <Border x:Name="NameBorder"
+                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        BackgroundColor="{DynamicResource SurfaceColor}"
+                        Padding="12,4">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                            <Setter Property="Stroke" Value="{StaticResource MartialRed}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Grid ColumnDefinitions="Auto, *">
+                        <Label Text="🏆" VerticalOptions="Center" Margin="0,0,10,0" />
+                        <Entry Grid.Column="1"
+                               Text="{Binding Name, Mode=TwoWay, UpdateSourceEventName=TextChanged}" 
+                               Placeholder="Ex: Championnat Kung Fu 2024"
+                               PlaceholderColor="{DynamicResource SecondaryTextColor}"
+                               TextColor="{DynamicResource PrimaryTextColor}"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+                <Label Text="Le nom est requis" 
+                       TextColor="{StaticResource MartialRed}" 
+                       FontSize="11" 
+                       Margin="12,0"
+                       IsVisible="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" />
+            </VerticalStackLayout>
+
+            <!-- Date Field -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Date de l'événement" FontAttributes="Bold" FontSize="14" Margin="4,0" />
+                <Border x:Name="DateBorder"
+                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        BackgroundColor="{DynamicResource SurfaceColor}"
+                        Padding="12,4">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <Label Text="📅" VerticalOptions="Center" Margin="0,0,10,0" />
+                        <DatePicker Grid.Column="1"
+                                    Date="{Binding Date, Mode=TwoWay}"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                    VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Place Field -->
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Lieu de la compétition" FontAttributes="Bold" FontSize="14" Margin="4,0" />
+                <Border x:Name="PlaceBorder"
+                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                        Stroke="{DynamicResource BorderColor}"
+                        StrokeThickness="1"
+                        BackgroundColor="{DynamicResource SurfaceColor}"
+                        Padding="12,4">
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Place, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                            <Setter Property="Stroke" Value="{StaticResource MartialRed}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Grid ColumnDefinitions="Auto, *">
+                        <Label Text="📍" VerticalOptions="Center" Margin="0,0,10,0" />
+                        <Entry Grid.Column="1"
+                               Text="{Binding Place, Mode=TwoWay, UpdateSourceEventName=TextChanged}" 
+                               Placeholder="Ex: Dojo Central, Paris"
+                               PlaceholderColor="{DynamicResource SecondaryTextColor}"
+                               TextColor="{DynamicResource PrimaryTextColor}"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </Border>
+                <Label Text="Le lieu est requis" 
+                       TextColor="{StaticResource MartialRed}" 
+                       FontSize="11" 
+                       Margin="12,0"
+                       IsVisible="{Binding Place, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

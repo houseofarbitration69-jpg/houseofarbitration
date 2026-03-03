@@ -10,6 +10,7 @@ public static class BuilderExtensions
     public static MauiAppBuilder RegisterViews(this MauiAppBuilder builder)
     {
         builder.Services.AddTransient<HomePage>();
+        builder.Services.AddTransient<HomePage>();
 
         return builder;
     }

@@ -29,6 +29,12 @@
     <Compile Update="TestPage.xaml.cs">
       <DependentUpon>TestPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Wizard\Competition\WizardPage.xaml.cs">
+      <DependentUpon>WizardPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Wizard\Competition\Steps\SettingsStepView.xaml.cs">
+      <DependentUpon>SettingsStepView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +42,12 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="TestPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\WizardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\Steps\SettingsStepView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
   </ItemGroup>

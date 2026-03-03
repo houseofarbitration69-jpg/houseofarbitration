@@ -1,4 +1,9 @@
-﻿namespace House.Of.Arbitration.ViewModels;
+﻿#region Imports
+using House.Of.Arbitration.ViewModels.Wizard.Competition;
+using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
+#endregion
+
+namespace House.Of.Arbitration.ViewModels;
 
 public static class BuilderExtensions
 {
@@ -10,6 +15,9 @@ public static class BuilderExtensions
     public static MauiAppBuilder RegisterViewModels(this MauiAppBuilder builder)
     {
         builder.Services.AddTransient<HomeViewModel>();
+
+        builder.Services.AddTransient<WizardViewModel>();
+        builder.Services.AddTransient<SettingsStepViewModel>();
 
         return builder;
     }

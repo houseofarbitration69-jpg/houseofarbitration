@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:wizard="clr-namespace:House.Of.Arbitration.Views.Wizard.Competition"
+    xmlns:steps="clr-namespace:House.Of.Arbitration.Views.Wizard.Competition.Steps"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition;assembly=House.Of.Arbitration.ViewModels"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.WizardPage"
+    x:Name="this"
+    x:TypeArguments="vm:WizardViewModel"
+    Title="Settings Wizard">
+
+    <base:BasePage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="SettingsStepTemplate">
+                <steps:SettingsStepView />
+            </DataTemplate>
+
+            <!--<DataTemplate x:Key="CategoriesStepTemplate">
+                <views:CategoriesStepView />
+            </DataTemplate>-->
+
+            <!--<DataTemplate x:Key="UserStepTemplate">
+                <views:UserStepView />
+            </DataTemplate>-->
+
+            <!--<DataTemplate x:Key="TermsStepTemplate">
+                <views:TermsStepView />
+            </DataTemplate>-->
+
+            <!--<DataTemplate x:Key="SummaryStepTemplate">
+                <views:SummaryStepView />
+            </DataTemplate>-->
+
+            <wizard:StepTemplateSelector 
+                x:Key="StepSelector"                                 
+                SettingsStepTemplate="{StaticResource SettingsStepTemplate}"
+            />
+            <!--CategoriesStepTemplate="{StaticResource CategoriesStepTemplate}"
+                UserStepTemplate="{StaticResource UserStepTemplate}"
+                TermsStepTemplate="{StaticResource TermsStepTemplate}"
+                SummaryStepTemplate="{StaticResource SummaryStepTemplate}" 
+            />-->
+        </ResourceDictionary>
+    </base:BasePage.Resources>
+
+    <Grid RowDefinitions="*, Auto" Padding="0">
+        <!--<Label Grid.Row="0" 
+               Text="{Binding CurrentStep.Title}" 
+               FontSize="28" 
+               FontAttributes="Bold" 
+               HorizontalOptions="Center" 
+               Margin="0,0,0,30" />-->
+
+        <CarouselView Grid.Row="0"
+                      x:Name="WizardCarousel"
+                      ItemsSource="{Binding Steps}"
+                      IsSwipeEnabled="False"
+                      Loop="False"
+                      ItemTemplate="{StaticResource StepSelector}"/>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="20" Margin="0,20,0,0">
+            <Button Grid.Column="0" 
+                    Text="Previous" 
+                    Command="{Binding PreviousCommand}"
+                    Padding="15" />
+            <Button Grid.Column="1" 
+                    Command="{Binding NextCommand}"
+                    Padding="15">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsLastStep}" Value="True">
+                        <Setter Property="Text" Value="Finish" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsLastStep}" Value="False">
+                        <Setter Property="Text" Value="Next" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+        </Grid>
+    </Grid>
+</base:BasePage>
