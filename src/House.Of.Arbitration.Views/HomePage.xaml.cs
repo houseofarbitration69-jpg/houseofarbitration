@@ -1,23 +1,35 @@
-﻿namespace House.Of.Arbitration.Views;
+using House.Of.Arbitration.Views.Core.Helpers;
+
+namespace House.Of.Arbitration.Views;
 
 public partial class HomePage : ContentPage
 {
-    int count = 0;
+	int count = 0;
 
-    public HomePage()
+	public HomePage()
+	{
+		InitializeComponent();
+	}
+
+	private void OnCounterClicked(object sender, EventArgs e)
+	{
+		count++;
+
+		if (count == 1)
+			CounterBtn.Text = $"Clicked {count} time";
+		else
+			CounterBtn.Text = $"Clicked {count} times";
+
+		SemanticScreenReader.Announce(CounterBtn.Text);
+	}
+
+    private void OnMartialThemeClicked(object sender, EventArgs e)
     {
-        InitializeComponent();
+        ThemeHelper.SetTheme(AppThemeType.Martial);
     }
 
-    private void OnCounterClicked(object? sender, EventArgs e)
+    private void OnPastelThemeClicked(object sender, EventArgs e)
     {
-        count++;
-
-        if (count == 1)
-            CounterBtn.Text = $"Clicked {count} time";
-        else
-            CounterBtn.Text = $"Clicked {count} times";
-
-        SemanticScreenReader.Announce(CounterBtn.Text);
+        ThemeHelper.SetTheme(AppThemeType.Pastel);
     }
 }

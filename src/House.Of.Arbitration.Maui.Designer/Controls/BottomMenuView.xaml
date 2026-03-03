@@ -4,8 +4,9 @@
              xmlns:models="clr-namespace:House.Of.Arbitration.Maui.Designer.Models"
              x:Class="House.Of.Arbitration.Maui.Designer.Controls.BottomMenuView"
              x:Name="ThisMenu">
-    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}"
-           CornerRadius="20"
+    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource MartialSurface}, Dark={StaticResource MartialDark}}"
+           CornerRadius="0"
+           BorderColor="{StaticResource MartialGold}"
            Margin="10"
            Padding="0"
            HasShadow="True"

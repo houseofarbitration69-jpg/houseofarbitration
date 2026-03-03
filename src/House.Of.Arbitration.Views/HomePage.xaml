@@ -7,6 +7,10 @@
         <VerticalStackLayout
             Padding="30,0"
             Spacing="25">
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10" Margin="0,20,0,0">
+                <Button Text="Martial" Clicked="OnMartialThemeClicked" />
+                <Button Text="Pastel" Clicked="OnPastelThemeClicked" />
+            </HorizontalStackLayout>
             <Image
                 Source="dotnet_bot.png"
                 HeightRequest="185"

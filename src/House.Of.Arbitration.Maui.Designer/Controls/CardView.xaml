@@ -6,8 +6,9 @@
     
     <ContentView.ControlTemplate>
         <ControlTemplate>
-            <Border StrokeShape="RoundRectangle 15"
-                    StrokeThickness="0"
+            <Border StrokeShape="RoundRectangle 2"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource MartialGold}}"
                     BackgroundColor="{TemplateBinding CardColor}"
                     Padding="{TemplateBinding CardPadding}"
                     HorizontalOptions="Fill"
