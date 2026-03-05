@@ -1,31 +1,47 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
-using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition;
 
-public abstract class WizardStepViewModel : ObservableObject
+public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T : class, new()
 {
-    private bool _isValid;
-    public bool IsValid 
-    { 
-        get => _isValid;
-        set => SetProperty(ref _isValid, value);
+    #region Events
+    public event Action<int>? ScrollToRequested;
+    #endregion
+
+    #region Services
+    private readonly IRepository<T> _repository;
+    #endregion
+
+    #region Attributs
+    private int _currentStepIndex;
+    private string _name = String.Empty;
+    private T _model = new();
+    #endregion
+
+    #region Properties
+    public T Model
+    {
+        get => _model;
+        set => SetProperty(ref _model, value);
+    }
+    /// <summary>
+    /// 
+    /// </summary>
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
     }
 
-    public abstract string Title { get; }
-}
-
-public class WizardViewModel : BaseViewModel, INotifyPropertyChanged
-{
-    private int _currentStepIndex;
+    /// <summary>
+    /// 
+    /// </summary>
     public int CurrentStepIndex
     {
         get => _currentStepIndex;
@@ -47,37 +63,57 @@ public class WizardViewModel : BaseViewModel, INotifyPropertyChanged
         }
     }
 
-    public WizardStepViewModel? CurrentStep => (Steps != null && CurrentStepIndex >= 0 && CurrentStepIndex < Steps.Count) ? Steps[CurrentStepIndex] : null;
     public bool IsLastStep => Steps.Count > 0 && CurrentStepIndex == Steps.Count - 1;
 
-    public ObservableCollection<WizardStepViewModel> Steps { get; } = new();
+    public ObservableCollection<WizardStepViewModel<T>> Steps { get; } = new();
 
+    public WizardStepViewModel<T>? CurrentStep => (Steps != null && CurrentStepIndex >= 0 && CurrentStepIndex < Steps.Count) ? Steps[CurrentStepIndex] : null;
+    #endregion
+
+    #region Commands
     public ICommand NextCommand { get; }
     public ICommand PreviousCommand { get; }
+    #endregion
 
-    public event Action<int>? ScrollToRequested;
-
-    public WizardViewModel(ILogger<WizardViewModel> logger, ResourceProvider resourceProvider) : base(logger, resourceProvider)
+    #region Constructors
+    public WizardViewModel(ILogger<WizardViewModel<T>> logger, ResourceProvider resourceProvider, IRepository<T> repository) : base(logger, resourceProvider)
     {
+        _repository = repository;
+
         NextCommand = new Command(async () => await GoNext(), () => CurrentStep?.IsValid ?? false);
         PreviousCommand = new Command(async () => await GoPrevious(), () => CurrentStepIndex > 0);
     }
+    #endregion
 
-    public void AddStep(WizardStepViewModel step)
+    #region Public Methods
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="step"></param>
+    public void AddStep(WizardStepViewModel<T> step)
     {
+        step.Model = Model; // Partager le modèle
         step.PropertyChanged += (s, e) =>
         {
-            if (e.PropertyName == nameof(WizardStepViewModel.IsValid))
+            if (e.PropertyName == nameof(WizardStepViewModel<T>.IsValid))
             {
                 ((Command)NextCommand).ChangeCanExecute();
             }
         };
         Steps.Add(step);
-        
+
+        OnPropertyChanged(nameof(CurrentStep));
+        OnPropertyChanged(nameof(IsLastStep));
         ((Command)NextCommand).ChangeCanExecute();
         ((Command)PreviousCommand).ChangeCanExecute();
     }
+    #endregion
 
+    #region Private Methods
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     private async Task GoNext()
     {
         if (CurrentStepIndex < Steps.Count - 1)
@@ -88,10 +124,40 @@ public class WizardViewModel : BaseViewModel, INotifyPropertyChanged
         }
         else
         {
-            await Shell.Current.DisplayAlertAsync("Wizard", "Information processed!", "OK");
+            await OnFinalizeAsync();
         }
     }
 
+    private async Task OnFinalizeAsync()
+    {
+        // Logique de validation et traitement final
+        bool isAllValid = true;
+        foreach (var step in Steps)
+        {
+            if (!step.IsValid)
+            {
+                isAllValid = false;
+                break;
+            }
+        }
+
+        if (isAllValid)
+        {
+            await _repository.AddAsync(Model);
+
+            await Shell.Current.DisplayAlertAsync("Validation", "La compétition a été validée avec succès !", "OK");
+            await Shell.Current.GoToAsync("..");
+        }
+        else
+        {
+            await Shell.Current.DisplayAlertAsync("Erreur", "Certaines étapes contiennent des informations invalides.", "OK");
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
     private async Task GoPrevious()
     {
         if (CurrentStepIndex > 0)
@@ -101,8 +167,5 @@ public class WizardViewModel : BaseViewModel, INotifyPropertyChanged
             CurrentStepIndex = prevIndex;
         }
     }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    #endregion
 }

@@ -1,4 +1,5 @@
 #region Imports
+using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Wizard.Competition;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using House.Of.Arbitration.Views.Core;
@@ -6,20 +7,20 @@ using House.Of.Arbitration.Views.Core;
 
 namespace House.Of.Arbitration.Views.Wizard.Competition;
 
-public partial class WizardPage : BasePage<WizardViewModel>
+public partial class WizardPage : BasePage<CompetitionWizardViewModel>
 {
-    public WizardPage(WizardViewModel viewModel) : base(viewModel)
+    public WizardPage(CompetitionWizardViewModel viewModel) : base(viewModel)
     {
         InitializeComponent();
         
         var settingsStep = new SettingsStepViewModel();
-        //var categoriesStep = new CategoriesStepViewModel();
+        var categoriesStep = new CategoriesStepViewModel();
         //var userStep = new UserStepViewModel();
         //var termsStep = new TermsStepViewModel();
         //var summaryStep = new SummaryStepViewModel(userStep, termsStep);
 
         viewModel.AddStep(settingsStep);
-        //_viewModel.AddStep(categoriesStep);
+        viewModel.AddStep(categoriesStep);
         //_viewModel.AddStep(userStep);
         //_viewModel.AddStep(termsStep);
         //_viewModel.AddStep(summaryStep);
@@ -34,7 +35,6 @@ public partial class WizardPage : BasePage<WizardViewModel>
             });
         };
 
-        //BindingContext = _viewModel;
         //IsMenuVisible = false;
         //IsBackButtonVisible = true;
     }

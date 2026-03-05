@@ -2,14 +2,16 @@
 <base:BasePage 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
     xmlns:wizard="clr-namespace:House.Of.Arbitration.Views.Wizard.Competition"
     xmlns:steps="clr-namespace:House.Of.Arbitration.Views.Wizard.Competition.Steps"
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition;assembly=House.Of.Arbitration.ViewModels"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.WizardPage"
     x:Name="this"
-    x:TypeArguments="vm:WizardViewModel"
-    Title="Settings Wizard">
+    x:DataType="vm:CompetitionWizardViewModel"
+    x:TypeArguments="vm:CompetitionWizardViewModel"
+    Title="{Binding Model.Name}">
 
     <base:BasePage.Resources>
         <ResourceDictionary>
@@ -17,9 +19,9 @@
                 <steps:SettingsStepView />
             </DataTemplate>
 
-            <!--<DataTemplate x:Key="CategoriesStepTemplate">
-                <views:CategoriesStepView />
-            </DataTemplate>-->
+            <DataTemplate x:Key="CategoriesStepTemplate">
+                <steps:CategoriesStepView />
+            </DataTemplate>
 
             <!--<DataTemplate x:Key="UserStepTemplate">
                 <views:UserStepView />
@@ -36,6 +38,7 @@
             <wizard:StepTemplateSelector 
                 x:Key="StepSelector"                                 
                 SettingsStepTemplate="{StaticResource SettingsStepTemplate}"
+                CategoriesStepTemplate="{StaticResource CategoriesStepTemplate}"
             />
             <!--CategoriesStepTemplate="{StaticResource CategoriesStepTemplate}"
                 UserStepTemplate="{StaticResource UserStepTemplate}"
@@ -70,7 +73,7 @@
                     Padding="15">
                 <Button.Triggers>
                     <DataTrigger TargetType="Button" Binding="{Binding IsLastStep}" Value="True">
-                        <Setter Property="Text" Value="Finish" />
+                        <Setter Property="Text" Value="Valider" />
                     </DataTrigger>
                     <DataTrigger TargetType="Button" Binding="{Binding IsLastStep}" Value="False">
                         <Setter Property="Text" Value="Next" />

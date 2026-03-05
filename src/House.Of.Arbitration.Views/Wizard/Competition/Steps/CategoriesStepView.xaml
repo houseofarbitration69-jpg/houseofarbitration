@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoriesStepView"
+    x:DataType="vm:CategoriesStepViewModel">
+    <ScrollView>
+        <Label Text="[CATEGORIES]"/>
+    </ScrollView>
+</ContentView>

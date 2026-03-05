@@ -5,7 +5,7 @@ namespace House.Of.Arbitration.Views.Wizard.Competition;
 public class StepTemplateSelector : DataTemplateSelector
 {
     public required DataTemplate SettingsStepTemplate { get; set; }
-    //public required DataTemplate CategoriesStepTemplate { get; set; }
+    public required DataTemplate CategoriesStepTemplate { get; set; }
     //public required DataTemplate UserStepTemplate { get; set; }
     //public required DataTemplate TermsStepTemplate { get; set; }
     //public required DataTemplate SummaryStepTemplate { get; set; }
@@ -15,7 +15,7 @@ public class StepTemplateSelector : DataTemplateSelector
         return item switch
         {
             SettingsStepViewModel => SettingsStepTemplate,
-            //CategoriesStepViewModel => CategoriesStepTemplate,
+            CategoriesStepViewModel => CategoriesStepTemplate,
             //UserStepViewModel => UserStepTemplate,
             //TermsStepViewModel => TermsStepTemplate,
             //SummaryStepViewModel => SummaryStepTemplate,

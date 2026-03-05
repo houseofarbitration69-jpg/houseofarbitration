@@ -3,7 +3,7 @@
 public class CompetitionModel
 {
     public int Id { get; set; } = -1;
-    public required string Name { get; set; }
-    public required DateOnly Date { get; set; }
-    public string? Address { get; set; }
+    public string Name { get; set; } = String.Empty;
+    public  DateOnly Date { get; set; } = new DateOnly();
+    public List<CategoryModel> Categories { get; set; } = new();
 }

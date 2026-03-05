@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
 {
     #region Properties
     public DbSet<CompetitionModel> Competitions { get; set; }
+    public DbSet<CategoryModel> Categories{ get; set; }
     #endregion
 
     #region Constructors
@@ -45,6 +46,13 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
+        });
+
+        builder.Entity<CategoryModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+            item.HasOne(i => i.Competition).WithMany().HasForeignKey(c => c.CompetitionId);
         });
     }
     #endregion

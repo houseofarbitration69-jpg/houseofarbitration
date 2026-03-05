@@ -1,30 +1,71 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using House.Of.Arbitration.ViewModels.Wizard.Competition;
+#region Imports
+using House.Of.Arbitration.Models;
+#endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
-public partial class SettingsStepViewModel : WizardStepViewModel
+public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionModel>
 {
-    [ObservableProperty]
-    private string _name;
+    #region Attributs
+    private string _name = String.Empty;
+    private DateOnly _date = DateOnly.FromDateTime(DateTime.Now);
+    #endregion
 
-    [ObservableProperty]
-    private DateTime _date = DateTime.Now;
+    #region Properties
+    public override string Title => String.Empty;
 
-    [ObservableProperty]
-    private string _place;
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            SetProperty(ref _name, value);
 
-    public override string Title => "Settings";
+            if (Model != null)
+            {
+                Model.Name = value;
+            }
 
-    partial void OnNameChanged(string value) => Validate();
-    partial void OnDateChanged(DateTime value) => Validate();
-    partial void OnPlaceChanged(string value) => Validate();
+            Validate();
+        }
+    }
 
+    public DateOnly Date
+    {
+        get => _date;
+        set
+        {
+            SetProperty(ref _date, value);
+
+            if (Model != null)
+            {
+                Model.Date = value;
+            }
+
+            Validate();
+        }
+    }
+    #endregion
+
+    #region Override Methods
+    protected override void OnModelUpdated(Models.CompetitionModel value)
+    {
+        if (value != null)
+        {
+            Name = value.Name;
+            Date = value.Date;
+            Validate();
+        }
+    }
+    #endregion
+
+    #region Private Methods
+    /// <summary>
+    /// 
+    /// </summary>
     private void Validate()
     {
-        // Simple validation logic
-        IsValid = !string.IsNullOrWhiteSpace(Name) && 
-                  !string.IsNullOrWhiteSpace(Place) && 
-                  Date >= DateTime.Today;
+        IsValid = !string.IsNullOrWhiteSpace(Name);
     }
+    #endregion
 }

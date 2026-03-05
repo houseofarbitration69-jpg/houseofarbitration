@@ -50,6 +50,29 @@ namespace House.Of.Arbitration.App
             // Register DbContext
             builder.RegisterDbContext();
 
+            // Supprimer les bordures natives des Entry
+            Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoBorder", (handler, view) =>
+            {
+#if ANDROID
+                handler.PlatformView.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+#elif WINDOWS
+                handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+                handler.PlatformView.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);
+#elif IOS || MACCATALYST
+                handler.PlatformView.BorderStyle = UIKit.UITextBorderStyle.None;
+#endif
+            });
+
+            // Supprimer les bordures natives des DatePicker
+            Microsoft.Maui.Handlers.DatePickerHandler.Mapper.AppendToMapping("NoBorder", (handler, view) =>
+            {
+#if ANDROID
+                handler.PlatformView.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+#elif WINDOWS
+                handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
+#endif
+            });
+
             return builder.Build();
         }
     }

@@ -16,7 +16,7 @@ public static class BuilderExtensions
     {
         builder.Services.AddTransient<HomeViewModel>();
 
-        builder.Services.AddTransient<WizardViewModel>();
+        builder.Services.AddTransient<CompetitionWizardViewModel>();
         builder.Services.AddTransient<SettingsStepViewModel>();
 
         return builder;

@@ -44,6 +44,9 @@
     <MauiXaml Update="TestPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\Steps\CategoriesStepView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Wizard\Competition\WizardPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
