@@ -18,6 +18,15 @@ public partial class IconButton : ContentView
         set => SetValue(TextProperty, value);
     }
 
+    public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
+        nameof(TextFontSize), typeof(double), typeof(IconButton), 14.0);
+
+    public double TextFontSize
+    {
+        get => (double)GetValue(TextFontSizeProperty);
+        set => SetValue(TextFontSizeProperty, value);
+    }
+
     public static readonly BindableProperty IconProperty = BindableProperty.Create(
         nameof(Icon), typeof(string), typeof(IconButton), string.Empty);
 
@@ -27,7 +36,16 @@ public partial class IconButton : ContentView
         set => SetValue(IconProperty, value);
     }
 
-    public ObservableCollection<string> InternalIcons { get; } = new();
+    public static readonly BindableProperty IconFontSizeProperty = BindableProperty.Create(
+        nameof(IconFontSize), typeof(double), typeof(IconButton), 18.0);
+
+    public double IconFontSize
+    {
+        get => (double)GetValue(IconFontSizeProperty);
+        set => SetValue(IconFontSizeProperty, value);
+    }
+
+    public ObservableCollection<IconInfo> InternalIcons { get; } = new();
 
     public static readonly BindableProperty IconsProperty = BindableProperty.Create(
         nameof(Icons), typeof(IList), typeof(IconButton), null, propertyChanged: OnIconsChanged);
@@ -55,7 +73,6 @@ public partial class IconButton : ContentView
     {
         UpdateInternalItems();
     }
-
 
     public static readonly BindableProperty IconFontFamilyProperty = BindableProperty.Create(
         nameof(IconFontFamily), typeof(string), typeof(IconButton), FontHelper.FONTAWESOME_SOLID_NAME);
@@ -159,7 +176,8 @@ public partial class IconButton : ContentView
 
     public IconButton()
     {
-        Icons = new ObservableCollection<string>();
+        // Initialisation par défaut pour XAML
+        Icons = new ObservableCollection<IconInfo>();
         InitializeComponent();
     }
 
@@ -191,10 +209,12 @@ public partial class IconButton : ContentView
             InternalIcons.Clear();
             if (Icons != null)
             {
-                foreach (var icon in Icons)
+                foreach (var item in Icons)
                 {
-                    if (icon != null)
-                        InternalIcons.Add(icon.ToString() ?? String.Empty);
+                    if (item is IconInfo iconInfo)
+                        InternalIcons.Add(iconInfo);
+                    else if (item != null)
+                        InternalIcons.Add(new IconInfo { Icon = item.ToString() ?? string.Empty, FontSize = IconFontSize });
                 }
             }
         });

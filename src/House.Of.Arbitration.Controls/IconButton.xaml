@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls"
     x:Class="House.Of.Arbitration.Controls.IconButton"
     x:Name="root">
 
@@ -36,22 +37,21 @@
             <!-- Icône unique -->
             <Label Text="{Binding Icon, Source={x:Reference root}}"
                    FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
-                   FontSize="18"
+                   FontSize="{Binding IconFontSize, Source={x:Reference root}}"
                    TextColor="{Binding IconColor, Source={x:Reference root}}"
                    VerticalOptions="Center"
                    IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"/>
 
             <!-- Liste d'icônes -->
-            <Grid 
-                BindableLayout.ItemsSource="{Binding InternalIcons, Source={x:Reference root}}"
-            >
+            <Grid BindableLayout.ItemsSource="{Binding InternalIcons, Source={x:Reference root}}"
+                                   IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}">
                 <BindableLayout.ItemTemplate>
-                    <DataTemplate>
-                        <!-- On utilise les propriétés parentes via root car elles ne changent pas par item -->
-                        <Label Text="{Binding .}"
-                               FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
-                               TextColor="{Binding IconColor, Source={x:Reference root}}"
-                               FontSize="18"
+                    <DataTemplate x:DataType="controls:IconInfo">
+                        <Label Text="{Binding Icon}"
+                               FontFamily="{Binding FontFamily}"
+                               TextColor="{Binding Color}"
+                               FontSize="{Binding FontSize}"
+                               HorizontalOptions="Center"
                                VerticalOptions="Center" />
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
@@ -61,7 +61,7 @@
             <Label x:Name="TextLabel"
                    Text="{Binding Text, Source={x:Reference root}}"
                    TextColor="{Binding TextColor, Source={x:Reference root}}"
-                   FontSize="14"
+                   FontSize="{Binding TextFontSize, Source={x:Reference root}}"
                    FontAttributes="Bold"
                    VerticalOptions="Center"
                    IsVisible="{Binding Text, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"/>
