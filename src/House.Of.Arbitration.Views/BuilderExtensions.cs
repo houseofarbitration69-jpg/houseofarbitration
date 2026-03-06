@@ -1,4 +1,8 @@
-﻿namespace House.Of.Arbitration.Views;
+﻿#region Imports
+using House.Of.Arbitration.Views.Competition;
+#endregion
+
+namespace House.Of.Arbitration.Views;
 
 public static class BuilderExtensions
 {
@@ -10,7 +14,7 @@ public static class BuilderExtensions
     public static MauiAppBuilder RegisterViews(this MauiAppBuilder builder)
     {
         builder.Services.AddTransient<HomePage>();
-        builder.Services.AddTransient<HomePage>();
+        builder.Services.AddTransient<CompetitionsPage>();
 
         return builder;
     }

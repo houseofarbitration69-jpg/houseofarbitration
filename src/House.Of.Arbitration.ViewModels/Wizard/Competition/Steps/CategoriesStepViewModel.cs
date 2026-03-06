@@ -1,53 +1,70 @@
-#region Imports
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Models;
-#endregion
+using System.Collections.ObjectModel;
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
 public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionModel>
 {
-    #region Attributs
-    private List<CategoryModel> _categories = new();
-    #endregion
+    [ObservableProperty]
+    private ObservableCollection<CategoryModel> _categories = new();
 
-    #region Properties
-    public override string Title => String.Empty;
+    public override string Title => "Catégories";
 
-    public List<CategoryModel> Categories
+    public CategoriesStepViewModel()
     {
-        get => _categories;
-        set
+        Validate();
+    }
+
+    [RelayCommand]
+    private void AddCategory(CategoryModel category)
+    {
+        if (category != null)
         {
-            SetProperty(ref _categories, value);
+            category.Competition = Model;
+            category.CompetitionId = Model?.Id ?? -1;
+            Categories.Add(category);
 
             if (Model != null)
             {
-                Model.Categories = value;
+                Model.Categories = Categories.ToList();
             }
 
             Validate();
         }
     }
-    #endregion
 
-    #region Override Methods
-    protected override void OnModelUpdated(Models.CompetitionModel value)
+    [RelayCommand]
+    private void RemoveCategory(CategoryModel category)
     {
-        if (value != null)
+        if (category != null && Categories.Contains(category))
         {
-            Categories = value.Categories;
+            Categories.Remove(category);
+
+            if (Model != null)
+            {
+                Model.Categories = Categories.ToList();
+            }
+
             Validate();
         }
     }
-    #endregion
 
-    #region Private Methods
-    /// <summary>
-    /// 
-    /// </summary>
+    protected override void OnModelUpdated(CompetitionModel value)
+    {
+        if (value != null)
+        {
+            // Note: CompetitionModel need to have a property List<CategoryModel> Categories
+            // For now, we initialize from the model if it exists
+            Categories = new ObservableCollection<CategoryModel>(value.Categories ?? new());
+
+            Validate();
+        }
+    }
+
     private void Validate()
     {
         IsValid = Categories != null && Categories.Count > 0;
     }
-    #endregion
 }

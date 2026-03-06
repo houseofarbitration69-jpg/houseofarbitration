@@ -1,5 +1,6 @@
 ﻿#region Imports
 using House.Of.Arbitration.Views;
+using House.Of.Arbitration.Views.Competition;
 using House.Of.Arbitration.Views.Wizard.Competition;
 #endregion
 
@@ -13,5 +14,6 @@ public partial class AppShell : Shell
 
         Routing.RegisterRoute("HomePage", typeof(HomePage));
         Routing.RegisterRoute("CompetitionWizard", typeof(WizardPage));
+        Routing.RegisterRoute("Competitions", typeof(CompetitionsPage));
     }
 }

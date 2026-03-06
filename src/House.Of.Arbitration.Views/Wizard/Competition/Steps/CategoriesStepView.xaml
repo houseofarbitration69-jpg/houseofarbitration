@@ -3,10 +3,143 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
-    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoriesStepView"
     x:DataType="vm:CategoriesStepViewModel">
-    <ScrollView>
-        <Label Text="[CATEGORIES]"/>
-    </ScrollView>
+
+    <Grid>
+        <!-- Background/Main Content -->
+        <ScrollView>
+            <VerticalStackLayout Spacing="24" Padding="20">
+                <!-- Header Section -->
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Gestion des Catégories" 
+                           Style="{DynamicResource Headline}" 
+                           HorizontalOptions="Start"
+                           FontSize="24" />
+                    <Label Text="Définissez les catégories de combat autorisées" 
+                           Style="{DynamicResource SubHeadline}" 
+                           HorizontalOptions="Start"
+                           FontSize="14" 
+                           Opacity="0.7" />
+                </VerticalStackLayout>
+
+                <!-- Add Button -->
+                <Button Text="+ Ajouter une Catégorie"
+                        Style="{StaticResource Button}"
+                        Margin="0,20"
+                        Clicked="OnAddCategoryClicked" />
+
+                <!-- Categories List -->
+                <CollectionView ItemsSource="{Binding Categories}">
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Margin="0,40" Spacing="10">
+                            <Label Text="📭" FontSize="48" HorizontalOptions="Center" />
+                            <Label Text="Aucune catégorie ajoutée" FontAttributes="Italic" Opacity="0.6" HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:CategoryModel">
+                            <Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                                    Stroke="{DynamicResource BorderColor}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{DynamicResource SurfaceColor}"
+                                    Padding="16">
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <VerticalStackLayout Spacing="4">
+                                        <HorizontalStackLayout Spacing="8">
+                                            <Label Text="🥋" />
+                                            <Label Text="{Binding Type}" FontAttributes="Bold" />
+                                        </HorizontalStackLayout>
+                                        <HorizontalStackLayout Spacing="12">
+                                            <Label Text="{Binding Genre, StringFormat='👤 {0}'}" FontSize="12" Opacity="0.8" />
+                                            <Label Text="{Binding AgeRange, StringFormat='🎂 {0}'}" FontSize="12" Opacity="0.8" />
+                                            <Label Text="{Binding WeightMin, StringFormat='⚖️ {0}kg'}" FontSize="12" Opacity="0.8" />
+                                            <Label Text="{Binding WeightMax, StringFormat=' - {0}kg'}" FontSize="12" Opacity="0.8" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
+                                    
+                                    <Button Grid.Column="1" 
+                                            Text="🗑️"
+                                            BackgroundColor="Transparent"
+                                            TextColor="{StaticResource MartialRed}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=RemoveCategoryCommand}"
+                                            CommandParameter="{Binding .}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Simulated Popup Overlay -->
+        <Grid x:Name="PopupOverlay"
+              BackgroundColor="#80000000" 
+              IsVisible="False"
+              Padding="20"
+              VerticalOptions="Fill"
+              HorizontalOptions="Fill">
+            
+            <Border VerticalOptions="Center"
+                    BackgroundColor="{DynamicResource PageBackgroundColor}"
+                    StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                    Padding="20"
+                    MaximumWidthRequest="400">
+                <VerticalStackLayout Spacing="20">
+                    <Label Text="Nouvelle Catégorie" Style="{DynamicResource Headline}" FontSize="20" HorizontalOptions="Start" />
+                    
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Style" FontAttributes="Bold" FontSize="14" />
+                        <Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}" Stroke="{DynamicResource BorderColor}" Padding="10,0" BackgroundColor="{DynamicResource SurfaceColor}">
+                            <Picker x:Name="TypePicker" Title="Sélectionnez un style" TextColor="{DynamicResource PrimaryTextColor}" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+                        <VerticalStackLayout Spacing="8" Grid.Column="0">
+                            <Label Text="Genre" FontAttributes="Bold" FontSize="14" />
+                            <Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}" Stroke="{DynamicResource BorderColor}" Padding="10,0" BackgroundColor="{DynamicResource SurfaceColor}">
+                                <Picker x:Name="GenrePicker" Title="Genre" TextColor="{DynamicResource PrimaryTextColor}" />
+                            </Border>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="8" Grid.Column="1">
+                            <Label Text="Âge" FontAttributes="Bold" FontSize="14" />
+                            <Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}" Stroke="{DynamicResource BorderColor}" Padding="10,0" BackgroundColor="{DynamicResource SurfaceColor}">
+                                <Picker x:Name="AgePicker" Title="Âge" TextColor="{DynamicResource PrimaryTextColor}" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+                        <VerticalStackLayout Spacing="8" Grid.Column="0">
+                            <Label Text="Poids Min (kg)" FontAttributes="Bold" FontSize="14" />
+                            <Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}" Stroke="{DynamicResource BorderColor}" Padding="10,0" BackgroundColor="{DynamicResource SurfaceColor}">
+                                <Entry x:Name="MinWeightEntry" Keyboard="Numeric" Placeholder="0" TextColor="{DynamicResource PrimaryTextColor}" BackgroundColor="Transparent" />
+                            </Border>
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="8" Grid.Column="1">
+                            <Label Text="Poids Max (kg)" FontAttributes="Bold" FontSize="14" />
+                            <Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}" Stroke="{DynamicResource BorderColor}" Padding="10,0" BackgroundColor="{DynamicResource SurfaceColor}">
+                                <Entry x:Name="MaxWeightEntry" Keyboard="Numeric" Placeholder="100" TextColor="{DynamicResource PrimaryTextColor}" BackgroundColor="Transparent" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15" Margin="0,10,0,0">
+                        <Button Text="Annuler" Grid.Column="0" 
+                                BackgroundColor="Transparent"
+                                TextColor="{DynamicResource PrimaryTextColor}"
+                                Clicked="OnClosePopupClicked" />
+                        <Button Text="Ajouter" Grid.Column="1" 
+                                Clicked="OnSaveCategoryClicked" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
 </ContentView>

@@ -46,6 +46,21 @@ public class Repository<T> : IRepository<T> where T : class
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    public async Task<IReadOnlyList<T>?> GetAllAsync(params System.Linq.Expressions.Expression<Func<T, object>>[] includes)
+    {
+        IQueryable<T> query = _context.Set<T>().AsNoTracking();
+
+        foreach (var include in includes)
+        {
+            query = query.Include(include);
+        }
+
+        return await query.ToListAsync();
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public async Task<T?> AddAsync(T entity)
     {
         await _context.Set<T>().AddAsync(entity);

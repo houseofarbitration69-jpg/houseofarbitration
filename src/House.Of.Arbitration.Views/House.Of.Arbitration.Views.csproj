@@ -23,6 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Competition\CompetitionsPage.xaml.cs">
+      <DependentUpon>CompetitionsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="OldHomePage.xaml.cs">
+      <DependentUpon>OldHomePage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="HomePage.xaml.cs">
       <DependentUpon>HomePage.xaml</DependentUpon>
     </Compile>
@@ -38,6 +44,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Competition\CompetitionsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="OldHomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="HomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

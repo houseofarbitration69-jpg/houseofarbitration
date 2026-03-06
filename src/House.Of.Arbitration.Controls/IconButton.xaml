@@ -11,29 +11,6 @@
         <converters:DoubleToCornerRadiusConverter x:Key="DoubleToCornerRadiusConverter" />
     </ContentView.Resources>
 
-    <VisualStateManager.VisualStateGroups>
-        <VisualStateGroup x:Name="CommonStates">
-            <VisualState x:Name="Normal">
-                <VisualState.Setters>
-                    <Setter TargetName="MainBorder" Property="Opacity" Value="1.0" />
-                    <Setter TargetName="MainBorder" Property="InputTransparent" Value="False" />
-                    <Setter TargetName="MainBorder" Property="BackgroundColor" Value="{Binding ButtonBackgroundColor, Source={x:Reference root}}" />
-                    <Setter TargetName="IconLabel" Property="TextColor" Value="{Binding IconColor, Source={x:Reference root}}" />
-                    <Setter TargetName="TextLabel" Property="TextColor" Value="{Binding TextColor, Source={x:Reference root}}" />
-                </VisualState.Setters>
-            </VisualState>
-            <VisualState x:Name="Disabled">
-                <VisualState.Setters>
-                    <Setter TargetName="MainBorder" Property="Opacity" Value="0.6" />
-                    <Setter TargetName="MainBorder" Property="BackgroundColor" Value="#E0E0E0" />
-                    <Setter TargetName="MainBorder" Property="InputTransparent" Value="True" />
-                    <Setter TargetName="IconLabel" Property="TextColor" Value="LightGray" />
-                    <Setter TargetName="TextLabel" Property="TextColor" Value="LightGray" />
-                </VisualState.Setters>
-            </VisualState>
-        </VisualStateGroup>
-    </VisualStateManager.VisualStateGroups>
-
     <Border x:Name="MainBorder" 
             BackgroundColor="{Binding ButtonBackgroundColor, Source={x:Reference root}}"
             Stroke="{Binding BorderBrush, Source={x:Reference root}}"
@@ -56,14 +33,29 @@
                                HorizontalOptions="Center" 
                                VerticalOptions="Center">
 
-            <!-- Icône -->
-            <Label x:Name="IconLabel"
-                   Text="{Binding Icon, Source={x:Reference root}}"
+            <!-- Icône unique -->
+            <Label Text="{Binding Icon, Source={x:Reference root}}"
                    FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
                    FontSize="18"
                    TextColor="{Binding IconColor, Source={x:Reference root}}"
                    VerticalOptions="Center"
                    IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"/>
+
+            <!-- Liste d'icônes -->
+            <Grid 
+                BindableLayout.ItemsSource="{Binding InternalIcons, Source={x:Reference root}}"
+            >
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <!-- On utilise les propriétés parentes via root car elles ne changent pas par item -->
+                        <Label Text="{Binding .}"
+                               FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
+                               TextColor="{Binding IconColor, Source={x:Reference root}}"
+                               FontSize="18"
+                               VerticalOptions="Center" />
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </Grid>
 
             <!-- Texte -->
             <Label x:Name="TextLabel"

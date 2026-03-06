@@ -20,6 +20,13 @@ public interface IRepository<T> where T : class
     Task<IReadOnlyList<T>?> GetAllAsync();
 
     /// <summary>
+    /// Get all items with includes
+    /// </summary>
+    /// <param name="includes"></param>
+    /// <returns></returns>
+    Task<IReadOnlyList<T>?> GetAllAsync(params System.Linq.Expressions.Expression<Func<T, object>>[] includes);
+
+    /// <summary>
     /// Add item
     /// </summary>
     /// <param name="entity">Item must be add</param>

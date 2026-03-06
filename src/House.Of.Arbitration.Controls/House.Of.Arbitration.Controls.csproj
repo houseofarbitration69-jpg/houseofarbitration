@@ -25,6 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Card.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="IconButton.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

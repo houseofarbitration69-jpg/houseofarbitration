@@ -2,7 +2,7 @@
 
 public class CategoryModel
 {
-    public int Id { get; set; } = -1;
+    public int Id { get; set; } = 0;
     public CategoryType Type { get; set; }
     public Genre Genre { get; set; }
     public int WeightMin { get; set; }

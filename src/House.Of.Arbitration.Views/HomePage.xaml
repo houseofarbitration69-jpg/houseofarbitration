@@ -6,43 +6,137 @@
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     x:TypeArguments="vm:HomeViewModel"
     x:Class="House.Of.Arbitration.Views.HomePage"
     x:DataType="vm:HomeViewModel"
     x:Name="this"
-    Shell.NavBarIsVisible="False">
+    Title="{Binding Title}">
 
     <ScrollView>
-        <Grid>
-            <Label Text="{Binding Title}" TextColor="White" HorizontalOptions="Center" FontSize="60"/>
-            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="20" Margin="0,20,0,0">
-                <controls:IconButton
-                    WidthRequest="250"
-                    Text="{Binding Resources.ADD_COMPETITION}"
-                    IsFullWidth="True"
-                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                    Icon="{x:Static helpers:FontCustomIcons.ADD}"
-                    ButtonBackgroundColor="{StaticResource Primary}"
-                    IconColor="{StaticResource PrimaryTextColor}"
-                    TextColor="{StaticResource PrimaryTextColor}"
-                    Command="{Binding NavigateToCommand}"
-                    CommandParameter="CompetitionWizard"
-                />
-                <controls:IconButton
-                    WidthRequest="250"
-                    Text="{Binding Resources.START_COMPETITION}"
-                    IsFullWidth="True"
-                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                    Icon="{x:Static helpers:FontCustomIcons.TROPHY}"
-                    ButtonBackgroundColor="{StaticResource Primary}"
-                    IconColor="{StaticResource PrimaryTextColor}"
-                    TextColor="{StaticResource PrimaryTextColor}"
-                    IsEnabled="{Binding StartCompetitionIsEnabled}"
-                    Command="{Binding NavigateToCommand}"
-                    CommandParameter="Competitions"
-                />
-            </VerticalStackLayout>
-        </Grid>
-    </ScrollView>
+        <HorizontalStackLayout>
+            <controls:IconButton
+                Text="{Binding Resources.ADD_COMPETITION}"
+                IsFullWidth="True"
+                IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                ButtonBackgroundColor="{StaticResource Primary}"
+                IconColor="{StaticResource PrimaryTextColor}"
+                TextColor="{StaticResource PrimaryTextColor}"
+                HorizontalOptions="Start"
+            >
+                <controls:IconButton.Icons>
+                    <x:Static Member="helpers:FontCustomIcons.CIRCLE"/>
+                    <x:Static Member="helpers:FontCustomIcons.ADD"/>
+                </controls:IconButton.Icons>
+            </controls:IconButton>
+            <controls:StringListControl ItemColor="Red" Items="{Binding MaListeDeChaines}">
+            </controls:StringListControl>
+            <controls:StringListControl ItemColor="Green">
+                <controls:StringListControl.Items>
+                    <x:Static Member="helpers:FontCustomIcons.ADD"/>
+                    <x:Static Member="helpers:FontCustomIcons.PEN"/>
+                    <x:Static Member="helpers:FontCustomIcons.TRASH"/>
+                </controls:StringListControl.Items>
+            </controls:StringListControl>
+        </HorizontalStackLayout>
+        <!--<CollectionView 
+            x:Name="CompetitionsList" 
+            ItemsSource="{Binding Competitions}" 
+            SelectionMode="None"
+            Margin="20,0,20,0">
 
+            <CollectionView.Header>
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label 
+                        Grid.Column="0"
+                        Text="Compétitions" 
+                        Style="{DynamicResource Headline}" 
+                        HorizontalOptions="Start"
+                        FontSize="32" />
+                    <controls:IconButton
+                        Grid.Column="1"
+                        Text="{Binding Resources.ADD_COMPETITION}"
+                        IsFullWidth="True"
+                        IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                        Icon="{x:Static helpers:FontCustomIcons.ADD}"
+                        ButtonBackgroundColor="{StaticResource Primary}"
+                        IconColor="{StaticResource PrimaryTextColor}"
+                        TextColor="{StaticResource PrimaryTextColor}"
+                        HorizontalOptions="Start"
+                    />
+                </Grid>
+            </CollectionView.Header>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Margin="0,100" Spacing="20">
+                    <Label Text="🥋" FontSize="64" HorizontalOptions="Center" />
+                    <Label Text="Aucune compétition trouvée" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Button Text="Créer une compétition" Command="{Binding CreateCommand}" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:CompetitionModel">
+                    <controls:Card>
+                        <Grid RowDefinitions="*,*" ColumnDefinitions="*,Auto">
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="10">
+                                <Label Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
+                                           VerticalOptions="Center"
+                                           TextColor="Black" />
+                                <Label Text="{Binding Name}" TextColor="Black"/>
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="5">
+                                <Label Text="🥋" VerticalOptions="Center" />
+                                <Label 
+                                    Text="{Binding Categories.Count, StringFormat='{0} catégories'}" 
+                                    FontSize="12" 
+                                    VerticalOptions="Center"
+                                    TextColor="Black"
+                                />
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout Grid.RowSpan="2" Grid.Column="1" VerticalOptions="Center" Spacing="10">
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    ButtonBackgroundColor="{StaticResource Primary}"
+                                    IconColor="{StaticResource PrimaryTextColor}"
+                                    TextColor="{StaticResource PrimaryTextColor}"
+                                    HorizontalOptions="Start"
+                                >
+                                    <controls:IconButton.Icons>
+                                        <x:String>{x:Static helpers:FontCustomIcons.CIRCLE}</x:String>
+                                        <x:String>{x:Static helpers:FontCustomIcons.ADD}</x:String>
+                                    </controls:IconButton.Icons>
+                                </controls:IconButton>
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                                    ButtonBackgroundColor="{StaticResource Primary}"
+                                    IconColor="{StaticResource PrimaryTextColor}"
+                                    TextColor="{StaticResource PrimaryTextColor}"
+                                    HorizontalOptions="Start"
+                                />
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.CIRCLE}"
+                                    ButtonBackgroundColor="{StaticResource Primary}"
+                                    IconColor="{StaticResource PrimaryTextColor}"
+                                    TextColor="{StaticResource PrimaryTextColor}"
+                                    HorizontalOptions="Start"
+                                />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </controls:Card>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.Footer>
+                <BoxView HeightRequest="20" Color="Transparent" />
+            </CollectionView.Footer>
+        </CollectionView>-->
+    </ScrollView>
 </base:BasePage>

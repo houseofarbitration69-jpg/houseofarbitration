@@ -1,7 +1,8 @@
-#region Imports
 using House.Of.Arbitration.Models.Helpers;
+using System.Collections;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows.Input;
-#endregion
 
 namespace House.Of.Arbitration.Controls;
 
@@ -11,9 +12,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty TextProperty = BindableProperty.Create(
         nameof(Text), typeof(string), typeof(IconButton), string.Empty);
 
-    /// <summary>
-    /// Gets or sets the text for the button.
-    /// </summary>
     public string Text
     {
         get => (string)GetValue(TextProperty);
@@ -23,21 +21,45 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty IconProperty = BindableProperty.Create(
         nameof(Icon), typeof(string), typeof(IconButton), string.Empty);
 
-    /// <summary>
-    /// Gets or sets the icon for the button.
-    /// </summary>
     public string Icon
     {
         get => (string)GetValue(IconProperty);
         set => SetValue(IconProperty, value);
     }
 
+    public ObservableCollection<string> InternalIcons { get; } = new();
+
+    public static readonly BindableProperty IconsProperty = BindableProperty.Create(
+        nameof(Icons), typeof(IList), typeof(IconButton), null, propertyChanged: OnIconsChanged);
+
+    public IList Icons
+    {
+        get => (IList)GetValue(IconsProperty);
+        set => SetValue(IconsProperty, value);
+    }
+
+    private static void OnIconsChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        var control = (IconButton)bindable;
+
+        if (oldValue is INotifyCollectionChanged oldCollection)
+            oldCollection.CollectionChanged -= control.OnIconsCollectionChanged;
+
+        if (newValue is INotifyCollectionChanged newCollection)
+            newCollection.CollectionChanged += control.OnIconsCollectionChanged;
+
+        control.UpdateInternalItems();
+    }
+
+    private void OnIconsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        UpdateInternalItems();
+    }
+
+
     public static readonly BindableProperty IconFontFamilyProperty = BindableProperty.Create(
         nameof(IconFontFamily), typeof(string), typeof(IconButton), FontHelper.FONTAWESOME_SOLID_NAME);
 
-    /// <summary>
-    /// Gets or sets the font family for the icon.
-    /// </summary>
     public string IconFontFamily
     {
         get => (string)GetValue(IconFontFamilyProperty);
@@ -47,9 +69,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
         nameof(TextColor), typeof(Color), typeof(IconButton), Colors.White);
 
-    /// <summary>
-    /// Gets or sets the text color.
-    /// </summary>
     public Color TextColor
     {
         get => (Color)GetValue(TextColorProperty);
@@ -59,9 +78,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
         nameof(IconColor), typeof(Color), typeof(IconButton), Colors.White);
 
-    /// <summary>
-    /// Gets or sets the icon color.
-    /// </summary>
     public Color IconColor
     {
         get => (Color)GetValue(IconColorProperty);
@@ -71,9 +87,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
         nameof(ButtonBackgroundColor), typeof(Color), typeof(IconButton), Colors.Blue);
 
-    /// <summary>
-    /// Gets or sets the background color of the button.
-    /// </summary>
     public Color ButtonBackgroundColor
     {
         get => (Color)GetValue(ButtonBackgroundColorProperty);
@@ -83,9 +96,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty BorderBrushProperty = BindableProperty.Create(
         nameof(BorderBrush), typeof(Brush), typeof(IconButton), Brush.Transparent);
 
-    /// <summary>
-    /// Gets or sets the brush used for the button border.
-    /// </summary>
     public Brush BorderBrush
     {
         get => (Brush)GetValue(BorderBrushProperty);
@@ -95,9 +105,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty BorderThicknessProperty = BindableProperty.Create(
         nameof(BorderThickness), typeof(double), typeof(IconButton), 0.0);
 
-    /// <summary>
-    /// Gets or sets the thickness of the button border.
-    /// </summary>
     public double BorderThickness
     {
         get => (double)GetValue(BorderThicknessProperty);
@@ -107,9 +114,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(
         nameof(CornerRadius), typeof(double), typeof(IconButton), 10.0);
 
-    /// <summary>
-    /// Gets or sets the corner radius of the button.
-    /// </summary>
     public double CornerRadius
     {
         get => (double)GetValue(CornerRadiusProperty);
@@ -119,9 +123,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty ButtonPaddingProperty = BindableProperty.Create(
         nameof(ButtonPadding), typeof(Thickness), typeof(IconButton), new Thickness(15, 10));
 
-    /// <summary>
-    /// Gets or sets the padding inside the button.
-    /// </summary>
     public Thickness ButtonPadding
     {
         get => (Thickness)GetValue(ButtonPaddingProperty);
@@ -131,10 +132,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty IsFullWidthProperty = BindableProperty.Create(
         nameof(IsFullWidth), typeof(bool), typeof(IconButton), true);
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the button should take the full width available.
-    /// If false, the button will adapt its size to its content.
-    /// </summary>
     public bool IsFullWidth
     {
         get => (bool)GetValue(IsFullWidthProperty);
@@ -144,9 +141,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
         nameof(Command), typeof(ICommand), typeof(IconButton), null);
 
-    /// <summary>
-    /// Gets or sets the command executed when the button is tapped.
-    /// </summary>
     public ICommand Command
     {
         get => (ICommand)GetValue(CommandProperty);
@@ -156,9 +150,6 @@ public partial class IconButton : ContentView
     public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
         nameof(CommandParameter), typeof(object), typeof(IconButton), null);
 
-    /// <summary>
-    /// Gets or sets the parameter passed to the command.
-    /// </summary>
     public object CommandParameter
     {
         get => GetValue(CommandParameterProperty);
@@ -168,6 +159,7 @@ public partial class IconButton : ContentView
 
     public IconButton()
     {
+        Icons = new ObservableCollection<string>();
         InitializeComponent();
     }
 
@@ -192,16 +184,28 @@ public partial class IconButton : ContentView
         VisualStateManager.GoToState(this, IsEnabled ? "Normal" : "Disabled");
     }
 
-    /// <summary>
-    /// Handles the tap gesture on the button and provides visual feedback.
-    /// </summary>
+    private void UpdateInternalItems()
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            InternalIcons.Clear();
+            if (Icons != null)
+            {
+                foreach (var icon in Icons)
+                {
+                    if (icon != null)
+                        InternalIcons.Add(icon.ToString() ?? String.Empty);
+                }
+            }
+        });
+    }
+
     private async void OnTapped(object sender, EventArgs e)
     {
         if (!IsEnabled) return;
 
         if (sender is VisualElement view)
         {
-            // Visual feedback animation (pressed effect)
             await view.ScaleToAsync(0.95, 50, Easing.CubicOut);
             await view.ScaleToAsync(1.0, 50, Easing.CubicIn);
         }

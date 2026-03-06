@@ -1,6 +1,7 @@
 ﻿#region Imports
 using House.Of.Arbitration.ViewModels.Wizard.Competition;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
+using House.Of.Arbitration.ViewModels.Competition;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels;
@@ -15,6 +16,7 @@ public static class BuilderExtensions
     public static MauiAppBuilder RegisterViewModels(this MauiAppBuilder builder)
     {
         builder.Services.AddTransient<HomeViewModel>();
+        builder.Services.AddTransient<CompetitionsViewModel>();
 
         builder.Services.AddTransient<CompetitionWizardViewModel>();
         builder.Services.AddTransient<SettingsStepViewModel>();
