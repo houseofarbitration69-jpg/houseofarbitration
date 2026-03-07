@@ -54,7 +54,15 @@ public partial class HomeViewModel : BaseViewModel
     private async Task EditCompetition(CompetitionModel competition)
     {
         if (competition == null) return;
-        await Shell.Current.DisplayAlertAsync("Édition", $"Modifier la compétition : {competition.Name}", "OK");
+        
+        // Navigation vers le wizard en passant l'ID
+        // On utilise un dictionnaire de paramètres pour Shell
+        var navigationParameter = new Dictionary<string, object>
+        {
+            { "CompetitionId", competition.Id }
+        };
+        
+        await Shell.Current.GoToAsync("CompetitionWizard", navigationParameter);
     }
 
     [RelayCommand]
@@ -79,7 +87,7 @@ public partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private async Task Create()
     {
-        await Shell.Current.GoToAsync("WizardPage");
+        await Shell.Current.GoToAsync("CompetitionWizard");
     }
     #endregion
 }

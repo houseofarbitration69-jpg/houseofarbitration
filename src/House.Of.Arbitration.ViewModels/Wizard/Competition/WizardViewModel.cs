@@ -8,6 +8,7 @@ using System.Windows.Input;
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition;
 
+[QueryProperty(nameof(CompetitionId), "CompetitionId")]
 public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T : class, new()
 {
     #region Events
@@ -15,33 +16,48 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
     #endregion
 
     #region Services
-    private readonly IRepository<T> _repository;
+    protected readonly IRepository<T> _repository;
     #endregion
 
     #region Attributs
     private int _currentStepIndex;
     private string _name = String.Empty;
     private T _model = new();
+    private int _competitionId;
     #endregion
 
     #region Properties
+    public int CompetitionId
+    {
+        get => _competitionId;
+        set => SetProperty(ref _competitionId, value);
+    }
+
     public T Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set
+        {
+            if (SetProperty(ref _model, value))
+            {
+                // PROPAGATION CRUCIALE : on parcourt toutes les étapes
+                if (Steps != null)
+                {
+                    foreach (var step in Steps)
+                    {
+                        step.Model = value;
+                    }
+                }
+            }
+        }
     }
-    /// <summary>
-    /// 
-    /// </summary>
+
     public string Name
     {
         get => _name;
         set => SetProperty(ref _name, value);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public int CurrentStepIndex
     {
         get => _currentStepIndex;
@@ -53,11 +69,6 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
             OnPropertyChanged(nameof(CurrentStep));
             OnPropertyChanged(nameof(IsLastStep));
             
-            //if (CurrentStep is SummaryStepViewModel summary)
-            //{
-            //    summary.Refresh();
-            //}
-
             ((Command)NextCommand).ChangeCanExecute();
             ((Command)PreviousCommand).ChangeCanExecute();
         }
@@ -86,13 +97,11 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
     #endregion
 
     #region Public Methods
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="step"></param>
     public void AddStep(WizardStepViewModel<T> step)
     {
-        step.Model = Model; // Partager le modèle
+        // On injecte le modèle actuel immédiatement
+        step.Model = Model; 
+        
         step.PropertyChanged += (s, e) =>
         {
             if (e.PropertyName == nameof(WizardStepViewModel<T>.IsValid))
@@ -110,10 +119,6 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
     #endregion
 
     #region Private Methods
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
     private async Task GoNext()
     {
         if (CurrentStepIndex < Steps.Count - 1)
@@ -130,7 +135,6 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
 
     private async Task OnFinalizeAsync()
     {
-        // Logique de validation et traitement final
         bool isAllValid = true;
         foreach (var step in Steps)
         {
@@ -143,9 +147,16 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
 
         if (isAllValid)
         {
-            await _repository.AddAsync(Model);
+            // Vérifier si c'est un ajout ou une mise à jour via réflexion
+            var idProp = Model.GetType().GetProperty("Id");
+            int id = idProp != null ? (int)idProp.GetValue(Model)! : 0;
 
-            await Shell.Current.DisplayAlertAsync("Validation", "La compétition a été validée avec succès !", "OK");
+            if (id > 0)
+                await _repository.UpdateAsync(Model);
+            else
+                await _repository.AddAsync(Model);
+
+            await Shell.Current.DisplayAlertAsync("Validation", "La compétition a été enregistrée avec succès !", "OK");
             await Shell.Current.GoToAsync("..");
         }
         else
@@ -154,10 +165,6 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
     private async Task GoPrevious()
     {
         if (CurrentStepIndex > 0)

@@ -8,61 +8,58 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
 {
     #region Attributs
     private string _name = String.Empty;
-    private DateOnly _date = DateOnly.FromDateTime(DateTime.Now);
+    private DateTime _date = DateTime.Now;
     #endregion
 
     #region Properties
-    public override string Title => String.Empty;
+    public override string Title => "Paramètres";
 
     public string Name
     {
         get => _name;
         set
         {
-            SetProperty(ref _name, value);
-
-            if (Model != null)
+            if (SetProperty(ref _name, value))
             {
-                Model.Name = value;
+                if (Model != null) Model.Name = value;
+                Validate();
             }
-
-            Validate();
         }
     }
 
-    public DateOnly Date
+    public DateTime Date
     {
         get => _date;
         set
         {
-            SetProperty(ref _date, value);
-
-            if (Model != null)
+            if (SetProperty(ref _date, value))
             {
-                Model.Date = value;
+                if (Model != null) Model.Date = value;
+                Validate();
             }
-
-            Validate();
         }
     }
     #endregion
 
     #region Override Methods
-    protected override void OnModelUpdated(Models.CompetitionModel value)
+    protected override void OnModelUpdated(CompetitionModel value)
     {
         if (value != null)
         {
-            Name = value.Name;
-            Date = value.Date;
+            // Mise à jour des champs locaux sans déclencher de boucle infinie
+            _name = value.Name;
+            _date = value.Date;
+            
+            // Notification explicite à l'UI
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(Date));
+            
             Validate();
         }
     }
     #endregion
 
     #region Private Methods
-    /// <summary>
-    /// 
-    /// </summary>
     private void Validate()
     {
         IsValid = !string.IsNullOrWhiteSpace(Name);

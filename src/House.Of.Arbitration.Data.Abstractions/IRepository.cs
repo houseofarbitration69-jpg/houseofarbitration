@@ -14,6 +14,13 @@ public interface IRepository<T> where T : class
     Task<T?> GetByIdAsync(int id);
 
     /// <summary>
+    /// Get item by id
+    /// </summary>
+    /// <param name="id">Item id</param>
+    /// <returns>Item or null if not exist</returns>
+    Task<T?> GetByIdAsync(int id, params System.Linq.Expressions.Expression<Func<T, object>>[] includes);
+
+    /// <summary>
     /// Get all items
     /// </summary>
     /// <returns>All items or null if empty</returns>

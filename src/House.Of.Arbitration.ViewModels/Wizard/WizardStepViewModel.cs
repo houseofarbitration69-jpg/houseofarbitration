@@ -7,42 +7,33 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
 {
     #region Attributs
     private bool _isValid;
+
+    [ObservableProperty]
     private T _model = default!;
     #endregion
 
     #region Properties
-    /// <summary>
-    /// 
-    /// </summary>
     public abstract string Title { get; }
 
-    /// <summary>
-    /// 
-    /// </summary>
     public bool IsValid
     {
         get => _isValid;
         set => SetProperty(ref _isValid, value);
     }
-
-    public T Model
-    {
-        get => _model; 
-        set => SetProperty(ref _model, value);
-    }
     #endregion
 
     /// <summary>
-    /// Méthode appelée lorsque le modèle est assigné ou modifié.
-    /// Peut être surchargée par les classes dérivées.
+    /// Méthode générée par CommunityToolkit.Mvvm lors du changement de Model.
     /// </summary>
-    /// <param name="value"></param>
-    protected void OnModelChanged(CompetitionModel value)
+    partial void OnModelChanged(T value)
     {
         OnModelUpdated(value);
     }
 
-    protected virtual void OnModelUpdated(CompetitionModel value)
+    /// <summary>
+    /// Méthode à surcharger dans les étapes pour synchroniser les données.
+    /// </summary>
+    protected virtual void OnModelUpdated(T value)
     {
     }
 }
