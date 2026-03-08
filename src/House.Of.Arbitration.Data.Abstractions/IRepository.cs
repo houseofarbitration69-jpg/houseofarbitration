@@ -21,6 +21,14 @@ public interface IRepository<T> where T : class
     Task<T?> GetByIdAsync(int id, params System.Linq.Expressions.Expression<Func<T, object>>[] includes);
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="includePaths"></param>
+    /// <returns></returns>
+    Task<T?> GetByIdAsync(int id, params string[] includePaths);
+
+    /// <summary>
     /// Get all items
     /// </summary>
     /// <returns>All items or null if empty</returns>
@@ -31,7 +39,15 @@ public interface IRepository<T> where T : class
     /// </summary>
     /// <param name="includes"></param>
     /// <returns></returns>
-    Task<IReadOnlyList<T>?> GetAllAsync(params System.Linq.Expressions.Expression<Func<T, object>>[] includes);
+    Task<IReadOnlyList<T>?> GetAllAsync(params System.Linq.Expressions.Expression<System.Func<T, object>>[] includes);
+
+    /// <summary>
+    /// Get all items with string-based includes (supports nested paths like "Categories.Competitors")
+    /// </summary>
+    /// <param name="includePaths"></param>
+    /// <returns></returns>
+    Task<IReadOnlyList<T>?> GetAllAsync(params string[] includePaths);
+
 
     /// <summary>
     /// Add item

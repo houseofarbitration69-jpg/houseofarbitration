@@ -1,26 +1,55 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+#region Imports
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Models;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+#endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
 public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionModel>
 {
-    [ObservableProperty]
+    #region Attributs
     private ObservableCollection<CategoryModel> _categories = new();
-
-    [ObservableProperty]
     private CategoryModel? _selectedCategory;
-
-    [ObservableProperty]
     private bool _isCompetitorPopupVisible;
+    private CompetitorModel? _selectedCompetitor;
+    private ObservableCollection<CompetitorModel> _competitors = new();
+    #endregion
 
-    [ObservableProperty]
-    private ObservableCollection<CompetitorModel> _currentCompetitors = new();
+    #region Properties
+    public ObservableCollection<CategoryModel> Categories
+    {
+        get => _categories;
+        set => SetProperty(ref _categories, value);
+    }
+    
+    public CategoryModel? SelectedCategory
+    {
+        get => _selectedCategory;
+        set => SetProperty(ref _selectedCategory, value);
+    }
+    
+    public bool IsCompetitorPopupVisible
+    {
+        get => _isCompetitorPopupVisible;
+        set => SetProperty(ref _isCompetitorPopupVisible, value);
+    }
+    
+    public ObservableCollection<CompetitorModel> Competitors
+    {
+        get => _competitors;
+        set => SetProperty(ref _competitors, value);
+    }
+
+    public CompetitorModel? SelectedCompetitor
+    {
+        get => _selectedCompetitor;
+        set => SetProperty(ref _selectedCompetitor, value);
+    }
 
     public override string Title => "Catégories";
+    #endregion
 
     public CategoriesStepViewModel()
     {
@@ -42,6 +71,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     {
         if (category != null)
         {
+            Competitors = new ObservableCollection<CompetitorModel>();
             category.Competition = Model!;
             category.CompetitionId = Model?.Id ?? 0;
             Categories.Add(category);
@@ -61,7 +91,8 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     private void ManageCompetitors(CategoryModel category)
     {
         SelectedCategory = category;
-        CurrentCompetitors = new ObservableCollection<CompetitorModel>(category.Competitors ?? new());
+        SelectedCompetitor = new();
+        Competitors = new ObservableCollection<CompetitorModel>(category.Competitors ?? new());
         IsCompetitorPopupVisible = true;
     }
 
@@ -70,33 +101,53 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     {
         if (SelectedCategory != null)
         {
-            SelectedCategory.Competitors = CurrentCompetitors.ToList();
+            // Grâce à [ObservableProperty] sur CategoryModel.Competitors, 
+            // cette réassignation déclenche la notification à l'UI MAUI.
+            SelectedCategory.Competitors = Competitors.ToList();
+
+            var category = Categories.FirstOrDefault(c => c.Id == SelectedCategory.Id);
+            if (category != null)
+            {
+                var index = Categories.IndexOf(category);
+
+                if (index >= 0)
+                {
+                    //Categories.CollectionChanged -= OnCategoriesCollectionChanged;
+                    Categories.RemoveAt(index);
+                    Categories.Insert(index, SelectedCategory);
+                    //OnCategoriesCollectionChanged(nameof(Categories), new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+                    //Categories = new ObservableCollection<CategoryModel>(Categories);
+                    //Categories.CollectionChanged += OnCategoriesCollectionChanged;
+
+                    //Categories = new ObservableCollection<CategoryModel>();
+                    //OnPropertyChanged(nameof(Categories));
+                }
+            }
         }
+
         IsCompetitorPopupVisible = false;
         SelectedCategory = null;
     }
 
     [RelayCommand]
-    private void AddCompetitor(string name)
+    private void AddCompetitor()
     {
-        if (!string.IsNullOrWhiteSpace(name) && SelectedCategory != null)
+        if (SelectedCompetitor != null && !string.IsNullOrWhiteSpace(SelectedCompetitor.Name) && SelectedCategory != null)
         {
-            var competitor = new CompetitorModel 
-            { 
-                Name = name, 
-                Genre = SelectedCategory.Genre, // Par défaut le genre de la catégorie
-                CategoryId = SelectedCategory.Id
-            };
-            CurrentCompetitors.Add(competitor);
+            SelectedCompetitor.Genre = SelectedCategory.Genre;
+            SelectedCompetitor.CategoryId = SelectedCategory.Id;
+            Competitors.Add(SelectedCompetitor);
+
+            SelectedCompetitor = new();
         }
     }
 
     [RelayCommand]
     private void RemoveCompetitor(CompetitorModel competitor)
     {
-        if (competitor != null && CurrentCompetitors.Contains(competitor))
+        if (competitor != null && Competitors.Contains(competitor))
         {
-            CurrentCompetitors.Remove(competitor);
+            Competitors.Remove(competitor);
         }
     }
 

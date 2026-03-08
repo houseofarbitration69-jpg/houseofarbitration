@@ -1,4 +1,4 @@
-﻿namespace House.Of.Arbitration.Models;
+namespace House.Of.Arbitration.Models;
 
 public class CategoryModel
 {

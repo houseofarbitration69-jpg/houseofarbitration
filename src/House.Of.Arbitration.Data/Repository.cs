@@ -29,6 +29,19 @@ public class Repository<T> : IRepository<T> where T : class
         return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
     }
 
+    public async Task<T?> GetByIdAsync(int id, params string[] includePaths)
+    {
+        IQueryable<T> query = _context.Set<T>().AsNoTracking();
+
+        foreach (var path in includePaths)
+        {
+            if (!string.IsNullOrWhiteSpace(path))
+                query = query.Include(path);
+        }
+
+        return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
+    }
+
     public async Task<IReadOnlyList<T>?> GetAllAsync()
     {
         return await _context.Set<T>().AsNoTracking().ToListAsync();
@@ -46,6 +59,19 @@ public class Repository<T> : IRepository<T> where T : class
         return await query.ToListAsync();
     }
 
+    public async Task<IReadOnlyList<T>?> GetAllAsync(params string[] includePaths)
+    {
+        IQueryable<T> query = _context.Set<T>().AsNoTracking();
+
+        foreach (var path in includePaths)
+        {
+            if (!string.IsNullOrWhiteSpace(path))
+                query = query.Include(path);
+        }
+
+        return await query.ToListAsync();
+    }
+
     public async Task<T?> AddAsync(T entity)
     {
         await _context.Set<T>().AddAsync(entity);
@@ -55,12 +81,11 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<bool> UpdateAsync(T entity)
     {
-        // On détache toute instance déjà suivie avec le même ID pour éviter les conflits
         var idProp = entity.GetType().GetProperty("Id");
         if (idProp != null)
         {
             int id = (int)idProp.GetValue(entity)!;
-            var trackedEntity = _context.Set<T>().Local.FirstOrDefault(e => (int)e.GetType().GetProperty("Id")!.GetValue(e)! == id);
+            var trackedEntity = _context.Set<T>().Local.FirstOrDefault(e => (int)entity.GetType().GetProperty("Id")!.GetValue(e)! == id);
             
             if (trackedEntity != null)
             {
@@ -68,8 +93,6 @@ public class Repository<T> : IRepository<T> where T : class
             }
         }
 
-        // UTILISATION DE Update() AU LIEU DE State = Modified
-        // Update() parcourt les relations et ajoute les nouvelles entités (états Added/Modified automatiques)
         _context.Update(entity);
         await _context.SaveChangesAsync();
 

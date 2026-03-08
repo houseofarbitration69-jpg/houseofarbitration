@@ -174,11 +174,20 @@
                     <Label Text="{Binding SelectedCategory.Type, StringFormat='Participants - {0}'}" Style="{DynamicResource Headline}" FontSize="20" />
 
                     <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
-                        <Entry x:Name="CompetitorNameEntry" Placeholder="Nom du compétiteur" TextColor="{DynamicResource PrimaryTextColor}" />
-                        <Button Grid.Column="1" Text="+" Command="{Binding AddCompetitorCommand}" CommandParameter="{Binding Source={x:Reference CompetitorNameEntry}, Path=Text}" />
+                        <Entry 
+                            x:Name="CompetitorNameEntry" 
+                            Placeholder="Nom du compétiteur" 
+                            Text="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=SelectedCompetitor.Name, Mode=TwoWay}"
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                        />
+                        <Button 
+                            Grid.Column="1" 
+                            Text="+" 
+                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=AddCompetitorCommand}"
+                        />
                     </Grid>
 
-                    <CollectionView ItemsSource="{Binding CurrentCompetitors}" HeightRequest="200">
+                    <CollectionView ItemsSource="{Binding Competitors}" HeightRequest="200">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:CompetitorModel">
                                 <Grid ColumnDefinitions="*, Auto" Padding="10">
@@ -191,7 +200,11 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <Button Text="Terminer" Command="{Binding SaveCompetitorsCommand}" HorizontalOptions="End" />
+                    <Button 
+                        Text="Terminer" 
+                        Command="{Binding SaveCompetitorsCommand}" 
+                        HorizontalOptions="End" 
+                    />
                 </VerticalStackLayout>
             </Border>
         </Grid>
