@@ -2,6 +2,7 @@
 using House.Of.Arbitration.Views;
 using House.Of.Arbitration.Views.Competition;
 using House.Of.Arbitration.Views.Wizard.Competition;
+using House.Of.Arbitration.Views.Wizard.Competition.Steps;
 #endregion
 
 namespace House.Of.Arbitration.App;
@@ -13,8 +14,12 @@ public partial class AppShell : Shell
         InitializeComponent();
 
         Routing.RegisterRoute("HomePage", typeof(HomePage));
+
+        Routing.RegisterRoute("MasterPage", typeof(MasterPage));
+        Routing.RegisterRoute("SlavePage", typeof(SlavePage));
+
         Routing.RegisterRoute("CompetitionWizard", typeof(WizardPage));
         Routing.RegisterRoute("Competitions", typeof(CompetitionsPage));
-        Routing.RegisterRoute("CompetitorPage", typeof(House.Of.Arbitration.Views.Wizard.Competition.Steps.CompetitorPage));
+        Routing.RegisterRoute("CompetitorPage", typeof(CompetitorPage));
     }
 }

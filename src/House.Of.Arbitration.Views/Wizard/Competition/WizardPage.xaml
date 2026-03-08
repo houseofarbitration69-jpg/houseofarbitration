@@ -11,7 +11,8 @@
     x:Name="this"
     x:DataType="vm:CompetitionWizardViewModel"
     x:TypeArguments="vm:CompetitionWizardViewModel"
-    Title="{Binding Model.Name}">
+    Title="{Binding Model.Name}"
+    Shell.NavBarIsVisible="False">
 
     <base:BasePage.Resources>
         <ResourceDictionary>

@@ -1,16 +1,14 @@
 #region Imports
-using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels;
 
-public partial class HomeViewModel : BaseViewModel
+public partial class SlaveViewModel : BaseViewModel
 {
     #region Attributs
     private string _title = String.Empty;
@@ -25,7 +23,7 @@ public partial class HomeViewModel : BaseViewModel
     #endregion
 
     #region Constructors
-    public HomeViewModel(ILogger<HomeViewModel> logger, ResourceProvider resourceProvider) : base(logger, resourceProvider)
+    public SlaveViewModel(ILogger<SlaveViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitionModel> repository) : base(logger, resourceProvider)
     {
         Title = resourceProvider.APPLICATION_NAME;
     }

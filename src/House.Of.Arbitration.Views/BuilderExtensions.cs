@@ -15,6 +15,8 @@ public static class BuilderExtensions
     public static MauiAppBuilder RegisterViews(this MauiAppBuilder builder)
     {
         builder.Services.AddTransient<HomePage>();
+        builder.Services.AddTransient<MasterPage>();
+        builder.Services.AddTransient<SlavePage>();
         builder.Services.AddTransient<CompetitionsPage>();
         builder.Services.AddTransient<CompetitorPage>();
 

@@ -6,7 +6,8 @@
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoriesStepView"
     x:DataType="vm:CategoriesStepViewModel"
-    x:Name="this">
+    x:Name="this"
+    Shell.NavBarIsVisible="False">
 
     <Grid>
         <!-- Background/Main Content -->

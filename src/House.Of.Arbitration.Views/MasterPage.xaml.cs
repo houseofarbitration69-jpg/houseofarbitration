@@ -1,13 +1,14 @@
 #region Imports
 using House.Of.Arbitration.ViewModels;
 using House.Of.Arbitration.Views.Core;
+using House.Of.Arbitration.Models;
 #endregion
 
 namespace House.Of.Arbitration.Views;
 
-public partial class OldHomePage : BasePage<MasterViewModel>
+public partial class MasterPage : BasePage<MasterViewModel>
 {
-	public OldHomePage(MasterViewModel viewModel) : base(viewModel)
+	public MasterPage(MasterViewModel viewModel) : base(viewModel)
 	{
 		InitializeComponent();
 	}

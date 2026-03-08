@@ -6,9 +6,9 @@
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
-    x:TypeArguments="vm:HomeViewModel"
+    x:TypeArguments="vm:MasterViewModel"
     x:Class="House.Of.Arbitration.Views.OldHomePage"
-    x:DataType="vm:HomeViewModel"
+    x:DataType="vm:MasterViewModel"
     x:Name="this">
 
     <ScrollView>

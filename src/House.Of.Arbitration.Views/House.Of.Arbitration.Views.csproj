@@ -26,11 +26,14 @@
     <Compile Update="Competition\CompetitionsPage.xaml.cs">
       <DependentUpon>CompetitionsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="SlavePage.xaml.cs">
+      <DependentUpon>SlavePage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="OldHomePage.xaml.cs">
       <DependentUpon>OldHomePage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="HomePage.xaml.cs">
-      <DependentUpon>HomePage.xaml</DependentUpon>
+    <Compile Update="MasterPage.xaml.cs">
+      <DependentUpon>MasterPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="TestPage.xaml.cs">
       <DependentUpon>TestPage.xaml</DependentUpon>
@@ -47,10 +50,16 @@
     <MauiXaml Update="Competition\CompetitionsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="HomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="SlavePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="OldHomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="HomePage.xaml">
+    <MauiXaml Update="MasterPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="TestPage.xaml">

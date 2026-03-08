@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:TypeArguments="vm:MasterViewModel"
+    x:Class="House.Of.Arbitration.Views.MasterPage"
+    x:DataType="vm:MasterViewModel"
+    x:Name="this"
+    Title="{Binding Title}"
+    Shell.NavBarIsVisible="False">
+
+    <base:BasePage.Resources>
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+    </base:BasePage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            
+            <!-- Header -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Compétitions" 
+                       Style="{DynamicResource Headline}" 
+                       FontSize="32" 
+                       VerticalOptions="Center" />
+                
+                <controls:IconButton Grid.Column="1"
+                                    Text="{Binding Resources.ADD_COMPETITION}"
+                                    ButtonBackgroundColor="LightGreen"
+                                    TextColor="Black"
+                                    Command="{Binding CreateCommand}">
+                    <controls:IconButton.Icons>
+                        <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
+                        <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
+
+                    </controls:IconButton.Icons>
+                </controls:IconButton>
+            </Grid>
+
+            <!-- Liste des Compétitions (BindableLayout) -->
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Competitions}" Spacing="12">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:CompetitionModel">
+                        <controls:Card CardPadding="15" CardColor="White">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                                <HorizontalStackLayout Grid.Column="0" Grid.Row="0" Spacing="10">
+                                    <Label Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="Black" VerticalOptions="Center" />
+                                    <Label Text="{Binding Name}" TextColor="Black" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Column="0" Grid.Row="1" Spacing="5" Margin="0,5,0,0">
+                                    <Label Text="🥋" FontSize="12" />
+                                    <Label Text="{Binding Categories.Count, StringFormat='{0} catégories'}" FontSize="12" TextColor="Gray" />
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Column="1" Grid.RowSpan="2" Spacing="8" VerticalOptions="Center">
+                                    <!-- En BindableLayout, x:Reference sur la page racine fonctionne parfaitement -->
+                                    <controls:IconButton
+                                        IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                        Icon="{x:Static helpers:FontCustomIcons.PEN}"
+                                        ButtonBackgroundColor="LightBlue"
+                                        IconColor="Black"
+                                        Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=EditCompetitionCommand}"
+                                        CommandParameter="{Binding}"
+                                    />
+                                    <controls:IconButton
+                                        IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                        Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                                        ButtonBackgroundColor="Red"
+                                        IconColor="White"
+                                        Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=DeleteCompetitionCommand}"
+                                        CommandParameter="{Binding .}"
+                                    />
+                                    <controls:IconButton
+                                        IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                        Icon="{x:Static helpers:FontCustomIcons.PLAY}"
+                                        ButtonBackgroundColor="LightGreen"
+                                        IconColor="Black"
+                                        Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=StartCompetitionCommand}"
+                                        CommandParameter="{Binding .}"
+                                    />
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </controls:Card>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <!-- Message si vide -->
+            <VerticalStackLayout IsVisible="{Binding Competitions.Count, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}"
+                                 HorizontalOptions="Center" 
+                                 Margin="0,50" 
+                                 Spacing="10">
+                <Label Text="🥋" FontSize="48" HorizontalOptions="Center" />
+                <Label Text="Aucune compétition enregistrée" FontAttributes="Italic" Opacity="0.6" />
+            </VerticalStackLayout>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</base:BasePage>

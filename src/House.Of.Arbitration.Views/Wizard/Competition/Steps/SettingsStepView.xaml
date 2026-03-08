@@ -5,7 +5,8 @@
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.SettingsStepView"
-    x:DataType="vm:SettingsStepViewModel">
+    x:DataType="vm:SettingsStepViewModel"
+    Shell.NavBarIsVisible="False">
 
     <ContentView.Resources>
         <converters:StringToBoolConverter x:Key="LocalStringToBoolConverter" />
