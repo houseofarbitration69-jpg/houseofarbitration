@@ -9,7 +9,9 @@ public class CategoryModel
     public int WeightMax { get; set; }
     public AgeRange AgeRange { get; set; }
     public int CompetitionId { get; set; }
+    public RoundType RoundType { get; set; }
     public required CompetitionModel Competition { get; set; }
+    public List<CompetitorModel> Competitors { get; set; } = new();
 }
 
 public enum CategoryType
@@ -35,5 +37,11 @@ public enum AgeRange
     Seniors,
     Espoirs,
     Veterans
+}
 
+public enum RoundType
+{
+    None,
+    Elimination,
+    Group
 }

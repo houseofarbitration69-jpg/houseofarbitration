@@ -11,11 +11,19 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     [ObservableProperty]
     private ObservableCollection<CategoryModel> _categories = new();
 
+    [ObservableProperty]
+    private CategoryModel? _selectedCategory;
+
+    [ObservableProperty]
+    private bool _isCompetitorPopupVisible;
+
+    [ObservableProperty]
+    private ObservableCollection<CompetitorModel> _currentCompetitors = new();
+
     public override string Title => "Catégories";
 
     public CategoriesStepViewModel()
     {
-        // On surveille les changements dans la liste pour mettre à jour le modèle
         Categories.CollectionChanged += OnCategoriesCollectionChanged;
         Validate();
     }
@@ -49,19 +57,56 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         }
     }
 
+    [RelayCommand]
+    private void ManageCompetitors(CategoryModel category)
+    {
+        SelectedCategory = category;
+        CurrentCompetitors = new ObservableCollection<CompetitorModel>(category.Competitors ?? new());
+        IsCompetitorPopupVisible = true;
+    }
+
+    [RelayCommand]
+    private void SaveCompetitors()
+    {
+        if (SelectedCategory != null)
+        {
+            SelectedCategory.Competitors = CurrentCompetitors.ToList();
+        }
+        IsCompetitorPopupVisible = false;
+        SelectedCategory = null;
+    }
+
+    [RelayCommand]
+    private void AddCompetitor(string name)
+    {
+        if (!string.IsNullOrWhiteSpace(name) && SelectedCategory != null)
+        {
+            var competitor = new CompetitorModel 
+            { 
+                Name = name, 
+                Genre = SelectedCategory.Genre, // Par défaut le genre de la catégorie
+                CategoryId = SelectedCategory.Id
+            };
+            CurrentCompetitors.Add(competitor);
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveCompetitor(CompetitorModel competitor)
+    {
+        if (competitor != null && CurrentCompetitors.Contains(competitor))
+        {
+            CurrentCompetitors.Remove(competitor);
+        }
+    }
+
     protected override void OnModelUpdated(CompetitionModel value)
     {
         if (value != null)
         {
-            // Détacher l'ancien événement pour éviter les fuites/doublons
             Categories.CollectionChanged -= OnCategoriesCollectionChanged;
-
-            // Remplir la collection à partir du modèle
             Categories = new ObservableCollection<CategoryModel>(value.Categories ?? new());
-
-            // Réattacher l'événement sur la nouvelle collection
             Categories.CollectionChanged += OnCategoriesCollectionChanged;
-
             Validate();
         }
     }
