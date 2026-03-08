@@ -29,6 +29,7 @@ public class Repository<T> : IRepository<T> where T : class
         return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
     }
 
+    // AJOUT DE LA MÉTHODE MANQUANTE
     public async Task<T?> GetByIdAsync(int id, params string[] includePaths)
     {
         IQueryable<T> query = _context.Set<T>().AsNoTracking();
@@ -81,16 +82,11 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<bool> UpdateAsync(T entity)
     {
-        var idProp = entity.GetType().GetProperty("Id");
-        if (idProp != null)
+        // On détache TOUTES les entités pour éviter le crash de tracking (recommandé MAUI)
+        var entries = _context.ChangeTracker.Entries().ToList();
+        foreach (var entry in entries)
         {
-            int id = (int)idProp.GetValue(entity)!;
-            var trackedEntity = _context.Set<T>().Local.FirstOrDefault(e => (int)entity.GetType().GetProperty("Id")!.GetValue(e)! == id);
-            
-            if (trackedEntity != null)
-            {
-                _context.Entry(trackedEntity).State = EntityState.Detached;
-            }
+            entry.State = EntityState.Detached;
         }
 
         _context.Update(entity);

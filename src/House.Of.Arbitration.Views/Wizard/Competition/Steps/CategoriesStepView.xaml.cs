@@ -42,7 +42,7 @@ public partial class CategoriesStepView : ContentView
                 AgeRange = (AgeRange)AgePicker.SelectedItem,
                 WeightMin = int.TryParse(MinWeightEntry.Text, out int min) ? min : 0,
                 WeightMax = int.TryParse(MaxWeightEntry.Text, out int max) ? max : 100,
-                Competitors = vm.Competitors.ToList(),
+                //Competitors = vm.Competitors.ToList(),
                 Competition = vm.Model
             };
 

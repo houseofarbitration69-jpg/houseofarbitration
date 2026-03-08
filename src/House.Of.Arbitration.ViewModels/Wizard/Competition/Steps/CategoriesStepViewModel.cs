@@ -1,55 +1,17 @@
-#region Imports
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Models;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-#endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
 public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionModel>
 {
-    #region Attributs
+    [ObservableProperty]
     private ObservableCollection<CategoryModel> _categories = new();
-    private CategoryModel? _selectedCategory;
-    private bool _isCompetitorPopupVisible;
-    private CompetitorModel? _selectedCompetitor;
-    private ObservableCollection<CompetitorModel> _competitors = new();
-    #endregion
-
-    #region Properties
-    public ObservableCollection<CategoryModel> Categories
-    {
-        get => _categories;
-        set => SetProperty(ref _categories, value);
-    }
-    
-    public CategoryModel? SelectedCategory
-    {
-        get => _selectedCategory;
-        set => SetProperty(ref _selectedCategory, value);
-    }
-    
-    public bool IsCompetitorPopupVisible
-    {
-        get => _isCompetitorPopupVisible;
-        set => SetProperty(ref _isCompetitorPopupVisible, value);
-    }
-    
-    public ObservableCollection<CompetitorModel> Competitors
-    {
-        get => _competitors;
-        set => SetProperty(ref _competitors, value);
-    }
-
-    public CompetitorModel? SelectedCompetitor
-    {
-        get => _selectedCompetitor;
-        set => SetProperty(ref _selectedCompetitor, value);
-    }
 
     public override string Title => "Catégories";
-    #endregion
 
     public CategoriesStepViewModel()
     {
@@ -71,9 +33,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     {
         if (category != null)
         {
-            Competitors = new ObservableCollection<CompetitorModel>();
             category.Competition = Model!;
-            category.CompetitionId = Model?.Id ?? 0;
             Categories.Add(category);
         }
     }
@@ -88,66 +48,71 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     }
 
     [RelayCommand]
-    private void ManageCompetitors(CategoryModel category)
+    private async Task AddCompetitor(CategoryModel category)
     {
-        SelectedCategory = category;
-        SelectedCompetitor = new();
-        Competitors = new ObservableCollection<CompetitorModel>(category.Competitors ?? new());
-        IsCompetitorPopupVisible = true;
+        if (category == null) return;
+
+        var newCompetitor = new CompetitorModel 
+        { 
+            Genre = category.Genre,
+            BirthDate = DateTime.Now.AddYears(-20)
+        };
+        
+        // On attache uniquement l'objet à la liste de navigation.
+        // EF Core gérera le CategoryId lors de la sauvegarde.
+        category.Competitors.Add(newCompetitor);
+
+        var navigationParameter = new Dictionary<string, object>
+        {
+            { "Competitor", newCompetitor }
+        };
+
+        // Navigation MVVM pure via Shell
+        await Shell.Current.GoToAsync("CompetitorPage", navigationParameter);
+        
+        // On rafraîchit l'UI au retour (si nécessaire)
+        RefreshCategory(category);
     }
 
     [RelayCommand]
-    private void SaveCompetitors()
+    private async Task EditCompetitor(CompetitorModel competitor)
     {
-        if (SelectedCategory != null)
+        if (competitor == null) return;
+
+        var navigationParameter = new Dictionary<string, object>
         {
-            // Grâce à [ObservableProperty] sur CategoryModel.Competitors, 
-            // cette réassignation déclenche la notification à l'UI MAUI.
-            SelectedCategory.Competitors = Competitors.ToList();
+            { "Competitor", competitor }
+        };
 
-            var category = Categories.FirstOrDefault(c => c.Id == SelectedCategory.Id);
-            if (category != null)
-            {
-                var index = Categories.IndexOf(category);
-
-                if (index >= 0)
-                {
-                    //Categories.CollectionChanged -= OnCategoriesCollectionChanged;
-                    Categories.RemoveAt(index);
-                    Categories.Insert(index, SelectedCategory);
-                    //OnCategoriesCollectionChanged(nameof(Categories), new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-                    //Categories = new ObservableCollection<CategoryModel>(Categories);
-                    //Categories.CollectionChanged += OnCategoriesCollectionChanged;
-
-                    //Categories = new ObservableCollection<CategoryModel>();
-                    //OnPropertyChanged(nameof(Categories));
-                }
-            }
-        }
-
-        IsCompetitorPopupVisible = false;
-        SelectedCategory = null;
-    }
-
-    [RelayCommand]
-    private void AddCompetitor()
-    {
-        if (SelectedCompetitor != null && !string.IsNullOrWhiteSpace(SelectedCompetitor.Name) && SelectedCategory != null)
-        {
-            SelectedCompetitor.Genre = SelectedCategory.Genre;
-            SelectedCompetitor.CategoryId = SelectedCategory.Id;
-            Competitors.Add(SelectedCompetitor);
-
-            SelectedCompetitor = new();
-        }
+        await Shell.Current.GoToAsync("CompetitorPage", navigationParameter);
     }
 
     [RelayCommand]
     private void RemoveCompetitor(CompetitorModel competitor)
     {
-        if (competitor != null && Competitors.Contains(competitor))
+        if (competitor != null)
         {
-            Competitors.Remove(competitor);
+            // On cherche la catégorie parente pour supprimer proprement
+            foreach (var cat in Categories)
+            {
+                if (cat.Competitors.Contains(competitor))
+                {
+                    cat.Competitors.Remove(competitor);
+                    RefreshCategory(cat);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void RefreshCategory(CategoryModel category)
+    {
+        var index = Categories.IndexOf(category);
+        if (index != -1)
+        {
+            // Forcer le rafraîchissement visuel du BindableLayout
+            Categories[index] = null!;
+            Categories[index] = category;
         }
     }
 

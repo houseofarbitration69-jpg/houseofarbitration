@@ -1,5 +1,6 @@
-﻿#region Imports
+#region Imports
 using House.Of.Arbitration.Views.Competition;
+using House.Of.Arbitration.Views.Wizard.Competition.Steps;
 #endregion
 
 namespace House.Of.Arbitration.Views;
@@ -15,6 +16,7 @@ public static class BuilderExtensions
     {
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<CompetitionsPage>();
+        builder.Services.AddTransient<CompetitorPage>();
 
         return builder;
     }

@@ -20,6 +20,7 @@ public static class BuilderExtensions
 
         builder.Services.AddTransient<CompetitionWizardViewModel>();
         builder.Services.AddTransient<SettingsStepViewModel>();
+        builder.Services.AddTransient<CompetitorPageViewModel>();
 
         return builder;
     }

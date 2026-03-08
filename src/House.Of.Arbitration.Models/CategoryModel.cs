@@ -8,9 +8,9 @@ public class CategoryModel
     public int WeightMin { get; set; }
     public int WeightMax { get; set; }
     public AgeRange AgeRange { get; set; }
-    public int CompetitionId { get; set; }
+    public int? CompetitionId { get; set; }
     public RoundType RoundType { get; set; }
-    public required CompetitionModel Competition { get; set; }
+    public CompetitionModel? Competition { get; set; }
     public List<CompetitorModel> Competitors { get; set; } = new();
 }
 
