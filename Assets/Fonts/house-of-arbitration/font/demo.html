@@ -42,7 +42,7 @@
             any text:
         </p>
         <div data-lang="HTML">
-        <pre>&lt;span <em>class="icon"</em>&gt;&#xf004;&lt;/span&gt;</pre>
+        <pre>&lt;span <em>class="icon"</em>&gt;&#xf006;&lt;/span&gt;</pre>
         </div>
         <p>
             You could change the size of the glyph using the
@@ -54,14 +54,32 @@
 }
 </pre></div>
         <div data-lang="HTML">
-        <pre>&lt;span class="icon <em>my-size</em>"&gt;&#xf004;&lt;/span&gt;</pre>
+        <pre>&lt;span class="icon <em>my-size</em>"&gt;&#xf006;&lt;/span&gt;</pre>
+        </div>
+        <p>You can specify which color palette to use like so:</p>
+        <div data-lang="HTML">
+        <pre>&lt;span class="icon <em>palette0</em>"&gt;&#xf006;&lt;/span&gt;</pre>
+        </div>
+        <p>You could also customize a palette in CSS:</p>
+<div data-lang="CSS"><pre>
+@font-palette-values <em>--custom</em> {
+    font-family: "Custom";
+    base-palette: 0;
+    override-colors: 0 #f00, 1 blue, 2 #bada55;
+}
+<em>.custom</em> {
+    font-palette: <em>--custom</em>;
+}
+</pre></div>
+        <div data-lang="HTML">
+        <pre>&lt;span class="icon <em>custom</em>"&gt;&#xf006;&lt;/span&gt;</pre>
         </div>
     </details>
     <details open>
         <noscript>
             <p>Enable JavaScript for easier copying of codes to clipboard.</p>
         </noscript>
-        <summary>List of Glyphs <small>(5)</small></summary>
+        <summary>List of Glyphs <small>(7)</small></summary>
         <div id="copy_settings" style="display: none">
             <label>
                 Click/tap on each glyph to copy:
@@ -72,6 +90,12 @@
                 </select>
             </label>
             <br>
+            <label>
+                Color Palette:
+                <select id="palette">
+                    <option value="0">palette0</option>
+                </select>
+            </label>
             <label>
                 Size:
                 <input id="size" type="number" value="32" min="8" max="99999" />
@@ -86,6 +110,8 @@
             </p>
         </div>
         <div class="_demo_glyphs">
+            <div><div class="_demo_glyph"><span class="icon">&#xf006;</span> icon-StreamlineUltimateColorCalendarDate</div><label class="_demo_code">U+ <input readonly value="f006" /></label></div>
+            <div><div class="_demo_glyph"><span class="icon">&#xf005;</span> icon-NotoTrophy</div><label class="_demo_code">U+ <input readonly value="f005" /></label></div>
             <div><div class="_demo_glyph"><span class="icon">&#xf004;</span> icon-MaterialSymbolsPlayArrowRounded</div><label class="_demo_code">U+ <input readonly value="f004" /></label></div>
             <div><div class="_demo_glyph"><span class="icon">&#xf000;</span> icon-MaterialSymbolsEditOutline</div><label class="_demo_code">U+ <input readonly value="f000" /></label></div>
             <div><div class="_demo_glyph"><span class="icon">&#xf001;</span> icon-MaterialSymbolsDeleteOutline</div><label class="_demo_code">U+ <input readonly value="f001" /></label></div>
@@ -163,6 +189,29 @@
                     });
                 } catch (ignore) {}
             }
+        }, false);
+        document.getElementById("palette").addEventListener("change", function (e) {
+            const i = Number(e.target.value);
+            const className = "icon" + (
+                (e.target.value === "" || Number.isNaN(i))
+                ? ""
+                : " palette" + i
+            );
+            document.querySelectorAll(".icon").forEach(function (x) {
+                x.className = className;
+            });
+            const selected = e.target.children[e.target.selectedIndex];
+            const background = selected.getAttribute("data-background");
+            const foreground = selected.getAttribute("data-foreground");
+            let style = [];
+            if (background) {
+                style.push(`--background: ${background}`);
+            }
+            if (foreground) {
+                style.push(`--color: ${foreground}`);
+            }
+            style = style.join("; ");
+            wrapper.setAttribute("style", style);
         }, false);
         document.getElementById("size").addEventListener("change", function (e) {
             let size = Number(e.target.value);

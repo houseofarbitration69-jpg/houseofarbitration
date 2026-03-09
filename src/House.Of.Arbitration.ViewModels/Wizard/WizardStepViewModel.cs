@@ -1,5 +1,7 @@
+#region Imports
 using CommunityToolkit.Mvvm.ComponentModel;
-using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Localization;
+#endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard;
 
@@ -7,8 +9,6 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
 {
     #region Attributs
     private bool _isValid;
-
-    [ObservableProperty]
     private T _model = default!;
     #endregion
 
@@ -20,12 +20,30 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
         get => _isValid;
         set => SetProperty(ref _isValid, value);
     }
+   
+    public T Model
+    {
+        get => _model;
+        set => SetProperty(ref _model, value);
+    }
+
+    /// <summary>
+    /// Gets the provider for localized string resources.
+    /// </summary>
+    public ResourceProvider Resources { get; }
+    #endregion
+
+    #region Constructors
+    public WizardStepViewModel(ResourceProvider resourceProvider)
+    {
+        Resources = resourceProvider;
+    }
     #endregion
 
     /// <summary>
     /// Méthode générée par CommunityToolkit.Mvvm lors du changement de Model.
     /// </summary>
-    partial void OnModelChanged(T value)
+    protected void OnModelChanged(T value)
     {
         OnModelUpdated(value);
     }

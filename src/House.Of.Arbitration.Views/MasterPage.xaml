@@ -17,6 +17,7 @@
 
     <base:BasePage.Resources>
         <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
     </base:BasePage.Resources>
 
     <ScrollView>
@@ -24,20 +25,25 @@
             
             <!-- Header -->
             <Grid ColumnDefinitions="*,Auto">
-                <Label Text="Compétitions" 
-                       Style="{DynamicResource Headline}" 
-                       FontSize="32" 
-                       VerticalOptions="Center" />
+                <Label 
+                    Grid.Column="0"
+                    Text="{Binding Resources.COMPETITION_LIST}" 
+                    Style="{DynamicResource Headline}" 
+                    FontSize="32" 
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
                 
-                <controls:IconButton Grid.Column="1"
-                                    Text="{Binding Resources.ADD_COMPETITION}"
-                                    ButtonBackgroundColor="LightGreen"
-                                    TextColor="Black"
-                                    Command="{Binding CreateCommand}">
+                <controls:IconButton 
+                    Grid.Column="1"
+                    Text="{Binding Resources.ADD_COMPETITION}"
+                    ButtonBackgroundColor="LightGreen"
+                    TextColor="Black"
+                    Command="{Binding CreateCommand}"
+                >
                     <controls:IconButton.Icons>
                         <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
                         <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
-
                     </controls:IconButton.Icons>
                 </controls:IconButton>
             </Grid>
@@ -92,12 +98,14 @@
             </VerticalStackLayout>
 
             <!-- Message si vide -->
-            <VerticalStackLayout IsVisible="{Binding Competitions.Count, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}"
-                                 HorizontalOptions="Center" 
-                                 Margin="0,50" 
-                                 Spacing="10">
-                <Label Text="🥋" FontSize="48" HorizontalOptions="Center" />
-                <Label Text="Aucune compétition enregistrée" FontAttributes="Italic" Opacity="0.6" />
+            <VerticalStackLayout 
+                IsVisible="{Binding Competitions.Count, Converter={StaticResource IntToBoolConverter}, ConverterParameter='Invert'}"
+                HorizontalOptions="Center" 
+                Margin="0,50" 
+                Spacing="10"
+            >
+                <Label Text="{x:Static helpers:FontCustomIcons.COLOR_TROPHY}" FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" FontSize="48" HorizontalOptions="Center" />
+                <Label Text="{Binding Resources.NO_COMPETITION}" FontAttributes="Italic" Opacity="0.6" />
             </VerticalStackLayout>
 
         </VerticalStackLayout>

@@ -4,6 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoriesStepView"
     x:DataType="vm:CategoriesStepViewModel"
     x:Name="this"
@@ -13,24 +15,44 @@
         <!-- Background/Main Content -->
         <ScrollView>
             <VerticalStackLayout Spacing="24" Padding="20">
+                <!-- Header -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label 
+                        Grid.Column="0"
+                        Text="{Binding Resources.CATEGORY_LIST}" 
+                        Style="{DynamicResource Headline}" 
+                        FontSize="32" 
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
+                    />
+
+                    <controls:IconButton 
+                        Grid.Column="1"
+                        Text="{Binding Resources.ADD_CATEGORY}"
+                        ButtonBackgroundColor="LightGreen"
+                        TextColor="Black"
+                        Command="{Binding CreateCommand}"
+                    >
+                        <controls:IconButton.Icons>
+                            <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
+                            <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
+                        </controls:IconButton.Icons>
+                    </controls:IconButton>
+                </Grid>
+
                 <!-- Header Section -->
-                <VerticalStackLayout Spacing="4">
+                <!--<VerticalStackLayout Spacing="4">
                     <Label Text="Gestion des Catégories" 
                            Style="{DynamicResource Headline}" 
                            HorizontalOptions="Start"
                            FontSize="24" />
-                    <Label Text="Définissez les catégories et leurs participants" 
-                           Style="{DynamicResource SubHeadline}" 
-                           HorizontalOptions="Start"
-                           FontSize="14" 
-                           Opacity="0.7" />
                 </VerticalStackLayout>
 
-                <!-- Add Button -->
+                --><!-- Add Button --><!--
                 <Button Text="+ Ajouter une Catégorie"
                         Style="{StaticResource Button}"
                         Margin="0,10"
-                        Clicked="OnAddCategoryClicked" />
+                        Clicked="OnAddCategoryClicked" />-->
 
                 <!-- Categories List -->
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Categories}" Spacing="15">

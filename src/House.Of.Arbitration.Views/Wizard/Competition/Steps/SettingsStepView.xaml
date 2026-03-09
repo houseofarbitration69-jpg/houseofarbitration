@@ -3,7 +3,9 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.SettingsStepView"
     x:DataType="vm:SettingsStepViewModel"
     Shell.NavBarIsVisible="False">
@@ -20,63 +22,100 @@
                        Style="{DynamicResource Headline}" 
                        HorizontalOptions="Start"
                        FontSize="24" />
-                <Label Text="Veuillez renseigner les détails principaux" 
-                       Style="{DynamicResource SubHeadline}" 
-                       HorizontalOptions="Start"
-                       FontSize="14" 
-                       Opacity="0.7" />
             </VerticalStackLayout>
 
-            <!-- Name Field -->
-            <VerticalStackLayout Spacing="8">
-                <Label Text="Nom de la compétition" FontAttributes="Bold" FontSize="14" Margin="4,0" />
-                <Border x:Name="NameBorder"
-                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
-                        Stroke="{DynamicResource BorderColor}"
-                        StrokeThickness="1"
-                        BackgroundColor="{DynamicResource SurfaceColor}"
-                        Padding="12,4">
-                    <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
-                            <Setter Property="Stroke" Value="{StaticResource MartialRed}" />
-                        </DataTrigger>
-                    </Border.Triggers>
-                    <Grid ColumnDefinitions="Auto, *">
-                        <Label Text="🏆" VerticalOptions="Center" Margin="0,0,10,0" />
-                        <Entry Grid.Column="1"
-                               Text="{Binding Name, Mode=TwoWay, UpdateSourceEventName=TextChanged}" 
-                               Placeholder="Ex: Championnat Kung Fu 2024"
-                               PlaceholderColor="{DynamicResource SecondaryTextColor}"
-                               TextColor="{DynamicResource PrimaryTextColor}"
-                               BackgroundColor="Transparent"
-                               VerticalOptions="Center" />
-                    </Grid>
-                </Border>
-                <Label Text="Le nom est requis" 
-                       TextColor="{StaticResource MartialRed}" 
-                       FontSize="11" 
-                       Margin="12,0"
-                       IsVisible="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" />
-            </VerticalStackLayout>
+            <controls:Card>
+                <!-- Name Field -->
+                <VerticalStackLayout Spacing="20">
+                    <VerticalStackLayout Spacing="5">
+                        <Label 
+                            Text="{Binding Resources.COMPETITION_NAME}" 
+                            FontAttributes="Bold" 
+                            FontSize="14" 
+                            Margin="4,0" 
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                        />
+                        <Border 
+                            x:Name="NameBorder"
+                            Stroke="{DynamicResource Valid}"
+                            StrokeThickness="1"
+                            BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                            Padding="12,4"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                    <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid ColumnDefinitions="Auto, *">
+                                <Label 
+                                Grid.Column="0"
+                                Text="{x:Static helpers:FontCustomIcons.COLOR_TROPHY}" 
+                                FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                VerticalOptions="Center" 
+                                Margin="0,0,10,0" 
+                            />
+                                <Entry 
+                                Grid.Column="1"
+                                Text="{Binding Name, Mode=TwoWay, UpdateSourceEventName=TextChanged}" 
+                                Placeholder="{Binding Resources.PLACEHOLDER_COMPETITION_NAME}"
+                                PlaceholderColor="{DynamicResource Placeholder}"
+                                TextColor="{DynamicResource PrimaryTextColor}"
+                                VerticalOptions="Center" 
+                            />
+                            </Grid>
+                        </Border>
+                        <Label 
+                            Text="{Binding Resources.NAME_REQUIRED}" 
+                            TextColor="{DynamicResource Error}" 
+                            FontSize="11" 
+                            Margin="12,0"
+                            IsVisible="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" 
+                        />
+                    </VerticalStackLayout>
 
-            <!-- Date Field -->
-            <VerticalStackLayout Spacing="8">
-                <Label Text="Date de l'événement" FontAttributes="Bold" FontSize="14" Margin="4,0" />
-                <Border x:Name="DateBorder"
-                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
-                        Stroke="{DynamicResource BorderColor}"
+                    <VerticalStackLayout Spacing="5">
+                        <!-- Date Field -->
+                        <Label 
+                        Text="{Binding Resources.COMPETITION_DATE}" 
+                        FontAttributes="Bold" 
+                        FontSize="14" 
+                        Margin="4,0" 
+                        TextColor="{DynamicResource PrimaryTextColor}"
+                    />
+                        <Border 
+                        x:Name="DateBorder"
+                        Stroke="{DynamicResource Valid}"
                         StrokeThickness="1"
-                        BackgroundColor="{DynamicResource SurfaceColor}"
-                        Padding="12,4">
-                    <Grid ColumnDefinitions="Auto, *">
-                        <Label Text="📅" VerticalOptions="Center" Margin="0,0,10,0" />
-                        <DatePicker Grid.Column="1"
-                                    Date="{Binding Date, Mode=TwoWay}"
-                                    TextColor="{DynamicResource PrimaryTextColor}"
-                                    VerticalOptions="Center" />
-                    </Grid>
-                </Border>
-            </VerticalStackLayout>
+                        BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                        Padding="12,4"
+                    >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="Auto, *">
+                                <Label 
+                                Grid.Column="0"
+                                Text="{x:Static helpers:FontCustomIcons.COLOR_CALENDAR}" 
+                                FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                VerticalOptions="Center" 
+                                Margin="0,0,10,0" 
+                            />
+                                <DatePicker 
+                                Grid.Column="1"
+                                Date="{Binding Date, Mode=TwoWay}"
+                                TextColor="{DynamicResource PrimaryTextColor}"
+                                VerticalOptions="Center" 
+                            />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+            </controls:Card>
 
         </VerticalStackLayout>
     </ScrollView>

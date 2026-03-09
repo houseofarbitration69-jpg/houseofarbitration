@@ -37,6 +37,71 @@ LocalizationResourceManager.Instance.GetValue(nameof(ADD_COMPETITION));
     /// </summary>
     public string START_COMPETITION =>
 LocalizationResourceManager.Instance.GetValue(nameof(START_COMPETITION));
+    /// <summary>
+    /// Gets the translated "MASTER" string.
+    /// </summary>
+    public string MASTER =>
+LocalizationResourceManager.Instance.GetValue(nameof(MASTER));
+    /// <summary>
+    /// Gets the translated "SLAVE" string.
+    /// </summary>
+    public string SLAVE =>
+LocalizationResourceManager.Instance.GetValue(nameof(SLAVE));
+    /// <summary>
+    /// Gets the translated "COMPETITION_LIST" string.
+    /// </summary>
+    public string COMPETITION_LIST =>
+LocalizationResourceManager.Instance.GetValue(nameof(COMPETITION_LIST));
+    /// <summary>
+    /// Gets the translated "NO_COMPETITION" string.
+    /// </summary>
+    public string NO_COMPETITION =>
+LocalizationResourceManager.Instance.GetValue(nameof(NO_COMPETITION));
+    /// <summary>
+    /// Gets the translated "PLACEHOLDER_COMPETITION_NAME" string.
+    /// </summary>
+    public string PLACEHOLDER_COMPETITION_NAME =>
+LocalizationResourceManager.Instance.GetValue(nameof(PLACEHOLDER_COMPETITION_NAME));
+    /// <summary>
+    /// Gets the translated "NAME_REQUIRED" string.
+    /// </summary>
+    public string NAME_REQUIRED =>
+LocalizationResourceManager.Instance.GetValue(nameof(NAME_REQUIRED));
+    /// <summary>
+    /// Gets the translated "COMPETITION_NAME" string.
+    /// </summary>
+    public string COMPETITION_NAME =>
+LocalizationResourceManager.Instance.GetValue(nameof(COMPETITION_NAME));
+    /// <summary>
+    /// Gets the translated "COMPETITION_DATE" string.
+    /// </summary>
+    public string COMPETITION_DATE =>
+LocalizationResourceManager.Instance.GetValue(nameof(COMPETITION_DATE));
+    /// <summary>
+    /// Gets the translated "PREVIOUS" string.
+    /// </summary>
+    public string PREVIOUS =>
+LocalizationResourceManager.Instance.GetValue(nameof(PREVIOUS));
+    /// <summary>
+    /// Gets the translated "NEXT" string.
+    /// </summary>
+    public string NEXT =>
+LocalizationResourceManager.Instance.GetValue(nameof(NEXT));
+    /// <summary>
+    /// Gets the translated "VALIDATE_ACTION" string.
+    /// </summary>
+    public string VALIDATE_ACTION =>
+LocalizationResourceManager.Instance.GetValue(nameof(VALIDATE_ACTION));
+    /// <summary>
+    /// Gets the translated "CATEGORY_LIST" string.
+    /// </summary>
+    public string CATEGORY_LIST =>
+LocalizationResourceManager.Instance.GetValue(nameof(CATEGORY_LIST));
+    /// <summary>
+    /// Gets the translated "ADD_CATEGORY" string.
+    /// </summary>
+    public string ADD_CATEGORY =>
+LocalizationResourceManager.Instance.GetValue(nameof(ADD_CATEGORY));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

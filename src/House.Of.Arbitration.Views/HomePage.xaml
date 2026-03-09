@@ -14,21 +14,32 @@
     x:Name="this"
     Shell.NavBarIsVisible="False">
     <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,250,*">
+        <Label 
+            Grid.Row="0" 
+            Grid.ColumnSpan="3" 
+            Text="{Binding Resources.APPLICATION_NAME}" 
+            TextColor="White"
+            FontAttributes="Bold"
+            FontSize="50"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"
+        />
+        
         <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
             <controls:IconButton 
-                Text="Serveur"
+                Text="{Binding Resources.MASTER}"
                 IsFullWidth="True"
-                ButtonBackgroundColor="LightGreen"
-                TextColor="Black"
+                ButtonBackgroundColor="{DynamicResource Valid}"
+                TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="MasterPage"
             >
             </controls:IconButton>
             <controls:IconButton 
-                Text="Juges"
+                Text="{Binding Resources.SLAVE}"
                 IsFullWidth="True"
-                ButtonBackgroundColor="LightGreen"
-                TextColor="Black"
+                ButtonBackgroundColor="{DynamicResource Valid}"
+                TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="SlavePage"
             >

@@ -1,4 +1,5 @@
 #region Imports
+using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Wizard.Competition;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
@@ -9,12 +10,12 @@ namespace House.Of.Arbitration.Views.Wizard.Competition;
 
 public partial class WizardPage : BasePage<CompetitionWizardViewModel>
 {
-    public WizardPage(CompetitionWizardViewModel viewModel) : base(viewModel)
+    public WizardPage(CompetitionWizardViewModel viewModel, ResourceProvider resource) : base(viewModel)
     {
         InitializeComponent();
         
-        var settingsStep = new SettingsStepViewModel();
-        var categoriesStep = new CategoriesStepViewModel();
+        var settingsStep = new SettingsStepViewModel(resource);
+        var categoriesStep = new CategoriesStepViewModel(resource);
         //var userStep = new UserStepViewModel();
         //var termsStep = new TermsStepViewModel();
         //var summaryStep = new SummaryStepViewModel(userStep, termsStep);

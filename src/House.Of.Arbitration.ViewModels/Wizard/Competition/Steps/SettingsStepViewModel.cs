@@ -1,4 +1,5 @@
 #region Imports
+using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 #endregion
 
@@ -38,6 +39,13 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
                 Validate();
             }
         }
+    }
+    #endregion
+
+    #region Constructors
+    public SettingsStepViewModel(ResourceProvider resourceProvider) : base(resourceProvider)
+    {
+
     }
     #endregion
 

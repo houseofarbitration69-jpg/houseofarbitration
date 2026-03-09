@@ -126,4 +126,43 @@
   <data name="START_COMPETITION" xml:space="preserve">
     <value>[START COMPETITION]</value>
   </data>
+  <data name="MASTER" xml:space="preserve">
+    <value>[MASTER]</value>
+  </data>
+  <data name="SLAVE" xml:space="preserve">
+    <value>[SLAVE]</value>
+  </data>
+  <data name="COMPETITION_LIST" xml:space="preserve">
+    <value>[COMPETITION'S LIST]</value>
+  </data>
+  <data name="NO_COMPETITION" xml:space="preserve">
+    <value>[NO COMPETITION]</value>
+  </data>
+  <data name="PLACEHOLDER_COMPETITION_NAME" xml:space="preserve">
+    <value>[PLACEHOLDER COMPETITION NAME]</value>
+  </data>
+  <data name="NAME_REQUIRED" xml:space="preserve">
+    <value>[NAME REQUIRED]</value>
+  </data>
+  <data name="COMPETITION_NAME" xml:space="preserve">
+    <value>[COMPETITION NAME]</value>
+  </data>
+  <data name="COMPETITION_DATE" xml:space="preserve">
+    <value>[COMPETITION DATE]</value>
+  </data>
+  <data name="PREVIOUS" xml:space="preserve">
+    <value>[PREVIOUS]</value>
+  </data>
+  <data name="NEXT" xml:space="preserve">
+    <value>[NEXT]</value>
+  </data>
+  <data name="VALIDATE_ACTION" xml:space="preserve">
+    <value>[VALIDATE]</value>
+  </data>
+  <data name="CATEGORY_LIST" xml:space="preserve">
+    <value>[CATEGORIES LIST]</value>
+  </data>
+  <data name="ADD_CATEGORY" xml:space="preserve">
+    <value>[ADD CATEGORY]</value>
+  </data>
 </root>

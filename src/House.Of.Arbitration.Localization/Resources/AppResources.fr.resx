@@ -126,4 +126,43 @@
   <data name="START_COMPETITION" xml:space="preserve">
     <value>Démarrer une compétition</value>
   </data>
+  <data name="MASTER" xml:space="preserve">
+    <value>SERVEUR</value>
+  </data>
+  <data name="SLAVE" xml:space="preserve">
+    <value>JUGES</value>
+  </data>
+  <data name="COMPETITION_LIST" xml:space="preserve">
+    <value>Liste des compétitions</value>
+  </data>
+  <data name="NO_COMPETITION" xml:space="preserve">
+    <value>Aucune compétition</value>
+  </data>
+  <data name="PLACEHOLDER_COMPETITION_NAME" xml:space="preserve">
+    <value>Ex: Championnat Kung Fu 2024</value>
+  </data>
+  <data name="NAME_REQUIRED" xml:space="preserve">
+    <value>Le nom est requis</value>
+  </data>
+  <data name="COMPETITION_NAME" xml:space="preserve">
+    <value>Nom de la compétition</value>
+  </data>
+  <data name="COMPETITION_DATE" xml:space="preserve">
+    <value>Date de la compétition</value>
+  </data>
+  <data name="PREVIOUS" xml:space="preserve">
+    <value>Précédent</value>
+  </data>
+  <data name="NEXT" xml:space="preserve">
+    <value>Suivant</value>
+  </data>
+  <data name="VALIDATE_ACTION" xml:space="preserve">
+    <value>Valider</value>
+  </data>
+  <data name="CATEGORY_LIST" xml:space="preserve">
+    <value>Liste des catègories</value>
+  </data>
+  <data name="ADD_CATEGORY" xml:space="preserve">
+    <value>Ajouter une catègorie</value>
+  </data>
 </root>

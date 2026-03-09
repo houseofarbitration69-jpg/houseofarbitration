@@ -9,4 +9,6 @@ public static class FontCustomIcons
     public const string CIRCLE = "\uf002";
     public const string ADD = "\uf003";
     public const string PLAY = "\uf004";
+    public const string COLOR_TROPHY = "\uf005";
+    public const string COLOR_CALENDAR = "\uf006";
 }

@@ -61,6 +61,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ADD CATEGORY].
+        /// </summary>
+        public static string ADD_CATEGORY {
+            get {
+                return ResourceManager.GetString("ADD_CATEGORY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [ADD COMPETITION].
         /// </summary>
         public static string ADD_COMPETITION {
@@ -79,11 +88,119 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [CATEGORIES LIST].
+        /// </summary>
+        public static string CATEGORY_LIST {
+            get {
+                return ResourceManager.GetString("CATEGORY_LIST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [COMPETITION DATE].
+        /// </summary>
+        public static string COMPETITION_DATE {
+            get {
+                return ResourceManager.GetString("COMPETITION_DATE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [COMPETITION&apos;S LIST].
+        /// </summary>
+        public static string COMPETITION_LIST {
+            get {
+                return ResourceManager.GetString("COMPETITION_LIST", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [COMPETITION NAME].
+        /// </summary>
+        public static string COMPETITION_NAME {
+            get {
+                return ResourceManager.GetString("COMPETITION_NAME", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [MASTER].
+        /// </summary>
+        public static string MASTER {
+            get {
+                return ResourceManager.GetString("MASTER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [NAME REQUIRED].
+        /// </summary>
+        public static string NAME_REQUIRED {
+            get {
+                return ResourceManager.GetString("NAME_REQUIRED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [NEXT].
+        /// </summary>
+        public static string NEXT {
+            get {
+                return ResourceManager.GetString("NEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [NO COMPETITION].
+        /// </summary>
+        public static string NO_COMPETITION {
+            get {
+                return ResourceManager.GetString("NO_COMPETITION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [PLACEHOLDER COMPETITION NAME].
+        /// </summary>
+        public static string PLACEHOLDER_COMPETITION_NAME {
+            get {
+                return ResourceManager.GetString("PLACEHOLDER_COMPETITION_NAME", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [PREVIOUS].
+        /// </summary>
+        public static string PREVIOUS {
+            get {
+                return ResourceManager.GetString("PREVIOUS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [SLAVE].
+        /// </summary>
+        public static string SLAVE {
+            get {
+                return ResourceManager.GetString("SLAVE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [START COMPETITION].
         /// </summary>
         public static string START_COMPETITION {
             get {
                 return ResourceManager.GetString("START_COMPETITION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [VALIDATE].
+        /// </summary>
+        public static string VALIDATE_ACTION {
+            get {
+                return ResourceManager.GetString("VALIDATE_ACTION", resourceCulture);
             }
         }
     }

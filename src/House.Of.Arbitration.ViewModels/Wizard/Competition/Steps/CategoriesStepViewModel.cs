@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -13,7 +14,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 
     public override string Title => "Catégories";
 
-    public CategoriesStepViewModel()
+    public CategoriesStepViewModel(ResourceProvider resourceProvider) : base(resourceProvider)
     {
         Categories.CollectionChanged += OnCategoriesCollectionChanged;
         Validate();
