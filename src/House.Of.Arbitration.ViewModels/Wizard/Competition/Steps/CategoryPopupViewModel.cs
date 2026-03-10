@@ -42,7 +42,7 @@ public partial class CategoryPopupViewModel : BaseViewModel
         get => _selectedGenre;
         set => SetProperty(ref _selectedGenre, value);
     }
-    
+
     public AgeRange SelectedAgeRange
     {
         get => _selectedAgeRange;
@@ -62,16 +62,16 @@ public partial class CategoryPopupViewModel : BaseViewModel
     }
 
     public List<CategoryType> CategoryTypes => Enum.GetValues(typeof(CategoryType)).Cast<CategoryType>().ToList();
-    
+
     public List<RoundType> RoundTypes => Enum.GetValues(typeof(RoundType)).Cast<RoundType>().ToList();
-    
+
     public List<Genre> Genres => Enum.GetValues(typeof(Genre)).Cast<Genre>().ToList();
-    
+
     public List<AgeRange> AgeRanges => Enum.GetValues(typeof(AgeRange)).Cast<AgeRange>().ToList();
     #endregion
 
     #region Constructors
-    public CategoryPopupViewModel(IPopupService popupService, ILogger<CategoryPopupViewModel> logger, ResourceProvider resourceProvider) 
+    public CategoryPopupViewModel(IPopupService popupService, ILogger<CategoryPopupViewModel> logger, ResourceProvider resourceProvider)
         : base(logger, resourceProvider)
     {
         _popupService = popupService;

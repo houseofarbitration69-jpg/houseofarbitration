@@ -6,10 +6,15 @@
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoriesStepView"
     x:DataType="vm:CategoriesStepViewModel"
     x:Name="this"
     Shell.NavBarIsVisible="False">
+
+    <ContentView.Resources>
+        <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
+    </ContentView.Resources>
 
     <Grid>
         <!-- Background/Main Content -->
@@ -45,7 +50,10 @@
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Categories}" Spacing="15">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:CategoryModel">
-                            <Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                            <controls:Card CardPadding="15" CardColor="White">
+                                <Label Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" TextColor="Black"/>
+                            </controls:Card>
+                            <!--<Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
                                     Stroke="{DynamicResource BorderColor}"
                                     StrokeThickness="1"
                                     Margin="0,0,0,12"
@@ -67,7 +75,6 @@
                                                 CommandParameter="{Binding .}" />
                                     </Grid>
 
-                                    <!-- Section Participants -->
                                     <Label Text="Participants :" FontAttributes="Bold" FontSize="12" Opacity="0.8" />
                                     
                                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Competitors}" Spacing="5">
@@ -93,7 +100,7 @@
                                             Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=AddCompetitorCommand}"
                                             CommandParameter="{Binding .}" />
                                 </VerticalStackLayout>
-                            </Border>
+                            </Border>-->
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
