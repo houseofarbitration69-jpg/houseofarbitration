@@ -38,6 +38,9 @@
     <Compile Update="TestPage.xaml.cs">
       <DependentUpon>TestPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Wizard\Competition\Steps\CategoryPopup.xaml.cs">
+      <DependentUpon>CategoryPopup.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Wizard\Competition\WizardPage.xaml.cs">
       <DependentUpon>WizardPage.xaml</DependentUpon>
     </Compile>

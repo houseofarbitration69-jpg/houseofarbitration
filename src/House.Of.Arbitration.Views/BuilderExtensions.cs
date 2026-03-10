@@ -1,4 +1,6 @@
 #region Imports
+using CommunityToolkit.Maui;
+using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using House.Of.Arbitration.Views.Competition;
 using House.Of.Arbitration.Views.Wizard.Competition.Steps;
 #endregion
@@ -20,6 +22,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<CompetitionsPage>();
         builder.Services.AddTransient<CompetitorPage>();
 
+        builder.Services.AddTransientPopup<CategoryPopup, CategoryPopupViewModel>();
         return builder;
     }
 }

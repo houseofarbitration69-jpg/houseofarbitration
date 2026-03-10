@@ -1,4 +1,5 @@
 ﻿#region Imports
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using House.Of.Arbitration.Data;
 using House.Of.Arbitration.Localization;
@@ -18,7 +19,7 @@ namespace House.Of.Arbitration.App
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .UseMauiCommunityToolkitCore()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont(FontHelper.OPENSANS_REGULAR_FILENAME, FontHelper.OPENSANS_REGULAR_NAME);

@@ -2,6 +2,7 @@
 using House.Of.Arbitration.ViewModels.Wizard.Competition;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using House.Of.Arbitration.ViewModels.Competition;
+using CommunityToolkit.Maui;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels;

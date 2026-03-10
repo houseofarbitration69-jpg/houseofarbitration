@@ -1,0 +1,19 @@
+<svg viewBox="0 0 24 24" width="32" height="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <style>
+        :root, .palette0 {color: currentColor;
+            --color0: #fcc219;
+            --color1: #865c50;
+            --color2: #d1701c;
+            --color3: #ffefab;
+            --color4: #fffcfd;
+            --color5: #ffa828;
+            --color6: #fec417;
+            --color7: #191919;
+            --color8: #fff;
+            --color9: #ffbfc5;
+            --color10: #ff808c;
+        }
+    </style>
+    <!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE -->
+    <path fill="currentColor" d="M9.55 15.15l8.475-8.475q0.3-0.3 0.7-0.3t0.7 0.3 0.3 0.713-0.3 0.712l-9.175 9.2q-0.3 0.3-0.7 0.3t-0.7-0.3L4.55 13q-0.3-0.3-0.288-0.712t0.313-0.713 0.713-0.3 0.712 0.3z" />
+</svg>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mct:Popup 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoryPopup"
+    x:DataType="vm:CategoryPopupViewModel"
+    Padding="0"
+>
+    <Border 
+        VerticalOptions="Center"
+        BackgroundColor="{DynamicResource PageBackgroundColor}"
+        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+        Padding="10"
+        MaximumWidthRequest="400"
+        WidthRequest="350"
+    >
+        <VerticalStackLayout Spacing="10">
+            <Label 
+                Text="{Binding Resources.NEW_CATEGORY}" 
+                Style="{DynamicResource Headline}" 
+                FontSize="20" 
+            />
+
+            <!-- Style -->
+            <Picker 
+                Title="{Binding Resources.STYLE}" 
+                ItemsSource="{Binding CategoryTypes}"
+                SelectedItem="{Binding SelectedType}" 
+            />
+            
+            <!-- Round (Conditional) -->
+            <VerticalStackLayout 
+                Spacing="8" 
+                IsVisible="False"
+            >
+                <Picker 
+                    Title="{Binding Resources.ROUND_TYPE}" 
+                    ItemsSource="{Binding RoundTypes}"
+                    SelectedItem="{Binding SelectedRoundType}" 
+                />
+                <VerticalStackLayout.Triggers>
+                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType}" Value="{x:Static models:CategoryType.Sanda}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType}" Value="{x:Static models:CategoryType.SandaLight}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                </VerticalStackLayout.Triggers>
+            </VerticalStackLayout>
+
+            <!-- Genre & Age -->
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+                <Picker 
+                    Grid.Column="0" 
+                    Title="{Binding Resources.GENRE}" 
+                    ItemsSource="{Binding Genres}"
+                    SelectedItem="{Binding SelectedGenre}" 
+                />
+                <Picker 
+                    Grid.Column="1" 
+                    Title="{Binding Resources.OLD}" 
+                    ItemsSource="{Binding AgeRanges}"
+                    SelectedItem="{Binding SelectedAgeRange}" 
+                />
+            </Grid>
+
+            <!-- Weight Min & Weight Max -->
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="15" IsVisible="False">
+                <VerticalStackLayout Grid.Column="0" Spacing="8">
+                    <Label 
+                        Text="{Binding Resources.WEIGHT_MIN}"
+                        TextColor="LightGray"
+                    />
+                    <Border
+                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                        Stroke="LightGray"
+                        StrokeThickness="0.2"
+                    >
+                        <Entry
+                            Text="{Binding WeightMin}"
+                            TextColor="White"
+                            PlaceholderColor="Gray"
+                            Placeholder="{Binding Resources.WEIGHT_MIN}"
+                            Keyboard="Numeric"
+                        />
+                    </Border>
+                </VerticalStackLayout>
+                <VerticalStackLayout Grid.Column="1" Spacing="8">
+                    <Label 
+                        Text="{Binding Resources.WEIGHT_MAX}"
+                        TextColor="LightGray"
+                    />
+                    <Border
+                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                        Stroke="LightGray"
+                        StrokeThickness="0.2"
+                    >
+                        <Entry                        
+                            Text="{Binding WeightMax}"
+                            PlaceholderColor="Gray"
+                            Placeholder="{Binding Resources.WEIGHT_MAX}"
+                            Keyboard="Numeric"
+                        />
+                    </Border>
+                </VerticalStackLayout>
+                <Grid.Triggers>
+                    <DataTrigger TargetType="Grid" Binding="{Binding SelectedType}" Value="{x:Static models:CategoryType.Sanda}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Grid" Binding="{Binding SelectedType}" Value="{x:Static models:CategoryType.SandaLight}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                </Grid.Triggers>
+            </Grid>
+
+            <!-- Buttons -->
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+                <controls:IconButton
+                    Grid.Column="0" 
+                    Text="{Binding Resources.CLOSE_ACTION}"
+                    ButtonBackgroundColor="{DynamicResource Error}"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
+                    IconColor="{DynamicResource PrimaryTextColor}"
+                    Command="{Binding CloseCommand}"
+                />
+
+                <controls:IconButton
+                    Grid.Column="1"
+                    Text="{Binding Resources.VALIDATE_ACTION}"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    ButtonBackgroundColor="{DynamicResource Valid}"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.CHECK}"
+                    IconColor="{DynamicResource PrimaryTextColor}"
+                    Command="{Binding ValidateCommand}"
+                />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</mct:Popup>

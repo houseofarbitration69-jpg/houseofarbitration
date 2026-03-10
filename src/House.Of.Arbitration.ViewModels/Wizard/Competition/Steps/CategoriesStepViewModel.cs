@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Localization;
@@ -9,13 +10,16 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
 public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionModel>
 {
+    private readonly IPopupService _popupService;
+
     [ObservableProperty]
     private ObservableCollection<CategoryModel> _categories = new();
 
     public override string Title => "Catégories";
 
-    public CategoriesStepViewModel(ResourceProvider resourceProvider) : base(resourceProvider)
+    public CategoriesStepViewModel(IPopupService popupService, ResourceProvider resourceProvider) : base(resourceProvider)
     {
+        _popupService = popupService;
         Categories.CollectionChanged += OnCategoriesCollectionChanged;
         Validate();
     }
@@ -30,12 +34,15 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     }
 
     [RelayCommand]
-    private void AddCategory(CategoryModel category)
+    private async Task AddCategory()
     {
-        if (category != null)
+        // On passe une action vide pour satisfaire la signature de la méthode
+        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(Shell.Current, null);
+
+        if (result != null && result.Result != null)
         {
-            category.Competition = Model!;
-            Categories.Add(category);
+            result.Result.Competition = Model!;
+            Categories.Add(result.Result);
         }
     }
 
@@ -53,14 +60,12 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     {
         if (category == null) return;
 
-        var newCompetitor = new CompetitorModel 
-        { 
+        var newCompetitor = new CompetitorModel
+        {
             Genre = category.Genre,
             BirthDate = DateTime.Now.AddYears(-20)
         };
-        
-        // On attache uniquement l'objet à la liste de navigation.
-        // EF Core gérera le CategoryId lors de la sauvegarde.
+
         category.Competitors.Add(newCompetitor);
 
         var navigationParameter = new Dictionary<string, object>
@@ -68,10 +73,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
             { "Competitor", newCompetitor }
         };
 
-        // Navigation MVVM pure via Shell
         await Shell.Current.GoToAsync("CompetitorPage", navigationParameter);
-        
-        // On rafraîchit l'UI au retour (si nécessaire)
         RefreshCategory(category);
     }
 
@@ -93,7 +95,6 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     {
         if (competitor != null)
         {
-            // On cherche la catégorie parente pour supprimer proprement
             foreach (var cat in Categories)
             {
                 if (cat.Competitors.Contains(competitor))
@@ -111,7 +112,6 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         var index = Categories.IndexOf(category);
         if (index != -1)
         {
-            // Forcer le rafraîchissement visuel du BindableLayout
             Categories[index] = null!;
             Categories[index] = category;
         }

@@ -165,4 +165,31 @@
   <data name="ADD_CATEGORY" xml:space="preserve">
     <value>[ADD CATEGORY]</value>
   </data>
+  <data name="COMPETITION_SETTINGS" xml:space="preserve">
+    <value>[COMPETITION SETTINGS]</value>
+  </data>
+  <data name="NEW_CATEGORY" xml:space="preserve">
+    <value>[NEW CATEGORY]</value>
+  </data>
+  <data name="STYLE" xml:space="preserve">
+    <value>[STYLE]</value>
+  </data>
+  <data name="ROUND_TYPE" xml:space="preserve">
+    <value>[ROUND TYPE]</value>
+  </data>
+  <data name="GENRE" xml:space="preserve">
+    <value>[GENRE]</value>
+  </data>
+  <data name="OLD" xml:space="preserve">
+    <value>[OLD]</value>
+  </data>
+  <data name="WEIGHT_MIN" xml:space="preserve">
+    <value>[WEIGHT MIN]</value>
+  </data>
+  <data name="WEIGHT_MAX" xml:space="preserve">
+    <value>[WEIGHT MAX]</value>
+  </data>
+  <data name="CLOSE_ACTION" xml:space="preserve">
+    <value>[CLOSE]</value>
+  </data>
 </root>

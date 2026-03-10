@@ -18,10 +18,12 @@
         <VerticalStackLayout Spacing="24" Padding="20">
             <!-- Header Section -->
             <VerticalStackLayout Spacing="4">
-                <Label Text="Configuration de la Compétition" 
-                       Style="{DynamicResource Headline}" 
-                       HorizontalOptions="Start"
-                       FontSize="24" />
+                <Label 
+                    Text="{Binding Resources.COMPETITION_SETTINGS}" 
+                    Style="{DynamicResource Headline}" 
+                    HorizontalOptions="Start"
+                    FontSize="24" 
+                />
             </VerticalStackLayout>
 
             <controls:Card>
@@ -52,20 +54,20 @@
                             </Border.Triggers>
                             <Grid ColumnDefinitions="Auto, *">
                                 <Label 
-                                Grid.Column="0"
-                                Text="{x:Static helpers:FontCustomIcons.COLOR_TROPHY}" 
-                                FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                VerticalOptions="Center" 
-                                Margin="0,0,10,0" 
-                            />
+                                    Grid.Column="0"
+                                    Text="{x:Static helpers:FontCustomIcons.COLOR_TROPHY}" 
+                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    VerticalOptions="Center" 
+                                    Margin="0,0,10,0" 
+                                />
                                 <Entry 
-                                Grid.Column="1"
-                                Text="{Binding Name, Mode=TwoWay, UpdateSourceEventName=TextChanged}" 
-                                Placeholder="{Binding Resources.PLACEHOLDER_COMPETITION_NAME}"
-                                PlaceholderColor="{DynamicResource Placeholder}"
-                                TextColor="{DynamicResource PrimaryTextColor}"
-                                VerticalOptions="Center" 
-                            />
+                                    Grid.Column="1"
+                                    Text="{Binding Name, Mode=TwoWay, UpdateSourceEventName=TextChanged}" 
+                                    Placeholder="{Binding Resources.PLACEHOLDER_COMPETITION_NAME}"
+                                    PlaceholderColor="{DynamicResource Placeholder}"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                    VerticalOptions="Center" 
+                                />
                             </Grid>
                         </Border>
                         <Label 
@@ -80,36 +82,36 @@
                     <VerticalStackLayout Spacing="5">
                         <!-- Date Field -->
                         <Label 
-                        Text="{Binding Resources.COMPETITION_DATE}" 
-                        FontAttributes="Bold" 
-                        FontSize="14" 
-                        Margin="4,0" 
-                        TextColor="{DynamicResource PrimaryTextColor}"
-                    />
+                            Text="{Binding Resources.COMPETITION_DATE}" 
+                            FontAttributes="Bold" 
+                            FontSize="14" 
+                            Margin="4,0" 
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                        />
                         <Border 
-                        x:Name="DateBorder"
-                        Stroke="{DynamicResource Valid}"
-                        StrokeThickness="1"
-                        BackgroundColor="{DynamicResource EntryBackgroundColor}"
-                        Padding="12,4"
-                    >
+                            x:Name="DateBorder"
+                            Stroke="{DynamicResource Valid}"
+                            StrokeThickness="1"
+                            BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                            Padding="12,4"
+                        >
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
                             </Border.StrokeShape>
                             <Grid ColumnDefinitions="Auto, *">
                                 <Label 
-                                Grid.Column="0"
-                                Text="{x:Static helpers:FontCustomIcons.COLOR_CALENDAR}" 
-                                FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                VerticalOptions="Center" 
-                                Margin="0,0,10,0" 
-                            />
+                                    Grid.Column="0"
+                                    Text="{x:Static helpers:FontCustomIcons.COLOR_CALENDAR}" 
+                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    VerticalOptions="Center" 
+                                    Margin="0,0,10,0" 
+                                />
                                 <DatePicker 
-                                Grid.Column="1"
-                                Date="{Binding Date, Mode=TwoWay}"
-                                TextColor="{DynamicResource PrimaryTextColor}"
-                                VerticalOptions="Center" 
-                            />
+                                    Grid.Column="1"
+                                    Date="{Binding Date, Mode=TwoWay}"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
+                                    VerticalOptions="Center" 
+                                />
                             </Grid>
                         </Border>
                     </VerticalStackLayout>

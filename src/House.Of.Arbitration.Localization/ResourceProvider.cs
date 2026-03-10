@@ -102,6 +102,51 @@ LocalizationResourceManager.Instance.GetValue(nameof(CATEGORY_LIST));
     /// </summary>
     public string ADD_CATEGORY =>
 LocalizationResourceManager.Instance.GetValue(nameof(ADD_CATEGORY));
+    /// <summary>
+    /// Gets the translated "COMPETITION_SETTINGS" string.
+    /// </summary>
+    public string COMPETITION_SETTINGS =>
+LocalizationResourceManager.Instance.GetValue(nameof(COMPETITION_SETTINGS));
+    /// <summary>
+    /// Gets the translated "NEW_CATEGORY" string.
+    /// </summary>
+    public string NEW_CATEGORY =>
+LocalizationResourceManager.Instance.GetValue(nameof(NEW_CATEGORY));
+    /// <summary>
+    /// Gets the translated "STYLE" string.
+    /// </summary>
+    public string STYLE =>
+LocalizationResourceManager.Instance.GetValue(nameof(STYLE));
+    /// <summary>
+    /// Gets the translated "ROUND_TYPE" string.
+    /// </summary>
+    public string ROUND_TYPE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ROUND_TYPE));
+    /// <summary>
+    /// Gets the translated "GENRE" string.
+    /// </summary>
+    public string GENRE =>
+LocalizationResourceManager.Instance.GetValue(nameof(GENRE));
+    /// <summary>
+    /// Gets the translated "OLD" string.
+    /// </summary>
+    public string OLD =>
+LocalizationResourceManager.Instance.GetValue(nameof(OLD));
+    /// <summary>
+    /// Gets the translated "WEIGHT_MIN" string.
+    /// </summary>
+    public string WEIGHT_MIN =>
+LocalizationResourceManager.Instance.GetValue(nameof(WEIGHT_MIN));
+    /// <summary>
+    /// Gets the translated "WEIGHT_MAX" string.
+    /// </summary>
+    public string WEIGHT_MAX =>
+LocalizationResourceManager.Instance.GetValue(nameof(WEIGHT_MAX));
+    /// <summary>
+    /// Gets the translated "CLOSE_ACTION" string.
+    /// </summary>
+    public string CLOSE_ACTION =>
+LocalizationResourceManager.Instance.GetValue(nameof(CLOSE_ACTION));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

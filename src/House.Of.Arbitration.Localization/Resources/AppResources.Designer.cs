@@ -97,6 +97,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [CLOSE].
+        /// </summary>
+        public static string CLOSE_ACTION {
+            get {
+                return ResourceManager.GetString("CLOSE_ACTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [COMPETITION DATE].
         /// </summary>
         public static string COMPETITION_DATE {
@@ -124,6 +133,24 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [COMPETITION SETTINGS].
+        /// </summary>
+        public static string COMPETITION_SETTINGS {
+            get {
+                return ResourceManager.GetString("COMPETITION_SETTINGS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [GENRE].
+        /// </summary>
+        public static string GENRE {
+            get {
+                return ResourceManager.GetString("GENRE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [MASTER].
         /// </summary>
         public static string MASTER {
@@ -138,6 +165,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string NAME_REQUIRED {
             get {
                 return ResourceManager.GetString("NAME_REQUIRED", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [NEW CATEGORY].
+        /// </summary>
+        public static string NEW_CATEGORY {
+            get {
+                return ResourceManager.GetString("NEW_CATEGORY", resourceCulture);
             }
         }
         
@@ -160,6 +196,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [OLD].
+        /// </summary>
+        public static string OLD {
+            get {
+                return ResourceManager.GetString("OLD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [PLACEHOLDER COMPETITION NAME].
         /// </summary>
         public static string PLACEHOLDER_COMPETITION_NAME {
@@ -174,6 +219,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string PREVIOUS {
             get {
                 return ResourceManager.GetString("PREVIOUS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ROUND TYPE].
+        /// </summary>
+        public static string ROUND_TYPE {
+            get {
+                return ResourceManager.GetString("ROUND_TYPE", resourceCulture);
             }
         }
         
@@ -196,11 +250,38 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [STYLE].
+        /// </summary>
+        public static string STYLE {
+            get {
+                return ResourceManager.GetString("STYLE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [VALIDATE].
         /// </summary>
         public static string VALIDATE_ACTION {
             get {
                 return ResourceManager.GetString("VALIDATE_ACTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [WEIGHT MAX].
+        /// </summary>
+        public static string WEIGHT_MAX {
+            get {
+                return ResourceManager.GetString("WEIGHT_MAX", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [WEIGHT MIN].
+        /// </summary>
+        public static string WEIGHT_MIN {
+            get {
+                return ResourceManager.GetString("WEIGHT_MIN", resourceCulture);
             }
         }
     }

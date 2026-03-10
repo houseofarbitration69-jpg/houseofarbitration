@@ -11,4 +11,7 @@ public static class FontCustomIcons
     public const string PLAY = "\uf004";
     public const string COLOR_TROPHY = "\uf005";
     public const string COLOR_CALENDAR = "\uf006";
+    public const string CLOSE_CIRCLE = "\uf007";
+    public const string CLOSE = "\uf008";
+    public const string CHECK = "\uf009";
 }
