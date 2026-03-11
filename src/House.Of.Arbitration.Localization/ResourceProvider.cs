@@ -232,6 +232,56 @@ LocalizationResourceManager.Instance.GetValue(nameof(ENUM_AGE_VETERANS));
     /// </summary>
     public string WEIGHT_UNIT =>
 LocalizationResourceManager.Instance.GetValue(nameof(WEIGHT_UNIT));
+    /// <summary>
+    /// Gets the translated "COMPETITORS" string.
+    /// </summary>
+    public string COMPETITORS =>
+LocalizationResourceManager.Instance.GetValue(nameof(COMPETITORS));
+    /// <summary>
+    /// Gets the translated "ADD_COMPETITOR" string.
+    /// </summary>
+    public string ADD_COMPETITOR =>
+LocalizationResourceManager.Instance.GetValue(nameof(ADD_COMPETITOR));
+    /// <summary>
+    /// Gets the translated "NO_COMPETITORS" string.
+    /// </summary>
+    public string NO_COMPETITORS =>
+LocalizationResourceManager.Instance.GetValue(nameof(NO_COMPETITORS));
+    /// <summary>
+    /// Gets the translated "COMPETITOR" string.
+    /// </summary>
+    public string COMPETITOR =>
+LocalizationResourceManager.Instance.GetValue(nameof(COMPETITOR));
+    /// <summary>
+    /// Gets the translated "FIRSTNAME" string.
+    /// </summary>
+    public string FIRSTNAME =>
+LocalizationResourceManager.Instance.GetValue(nameof(FIRSTNAME));
+    /// <summary>
+    /// Gets the translated "LASTNAME" string.
+    /// </summary>
+    public string LASTNAME =>
+LocalizationResourceManager.Instance.GetValue(nameof(LASTNAME));
+    /// <summary>
+    /// Gets the translated "CLUB" string.
+    /// </summary>
+    public string CLUB =>
+LocalizationResourceManager.Instance.GetValue(nameof(CLUB));
+    /// <summary>
+    /// Gets the translated "GRADE" string.
+    /// </summary>
+    public string GRADE =>
+LocalizationResourceManager.Instance.GetValue(nameof(GRADE));
+    /// <summary>
+    /// Gets the translated "BIRTHDATE" string.
+    /// </summary>
+    public string BIRTHDATE =>
+LocalizationResourceManager.Instance.GetValue(nameof(BIRTHDATE));
+    /// <summary>
+    /// Gets the translated "WEIGHT" string.
+    /// </summary>
+    public string WEIGHT =>
+LocalizationResourceManager.Instance.GetValue(nameof(WEIGHT));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

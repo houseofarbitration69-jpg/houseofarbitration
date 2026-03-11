@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:TypeArguments="vm:CompetitorsPageViewModel"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CompetitorsPage"
+    Shell.PresentationMode="ModalNotAnimated"
+    BackgroundColor="{DynamicResource PageBackgroundColor}">
+
+    <base:BasePage.Resources>
+        <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
+    </base:BasePage.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+            <VerticalStackLayout Grid.Column="0">
+                <Label 
+                    Text="{Binding Resources.COMPETITORS}" 
+                    Style="{DynamicResource Headline}" 
+                    FontSize="28" 
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
+                <Label 
+                    Text="{Binding Category, Converter={StaticResource CategoryToNameConverter}}"
+                    FontSize="14"
+                    TextColor="White"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
+            </VerticalStackLayout>
+
+            <controls:IconButton 
+                Grid.Column="1"
+                Text="{Binding Resources.ADD_COMPETITOR}"
+                ButtonBackgroundColor="LightGreen"
+                TextColor="Black"
+                Command="{Binding AddCompetitorCommand}"
+                VerticalOptions="Center"
+            >
+                <controls:IconButton.Icons>
+                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
+                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
+                </controls:IconButton.Icons>
+            </controls:IconButton>
+        </Grid>
+
+        <!-- Competitors List -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Competitors}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:CompetitorModel">
+                    <controls:Card CardPadding="15" CardColor="{DynamicResource SurfaceColor}">
+                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="15">
+                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                <Label Text="{Binding Club}" FontSize="13" TextColor="Gray" />
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.PEN}"
+                                    ButtonBackgroundColor="LightBlue"
+                                    IconColor="Black"
+                                    Command="{Binding x:DataType='vm:CompetitorsPopupViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPopupViewModel}}, Path=EditCompetitorCommand}"
+                                    CommandParameter="{Binding}"
+                                />
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                                    ButtonBackgroundColor="Red"
+                                    IconColor="White"
+                                    Command="{Binding x:DataType='vm:CompetitorsPopupViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPopupViewModel}}, Path=DeleteCompetitorCommand}"
+                                    CommandParameter="{Binding}"
+                                />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </controls:Card>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                    <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
+                    <Label Text="{Binding Resources.NO_COMPETITORS}" TextColor="Gray" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Actions -->
+        <Button Grid.Row="2" 
+                Text="{Binding Resources.CLOSE_ACTION}"
+                Style="{StaticResource Button}"
+                BackgroundColor="{DynamicResource Error}"
+                TextColor="White"
+                Command="{Binding CloseCommand}" />
+    </Grid>
+
+</base:BasePage>

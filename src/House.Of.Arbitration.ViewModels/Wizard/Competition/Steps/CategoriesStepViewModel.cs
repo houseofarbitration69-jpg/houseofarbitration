@@ -118,9 +118,15 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     }
 
     [RelayCommand]
-    private async Task ShowCompetitorsCommand(CategoryModel category)
+    private async Task ShowCompetitors(CategoryModel category)
     {
+        var queryAttributes = new Dictionary<string, object>
+        {
+            [nameof(CompetitorsPageViewModel.Category)] = category
+        };
 
+        await Shell.Current.GoToAsync("CompetitorsPage", queryAttributes);
+        RefreshCategory(category);
     }
 
     [RelayCommand]

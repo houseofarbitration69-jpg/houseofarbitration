@@ -243,4 +243,34 @@
   <data name="WEIGHT_UNIT" xml:space="preserve">
     <value>kg</value>
   </data>
+  <data name="COMPETITORS" xml:space="preserve">
+    <value>Compétiteurs</value>
+  </data>
+  <data name="ADD_COMPETITOR" xml:space="preserve">
+    <value>Ajouter un compétiteur</value>
+  </data>
+  <data name="NO_COMPETITORS" xml:space="preserve">
+    <value>Aucun compétiteur pour cette catégorie</value>
+  </data>
+  <data name="COMPETITOR" xml:space="preserve">
+    <value>Compétiteur</value>
+  </data>
+  <data name="FIRSTNAME" xml:space="preserve">
+    <value>Prénom</value>
+  </data>
+  <data name="LASTNAME" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="CLUB" xml:space="preserve">
+    <value>Club / École</value>
+  </data>
+  <data name="GRADE" xml:space="preserve">
+    <value>Grade</value>
+  </data>
+  <data name="BIRTHDATE" xml:space="preserve">
+    <value>Date de naissance</value>
+  </data>
+  <data name="WEIGHT" xml:space="preserve">
+    <value>Poids (kg)</value>
+  </data>
 </root>

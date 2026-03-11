@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mct:Popup 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CompetitorPopup"
+    x:DataType="vm:CompetitorPopupViewModel"
+    Color="Transparent"
+    Padding="0"
+>
+    <Border 
+        VerticalOptions="Center"
+        BackgroundColor="{DynamicResource PageBackgroundColor}"
+        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+        Padding="15"
+        MaximumWidthRequest="400"
+        WidthRequest="350"
+    >
+        <Grid RowDefinitions="*,Auto">
+            <ScrollView>
+                <VerticalStackLayout Spacing="15">
+                    <Label 
+                Text="{Binding Resources.COMPETITOR}" 
+                Style="{DynamicResource Headline}" 
+                FontSize="20" 
+            />
+
+                    <!-- FirstName & LastName -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                           Text="{Binding Resources.LASTNAME}"
+                            TextColor="LightGray"
+                        />
+                        <Border
+                            Stroke="LightGray"
+                            StrokeThickness="0.2"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}" />
+                            </Border.StrokeShape>
+                            <Entry
+                                Text="{Binding Competitor.LastName}"
+                                TextColor="White"
+                                PlaceholderColor="Gray"
+                                Placeholder="{Binding Resources.LASTNAME}"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                    Text="{Binding Resources.FIRSTNAME}"
+                    TextColor="LightGray"
+                />
+                        <Border
+                    Stroke="LightGray"
+                    StrokeThickness="0.2"
+                >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}" />
+                            </Border.StrokeShape>
+                            <Entry
+                        Text="{Binding Competitor.FirstName}"
+                        TextColor="White"
+                        PlaceholderColor="Gray"
+                        Placeholder="{Binding Resources.FIRSTNAME}"
+                    />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Genre -->
+                    <Picker 
+                        Title="{Binding Resources.GENRE}" 
+                        ItemsSource="{Binding Genres}"
+                        SelectedItem="{Binding SelectedGenre}"
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        TextColor="White"
+                    />
+
+                    <!-- Club & Grade -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                           Text="{Binding Resources.CLUB}"
+                            TextColor="LightGray"
+                        />
+                        <Border
+                            Stroke="LightGray"
+                            StrokeThickness="0.2"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}" />
+                            </Border.StrokeShape>
+                            <Entry
+                                Text="{Binding Competitor.Club}"
+                                TextColor="White"
+                                PlaceholderColor="Gray"
+                                Placeholder="{Binding Resources.CLUB}"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                           Text="{Binding Resources.GRADE}"
+                            TextColor="LightGray"
+                        />
+                        <Border
+                            Stroke="LightGray"
+                            StrokeThickness="0.2"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}" />
+                            </Border.StrokeShape>
+                            <Entry
+                                Text="{Binding Competitor.Grade}"
+                                TextColor="White"
+                                PlaceholderColor="Gray"
+                                Placeholder="{Binding Resources.GRADE}"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- BirthDate & Weight -->
+                    <DatePicker Date="{Binding Competitor.BirthDate}" Format="dd/MM/yyyy" TextColor="White" />
+
+                    <VerticalStackLayout Spacing="8">
+                        <Label 
+                           Text="{Binding Resources.WEIGHT}"
+                            TextColor="LightGray"
+                        />
+                        <Border
+                            Stroke="LightGray"
+                            StrokeThickness="0.2"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}" />
+                            </Border.StrokeShape>
+                            <Entry
+                                Text="{Binding Competitor.CurrentWeight}"
+                                TextColor="White"
+                                PlaceholderColor="Gray"
+                                Placeholder="{Binding Resources.WEIGHT}"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- Actions -->
+            <Grid Grid.Row="1" ColumnDefinitions="*, *" ColumnSpacing="15">
+                <controls:IconButton
+                    Grid.Column="0" 
+                    Text="{Binding Resources.CLOSE_ACTION}"
+                    ButtonBackgroundColor="{DynamicResource Error}"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
+                    IconColor="{DynamicResource PrimaryTextColor}"
+                    Command="{Binding CloseCommand}"
+                />
+
+                <controls:IconButton
+                    Grid.Column="1"
+                    Text="{Binding Resources.VALIDATE_ACTION}"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    ButtonBackgroundColor="{DynamicResource Valid}"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.CHECK}"
+                    IconColor="{DynamicResource PrimaryTextColor}"
+                    Command="{Binding ValidateCommand}"
+                />
+            </Grid>
+        </Grid>
+    </Border>
+</mct:Popup>

@@ -20,6 +20,6 @@ public partial class AppShell : Shell
 
         Routing.RegisterRoute("CompetitionWizard", typeof(WizardPage));
         Routing.RegisterRoute("Competitions", typeof(CompetitionsPage));
-        Routing.RegisterRoute("CompetitorPage", typeof(CompetitorPage));
+        Routing.RegisterRoute("CompetitorsPage", typeof(CompetitorsPage));
     }
 }

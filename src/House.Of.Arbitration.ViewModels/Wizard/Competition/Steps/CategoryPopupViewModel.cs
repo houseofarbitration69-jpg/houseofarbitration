@@ -105,10 +105,10 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         AgeRanges = LocalizeEnum<AgeRange>("ENUM_AGE_");
 
         // Valeurs par défaut
-        SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == CategoryType.Sanda);
-        SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == RoundType.Elimination);
-        SelectedGenre = Genres.FirstOrDefault(x => x.Value == Genre.Men);
-        SelectedAgeRange = AgeRanges.FirstOrDefault(x => x.Value == AgeRange.Seniors);
+        SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == CategoryType.None);
+        SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == RoundType.None);
+        SelectedGenre = Genres.FirstOrDefault(x => x.Value == Genre.None);
+        SelectedAgeRange = AgeRanges.FirstOrDefault(x => x.Value == AgeRange.None);
     }
     #endregion
 

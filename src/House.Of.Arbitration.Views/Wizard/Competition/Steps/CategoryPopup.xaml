@@ -7,11 +7,19 @@
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoryPopup"
     x:DataType="vm:CategoryPopupViewModel"
     Color="Transparent"
     Padding="0"
 >
+    <ContentView.Resources>
+        <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
+        <converters:RoundTypeToBoolConverter x:Key="RoundTypeToBoolConverter" />
+        <converters:GenreToBoolConverter x:Key="GenreToBoolConverter" />
+        <converters:AgeRangeToBoolConverter x:Key="AgeRangeToBoolConverter" />
+    </ContentView.Resources>
+
     <Border 
         VerticalOptions="Center"
         BackgroundColor="{DynamicResource PageBackgroundColor}"
@@ -28,24 +36,75 @@
             />
 
             <!-- Style -->
-            <Picker 
-                Title="{Binding Resources.STYLE}" 
-                ItemsSource="{Binding CategoryTypes}"
-                SelectedItem="{Binding SelectedType}"
-                ItemDisplayBinding="{Binding DisplayName}"
-            />
-            
-            <!-- Round (Conditional) -->
-            <VerticalStackLayout 
-                Spacing="8" 
-                IsVisible="False"
-            >
-                <Picker 
-                    Title="{Binding Resources.ROUND_TYPE}" 
-                    ItemsSource="{Binding RoundTypes}"
-                    SelectedItem="{Binding SelectedRoundType}"
-                    ItemDisplayBinding="{Binding DisplayName}"
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="{Binding Resources.STYLE}" 
+                    FontAttributes="Bold" 
+                    FontSize="14" 
+                    Margin="4,0" 
+                    TextColor="LightGray"
                 />
+                <Border 
+                    Stroke="{DynamicResource Valid}"
+                    StrokeThickness="1"
+                    BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                    MinimumHeightRequest="30"
+                    Margin="0"
+                    Padding="0"
+                >
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                    </Border.StrokeShape>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding SelectedType.Value, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                            <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Picker 
+                        ItemsSource="{Binding CategoryTypes}"
+                        SelectedItem="{Binding SelectedType}"
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        TextColor="Black"
+                        BackgroundColor="White"
+                        MinimumHeightRequest="30"
+                    />
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- Round (Conditional) -->
+            <VerticalStackLayout Spacing="5" IsVisible="False">
+                <Label 
+                    Text="{Binding Resources.ROUND_TYPE}" 
+                    FontAttributes="Bold" 
+                    FontSize="14" 
+                    Margin="4,0" 
+                    TextColor="LightGray"
+                />
+                <Border 
+                    Stroke="{DynamicResource Valid}"
+                    StrokeThickness="1"
+                    BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                    MinimumHeightRequest="30"
+                    Margin="0"
+                    Padding="0"
+                >
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                    </Border.StrokeShape>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding SelectedRoundType.Value, Converter={StaticResource RoundTypeToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                            <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Picker 
+                        ItemsSource="{Binding RoundTypes}"
+                        SelectedItem="{Binding SelectedRoundType}"
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        TextColor="Black"
+                        BackgroundColor="White"
+                        MinimumHeightRequest="30"
+                    />
+                </Border>
                 <VerticalStackLayout.Triggers>
                     <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.Sanda}">
                         <Setter Property="IsVisible" Value="True" />
@@ -57,59 +116,136 @@
             </VerticalStackLayout>
 
             <!-- Genre & Age -->
-            <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
-                <Picker 
-                    Grid.Column="0" 
-                    Title="{Binding Resources.GENRE}" 
-                    ItemsSource="{Binding Genres}"
-                    SelectedItem="{Binding SelectedGenre}"
-                    ItemDisplayBinding="{Binding DisplayName}"
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="{Binding Resources.GENRE}" 
+                    FontAttributes="Bold" 
+                    FontSize="14" 
+                    Margin="4,0" 
+                    TextColor="LightGray"
                 />
-                <Picker 
-                    Grid.Column="1" 
-                    Title="{Binding Resources.OLD}" 
-                    ItemsSource="{Binding AgeRanges}"
-                    SelectedItem="{Binding SelectedAgeRange}"
-                    ItemDisplayBinding="{Binding DisplayName}"
+                <Border 
+                    Stroke="{DynamicResource Valid}"
+                    StrokeThickness="1"
+                    BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                    MinimumHeightRequest="30"
+                    Margin="0"
+                    Padding="0"
+                >
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                    </Border.StrokeShape>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding SelectedGenre.Value, Converter={StaticResource GenreToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                            <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Picker 
+                        ItemsSource="{Binding Genres}"
+                        SelectedItem="{Binding SelectedGenre}"
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        TextColor="Black"
+                        BackgroundColor="White"
+                        MinimumHeightRequest="30"
+                    />
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="5">
+                <Label 
+                    Text="{Binding Resources.OLD}" 
+                    FontAttributes="Bold" 
+                    FontSize="14" 
+                    Margin="4,0" 
+                    TextColor="LightGray"
                 />
-            </Grid>
+                <Border 
+                    Stroke="{DynamicResource Valid}"
+                    StrokeThickness="1"
+                    BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                    MinimumHeightRequest="30"
+                    Margin="0"
+                    Padding="0"
+                >
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                    </Border.StrokeShape>
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding SelectedAgeRange.Value, Converter={StaticResource AgeRangeToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                            <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                        </DataTrigger>
+                    </Border.Triggers>
+                    <Picker 
+                        ItemsSource="{Binding AgeRanges}"
+                        SelectedItem="{Binding SelectedAgeRange}"
+                        ItemDisplayBinding="{Binding DisplayName}"
+                        TextColor="Black"
+                        BackgroundColor="White"
+                        MinimumHeightRequest="30"
+                    />
+                </Border>
+            </VerticalStackLayout>
 
             <!-- Weight Min & Weight Max -->
             <Grid ColumnDefinitions="*, *" ColumnSpacing="15" IsVisible="False">
-                <VerticalStackLayout Grid.Column="0" Spacing="8">
+                <VerticalStackLayout Spacing="5">
                     <Label 
-                        Text="{Binding Resources.WEIGHT_MIN}"
+                        Text="{Binding Resources.WEIGHT_MIN}" 
+                        FontAttributes="Bold" 
+                        FontSize="14" 
+                        Margin="4,0" 
                         TextColor="LightGray"
                     />
-                    <Border
-                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                    <Border 
                         Stroke="LightGray"
-                        StrokeThickness="0.2"
+                        StrokeThickness="1"
+                        BackgroundColor="White"
+                        Padding="0"
+                        Margin="0"
                     >
-                        <Entry
-                            Text="{Binding WeightMin}"
-                            TextColor="White"
-                            PlaceholderColor="Gray"
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                        </Border.StrokeShape>
+                        <Entry 
+                            Grid.Column="1"
+                            Margin="0"
+                            Text="{Binding WeightMin}" 
                             Placeholder="{Binding Resources.WEIGHT_MIN}"
-                            Keyboard="Numeric"
+                            PlaceholderColor="Gray"
+                            TextColor="Black"
+                            VerticalOptions="Center" 
+                            MinimumHeightRequest="30"
                         />
                     </Border>
                 </VerticalStackLayout>
-                <VerticalStackLayout Grid.Column="1" Spacing="8">
+
+                <VerticalStackLayout Grid.Column="1" Spacing="5">
                     <Label 
-                        Text="{Binding Resources.WEIGHT_MAX}"
+                        Text="{Binding Resources.WEIGHT_MAX}" 
+                        FontAttributes="Bold" 
+                        FontSize="14" 
+                        Margin="4,0" 
                         TextColor="LightGray"
                     />
-                    <Border
-                        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
+                    <Border 
                         Stroke="LightGray"
-                        StrokeThickness="0.2"
+                        StrokeThickness="1"
+                        BackgroundColor="White"
+                        Padding="0"
+                        Margin="0"
                     >
-                        <Entry                        
-                            Text="{Binding WeightMax}"
-                            PlaceholderColor="Gray"
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                        </Border.StrokeShape>
+                        <Entry 
+                            Grid.Column="1"
+                            Margin="0"
+                            Text="{Binding WeightMax}" 
                             Placeholder="{Binding Resources.WEIGHT_MAX}"
-                            Keyboard="Numeric"
+                            PlaceholderColor="Gray"
+                            TextColor="Black"
+                            VerticalOptions="Center" 
+                            MinimumHeightRequest="30"
                         />
                     </Border>
                 </VerticalStackLayout>

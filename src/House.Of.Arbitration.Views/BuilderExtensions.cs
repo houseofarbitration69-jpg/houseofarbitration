@@ -20,9 +20,10 @@ public static class BuilderExtensions
         builder.Services.AddTransient<MasterPage>();
         builder.Services.AddTransient<SlavePage>();
         builder.Services.AddTransient<CompetitionsPage>();
-        builder.Services.AddTransient<CompetitorPage>();
-
+        builder.Services.AddTransient<CompetitorsPage>();
+       
         builder.Services.AddTransientPopup<CategoryPopup, CategoryPopupViewModel>();
+        builder.Services.AddTransientPopup<CompetitorPopup, CompetitorPopupViewModel>();
         return builder;
     }
 }

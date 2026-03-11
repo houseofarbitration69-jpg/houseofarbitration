@@ -20,5 +20,6 @@
     <Color x:Key="PageBackgroundColor">Gray</Color>
     <Color x:Key="EntryBackgroundColor">LightGray</Color>
     <x:Int32 x:Key="ButtonCornerRadius">20</x:Int32>
+    <x:Int32 x:Key="EntryCornerRadius">5</x:Int32>
 
 </ResourceDictionary>

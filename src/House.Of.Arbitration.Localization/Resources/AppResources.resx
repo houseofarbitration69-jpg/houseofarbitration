@@ -243,4 +243,34 @@
   <data name="WEIGHT_UNIT" xml:space="preserve">
     <value>[WEIGHT UNIT]</value>
   </data>
+  <data name="COMPETITORS" xml:space="preserve">
+    <value>[COMPETITORS]</value>
+  </data>
+  <data name="ADD_COMPETITOR" xml:space="preserve">
+    <value>[ADD COMPETITOR]</value>
+  </data>
+  <data name="NO_COMPETITORS" xml:space="preserve">
+    <value>[NO COMPETITORS]</value>
+  </data>
+  <data name="COMPETITOR" xml:space="preserve">
+    <value>[COMPETITOR]</value>
+  </data>
+  <data name="FIRSTNAME" xml:space="preserve">
+    <value>[FIRST NAME]</value>
+  </data>
+  <data name="LASTNAME" xml:space="preserve">
+    <value>[LAST NAME]</value>
+  </data>
+  <data name="CLUB" xml:space="preserve">
+    <value>[CLUB]</value>
+  </data>
+  <data name="GRADE" xml:space="preserve">
+    <value>[GRADE]</value>
+  </data>
+  <data name="BIRTHDATE" xml:space="preserve">
+    <value>[BIRTH DATE]</value>
+  </data>
+  <data name="WEIGHT" xml:space="preserve">
+    <value>[WEIGHT]</value>
+  </data>
 </root>

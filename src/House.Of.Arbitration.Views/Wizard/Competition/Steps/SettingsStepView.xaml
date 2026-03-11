@@ -45,14 +45,14 @@
                             Padding="12,4"
                         >
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                             </Border.StrokeShape>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
                                     <Setter Property="Stroke" Value="{DynamicResource Error}" />
                                 </DataTrigger>
                             </Border.Triggers>
-                            <Grid ColumnDefinitions="Auto, *">
+                            <Grid RowDefinitions="35" ColumnDefinitions="Auto, *">
                                 <Label 
                                     Grid.Column="0"
                                     Text="{x:Static helpers:FontCustomIcons.COLOR_TROPHY}" 
@@ -67,6 +67,7 @@
                                     PlaceholderColor="{DynamicResource Placeholder}"
                                     TextColor="{DynamicResource PrimaryTextColor}"
                                     VerticalOptions="Center" 
+                                    MinimumHeightRequest="35"
                                 />
                             </Grid>
                         </Border>
@@ -96,7 +97,7 @@
                             Padding="12,4"
                         >
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                             </Border.StrokeShape>
                             <Grid ColumnDefinitions="Auto, *">
                                 <Label 
@@ -111,6 +112,7 @@
                                     Date="{Binding Date, Mode=TwoWay}"
                                     TextColor="{DynamicResource PrimaryTextColor}"
                                     VerticalOptions="Center" 
+                                    MinimumHeightRequest="35"
                                 />
                             </Grid>
                         </Border>
