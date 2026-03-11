@@ -14,4 +14,5 @@ public static class FontCustomIcons
     public const string CLOSE_CIRCLE = "\uf007";
     public const string CLOSE = "\uf008";
     public const string CHECK = "\uf009";
+    public const string DOGI = "\uf00A";
 }

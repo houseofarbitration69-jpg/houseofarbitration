@@ -1,29 +1,44 @@
+#region Imports
 using CommunityToolkit.Maui;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+#endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
 public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionModel>
 {
+    #region Services
     private readonly IPopupService _popupService;
+    #endregion
 
-    [ObservableProperty]
+    #region Attributs
     private ObservableCollection<CategoryModel> _categories = new();
+    #endregion
 
+    #region Properties
     public override string Title => "Catégories";
 
+    public ObservableCollection<CategoryModel> Categories
+    {
+        get => _categories;
+        set => SetProperty(ref _categories, value);
+    }
+    #endregion
+
+    #region Constructors
     public CategoriesStepViewModel(IPopupService popupService, ResourceProvider resourceProvider) : base(resourceProvider)
     {
         _popupService = popupService;
         Categories.CollectionChanged += OnCategoriesCollectionChanged;
         Validate();
     }
+    #endregion
 
+    #region Private Methods
     private void OnCategoriesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (Model != null)
@@ -33,6 +48,27 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         Validate();
     }
 
+    private void RefreshCategory(CategoryModel category)
+    {
+        var index = Categories.IndexOf(category);
+        if (index != -1)
+        {
+            Categories[index] = null!;
+            Categories[index] = category;
+        }
+    }
+
+    private void Validate()
+    {
+        IsValid = Categories != null && Categories.Count > 0;
+    }
+    #endregion
+
+    #region Override Methods
+
+    #endregion
+
+    #region Commands
     [RelayCommand]
     private async Task AddCategory()
     {
@@ -47,12 +83,44 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     }
 
     [RelayCommand]
-    private void RemoveCategory(CategoryModel category)
+    private async Task EditCategory(CategoryModel category)
+    {
+        var queryAttributes = new Dictionary<string, object>
+        {
+            [nameof(CategoryPopupViewModel.Category)] = category
+        };
+
+        // On passe une action vide pour satisfaire la signature de la méthode
+        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(Shell.Current, options: PopupOptions.Empty, shellParameters: queryAttributes);
+
+        if (result != null && result.Result != null)
+        {
+            result.Result.Competition = Model!;
+            var cat = Categories.FirstOrDefault(c => c.Id == result.Result.Id);
+            if (cat != null)
+            {
+                var index = Categories.IndexOf(cat);
+                if (index >= 0)
+                {
+                    Categories[index] = result.Result;
+                }
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void DeleteCategory(CategoryModel category)
     {
         if (category != null && Categories.Contains(category))
         {
             Categories.Remove(category);
         }
+    }
+
+    [RelayCommand]
+    private async Task ShowCompetitorsCommand(CategoryModel category)
+    {
+
     }
 
     [RelayCommand]
@@ -91,7 +159,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     }
 
     [RelayCommand]
-    private void RemoveCompetitor(CompetitorModel competitor)
+    private void DeleteCompetitor(CompetitorModel competitor)
     {
         if (competitor != null)
         {
@@ -106,17 +174,9 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
             }
         }
     }
+    #endregion
 
-    private void RefreshCategory(CategoryModel category)
-    {
-        var index = Categories.IndexOf(category);
-        if (index != -1)
-        {
-            Categories[index] = null!;
-            Categories[index] = category;
-        }
-    }
-
+    #region Override Methods
     protected override void OnModelUpdated(CompetitionModel value)
     {
         if (value != null)
@@ -127,9 +187,5 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
             Validate();
         }
     }
-
-    private void Validate()
-    {
-        IsValid = Categories != null && Categories.Count > 0;
-    }
+    #endregion
 }

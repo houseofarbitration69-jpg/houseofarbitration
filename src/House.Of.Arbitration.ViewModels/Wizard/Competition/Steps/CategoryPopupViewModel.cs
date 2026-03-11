@@ -1,22 +1,24 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using House.Of.Arbitration.Models;
-using House.Of.Arbitration.ViewModels.Core;
-using House.Of.Arbitration.Localization;
-using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
+#region Imports
 using CommunityToolkit.Maui;
+using CommunityToolkit.Mvvm.Input;
+using House.Of.Arbitration.Localization;
+using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Models.Helpers;
+using House.Of.Arbitration.ViewModels.Core;
+using Microsoft.Extensions.Logging;
+#endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
-public partial class CategoryPopupViewModel : BaseViewModel
+public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
     private readonly IPopupService _popupService;
     #endregion
 
     #region Attributs
+    private CategoryModel? _category;
+
     private LocalizedEnum<CategoryType>? _selectedType;
     private LocalizedEnum<RoundType>? _selectedRoundType;
     private LocalizedEnum<Genre>? _selectedGenre;
@@ -26,6 +28,25 @@ public partial class CategoryPopupViewModel : BaseViewModel
     #endregion
 
     #region Properties    
+    public CategoryModel? Category
+    {
+        get => _category;
+        set
+        {
+            SetProperty(ref _category, value);
+
+            if (value != null)
+            {
+                SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == value.Type);
+                SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == value.RoundType);
+                SelectedGenre = Genres.FirstOrDefault(x => x.Value == value.Genre);
+                SelectedAgeRange = AgeRanges.FirstOrDefault(x => x.Value == value.AgeRange);
+                WeightMin = value.WeightMin;
+                WeightMax = value.WeightMax;
+            }
+        }
+    }
+
     public LocalizedEnum<CategoryType>? SelectedType
     {
         get => _selectedType;
@@ -61,9 +82,13 @@ public partial class CategoryPopupViewModel : BaseViewModel
         get => _weightMax;
         set => SetProperty(ref _weightMax, value);
     }
+
     public List<LocalizedEnum<CategoryType>> CategoryTypes { get; }
+
     public List<LocalizedEnum<RoundType>> RoundTypes { get; }
+
     public List<LocalizedEnum<Genre>> Genres { get; }
+
     public List<LocalizedEnum<AgeRange>> AgeRanges { get; }
     #endregion
 
@@ -87,6 +112,16 @@ public partial class CategoryPopupViewModel : BaseViewModel
     }
     #endregion
 
+    #region Implement IQueryAttributable
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.ContainsKey(nameof(CategoryPopupViewModel.Category)))
+        {
+            Category = (CategoryModel?)query[nameof(CategoryPopupViewModel.Category)];
+        }
+    }
+    #endregion
+
     #region Private Methods
     private List<LocalizedEnum<T>> LocalizeEnum<T>(string prefix) where T : Enum
     {
@@ -100,6 +135,7 @@ public partial class CategoryPopupViewModel : BaseViewModel
     {
         return new CategoryModel
         {
+            Id = Category?.Id ?? 0,
             Type = SelectedType?.Value ?? CategoryType.None,
             RoundType = SelectedRoundType?.Value ?? RoundType.None,
             Genre = SelectedGenre?.Value ?? Genre.None,

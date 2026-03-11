@@ -24,7 +24,15 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
     public T Model
     {
         get => _model;
-        set => SetProperty(ref _model, value);
+        set
+        {
+            if(_model != value)
+            {
+                OnModelChanged(value);
+            }
+
+            SetProperty(ref _model, value);
+        }
     }
 
     /// <summary>

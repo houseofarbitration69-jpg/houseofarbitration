@@ -51,7 +51,42 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:CategoryModel">
                             <controls:Card CardPadding="15" CardColor="White">
-                                <Label Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" TextColor="Black"/>
+                                <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
+                                    <Label 
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
+                                        TextColor="Black"
+                                        VerticalOptions="Center"
+                                    />
+
+                                    <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
+                                        <controls:IconButton
+                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                            Icon="{x:Static helpers:FontCustomIcons.PEN}"
+                                            ButtonBackgroundColor="LightBlue"
+                                            IconColor="Black"
+                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=EditCategoryCommand}"
+                                            CommandParameter="{Binding}"
+                                        />
+                                        <controls:IconButton
+                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                            Icon="{x:Static helpers:FontCustomIcons.DOGI}"
+                                            ButtonBackgroundColor="LightGreen"
+                                            IconColor="Black"
+                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=ShowCompetitorsCommand}"
+                                            CommandParameter="{Binding}"
+                                        />
+                                        <controls:IconButton
+                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                            Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                                            ButtonBackgroundColor="Red"
+                                            IconColor="White"
+                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=DeleteCategoryCommand}"
+                                            CommandParameter="{Binding}"
+                                        />
+                                    </HorizontalStackLayout>
+                                </Grid>
                             </controls:Card>
                             <!--<Border StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
                                     Stroke="{DynamicResource BorderColor}"
