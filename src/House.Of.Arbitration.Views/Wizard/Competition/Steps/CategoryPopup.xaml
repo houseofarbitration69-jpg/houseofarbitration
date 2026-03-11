@@ -9,6 +9,7 @@
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoryPopup"
     x:DataType="vm:CategoryPopupViewModel"
+    Color="Transparent"
     Padding="0"
 >
     <Border 
@@ -30,7 +31,8 @@
             <Picker 
                 Title="{Binding Resources.STYLE}" 
                 ItemsSource="{Binding CategoryTypes}"
-                SelectedItem="{Binding SelectedType}" 
+                SelectedItem="{Binding SelectedType}"
+                ItemDisplayBinding="{Binding DisplayName}"
             />
             
             <!-- Round (Conditional) -->
@@ -41,13 +43,14 @@
                 <Picker 
                     Title="{Binding Resources.ROUND_TYPE}" 
                     ItemsSource="{Binding RoundTypes}"
-                    SelectedItem="{Binding SelectedRoundType}" 
+                    SelectedItem="{Binding SelectedRoundType}"
+                    ItemDisplayBinding="{Binding DisplayName}"
                 />
                 <VerticalStackLayout.Triggers>
-                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType}" Value="{x:Static models:CategoryType.Sanda}">
+                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.Sanda}">
                         <Setter Property="IsVisible" Value="True" />
                     </DataTrigger>
-                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType}" Value="{x:Static models:CategoryType.SandaLight}">
+                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.SandaLight}">
                         <Setter Property="IsVisible" Value="True" />
                     </DataTrigger>
                 </VerticalStackLayout.Triggers>
@@ -59,13 +62,15 @@
                     Grid.Column="0" 
                     Title="{Binding Resources.GENRE}" 
                     ItemsSource="{Binding Genres}"
-                    SelectedItem="{Binding SelectedGenre}" 
+                    SelectedItem="{Binding SelectedGenre}"
+                    ItemDisplayBinding="{Binding DisplayName}"
                 />
                 <Picker 
                     Grid.Column="1" 
                     Title="{Binding Resources.OLD}" 
                     ItemsSource="{Binding AgeRanges}"
-                    SelectedItem="{Binding SelectedAgeRange}" 
+                    SelectedItem="{Binding SelectedAgeRange}"
+                    ItemDisplayBinding="{Binding DisplayName}"
                 />
             </Grid>
 
@@ -109,10 +114,10 @@
                     </Border>
                 </VerticalStackLayout>
                 <Grid.Triggers>
-                    <DataTrigger TargetType="Grid" Binding="{Binding SelectedType}" Value="{x:Static models:CategoryType.Sanda}">
+                    <DataTrigger TargetType="Grid" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.Sanda}">
                         <Setter Property="IsVisible" Value="True" />
                     </DataTrigger>
-                    <DataTrigger TargetType="Grid" Binding="{Binding SelectedType}" Value="{x:Static models:CategoryType.SandaLight}">
+                    <DataTrigger TargetType="Grid" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.SandaLight}">
                         <Setter Property="IsVisible" Value="True" />
                     </DataTrigger>
                 </Grid.Triggers>

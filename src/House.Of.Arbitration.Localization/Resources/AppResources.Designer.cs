@@ -142,6 +142,150 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM AGE CADETS].
+        /// </summary>
+        public static string ENUM_AGE_CADETS {
+            get {
+                return ResourceManager.GetString("ENUM_AGE_CADETS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM AGE ESPOIRS].
+        /// </summary>
+        public static string ENUM_AGE_ESPOIRS {
+            get {
+                return ResourceManager.GetString("ENUM_AGE_ESPOIRS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM AGE JUNIORS].
+        /// </summary>
+        public static string ENUM_AGE_JUNIORS {
+            get {
+                return ResourceManager.GetString("ENUM_AGE_JUNIORS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM AGE NONE].
+        /// </summary>
+        public static string ENUM_AGE_NONE {
+            get {
+                return ResourceManager.GetString("ENUM_AGE_NONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM AGE SENIORS].
+        /// </summary>
+        public static string ENUM_AGE_SENIORS {
+            get {
+                return ResourceManager.GetString("ENUM_AGE_SENIORS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM AGE VETERANS].
+        /// </summary>
+        public static string ENUM_AGE_VETERANS {
+            get {
+                return ResourceManager.GetString("ENUM_AGE_VETERANS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM CATEGORY NONE].
+        /// </summary>
+        public static string ENUM_CATEGORY_NONE {
+            get {
+                return ResourceManager.GetString("ENUM_CATEGORY_NONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM CATEGORY SANDA].
+        /// </summary>
+        public static string ENUM_CATEGORY_SANDA {
+            get {
+                return ResourceManager.GetString("ENUM_CATEGORY_SANDA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM CATEGORY SANDA LIGHT].
+        /// </summary>
+        public static string ENUM_CATEGORY_SANDALIGHT {
+            get {
+                return ResourceManager.GetString("ENUM_CATEGORY_SANDALIGHT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM CATEGORY TAOLU].
+        /// </summary>
+        public static string ENUM_CATEGORY_TAOLU {
+            get {
+                return ResourceManager.GetString("ENUM_CATEGORY_TAOLU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM GENRE MEN].
+        /// </summary>
+        public static string ENUM_GENRE_MEN {
+            get {
+                return ResourceManager.GetString("ENUM_GENRE_MEN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM GENRE NONE].
+        /// </summary>
+        public static string ENUM_GENRE_NONE {
+            get {
+                return ResourceManager.GetString("ENUM_GENRE_NONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM GENRE WOMEN].
+        /// </summary>
+        public static string ENUM_GENRE_WOMEN {
+            get {
+                return ResourceManager.GetString("ENUM_GENRE_WOMEN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM ROUND ELIMINATION].
+        /// </summary>
+        public static string ENUM_ROUND_ELIMINATION {
+            get {
+                return ResourceManager.GetString("ENUM_ROUND_ELIMINATION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM ROUND GROUP].
+        /// </summary>
+        public static string ENUM_ROUND_GROUP {
+            get {
+                return ResourceManager.GetString("ENUM_ROUND_GROUP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM ROUND NONE].
+        /// </summary>
+        public static string ENUM_ROUND_NONE {
+            get {
+                return ResourceManager.GetString("ENUM_ROUND_NONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [GENRE].
         /// </summary>
         public static string GENRE {
@@ -282,6 +426,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string WEIGHT_MIN {
             get {
                 return ResourceManager.GetString("WEIGHT_MIN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [WEIGHT UNIT].
+        /// </summary>
+        public static string WEIGHT_UNIT {
+            get {
+                return ResourceManager.GetString("WEIGHT_UNIT", resourceCulture);
             }
         }
     }

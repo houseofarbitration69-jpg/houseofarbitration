@@ -147,6 +147,91 @@ LocalizationResourceManager.Instance.GetValue(nameof(WEIGHT_MAX));
     /// </summary>
     public string CLOSE_ACTION =>
 LocalizationResourceManager.Instance.GetValue(nameof(CLOSE_ACTION));
+    /// <summary>
+    /// Gets the translated "ENUM_CATEGORY_SANDA" string.
+    /// </summary>
+    public string ENUM_CATEGORY_SANDA =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_SANDA));
+    /// <summary>
+    /// Gets the translated "ENUM_CATEGORY_SANDALIGHT" string.
+    /// </summary>
+    public string ENUM_CATEGORY_SANDALIGHT =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_SANDALIGHT));
+    /// <summary>
+    /// Gets the translated "ENUM_CATEGORY_NONE" string.
+    /// </summary>
+    public string ENUM_CATEGORY_NONE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_NONE));
+    /// <summary>
+    /// Gets the translated "ENUM_CATEGORY_TAOLU" string.
+    /// </summary>
+    public string ENUM_CATEGORY_TAOLU =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_TAOLU));
+    /// <summary>
+    /// Gets the translated "ENUM_ROUND_ELIMINATION" string.
+    /// </summary>
+    public string ENUM_ROUND_ELIMINATION =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_ELIMINATION));
+    /// <summary>
+    /// Gets the translated "ENUM_ROUND_NONE" string.
+    /// </summary>
+    public string ENUM_ROUND_NONE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_NONE));
+    /// <summary>
+    /// Gets the translated "ENUM_ROUND_GROUP" string.
+    /// </summary>
+    public string ENUM_ROUND_GROUP =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_GROUP));
+    /// <summary>
+    /// Gets the translated "ENUM_GENRE_NONE" string.
+    /// </summary>
+    public string ENUM_GENRE_NONE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_GENRE_NONE));
+    /// <summary>
+    /// Gets the translated "ENUM_GENRE_MEN" string.
+    /// </summary>
+    public string ENUM_GENRE_MEN =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_GENRE_MEN));
+    /// <summary>
+    /// Gets the translated "ENUM_GENRE_WOMEN" string.
+    /// </summary>
+    public string ENUM_GENRE_WOMEN =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_GENRE_WOMEN));
+    /// <summary>
+    /// Gets the translated "ENUM_AGE_NONE" string.
+    /// </summary>
+    public string ENUM_AGE_NONE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_AGE_NONE));
+    /// <summary>
+    /// Gets the translated "ENUM_AGE_CADETS" string.
+    /// </summary>
+    public string ENUM_AGE_CADETS =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_AGE_CADETS));
+    /// <summary>
+    /// Gets the translated "ENUM_AGE_JUNIORS" string.
+    /// </summary>
+    public string ENUM_AGE_JUNIORS =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_AGE_JUNIORS));
+    /// <summary>
+    /// Gets the translated "ENUM_AGE_SENIORS" string.
+    /// </summary>
+    public string ENUM_AGE_SENIORS =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_AGE_SENIORS));
+    /// <summary>
+    /// Gets the translated "ENUM_AGE_ESPOIRS" string.
+    /// </summary>
+    public string ENUM_AGE_ESPOIRS =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_AGE_ESPOIRS));
+    /// <summary>
+    /// Gets the translated "ENUM_AGE_VETERANS" string.
+    /// </summary>
+    public string ENUM_AGE_VETERANS =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_AGE_VETERANS));
+    /// <summary>
+    /// Gets the translated "WEIGHT_UNIT" string.
+    /// </summary>
+    public string WEIGHT_UNIT =>
+LocalizationResourceManager.Instance.GetValue(nameof(WEIGHT_UNIT));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

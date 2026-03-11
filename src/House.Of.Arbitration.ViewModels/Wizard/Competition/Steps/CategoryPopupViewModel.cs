@@ -6,6 +6,7 @@ using House.Of.Arbitration.Localization;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Maui;
+using House.Of.Arbitration.Models.Helpers;
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
@@ -16,34 +17,34 @@ public partial class CategoryPopupViewModel : BaseViewModel
     #endregion
 
     #region Attributs
-    private CategoryType _selectedType = CategoryType.Sanda;
-    private RoundType _selectedRoundType = RoundType.Elimination;
-    private Genre _selectedGenre = Genre.Men;
-    private AgeRange _selectedAgeRange = AgeRange.Seniors;
+    private LocalizedEnum<CategoryType>? _selectedType;
+    private LocalizedEnum<RoundType>? _selectedRoundType;
+    private LocalizedEnum<Genre>? _selectedGenre;
+    private LocalizedEnum<AgeRange>? _selectedAgeRange;
     private int _weightMin = 0;
     private int _weightMax = 0;
     #endregion
 
     #region Properties    
-    public CategoryType SelectedType
+    public LocalizedEnum<CategoryType>? SelectedType
     {
         get => _selectedType;
         set => SetProperty(ref _selectedType, value);
     }
 
-    public RoundType SelectedRoundType
+    public LocalizedEnum<RoundType>? SelectedRoundType
     {
         get => _selectedRoundType;
         set => SetProperty(ref _selectedRoundType, value);
     }
 
-    public Genre SelectedGenre
+    public LocalizedEnum<Genre>? SelectedGenre
     {
         get => _selectedGenre;
         set => SetProperty(ref _selectedGenre, value);
     }
 
-    public AgeRange SelectedAgeRange
+    public LocalizedEnum<AgeRange>? SelectedAgeRange
     {
         get => _selectedAgeRange;
         set => SetProperty(ref _selectedAgeRange, value);
@@ -60,14 +61,10 @@ public partial class CategoryPopupViewModel : BaseViewModel
         get => _weightMax;
         set => SetProperty(ref _weightMax, value);
     }
-
-    public List<CategoryType> CategoryTypes => Enum.GetValues(typeof(CategoryType)).Cast<CategoryType>().ToList();
-
-    public List<RoundType> RoundTypes => Enum.GetValues(typeof(RoundType)).Cast<RoundType>().ToList();
-
-    public List<Genre> Genres => Enum.GetValues(typeof(Genre)).Cast<Genre>().ToList();
-
-    public List<AgeRange> AgeRanges => Enum.GetValues(typeof(AgeRange)).Cast<AgeRange>().ToList();
+    public List<LocalizedEnum<CategoryType>> CategoryTypes { get; }
+    public List<LocalizedEnum<RoundType>> RoundTypes { get; }
+    public List<LocalizedEnum<Genre>> Genres { get; }
+    public List<LocalizedEnum<AgeRange>> AgeRanges { get; }
     #endregion
 
     #region Constructors
@@ -75,18 +72,38 @@ public partial class CategoryPopupViewModel : BaseViewModel
         : base(logger, resourceProvider)
     {
         _popupService = popupService;
+
+        // Initialisation des listes traduites via le manager global
+        CategoryTypes = LocalizeEnum<CategoryType>("ENUM_CATEGORY_");
+        RoundTypes = LocalizeEnum<RoundType>("ENUM_ROUND_");
+        Genres = LocalizeEnum<Genre>("ENUM_GENRE_");
+        AgeRanges = LocalizeEnum<AgeRange>("ENUM_AGE_");
+
+        // Valeurs par défaut
+        SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == CategoryType.Sanda);
+        SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == RoundType.Elimination);
+        SelectedGenre = Genres.FirstOrDefault(x => x.Value == Genre.Men);
+        SelectedAgeRange = AgeRanges.FirstOrDefault(x => x.Value == AgeRange.Seniors);
     }
     #endregion
 
     #region Private Methods
-    private CategoryModel GetResult()
+    private List<LocalizedEnum<T>> LocalizeEnum<T>(string prefix) where T : Enum
+    {
+        return Enum.GetValues(typeof(T))
+            .Cast<T>()
+            .Select(e => new LocalizedEnum<T>(e, LocalizationResourceManager.Instance.GetValue($"{prefix}{e.ToString().ToUpper()}")))
+            .ToList();
+    }
+
+    public CategoryModel GetResult()
     {
         return new CategoryModel
         {
-            Type = SelectedType,
-            RoundType = SelectedRoundType,
-            Genre = SelectedGenre,
-            AgeRange = SelectedAgeRange,
+            Type = SelectedType?.Value ?? CategoryType.None,
+            RoundType = SelectedRoundType?.Value ?? RoundType.None,
+            Genre = SelectedGenre?.Value ?? Genre.None,
+            AgeRange = SelectedAgeRange?.Value ?? AgeRange.None,
             WeightMin = WeightMin,
             WeightMax = WeightMax,
             Competition = null!

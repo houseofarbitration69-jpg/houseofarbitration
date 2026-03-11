@@ -1,4 +1,5 @@
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Localization;
 using System.Globalization;
 
 namespace House.Of.Arbitration.Controls.Converters;
@@ -9,6 +10,8 @@ public class CategoryToNameConverter : IValueConverter
     {
         if(value is CategoryModel category)
         {
+            var localizer = LocalizationResourceManager.Instance;
+
             var weights =
     (category.WeightMin <= 0 && category.WeightMax > 0) ? $"-{category.WeightMax}" :
     ((category.WeightMin > 0 && category.WeightMax <= 0) ? $"+{category.WeightMin}" : String.Empty);
@@ -18,11 +21,11 @@ public class CategoryToNameConverter : IValueConverter
                 case CategoryType.None:
                     return String.Empty;
                 case CategoryType.Sanda:
-                    return $"Sanda {category.AgeRange} {category.Genre} {weights}";
+                    return $"Sanda {localizer.GetValue($"ENUM_AGE_{category.AgeRange.ToString().ToUpper()}")} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{localizer.GetValue("WEIGHT_UNIT")}";
                 case CategoryType.SandaLight:
-                    return $"Sanda Light {category.AgeRange} {category.Genre} {weights}";
+                    return $"Sanda Light {localizer.GetValue($"ENUM_AGE_{category.AgeRange.ToString().ToUpper()}")} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{localizer.GetValue("WEIGHT_UNIT")}";
                 case CategoryType.Taolu:
-                    return $"Taolu {category.AgeRange} {category.Genre}";
+                    return $"Taolu {localizer.GetValue($"ENUM_AGE_{category.AgeRange.ToString().ToUpper()}")} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")}";
                 default:
                     return String.Empty;
             }

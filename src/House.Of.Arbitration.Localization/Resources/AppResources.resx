@@ -192,4 +192,55 @@
   <data name="CLOSE_ACTION" xml:space="preserve">
     <value>[CLOSE]</value>
   </data>
+  <data name="ENUM_CATEGORY_SANDA" xml:space="preserve">
+    <value>[ENUM CATEGORY SANDA]</value>
+  </data>
+  <data name="ENUM_CATEGORY_SANDALIGHT" xml:space="preserve">
+    <value>[ENUM CATEGORY SANDA LIGHT]</value>
+  </data>
+  <data name="ENUM_CATEGORY_NONE" xml:space="preserve">
+    <value>[ENUM CATEGORY NONE]</value>
+  </data>
+  <data name="ENUM_CATEGORY_TAOLU" xml:space="preserve">
+    <value>[ENUM CATEGORY TAOLU]</value>
+  </data>
+  <data name="ENUM_ROUND_ELIMINATION" xml:space="preserve">
+    <value>[ENUM ROUND ELIMINATION]</value>
+  </data>
+  <data name="ENUM_ROUND_NONE" xml:space="preserve">
+    <value>[ENUM ROUND NONE]</value>
+  </data>
+  <data name="ENUM_ROUND_GROUP" xml:space="preserve">
+    <value>[ENUM ROUND GROUP]</value>
+  </data>
+  <data name="ENUM_GENRE_NONE" xml:space="preserve">
+    <value>[ENUM GENRE NONE]</value>
+  </data>
+  <data name="ENUM_GENRE_MEN" xml:space="preserve">
+    <value>[ENUM GENRE MEN]</value>
+  </data>
+  <data name="ENUM_GENRE_WOMEN" xml:space="preserve">
+    <value>[ENUM GENRE WOMEN]</value>
+  </data>
+  <data name="ENUM_AGE_NONE" xml:space="preserve">
+    <value>[ENUM AGE NONE]</value>
+  </data>
+  <data name="ENUM_AGE_CADETS" xml:space="preserve">
+    <value>[ENUM AGE CADETS]</value>
+  </data>
+  <data name="ENUM_AGE_JUNIORS" xml:space="preserve">
+    <value>[ENUM AGE JUNIORS]</value>
+  </data>
+  <data name="ENUM_AGE_SENIORS" xml:space="preserve">
+    <value>[ENUM AGE SENIORS]</value>
+  </data>
+  <data name="ENUM_AGE_ESPOIRS" xml:space="preserve">
+    <value>[ENUM AGE ESPOIRS]</value>
+  </data>
+  <data name="ENUM_AGE_VETERANS" xml:space="preserve">
+    <value>[ENUM AGE VETERANS]</value>
+  </data>
+  <data name="WEIGHT_UNIT" xml:space="preserve">
+    <value>[WEIGHT UNIT]</value>
+  </data>
 </root>

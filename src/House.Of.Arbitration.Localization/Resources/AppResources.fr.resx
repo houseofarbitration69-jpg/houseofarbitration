@@ -127,7 +127,7 @@
     <value>Démarrer une compétition</value>
   </data>
   <data name="MASTER" xml:space="preserve">
-    <value>SERVEUR</value>
+    <value>Serveur</value>
   </data>
   <data name="SLAVE" xml:space="preserve">
     <value>JUGES</value>
@@ -191,5 +191,56 @@
   </data>
   <data name="CLOSE_ACTION" xml:space="preserve">
     <value>Fermer</value>
+  </data>
+  <data name="ENUM_CATEGORY_SANDA" xml:space="preserve">
+    <value>Sanda</value>
+  </data>
+  <data name="ENUM_CATEGORY_SANDALIGHT" xml:space="preserve">
+    <value>Sanda Light</value>
+  </data>
+  <data name="ENUM_CATEGORY_NONE" xml:space="preserve">
+    <value>Sélectionnez une catégorie</value>
+  </data>
+  <data name="ENUM_CATEGORY_TAOLU" xml:space="preserve">
+    <value>Taolu</value>
+  </data>
+  <data name="ENUM_ROUND_ELIMINATION" xml:space="preserve">
+    <value>Eliminatoire</value>
+  </data>
+  <data name="ENUM_ROUND_NONE" xml:space="preserve">
+    <value>Sélectionnez un type de round</value>
+  </data>
+  <data name="ENUM_ROUND_GROUP" xml:space="preserve">
+    <value>Poule</value>
+  </data>
+  <data name="ENUM_GENRE_NONE" xml:space="preserve">
+    <value>Sélectionnez un genre</value>
+  </data>
+  <data name="ENUM_GENRE_MEN" xml:space="preserve">
+    <value>Hommes</value>
+  </data>
+  <data name="ENUM_GENRE_WOMEN" xml:space="preserve">
+    <value>Femmes</value>
+  </data>
+  <data name="ENUM_AGE_NONE" xml:space="preserve">
+    <value>Sélectionnez un groupe d'âge</value>
+  </data>
+  <data name="ENUM_AGE_CADETS" xml:space="preserve">
+    <value>Cadets</value>
+  </data>
+  <data name="ENUM_AGE_JUNIORS" xml:space="preserve">
+    <value>Juniors</value>
+  </data>
+  <data name="ENUM_AGE_SENIORS" xml:space="preserve">
+    <value>Seniors</value>
+  </data>
+  <data name="ENUM_AGE_ESPOIRS" xml:space="preserve">
+    <value>Espoirs</value>
+  </data>
+  <data name="ENUM_AGE_VETERANS" xml:space="preserve">
+    <value>Vétérans</value>
+  </data>
+  <data name="WEIGHT_UNIT" xml:space="preserve">
+    <value>kg</value>
   </data>
 </root>
