@@ -50,25 +50,41 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     public LocalizedEnum<CategoryType>? SelectedType
     {
         get => _selectedType;
-        set => SetProperty(ref _selectedType, value);
+        set
+        {
+            SetProperty(ref _selectedType, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
     }
 
     public LocalizedEnum<RoundType>? SelectedRoundType
     {
         get => _selectedRoundType;
-        set => SetProperty(ref _selectedRoundType, value);
+        set
+        {
+            SetProperty(ref _selectedRoundType, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
     }
 
     public LocalizedEnum<Genre>? SelectedGenre
     {
         get => _selectedGenre;
-        set => SetProperty(ref _selectedGenre, value);
+        set
+        {
+            SetProperty(ref _selectedGenre, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
     }
 
     public LocalizedEnum<AgeRange>? SelectedAgeRange
     {
         get => _selectedAgeRange;
-        set => SetProperty(ref _selectedAgeRange, value);
+        set
+        {
+            SetProperty(ref _selectedAgeRange, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
     }
 
     public int WeightMin
@@ -154,10 +170,21 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         await _popupService.ClosePopupAsync(Shell.Current);
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanValidate))]
     private async Task Validate()
     {
         await _popupService.ClosePopupAsync<CategoryModel>(Shell.Current, GetResult());
+    }
+
+    private bool CanValidate()
+    {
+        var result = SelectedType != null && SelectedType.Value != CategoryType.None;
+        result = result && (SelectedGenre != null && SelectedGenre.Value != Genre.None);
+        result = result && (SelectedAgeRange != null && SelectedAgeRange.Value != AgeRange.None);
+
+        result = result && ((SelectedType != null && (SelectedType.Value == CategoryType.Sanda || SelectedType.Value == CategoryType.SandaLight)) ? (SelectedRoundType != null && SelectedRoundType.Value != RoundType.None) : true);
+
+        return result;
     }
     #endregion
 }

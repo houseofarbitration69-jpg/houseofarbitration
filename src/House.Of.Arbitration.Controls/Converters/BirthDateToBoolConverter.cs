@@ -1,24 +1,21 @@
-using House.Of.Arbitration.Models;
 using System.Globalization;
 
 namespace House.Of.Arbitration.Controls.Converters;
 
-public class CategoryTypeToBoolConverter : IValueConverter
+public class BirthDateToBoolConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is CategoryType type)
+        if (value is DateTime date)
         {
-            var result = type != CategoryType.None;
+            var result = date < DateTime.Now.AddYears(-4);
 
             if (parameter as string == "Invert")
             {
                 return !result;
             }
-            else if(parameter is CategoryType target)
-            {
-                result = type == target;
-            }
+
+            return result;
         }
 
         return false;

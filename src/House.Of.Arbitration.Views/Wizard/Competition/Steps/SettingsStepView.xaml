@@ -11,7 +11,7 @@
     Shell.NavBarIsVisible="False">
 
     <ContentView.Resources>
-        <converters:StringToBoolConverter x:Key="LocalStringToBoolConverter" />
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
     </ContentView.Resources>
 
     <ScrollView Padding="0" Margin="0">
@@ -48,7 +48,7 @@
                                 <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                             </Border.StrokeShape>
                             <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
                                     <Setter Property="Stroke" Value="{DynamicResource Error}" />
                                 </DataTrigger>
                             </Border.Triggers>
@@ -76,7 +76,7 @@
                             TextColor="{DynamicResource Error}" 
                             FontSize="11" 
                             Margin="12,0"
-                            IsVisible="{Binding Name, Converter={StaticResource LocalStringToBoolConverter}, ConverterParameter='Invert'}" 
+                            IsVisible="{Binding Name, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" 
                         />
                     </VerticalStackLayout>
 

@@ -92,7 +92,8 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
 
         var queryAttributes = new Dictionary<string, object>
         {
-            [nameof(CompetitorPopupViewModel.Competitor)] = newCompetitor
+            [nameof(CompetitorPopupViewModel.Competitor)] = newCompetitor,
+            [nameof(CompetitorPopupViewModel.Category)] = Category,
         };
 
         var result = await _popupService.ShowPopupAsync<CompetitorPopupViewModel, CompetitorModel?>(Shell.Current, shellParameters: queryAttributes);

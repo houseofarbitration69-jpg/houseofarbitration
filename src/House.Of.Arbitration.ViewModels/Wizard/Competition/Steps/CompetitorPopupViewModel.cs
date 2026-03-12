@@ -17,8 +17,14 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Attributs
+    private CategoryModel? _category;
     private CompetitorModel _competitor = new();
     private LocalizedEnum<Genre>? _selectedGenre;
+    private string _firstName = String.Empty;
+    private string _lastName = String.Empty;
+    private string _club = String.Empty;
+    private DateTime? _birthDate;
+    private double _weight;
     #endregion
 
     #region Properties
@@ -31,14 +37,79 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
             if (value != null)
             {
                 SelectedGenre = Genres.FirstOrDefault(x => x.Value == value.Genre);
+                FirstName = value.FirstName;
+                LastName = value.LastName;
+                Club = value.Club;
+                BirthDate = value.BirthDate;
+                Weight = value.CurrentWeight;
             }
+        }
+    }
+
+    public CategoryModel? Category
+    {
+        get => _category;
+        set => SetProperty(ref _category, value);
+    }
+
+    public string FirstName
+    {
+        get => _firstName;
+        set
+        {
+            SetProperty(ref _firstName, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    public string LastName
+    {
+        get => _lastName;
+        set
+        {
+            SetProperty(ref _lastName, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    public string Club
+    {
+        get => _club;
+        set
+        {
+            SetProperty(ref _club, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    public DateTime? BirthDate
+    {
+        get => _birthDate;
+        set
+        {
+            SetProperty(ref _birthDate, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    public double Weight
+    {
+        get => _weight;
+        set
+        {
+            SetProperty(ref _weight, value);
+            ValidateCommand.NotifyCanExecuteChanged();
         }
     }
 
     public LocalizedEnum<Genre>? SelectedGenre
     {
         get => _selectedGenre;
-        set => SetProperty(ref _selectedGenre, value);
+        set
+        {
+            SetProperty(ref _selectedGenre, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
     }
 
     public List<LocalizedEnum<Genre>> Genres { get; }
@@ -59,6 +130,11 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         if (query.ContainsKey(nameof(Competitor)))
         {
             Competitor = (CompetitorModel)query[nameof(Competitor)];
+        }
+
+        if (query.ContainsKey(nameof(Category)))
+        {
+            Category = (CategoryModel)query[nameof(Category)];
         }
     }
     #endregion
@@ -86,10 +162,21 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         await _popupService.ClosePopupAsync(Shell.Current);
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanValidate))]
     private async Task Validate()
     {
         await _popupService.ClosePopupAsync<CompetitorModel>(Shell.Current, GetResult());
+    }
+
+    private bool CanValidate()
+    {
+        var result = !String.IsNullOrEmpty(LastName);
+        result = result && !String.IsNullOrEmpty(FirstName);
+        result = result && (SelectedGenre != null && SelectedGenre.Value != Genre.None);
+        result = result && !String.IsNullOrEmpty(Club);
+        result = result && (BirthDate != null);
+
+        return result;
     }
     #endregion
 }

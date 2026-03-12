@@ -1,4 +1,5 @@
 using House.Of.Arbitration.Models.Helpers;
+using System;
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -156,7 +157,7 @@ public partial class IconButton : ContentView
     }
 
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
-        nameof(Command), typeof(ICommand), typeof(IconButton), null);
+        nameof(Command), typeof(ICommand), typeof(IconButton), null, propertyChanged: OnCommandChanged);
 
     public ICommand Command
     {
@@ -164,13 +165,41 @@ public partial class IconButton : ContentView
         set => SetValue(CommandProperty, value);
     }
 
+    private static void OnCommandChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        var control = (IconButton)bindable;
+
+        if (oldValue is ICommand oldCommand)
+            oldCommand.CanExecuteChanged -= control.OnCommandCanExecuteChanged;
+
+        if (newValue is ICommand newCommand)
+        {
+            newCommand.CanExecuteChanged += control.OnCommandCanExecuteChanged;
+            control.OnCommandCanExecuteChanged(newCommand, EventArgs.Empty);
+        }
+    }
+
+    private void OnCommandCanExecuteChanged(object? sender, EventArgs e)
+    {
+        if (Command != null)
+        {
+            IsEnabled = Command.CanExecute(CommandParameter);
+        }
+    }
+
     public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
-        nameof(CommandParameter), typeof(object), typeof(IconButton), null);
+        nameof(CommandParameter), typeof(object), typeof(IconButton), null, propertyChanged: OnCommandParameterChanged);
 
     public object CommandParameter
     {
         get => GetValue(CommandParameterProperty);
         set => SetValue(CommandParameterProperty, value);
+    }
+
+    private static void OnCommandParameterChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        var control = (IconButton)bindable;
+        control.OnCommandCanExecuteChanged(control.Command, EventArgs.Empty);
     }
     #endregion
 

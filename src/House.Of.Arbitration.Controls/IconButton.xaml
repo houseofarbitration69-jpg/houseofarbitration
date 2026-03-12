@@ -20,6 +20,18 @@
             HorizontalOptions="Fill"
             VerticalOptions="Center">
 
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="Disabled">
+                    <VisualState.Setters>
+                        <Setter Property="Opacity" Value="0.5" />
+                        <Setter TargetName="MainBorder" Property="BackgroundColor" Value="Gray" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <Border.Triggers>
             <DataTrigger TargetType="Border" Binding="{Binding IsFullWidth, Source={x:Reference root}}" Value="False">
                 <Setter Property="HorizontalOptions" Value="Center" />
