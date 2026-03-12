@@ -21,8 +21,9 @@
                 <Label 
                     Text="{Binding Resources.COMPETITION_SETTINGS}" 
                     Style="{DynamicResource Headline}" 
+                    TextColor="{DynamicResource Valid}"
                     HorizontalOptions="Start"
-                    FontSize="24" 
+                    FontSize="32" 
                 />
             </VerticalStackLayout>
 

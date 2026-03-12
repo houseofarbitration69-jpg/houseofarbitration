@@ -19,6 +19,8 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     #region Attributs
     private CategoryModel? _category;
 
+    private string _title = String.Empty;
+
     private LocalizedEnum<CategoryType>? _selectedType;
     private LocalizedEnum<RoundType>? _selectedRoundType;
     private LocalizedEnum<Genre>? _selectedGenre;
@@ -37,6 +39,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
 
             if (value != null)
             {
+                Title = Resources.UPDATE_CATEGORY;
                 SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == value.Type);
                 SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == value.RoundType);
                 SelectedGenre = Genres.FirstOrDefault(x => x.Value == value.Genre);
@@ -99,6 +102,12 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         set => SetProperty(ref _weightMax, value);
     }
 
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
+
     public List<LocalizedEnum<CategoryType>> CategoryTypes { get; }
 
     public List<LocalizedEnum<RoundType>> RoundTypes { get; }
@@ -113,6 +122,8 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         : base(logger, resourceProvider)
     {
         _popupService = popupService;
+
+        Title = resourceProvider.NEW_CATEGORY;
 
         // Initialisation des listes traduites via le manager global
         CategoryTypes = LocalizeEnum<CategoryType>("ENUM_CATEGORY_");

@@ -282,6 +282,11 @@ LocalizationResourceManager.Instance.GetValue(nameof(BIRTHDATE));
     /// </summary>
     public string WEIGHT =>
 LocalizationResourceManager.Instance.GetValue(nameof(WEIGHT));
+    /// <summary>
+    /// Gets the translated "UPDATE_CATEGORY" string.
+    /// </summary>
+    public string UPDATE_CATEGORY =>
+LocalizationResourceManager.Instance.GetValue(nameof(UPDATE_CATEGORY));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

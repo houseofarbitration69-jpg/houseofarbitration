@@ -273,4 +273,7 @@
   <data name="WEIGHT" xml:space="preserve">
     <value>[WEIGHT]</value>
   </data>
+  <data name="UPDATE_CATEGORY" xml:space="preserve">
+    <value>[UPDATE CATEGORY]</value>
+  </data>
 </root>

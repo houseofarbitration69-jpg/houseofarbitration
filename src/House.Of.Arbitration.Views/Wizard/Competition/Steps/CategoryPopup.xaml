@@ -30,9 +30,10 @@
     >
         <VerticalStackLayout Spacing="10">
             <Label 
-                Text="{Binding Resources.NEW_CATEGORY}" 
+                Text="{Binding Title}" 
                 Style="{DynamicResource Headline}" 
                 FontSize="20" 
+                TextColor="{DynamicResource Valid}"
             />
 
             <!-- Style -->

@@ -26,6 +26,7 @@
                         Grid.Column="0"
                         Text="{Binding Resources.CATEGORY_LIST}" 
                         Style="{DynamicResource Headline}" 
+                        TextColor="{DynamicResource Valid}"
                         FontSize="32" 
                         VerticalOptions="Center"
                         HorizontalOptions="Start"
