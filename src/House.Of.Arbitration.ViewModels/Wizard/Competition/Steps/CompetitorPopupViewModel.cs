@@ -152,14 +152,14 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     {
         return new CompetitorModel
         {
-            Id = Category?.Id ?? 0,
+            Id = Competitor?.Id ?? 0,
             LastName = LastName,
             FirstName = FirstName,
             Genre = SelectedGenre?.Value ?? Genre.None,
             Club = Club,
             BirthDate = BirthDate ?? DateTime.Now,
             CurrentWeight = Weight,
-            CategoryId = Category.Id
+            CategoryId = Category?.Id ?? 0
         };
     }
     #endregion

@@ -14,6 +14,7 @@
 
     <ContentView.Resources>
         <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
+        <converters:NbCompetitorConverter x:Key="NbCompetitorConverter"/>
     </ContentView.Resources>
 
     <Grid>
@@ -53,14 +54,21 @@
                         <DataTemplate x:DataType="models:CategoryModel">
                             <controls:Card CardPadding="15" CardColor="White">
                                 <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
-                                    <Label 
-                                        Grid.Row="0"
-                                        Grid.Column="0"
-                                        Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
-                                        TextColor="Black"
-                                        VerticalOptions="Center"
-                                    />
-
+                                    <VerticalStackLayout Grid.Row="0" Grid.Column="0">
+                                        <Label 
+                                            Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
+                                            TextColor="Black"
+                                            VerticalOptions="Center"
+                                        />
+                                        <Label 
+                                            Text="{Binding Competitors.Count, Converter={StaticResource NbCompetitorConverter}}"
+                                            TextColor="Black"
+                                            VerticalOptions="Center"
+                                            FontAttributes="Italic"
+                                            FontSize="10"
+                                        />
+                                    </VerticalStackLayout>
+                                    
                                     <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
                                         <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
