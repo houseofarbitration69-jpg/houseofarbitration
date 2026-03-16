@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
@@ -30,8 +31,9 @@ public partial class CompetitionsViewModel : BaseViewModel
     public CompetitionsViewModel(
         ILogger<CompetitionsViewModel> logger,
         ResourceProvider resourceProvider,
-        IRepository<CompetitionModel> repository)
-        : base(logger, resourceProvider)
+        IRepository<CompetitionModel> repository,
+        IPopupService popupService)
+        : base(logger, resourceProvider, popupService)
     {
         _repository = repository;
     }

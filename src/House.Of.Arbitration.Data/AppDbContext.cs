@@ -53,14 +53,14 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
-            item.HasOne(i => i.Category).WithMany().HasForeignKey(c => c.CategoryId);
+            item.HasOne(i => i.Category).WithMany(c => c.Competitors).HasForeignKey(c => c.CategoryId);
         });
 
         builder.Entity<CategoryModel>(item =>
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
-            item.HasOne(i => i.Competition).WithMany().HasForeignKey(c => c.CompetitionId);
+            item.HasOne(i => i.Competition).WithMany(c => c.Categories).HasForeignKey(c => c.CompetitionId);
         });
     }
     #endregion

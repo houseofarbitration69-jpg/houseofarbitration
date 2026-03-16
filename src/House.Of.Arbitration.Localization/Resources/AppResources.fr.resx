@@ -274,6 +274,21 @@
     <value>Poids (kg)</value>
   </data>
   <data name="UPDATE_CATEGORY" xml:space="preserve">
-    <value>Modification d'une catégorie</value>
+    <value>Modifier la catégorie</value>
   </data>
-</root>
+  <data name="YES" xml:space="preserve">
+    <value>Oui</value>
+  </data>
+  <data name="NO" xml:space="preserve">
+    <value>Non</value>
+  </data>
+  <data name="CONFIRM_DELETE" xml:space="preserve">
+    <value>Confirmer la suppression</value>
+  </data>
+  <data name="DELETE_CATEGORY_MESSAGE" xml:space="preserve">
+    <value>Êtes-vous sûr de vouloir supprimer cette catégorie ?</value>
+  </data>
+  <data name="DELETE_COMPETITOR_MESSAGE" xml:space="preserve">
+    <value>Êtes-vous sûr de vouloir supprimer ce compétiteur ?</value>
+  </data>
+  </root>

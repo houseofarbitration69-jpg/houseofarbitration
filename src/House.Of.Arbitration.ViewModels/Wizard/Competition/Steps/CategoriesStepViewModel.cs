@@ -1,6 +1,7 @@
 #region Imports
 using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.Input;
+using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using System.Collections.ObjectModel;
@@ -12,7 +13,7 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionModel>
 {
     #region Services
-    private readonly IPopupService _popupService;
+    private readonly IRepository<CategoryModel> _repository;
     #endregion
 
     #region Attributs
@@ -30,9 +31,9 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     #endregion
 
     #region Constructors
-    public CategoriesStepViewModel(IPopupService popupService, ResourceProvider resourceProvider) : base(resourceProvider)
+    public CategoriesStepViewModel(IPopupService popupService, ResourceProvider resourceProvider, IRepository<CategoryModel> repository) : base(resourceProvider, popupService)
     {
-        _popupService = popupService;
+        _repository = repository;
         Categories.CollectionChanged += OnCategoriesCollectionChanged;
         Validate();
     }
@@ -77,8 +78,11 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 
         if (result != null && result.Result != null)
         {
-            result.Result.Competition = Model!;
-            Categories.Add(result.Result);
+            var category = result.Result;
+            category.CompetitionId = Model?.Id;
+
+            await _repository.AddAsync(category);
+            Categories.Add(category);
         }
     }
 
@@ -95,24 +99,36 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 
         if (result != null && result.Result != null)
         {
-            result.Result.Competition = Model!;
+            var editCategory = result.Result;
+            editCategory.CompetitionId = Model?.Id;
             var cat = Categories.FirstOrDefault(c => c.Id == result.Result.Id);
+
             if (cat != null)
             {
                 var index = Categories.IndexOf(cat);
                 if (index >= 0)
                 {
-                    Categories[index] = result.Result;
+                    await _repository.UpdateAsync(editCategory);
+                    Categories[index] = editCategory;                    
                 }
             }
         }
     }
 
     [RelayCommand]
-    private void DeleteCategory(CategoryModel category)
+    private async Task DeleteCategory(CategoryModel category)
     {
-        if (category != null && Categories.Contains(category))
+        if (category == null) return;
+
+        bool confirm = await DisplayConfirmation(
+            Resources.CONFIRM_DELETE,
+            Resources.DELETE_CATEGORY_MESSAGE,
+            Resources.YES,
+            Resources.NO);
+
+        if (confirm && Categories.Contains(category))
         {
+            await _repository.DeleteAsync(category);
             Categories.Remove(category);
         }
     }
@@ -126,7 +142,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         };
 
         await Shell.Current.GoToAsync("CompetitorsPage", queryAttributes);
-        RefreshCategory(category);
+        //RefreshCategory(category);
     }
 
     [RelayCommand]
@@ -165,9 +181,17 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     }
 
     [RelayCommand]
-    private void DeleteCompetitor(CompetitorModel competitor)
+    private async Task DeleteCompetitor(CompetitorModel competitor)
     {
-        if (competitor != null)
+        if (competitor == null) return;
+
+        bool confirm = await DisplayConfirmation(
+            Resources.CONFIRM_DELETE,
+            Resources.DELETE_COMPETITOR_MESSAGE,
+            Resources.YES,
+            Resources.NO);
+
+        if (confirm)
         {
             foreach (var cat in Categories)
             {

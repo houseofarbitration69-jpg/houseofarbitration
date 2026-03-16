@@ -12,6 +12,8 @@
 
 
 
+    <Color x:Key="ApplicationNameColor">White</Color>
+    <Color x:Key="PageTitleColor">White</Color>
     <Color x:Key="Error">#FF746C</Color>
     <Color x:Key="Valid">#80EF80</Color>
     <Color x:Key="Placeholder">Gray</Color>

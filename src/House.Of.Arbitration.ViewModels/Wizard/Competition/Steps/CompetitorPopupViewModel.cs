@@ -117,7 +117,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
 
     #region Constructor
     public CompetitorPopupViewModel(IPopupService popupService, ILogger<CompetitorPopupViewModel> logger, ResourceProvider resourceProvider)
-        : base(logger, resourceProvider)
+        : base(logger, resourceProvider, popupService)
     {
         _popupService = popupService;
         Genres = LocalizeEnum<Genre>("ENUM_GENRE_");
@@ -150,8 +150,17 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
 
     public CompetitorModel GetResult()
     {
-        Competitor.Genre = SelectedGenre?.Value ?? Genre.None;
-        return Competitor;
+        return new CompetitorModel
+        {
+            Id = Category?.Id ?? 0,
+            LastName = LastName,
+            FirstName = FirstName,
+            Genre = SelectedGenre?.Value ?? Genre.None,
+            Club = Club,
+            BirthDate = BirthDate ?? DateTime.Now,
+            CurrentWeight = Weight,
+            CategoryId = Category.Id
+        };
     }
     #endregion
 

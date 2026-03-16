@@ -1,10 +1,10 @@
 #region Imports
+using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Localization;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
-using System.Xml.Linq;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels.Core;
@@ -17,6 +17,7 @@ public partial class BaseViewModel : ObservableObject
 {
     #region Service
     protected readonly ILogger _logger;
+    protected readonly IPopupService _popupService;
     #endregion
 
     #region Attributs
@@ -44,9 +45,10 @@ public partial class BaseViewModel : ObservableObject
     /// Initializes a new instance of the <see cref="BaseViewModel"/> class.
     /// </summary>
     /// <param name="resourceProvider">The localization resource provider, injected by DI.</param>
-    public BaseViewModel(ILogger logger, ResourceProvider resourceProvider)
+    public BaseViewModel(ILogger logger, ResourceProvider resourceProvider, IPopupService popupService)
     {
         _logger = logger;
+        _popupService = popupService;
 
         Resources = resourceProvider;
     }
@@ -103,6 +105,27 @@ public partial class BaseViewModel : ObservableObject
     private async Task NavigateTo(string page)
     {
         await Shell.Current.GoToAsync($"/{page}");
+    }
+    #endregion
+
+    #region UI Methods
+    protected async Task DisplayAlert(string title, string message, string cancel)
+    {
+        await Shell.Current.CurrentPage.DisplayAlert(title, message, cancel);
+    }
+
+    protected async Task<bool> DisplayConfirmation(string title, string message, string accept, string cancel)
+    {
+        var queryAttributes = new Dictionary<string, object>
+        {
+            { "Title", title },
+            { "Message", message },
+            { "Accept", accept },
+            { "Cancel", cancel }
+        };
+
+        var result = await _popupService.ShowPopupAsync<ConfirmationPopupViewModel, bool>(Shell.Current, shellParameters: queryAttributes);
+        return result.Result;
     }
     #endregion
 

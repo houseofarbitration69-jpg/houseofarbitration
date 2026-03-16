@@ -119,7 +119,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
 
     #region Constructors
     public CategoryPopupViewModel(IPopupService popupService, ILogger<CategoryPopupViewModel> logger, ResourceProvider resourceProvider)
-        : base(logger, resourceProvider)
+        : base(logger, resourceProvider, popupService)
     {
         _popupService = popupService;
 

@@ -1,4 +1,5 @@
 #region Imports
+using CommunityToolkit.Maui;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
@@ -23,7 +24,7 @@ public partial class SlaveViewModel : BaseViewModel
     #endregion
 
     #region Constructors
-    public SlaveViewModel(ILogger<SlaveViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitionModel> repository) : base(logger, resourceProvider)
+    public SlaveViewModel(ILogger<SlaveViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitionModel> repository, IPopupService popupService) : base(logger, resourceProvider, popupService)
     {
         Title = resourceProvider.APPLICATION_NAME;
     }

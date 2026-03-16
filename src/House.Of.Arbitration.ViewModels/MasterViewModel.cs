@@ -1,4 +1,5 @@
 #region Imports
+using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
@@ -36,7 +37,7 @@ public partial class MasterViewModel : BaseViewModel
     #endregion
 
     #region Constructors
-    public MasterViewModel(ILogger<MasterViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitionModel> repository) : base(logger, resourceProvider)
+    public MasterViewModel(ILogger<MasterViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitionModel> repository, IPopupService popupService) : base(logger, resourceProvider, popupService)
     {
         Title = resourceProvider.APPLICATION_NAME;
         _repository = repository;

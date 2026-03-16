@@ -1,3 +1,5 @@
+#region Imports
+using CommunityToolkit.Maui;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.ViewModels.Core;
@@ -5,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
+#endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition;
 
@@ -87,7 +90,7 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
     #endregion
 
     #region Constructors
-    public WizardViewModel(ILogger<WizardViewModel<T>> logger, ResourceProvider resourceProvider, IRepository<T> repository) : base(logger, resourceProvider)
+    public WizardViewModel(ILogger<WizardViewModel<T>> logger, ResourceProvider resourceProvider, IRepository<T> repository, IPopupService popupService) : base(logger, resourceProvider, popupService)
     {
         _repository = repository;
 
@@ -121,6 +124,11 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
     #region Private Methods
     private async Task GoNext()
     {
+        if(CurrentStep != null)
+        {
+            await CurrentStep.Save();
+        }
+
         if (CurrentStepIndex < Steps.Count - 1)
         {
             int nextIndex = CurrentStepIndex + 1;
@@ -147,16 +155,16 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
 
         if (isAllValid)
         {
-            // Vérifier si c'est un ajout ou une mise à jour via réflexion
-            var idProp = Model.GetType().GetProperty("Id");
-            int id = idProp != null ? (int)idProp.GetValue(Model)! : 0;
+            //// Vérifier si c'est un ajout ou une mise à jour via réflexion
+            //var idProp = Model.GetType().GetProperty("Id");
+            //int id = idProp != null ? (int)idProp.GetValue(Model)! : 0;
 
-            if (id > 0)
-                await _repository.UpdateAsync(Model);
-            else
-                await _repository.AddAsync(Model);
+            //if (id > 0)
+            //    await _repository.UpdateAsync(Model);
+            //else
+            //    await _repository.AddAsync(Model);
 
-            await Shell.Current.DisplayAlertAsync("Validation", "La compétition a été enregistrée avec succès !", "OK");
+            //await Shell.Current.DisplayAlertAsync("Validation", "La compétition a été enregistrée avec succès !", "OK");
             await Shell.Current.GoToAsync("..");
         }
         else

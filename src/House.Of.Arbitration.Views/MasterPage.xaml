@@ -28,8 +28,8 @@
                 <Label 
                     Grid.Column="0"
                     Text="{Binding Resources.COMPETITION_LIST}" 
-                    Style="{DynamicResource Headline}" 
                     FontSize="32" 
+                    TextColor="{DynamicResource PageTitleColor}"
                     VerticalOptions="Center"
                     HorizontalOptions="Start"
                 />

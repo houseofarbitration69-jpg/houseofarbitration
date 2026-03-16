@@ -1,5 +1,6 @@
 #region Imports
 using CommunityToolkit.Maui;
+using House.Of.Arbitration.ViewModels.Core;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using House.Of.Arbitration.Views.Competition;
 using House.Of.Arbitration.Views.Wizard.Competition.Steps;
@@ -24,6 +25,7 @@ public static class BuilderExtensions
        
         builder.Services.AddTransientPopup<CategoryPopup, CategoryPopupViewModel>();
         builder.Services.AddTransientPopup<CompetitorPopup, CompetitorPopupViewModel>();
+        builder.Services.AddTransientPopup<ConfirmationPopup, ConfirmationPopupViewModel>();
         return builder;
     }
 }

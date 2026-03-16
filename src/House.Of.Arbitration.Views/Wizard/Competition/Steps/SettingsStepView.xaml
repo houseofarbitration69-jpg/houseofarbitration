@@ -21,7 +21,7 @@
                 <Label 
                     Text="{Binding Resources.COMPETITION_SETTINGS}" 
                     Style="{DynamicResource Headline}" 
-                    TextColor="{DynamicResource Valid}"
+                    TextColor="{DynamicResource PageTitleColor}"
                     HorizontalOptions="Start"
                     FontSize="32" 
                 />

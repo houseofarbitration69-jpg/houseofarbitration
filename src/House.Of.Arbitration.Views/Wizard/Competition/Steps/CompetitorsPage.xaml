@@ -24,7 +24,7 @@
             <VerticalStackLayout Grid.Column="0">
                 <Label 
                     Text="{Binding Resources.COMPETITORS}" 
-                    Style="{DynamicResource Headline}" 
+                    TextColor="{DynamicResource PageTitleColor}"
                     FontSize="28" 
                     VerticalOptions="Center"
                     HorizontalOptions="Start"
@@ -60,7 +60,38 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:CompetitorModel">
-                    <controls:Card CardPadding="15" CardColor="{DynamicResource SurfaceColor}">
+                    <controls:Card CardPadding="15" CardColor="White">
+                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                <HorizontalStackLayout Spacing="9">
+                                    <Label Text="{Binding LastName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label Text="{Binding FirstName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding Club}" FontSize="13" TextColor="Gray" />
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
+                                <controls:IconButton
+                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                            Icon="{x:Static helpers:FontCustomIcons.PEN}"
+                                            ButtonBackgroundColor="LightBlue"
+                                            IconColor="Black"
+                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=EditCategoryCommand}"
+                                            CommandParameter="{Binding}"
+                                        />
+                                <controls:IconButton
+                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                            Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                                            ButtonBackgroundColor="Red"
+                                            IconColor="White"
+                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=DeleteCategoryCommand}"
+                                            CommandParameter="{Binding}"
+                                        />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </controls:Card>
+
+                    <!--<controls:Card CardPadding="15" CardColor="{DynamicResource SurfaceColor}">
                         <Grid ColumnDefinitions="*, Auto" ColumnSpacing="15">
                             <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
                                 <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
@@ -86,7 +117,7 @@
                                 />
                             </HorizontalStackLayout>
                         </Grid>
-                    </controls:Card>
+                    </controls:Card>-->
                 </DataTemplate>
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
@@ -98,12 +129,16 @@
         </CollectionView>
 
         <!-- Actions -->
-        <Button Grid.Row="2" 
-                Text="{Binding Resources.CLOSE_ACTION}"
-                Style="{StaticResource Button}"
+        <Grid Grid.Row="2" ColumnDefinitions="*, 200, *" ColumnSpacing="20" Margin="20,20,20,20">
+            <Button 
+                Grid.Column="1" 
+                Text="{Binding Resources.CLOSE_ACTION}" 
                 BackgroundColor="{DynamicResource Error}"
                 TextColor="White"
-                Command="{Binding CloseCommand}" />
+                Command="{Binding CloseCommand}" 
+                Padding="15" 
+            />
+        </Grid>
     </Grid>
 
 </base:BasePage>

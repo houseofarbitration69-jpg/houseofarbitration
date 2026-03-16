@@ -2,7 +2,7 @@
 using House.Of.Arbitration.ViewModels.Wizard.Competition;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using House.Of.Arbitration.ViewModels.Competition;
-using CommunityToolkit.Maui;
+using House.Of.Arbitration.ViewModels.Core;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels;
@@ -26,6 +26,8 @@ public static class BuilderExtensions
 
         builder.Services.AddTransient<CompetitorsPageViewModel>();
         builder.Services.AddTransient<CompetitorPopupViewModel>();
+
+        builder.Services.AddTransient<ConfirmationPopupViewModel>();
 
         return builder;
     }

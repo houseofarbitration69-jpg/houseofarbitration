@@ -287,6 +287,31 @@ LocalizationResourceManager.Instance.GetValue(nameof(WEIGHT));
     /// </summary>
     public string UPDATE_CATEGORY =>
 LocalizationResourceManager.Instance.GetValue(nameof(UPDATE_CATEGORY));
+    /// <summary>
+    /// Gets the translated "YES" string.
+    /// </summary>
+    public string YES =>
+LocalizationResourceManager.Instance.GetValue(nameof(YES));
+    /// <summary>
+    /// Gets the translated "NO" string.
+    /// </summary>
+    public string NO =>
+LocalizationResourceManager.Instance.GetValue(nameof(NO));
+    /// <summary>
+    /// Gets the translated "CONFIRM_DELETE" string.
+    /// </summary>
+    public string CONFIRM_DELETE =>
+LocalizationResourceManager.Instance.GetValue(nameof(CONFIRM_DELETE));
+    /// <summary>
+    /// Gets the translated "DELETE_CATEGORY_MESSAGE" string.
+    /// </summary>
+    public string DELETE_CATEGORY_MESSAGE =>
+LocalizationResourceManager.Instance.GetValue(nameof(DELETE_CATEGORY_MESSAGE));
+    /// <summary>
+    /// Gets the translated "DELETE_COMPETITOR_MESSAGE" string.
+    /// </summary>
+    public string DELETE_COMPETITOR_MESSAGE =>
+LocalizationResourceManager.Instance.GetValue(nameof(DELETE_COMPETITOR_MESSAGE));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

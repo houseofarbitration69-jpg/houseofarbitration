@@ -1,11 +1,8 @@
 #region Imports
-using CommunityToolkit.Mvvm.Input;
-using House.Of.Arbitration.Data.Abstractions;
+using CommunityToolkit.Maui;
 using House.Of.Arbitration.Localization;
-using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels;
@@ -25,7 +22,7 @@ public partial class HomeViewModel : BaseViewModel
     #endregion
 
     #region Constructors
-    public HomeViewModel(ILogger<HomeViewModel> logger, ResourceProvider resourceProvider) : base(logger, resourceProvider)
+    public HomeViewModel(ILogger<HomeViewModel> logger, ResourceProvider resourceProvider, IPopupService popupService) : base(logger, resourceProvider, popupService)
     {
         Title = resourceProvider.APPLICATION_NAME;
     }

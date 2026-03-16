@@ -1,6 +1,7 @@
 #region Imports
 using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.Input;
+using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Core;
@@ -14,7 +15,7 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
-    private readonly IPopupService _popupService;
+    private readonly IRepository<CompetitorModel> _repository;
     #endregion
 
     #region Attributs
@@ -45,10 +46,10 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Constructors
-    public CompetitorsPageViewModel(IPopupService popupService, ILogger<CompetitorsPageViewModel> logger, ResourceProvider resourceProvider)
-        : base(logger, resourceProvider)
+    public CompetitorsPageViewModel(IPopupService popupService, ILogger<CompetitorsPageViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitorModel> repository)
+        : base(logger, resourceProvider, popupService)
     {
-        _popupService = popupService;
+        _repository = repository;
     }
     #endregion
 
@@ -79,6 +80,19 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         await Shell.Current.GoToAsync("..");
     }
 
+    //[RelayCommand(CanExecute = nameof(CanValidate))]
+    //private async Task Validate()
+    //{
+    //    await Shell.Current.GoToAsync("..");
+    //}
+
+    //private bool CanValidate()
+    //{
+    //    var result = Competitors != null && Competitors.Count > 0;
+    //    return result;
+    //}
+
+
     [RelayCommand]
     private async Task AddCompetitor()
     {
@@ -100,7 +114,10 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
 
         if (result != null && result.Result != null)
         {
-            Competitors.Add(result.Result);
+            var competitor = result.Result;
+
+            await _repository.AddAsync(competitor);
+            Competitors.Add(competitor);
         }
     }
 
@@ -126,9 +143,17 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     }
 
     [RelayCommand]
-    private void DeleteCompetitor(CompetitorModel competitor)
+    private async Task DeleteCompetitor(CompetitorModel competitor)
     {
-        if (competitor != null && Competitors.Contains(competitor))
+        if (competitor == null) return;
+
+        bool confirm = await DisplayConfirmation(
+            Resources.CONFIRM_DELETE,
+            Resources.DELETE_COMPETITOR_MESSAGE,
+            Resources.YES,
+            Resources.NO);
+
+        if (confirm && Competitors.Contains(competitor))
         {
             Competitors.Remove(competitor);
         }

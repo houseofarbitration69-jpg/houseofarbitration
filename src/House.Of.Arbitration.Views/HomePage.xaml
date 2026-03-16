@@ -18,7 +18,7 @@
             Grid.Row="0" 
             Grid.ColumnSpan="3" 
             Text="{Binding Resources.APPLICATION_NAME}" 
-            TextColor="White"
+            TextColor="{DynamicResource ApplicationNameColor}"
             FontAttributes="Bold"
             FontSize="50"
             HorizontalOptions="Center"

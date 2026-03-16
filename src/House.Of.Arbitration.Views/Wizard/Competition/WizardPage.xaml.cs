@@ -1,5 +1,6 @@
 #region Imports
 using CommunityToolkit.Maui;
+using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Wizard.Competition;
@@ -11,12 +12,12 @@ namespace House.Of.Arbitration.Views.Wizard.Competition;
 
 public partial class WizardPage : BasePage<CompetitionWizardViewModel>
 {
-    public WizardPage(IPopupService popupService, CompetitionWizardViewModel viewModel, ResourceProvider resource) : base(viewModel)
+    public WizardPage(IPopupService popupService, CompetitionWizardViewModel viewModel, ResourceProvider resource, IRepository<CompetitionModel> competitionRepository, IRepository<CategoryModel> categoryRepository) : base(viewModel)
     {
         InitializeComponent();
         
-        var settingsStep = new SettingsStepViewModel(resource);
-        var categoriesStep = new CategoriesStepViewModel(popupService, resource);
+        var settingsStep = new SettingsStepViewModel(resource, popupService, competitionRepository);
+        var categoriesStep = new CategoriesStepViewModel(popupService, resource, categoryRepository);
         //var userStep = new UserStepViewModel();
         //var termsStep = new TermsStepViewModel();
         //var summaryStep = new SummaryStepViewModel(userStep, termsStep);
