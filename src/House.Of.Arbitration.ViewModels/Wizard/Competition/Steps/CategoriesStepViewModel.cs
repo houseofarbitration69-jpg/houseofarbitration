@@ -126,10 +126,15 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
             Resources.YES,
             Resources.NO);
 
-        if (confirm && Categories.Contains(category))
+        if (confirm)
         {
-            await _repository.DeleteAsync(category);
-            Categories.Remove(category);
+            var searchCategory = Categories.FirstOrDefault(c => c.Id == category.Id);
+
+            if( searchCategory != null)
+            {
+                await _repository.DeleteAsync(category);
+                Categories.Remove(searchCategory);
+            }
         }
     }
 

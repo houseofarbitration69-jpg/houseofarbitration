@@ -16,8 +16,8 @@
         BackgroundColor="{DynamicResource PageBackgroundColor}"
         StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
         Padding="20"
-        MaximumWidthRequest="400"
-        WidthRequest="350"
+        MaximumWidthRequest="450"
+        WidthRequest="400"
     >
         <VerticalStackLayout Spacing="20">
             <!-- Icon & Title -->
@@ -50,24 +50,22 @@
                 <controls:IconButton
                     Grid.Column="0" 
                     Text="{Binding CancelText}"
-                    ButtonBackgroundColor="Transparent"
-                    TextColor="White"
-                    BorderBrush="{DynamicResource Error}"
-                    BorderThickness="1"
+                    ButtonBackgroundColor="{DynamicResource Valid}"
+                    TextColor="Black"
                     IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                     Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
-                    IconColor="{DynamicResource Error}"
+                    IconColor="Black"
                     Command="{Binding CancelCommand}"
                 />
 
                 <controls:IconButton
                     Grid.Column="1"
                     Text="{Binding AcceptText}"
-                    TextColor="{DynamicResource PrimaryTextColor}"
+                    TextColor="White"
                     ButtonBackgroundColor="{DynamicResource Error}"
                     IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                     Icon="{x:Static helpers:FontCustomIcons.TRASH}"
-                    IconColor="{DynamicResource PrimaryTextColor}"
+                    IconColor="White"
                     Command="{Binding AcceptCommand}"
                 />
             </Grid>
