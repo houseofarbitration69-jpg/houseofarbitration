@@ -80,21 +80,8 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         await Shell.Current.GoToAsync("..");
     }
 
-    //[RelayCommand(CanExecute = nameof(CanValidate))]
-    //private async Task Validate()
-    //{
-    //    await Shell.Current.GoToAsync("..");
-    //}
-
-    //private bool CanValidate()
-    //{
-    //    var result = Competitors != null && Competitors.Count > 0;
-    //    return result;
-    //}
-
-
     [RelayCommand]
-    private async Task AddCompetitor()
+    private async Task Add()
     {
         if (Category == null) return;
 
@@ -122,7 +109,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     }
 
     [RelayCommand]
-    private async Task EditCompetitor(CompetitorModel competitor)
+    private async Task Edit(CompetitorModel competitor)
     {
         var queryAttributes = new Dictionary<string, object>
         {
@@ -133,17 +120,22 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
 
         if (result != null && result.Result != null)
         {
+            var updated = result.Result;
+            updated.CategoryId = competitor.CategoryId;
+
+            await _repository.UpdateAsync(updated);
+
             var index = Competitors.IndexOf(competitor);
             if (index != -1)
             {
                 Competitors[index] = null!;
-                Competitors[index] = result.Result;
+                Competitors[index] = updated;
             }
         }
     }
 
     [RelayCommand]
-    private async Task DeleteCompetitor(CompetitorModel competitor)
+    private async Task Delete(CompetitorModel competitor)
     {
         if (competitor == null) return;
 
@@ -153,8 +145,9 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             Resources.YES,
             Resources.NO);
 
-        if (confirm && Competitors.Contains(competitor))
+        if (confirm)
         {
+            await _repository.DeleteAsync(competitor);
             Competitors.Remove(competitor);
         }
     }

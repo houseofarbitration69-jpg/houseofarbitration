@@ -43,7 +43,7 @@
                 Text="{Binding Resources.ADD_COMPETITOR}"
                 ButtonBackgroundColor="LightGreen"
                 TextColor="Black"
-                Command="{Binding AddCompetitorCommand}"
+                Command="{Binding AddCommand}"
                 VerticalOptions="Center"
             >
                 <controls:IconButton.Icons>
@@ -76,7 +76,7 @@
                                             Icon="{x:Static helpers:FontCustomIcons.PEN}"
                                             ButtonBackgroundColor="LightBlue"
                                             IconColor="Black"
-                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=EditCategoryCommand}"
+                                            Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=EditCommand}"
                                             CommandParameter="{Binding}"
                                         />
                                 <controls:IconButton
@@ -84,40 +84,12 @@
                                             Icon="{x:Static helpers:FontCustomIcons.TRASH}"
                                             ButtonBackgroundColor="Red"
                                             IconColor="White"
-                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=DeleteCategoryCommand}"
+                                            Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=DeleteCommand}"
                                             CommandParameter="{Binding}"
                                         />
                             </HorizontalStackLayout>
                         </Grid>
                     </controls:Card>
-
-                    <!--<controls:Card CardPadding="15" CardColor="{DynamicResource SurfaceColor}">
-                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="15">
-                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                                <Label Text="{Binding Name}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
-                                <Label Text="{Binding Club}" FontSize="13" TextColor="Gray" />
-                            </VerticalStackLayout>
-
-                            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
-                                <controls:IconButton
-                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                    Icon="{x:Static helpers:FontCustomIcons.PEN}"
-                                    ButtonBackgroundColor="LightBlue"
-                                    IconColor="Black"
-                                    Command="{Binding x:DataType='vm:CompetitorsPopupViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPopupViewModel}}, Path=EditCompetitorCommand}"
-                                    CommandParameter="{Binding}"
-                                />
-                                <controls:IconButton
-                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                    Icon="{x:Static helpers:FontCustomIcons.TRASH}"
-                                    ButtonBackgroundColor="Red"
-                                    IconColor="White"
-                                    Command="{Binding x:DataType='vm:CompetitorsPopupViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPopupViewModel}}, Path=DeleteCompetitorCommand}"
-                                    CommandParameter="{Binding}"
-                                />
-                            </HorizontalStackLayout>
-                        </Grid>
-                    </controls:Card>-->
                 </DataTemplate>
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
