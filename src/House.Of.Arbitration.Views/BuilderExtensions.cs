@@ -22,7 +22,8 @@ public static class BuilderExtensions
         builder.Services.AddTransient<SlavePage>();
         builder.Services.AddTransient<CompetitionsPage>();
         builder.Services.AddTransient<CompetitorsPage>();
-       
+        builder.Services.AddTransient<DrawPage>();
+
         builder.Services.AddTransientPopup<CategoryPopup, CategoryPopupViewModel>();
         builder.Services.AddTransientPopup<CompetitorPopup, CompetitorPopupViewModel>();
         builder.Services.AddTransientPopup<ConfirmationPopup, ConfirmationPopupViewModel>();

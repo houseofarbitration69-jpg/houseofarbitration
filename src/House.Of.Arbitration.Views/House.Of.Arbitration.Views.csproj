@@ -41,6 +41,9 @@
     <Compile Update="Wizard\Competition\Steps\CategoryPopup.xaml.cs">
       <DependentUpon>CategoryPopup.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Wizard\Competition\Steps\DrawPage.xaml.cs">
+      <DependentUpon>DrawPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Wizard\Competition\WizardPage.xaml.cs">
       <DependentUpon>WizardPage.xaml</DependentUpon>
     </Compile>
@@ -69,6 +72,9 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Wizard\Competition\Steps\CategoriesStepView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\Steps\DrawPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Wizard\Competition\WizardPage.xaml">

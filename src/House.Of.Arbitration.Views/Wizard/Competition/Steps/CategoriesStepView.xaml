@@ -88,6 +88,14 @@
                                         />
                                         <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                            Icon="{x:Static helpers:FontCustomIcons.DRAWS}"
+                                            ButtonBackgroundColor="LightGreen"
+                                            IconColor="Black"
+                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=ShowDrawCommand}"
+                                            CommandParameter="{Binding}"
+                                        />
+                                        <controls:IconButton
+                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                             Icon="{x:Static helpers:FontCustomIcons.TRASH}"
                                             ButtonBackgroundColor="Red"
                                             IconColor="White"

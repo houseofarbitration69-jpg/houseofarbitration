@@ -209,6 +209,17 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
             }
         }
     }
+
+    [RelayCommand]
+    private async Task ShowDraw(CategoryModel category)
+    {
+        var queryAttributes = new Dictionary<string, object>
+        {
+            [nameof(DrawPageViewModel.Category)] = category
+        };
+
+        await Shell.Current.GoToAsync("DrawPage", queryAttributes);
+    }
     #endregion
 
     #region Override Methods

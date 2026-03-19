@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="House.Of.Arbitration.Controls.SuggestEntry"
+             x:Name="this">
+
+    <Grid RowDefinitions="Auto, Auto">
+        <!-- Main Entry -->
+        <Border 
+            Grid.Row="0"
+            Stroke="{Binding Stroke, Source={x:Reference this}}"
+            StrokeThickness="{Binding StrokeThickness, Source={x:Reference this}}"
+            BackgroundColor="{Binding BackgroundColor, Source={x:Reference this}}"
+            Padding="0"
+            Margin="0"
+        >
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="{Binding CornerRadius, Source={x:Reference this}}"/>
+            </Border.StrokeShape>
+            <Entry 
+                x:Name="EntryField"
+                Text="{Binding Text, Source={x:Reference this}}"
+                Placeholder="{Binding Placeholder, Source={x:Reference this}}"
+                PlaceholderColor="{Binding PlaceholderColor, Source={x:Reference this}}"
+                TextColor="{Binding TextColor, Source={x:Reference this}}"
+                VerticalOptions="Center" 
+                MinimumHeightRequest="30"
+                Margin="0"
+                TextChanged="OnTextChanged"
+                Focused="OnEntryFocused"
+                Unfocused="OnEntryUnfocused"
+                Completed="OnEntryCompleted"
+            />
+        </Border>
+
+        <!-- Suggestions List -->
+        <Border 
+            Grid.Row="1"
+            IsVisible="{Binding IsSuggestionsVisible, Source={x:Reference this}}"
+            BackgroundColor="White"
+            Stroke="LightGray"
+            StrokeThickness="1"
+            ZIndex="1000"
+            VerticalOptions="Start"
+            Margin="0,2,0,0"
+            Padding="0"
+        >
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="5"/>
+            </Border.StrokeShape>
+            <CollectionView 
+                x:Name="SuggestionsList"
+                ItemsSource="{Binding Suggestions, Source={x:Reference this}}"
+                SelectionMode="Single"
+                SelectionChanged="OnSelectionChanged"
+                MaximumHeightRequest="200"
+            >
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="10">
+                            <Label Text="{Binding .}" TextColor="Black" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Border>
+    </Grid>
+</ContentView>

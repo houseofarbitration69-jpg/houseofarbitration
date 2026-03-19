@@ -101,7 +101,7 @@
         </CollectionView>
 
         <!-- Actions -->
-        <Grid Grid.Row="2" ColumnDefinitions="*, 200, *" ColumnSpacing="20" Margin="20,20,20,20">
+        <Grid Grid.Row="2" ColumnDefinitions="*, 200, *" ColumnSpacing="20">
             <Button 
                 Grid.Column="1" 
                 Text="{Binding Resources.CLOSE_ACTION}" 

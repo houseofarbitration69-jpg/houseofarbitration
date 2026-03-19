@@ -29,6 +29,8 @@ public static class BuilderExtensions
 
         builder.Services.AddTransient<ConfirmationPopupViewModel>();
 
+        builder.Services.AddTransient<DrawPageViewModel>();
+
         return builder;
     }
 }

@@ -170,14 +170,15 @@
                                     <Setter Property="Stroke" Value="{DynamicResource Error}" />
                                 </DataTrigger>
                             </Border.Triggers>
-                            <Entry 
-                                Margin="0"
-                                Text="{Binding Club}" 
-                                Placeholder="{Binding Resources.CLUB}"
-                                PlaceholderColor="Gray"
+                            <controls:SuggestEntry 
+                                Placeholder="Tapez le nom d'un club"
+                                Text="{Binding Club}"
+                                ItemsSource="{Binding Clubs}"
                                 TextColor="Black"
-                                VerticalOptions="Center" 
-                                MinimumHeightRequest="30"
+                                PlaceholderColor="Gray"
+                                Stroke="Transparent"
+                                StrokeThickness="0"
+                                CornerRadius="10"
                             />
                         </Border>
                     </VerticalStackLayout>

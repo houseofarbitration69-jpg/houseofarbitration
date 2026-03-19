@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:TypeArguments="vm:DrawPageViewModel"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.DrawPage"
+    x:Name="this"
+    Shell.PresentationMode="ModalNotAnimated"
+    BackgroundColor="{DynamicResource PageBackgroundColor}">
+
+    <base:BasePage.Resources>
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+    </base:BasePage.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+            <VerticalStackLayout Grid.Column="0">
+                <Label 
+                    Text="DRAWS" 
+                    TextColor="{DynamicResource PageTitleColor}"
+                    FontSize="28" 
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
+                <Label 
+                    Text="{Binding Category.RoundType}"
+                    FontSize="14"
+                    TextColor="White"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Competitors List / Bracket -->
+        <ScrollView Grid.Row="1" Orientation="Both" HorizontalScrollBarVisibility="Always" VerticalScrollBarVisibility="Always">
+            <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
+                <!-- Bracket View (Elimination) -->
+                <HorizontalStackLayout 
+                    IsVisible="{Binding IsElimination}"
+                    Spacing="40" 
+                    Padding="20"
+                    VerticalOptions="Start"
+                    HorizontalOptions="Start"
+                    BindableLayout.ItemsSource="{Binding Rounds}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BracketRoundViewModel">
+                            <VerticalStackLayout Spacing="0" VerticalOptions="Start">
+                                <Label Text="{Binding Name}" 
+                                       TextColor="White" 
+                                       FontSize="18" 
+                                       FontAttributes="Bold" 
+                                       HorizontalOptions="Center" 
+                                       Margin="0,0,0,20" />
+                                
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Matches}" VerticalOptions="Start">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:BracketMatchViewModel">
+                                            <Grid Margin="{Binding Margin}" HeightRequest="{Binding Height}" WidthRequest="200" VerticalOptions="Start">
+                                                <VerticalStackLayout Spacing="5" VerticalOptions="Center">
+                                                    <!-- Slot 1 -->
+                                                    <Border Padding="10" 
+                                                            HeightRequest="40" 
+                                                            BackgroundColor="#F5F5F5" 
+                                                            Stroke="Gray"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Border.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding BindingContext.IsDragging, Source={x:Reference this}}" Value="True">
+                                                                <Setter Property="Stroke" Value="LightBlue" />
+                                                                <Setter Property="StrokeThickness" Value="2" />
+                                                            </DataTrigger>
+                                                        </Border.Triggers>
+                                                        <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
+                                                            <Label Text="{Binding Slot1.Competitor.LastName, FallbackValue='(BYE)'}" 
+                                                                   TextColor="Black" 
+                                                                   VerticalOptions="Center" />
+                                                            <Label Grid.Column="1" Text="➕" 
+                                                                   IsVisible="{Binding BindingContext.IsDragging, Source={x:Reference this}}"
+                                                                   FontSize="12" VerticalOptions="Center" Opacity="0.6" />
+                                                        </Grid>
+                                                        <Border.GestureRecognizers>
+                                                            <DragGestureRecognizer 
+                                                                CanDrag="True" 
+                                                                DragStarting="OnDragStarting"
+                                                                DragStartingCommand="{Binding BindingContext.DragStartingCommand, Source={x:Reference this}}"
+                                                                DragStartingCommandParameter="{Binding Slot1}" />
+                                                            <DropGestureRecognizer 
+                                                                AllowDrop="True" 
+                                                                DragOver="OnDragOver"
+                                                                DragLeave="OnDragLeave"
+                                                                Drop="OnDrop"
+                                                                DropCommandParameter="{Binding Slot1}" />
+                                                        </Border.GestureRecognizers>
+                                                    </Border>
+
+                                                    <!-- Slot 2 -->
+                                                    <Border Padding="10" 
+                                                            HeightRequest="40" 
+                                                            BackgroundColor="#F5F5F5" 
+                                                            Stroke="Gray"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Border.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding BindingContext.IsDragging, Source={x:Reference this}}" Value="True">
+                                                                <Setter Property="Stroke" Value="LightBlue" />
+                                                                <Setter Property="StrokeThickness" Value="2" />
+                                                            </DataTrigger>
+                                                        </Border.Triggers>
+                                                        <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
+                                                            <Label Text="{Binding Slot2.Competitor.LastName, FallbackValue='(BYE)'}" 
+                                                                   TextColor="Black" 
+                                                                   VerticalOptions="Center" />
+                                                            <Label Grid.Column="1" Text="➕" 
+                                                                   IsVisible="{Binding BindingContext.IsDragging, Source={x:Reference this}}"
+                                                                   FontSize="12" VerticalOptions="Center" Opacity="0.6" />
+                                                        </Grid>
+                                                        <Border.GestureRecognizers>
+                                                            <DragGestureRecognizer 
+                                                                CanDrag="True" 
+                                                                DragStarting="OnDragStarting"
+                                                                DragStartingCommand="{Binding BindingContext.DragStartingCommand, Source={x:Reference this}}"
+                                                                DragStartingCommandParameter="{Binding Slot2}" />
+                                                            <DropGestureRecognizer 
+                                                                AllowDrop="True" 
+                                                                DragOver="OnDragOver"
+                                                                DragLeave="OnDragLeave"
+                                                                Drop="OnDrop"
+                                                                DropCommandParameter="{Binding Slot2}" />
+                                                        </Border.GestureRecognizers>
+                                                    </Border>
+                                                    
+                                                    <!-- Winner Slot -->
+                                                    <Border Padding="10" 
+                                                            HeightRequest="40" 
+                                                            BackgroundColor="Gold" 
+                                                            Stroke="Orange"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Label Text="WINNER" 
+                                                               TextColor="Black" 
+                                                               FontAttributes="Bold"
+                                                               HorizontalOptions="Center"
+                                                               VerticalOptions="Center" />
+                                                    </Border>
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
+
+                <!-- Other View (if not Elimination) -->
+                <VerticalStackLayout IsVisible="{Binding IsElimination, Converter={StaticResource InvertBoolConverter}}"
+                                     HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                    <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
+                    <Label Text="Non-elimination draw view not implemented yet." TextColor="Gray" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Grid>
+        </ScrollView>
+
+        <!-- Actions -->
+        <Grid Grid.Row="2" ColumnDefinitions="*, 200, *" ColumnSpacing="20">
+            <Button 
+                Grid.Column="1" 
+                Text="{Binding Resources.CLOSE_ACTION}" 
+                BackgroundColor="{DynamicResource Error}"
+                TextColor="White"
+                Command="{Binding CloseCommand}" 
+                Padding="15" 
+            />
+        </Grid>
+    </Grid>
+
+</base:BasePage>

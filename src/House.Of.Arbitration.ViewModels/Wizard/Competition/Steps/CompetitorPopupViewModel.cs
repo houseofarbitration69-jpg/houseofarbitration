@@ -1,6 +1,7 @@
 #region Imports
 using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.Input;
+using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Models.Helpers;
@@ -14,6 +15,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
 {
     #region Services
     private readonly IPopupService _popupService;
+    private readonly IRepository<CompetitorModel> _repository;
     #endregion
 
     #region Attributs
@@ -25,6 +27,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     private string _club = String.Empty;
     private DateTime? _birthDate;
     private double _weight;
+    private List<string> _clubs = new();
     #endregion
 
     #region Properties
@@ -113,14 +116,23 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     }
 
     public List<LocalizedEnum<Genre>> Genres { get; }
+    
+    public List<string> Clubs
+    {
+        get => _clubs;
+        set => SetProperty(ref _clubs, value);
+    }
     #endregion
 
     #region Constructor
-    public CompetitorPopupViewModel(IPopupService popupService, ILogger<CompetitorPopupViewModel> logger, ResourceProvider resourceProvider)
+    public CompetitorPopupViewModel(IPopupService popupService, ILogger<CompetitorPopupViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitorModel> repository)
         : base(logger, resourceProvider, popupService)
     {
         _popupService = popupService;
+        _repository = repository;
+
         Genres = LocalizeEnum<Genre>("ENUM_GENRE_");
+        InitData();
     }
     #endregion
 
@@ -136,6 +148,14 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         {
             Category = (CategoryModel)query[nameof(Category)];
         }
+    }
+    #endregion
+
+    #region Init Methods
+    private async void InitData()
+    {
+        // Récupération de la liste des clubs
+        Clubs = (await _repository.GetAllAsync())?.Select(c => c.Club).Distinct()?.ToList() ?? new();
     }
     #endregion
 

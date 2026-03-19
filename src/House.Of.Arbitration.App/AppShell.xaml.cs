@@ -21,5 +21,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("CompetitionWizard", typeof(WizardPage));
         Routing.RegisterRoute("Competitions", typeof(CompetitionsPage));
         Routing.RegisterRoute("CompetitorsPage", typeof(CompetitorsPage));
+        Routing.RegisterRoute("DrawPage", typeof(DrawPage));
     }
 }
