@@ -7,12 +7,7 @@ using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui;
-using Microsoft.Maui.Controls;
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
-using System;
-using System.Threading.Tasks;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
@@ -27,15 +22,23 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     private CategoryModel? _category;
     private ObservableCollection<CompetitorModel> _competitors = new();
     private ObservableCollection<BracketRoundViewModel> _rounds = new();
-    
-    [ObservableProperty]
     private BracketSlotViewModel? _draggedSlot;
-
-    [ObservableProperty]
     private bool _isDragging;
     #endregion
 
     #region Properties    
+    public BracketSlotViewModel? DraggedSlot
+    {
+        get => _draggedSlot;
+        set => SetProperty(ref _draggedSlot, value);
+    }
+
+    public bool IsDragging
+    {
+        get => _isDragging;
+        set => SetProperty(ref _isDragging, value);
+    }
+
     public CategoryModel? Category
     {
         get => _category;
@@ -144,10 +147,23 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         double matchHeight = 100;
         double currentMargin = 0;
         double currentSpacing = 0;
+        double previousRoundMargin = 0;
 
         for (int i = 0; i < targetRounds.Count; i++)
         {
             var round = targetRounds[i];
+            
+            if (round.Name == "Winner")
+            {
+                foreach (var match in round.Matches)
+                {
+                    match.Height = matchHeight;
+                    // Align perfectly with the first match of the previous round
+                    match.Margin = new Thickness(0, previousRoundMargin, 0, 0);
+                }
+                break;
+            }
+
             foreach (var match in round.Matches)
             {
                 match.Height = matchHeight;
@@ -161,6 +177,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                 }
             }
 
+            previousRoundMargin = currentMargin;
             currentMargin = (currentMargin * 2) + (matchHeight / 2);
             currentSpacing = (currentSpacing * 2) + matchHeight;
         }
@@ -234,28 +251,64 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
 public partial class BracketRoundViewModel : ObservableObject
 {
-    [ObservableProperty]
+    #region Attributs
     private string _name = string.Empty;
+    #endregion
+
+    #region Properties    
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
+    }
+
     public ObservableCollection<BracketMatchViewModel> Matches { get; } = new();
+    #endregion
 }
 
 public partial class BracketMatchViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private Thickness _margin;
+    #region Attributs
+    private Thickness _margin = new Thickness(0);
+    private double _height = 0.0;
+    private bool _isWinnerSlot =false;
+    #endregion
+
+    #region Properties
+    public Thickness Margin
+    {
+        get => _margin;
+        set => SetProperty(ref _margin, value);
+    }
     
-    [ObservableProperty]
-    private double _height;
-    
-    [ObservableProperty]
-    private bool _isWinnerSlot;
+    public double Height
+    {
+        get => _height;
+        set => SetProperty(ref _height, value);
+    }
+        
+    public bool IsWinnerSlot
+    {
+        get => _isWinnerSlot;
+        set => SetProperty(ref _isWinnerSlot, value);
+    }
 
     public BracketSlotViewModel Slot1 { get; } = new();
     public BracketSlotViewModel Slot2 { get; } = new();
+    #endregion
 }
 
 public partial class BracketSlotViewModel : ObservableObject
 {
-    [ObservableProperty]
+    #region Attributs
     private CompetitorModel? _competitor;
+    #endregion
+
+    #region Properties
+    public CompetitorModel? Competitor
+    {
+        get => _competitor;
+        set => SetProperty(ref _competitor, value);
+    }
+    #endregion
 }

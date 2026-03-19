@@ -59,7 +59,21 @@ public partial class DragDropPageViewModel : BaseViewModel
         { 
             new CompetitorModel() { FirstName = "P1", LastName = "N1" },
             new CompetitorModel() { FirstName = "P2", LastName = "N2" },
-            new CompetitorModel() { FirstName = "P3", LastName = "N3" }
+            new CompetitorModel() { FirstName = "P3", LastName = "N3" },
+            new CompetitorModel() { FirstName = "P4", LastName = "N4" },
+            new CompetitorModel() { FirstName = "P5", LastName = "N5" },
+            new CompetitorModel() { FirstName = "P6", LastName = "N6" },
+            new CompetitorModel() { FirstName = "P7", LastName = "N7" },
+            new CompetitorModel() { FirstName = "P8", LastName = "N8" },
+            new CompetitorModel() { FirstName = "P9", LastName = "N9" },
+            new CompetitorModel() { FirstName = "P10", LastName = "N10" },
+            new CompetitorModel() { FirstName = "P11", LastName = "N11" },
+            new CompetitorModel() { FirstName = "P12", LastName = "N12" },
+            new CompetitorModel() { FirstName = "P13", LastName = "N13" },
+            new CompetitorModel() { FirstName = "P14", LastName = "N14" },
+            new CompetitorModel() { FirstName = "P15", LastName = "N15" },
+            new CompetitorModel() { FirstName = "P16", LastName = "N16" },
+            new CompetitorModel() { FirstName = "P17", LastName = "N17" }
         });
 
         InitializeBracket();
@@ -116,10 +130,23 @@ public partial class DragDropPageViewModel : BaseViewModel
         double matchHeight = 100;
         double currentMargin = 0;
         double currentSpacing = 0;
+        double previousRoundMargin = 0;
 
         for (int i = 0; i < targetRounds.Count; i++)
         {
             var round = targetRounds[i];
+            
+            if (round.Name == "Winner")
+            {
+                foreach (var match in round.Matches)
+                {
+                    match.Height = matchHeight;
+                    // Align perfectly with the first match of the previous round
+                    match.Margin = new Thickness(0, previousRoundMargin, 0, 0);
+                }
+                break;
+            }
+
             foreach (var match in round.Matches)
             {
                 match.Height = matchHeight;
@@ -133,6 +160,7 @@ public partial class DragDropPageViewModel : BaseViewModel
                 }
             }
 
+            previousRoundMargin = currentMargin;
             currentMargin = (currentMargin * 2) + (matchHeight / 2);
             currentSpacing = (currentSpacing * 2) + matchHeight;
         }

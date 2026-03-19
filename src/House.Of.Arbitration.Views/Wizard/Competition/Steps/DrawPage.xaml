@@ -77,25 +77,20 @@
                                                         <Border.StrokeShape>
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
-                                                        <Border.Triggers>
-                                                            <DataTrigger TargetType="Border" Binding="{Binding BindingContext.IsDragging, Source={x:Reference this}}" Value="True">
-                                                                <Setter Property="Stroke" Value="LightBlue" />
-                                                                <Setter Property="StrokeThickness" Value="2" />
-                                                            </DataTrigger>
-                                                        </Border.Triggers>
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
                                                             <Label Text="{Binding Slot1.Competitor.LastName, FallbackValue='(BYE)'}" 
                                                                    TextColor="Black" 
                                                                    VerticalOptions="Center" />
                                                             <Label Grid.Column="1" Text="➕" 
-                                                                   IsVisible="{Binding BindingContext.IsDragging, Source={x:Reference this}}"
+                                                                   IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
                                                                    FontSize="12" VerticalOptions="Center" Opacity="0.6" />
                                                         </Grid>
                                                         <Border.GestureRecognizers>
                                                             <DragGestureRecognizer 
                                                                 CanDrag="True" 
                                                                 DragStarting="OnDragStarting"
-                                                                DragStartingCommand="{Binding BindingContext.DragStartingCommand, Source={x:Reference this}}"
+                                                                DropCompleted="OnDragCompleted"
+                                                                DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
                                                                 DragStartingCommandParameter="{Binding Slot1}" />
                                                             <DropGestureRecognizer 
                                                                 AllowDrop="True" 
@@ -116,25 +111,20 @@
                                                         <Border.StrokeShape>
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
-                                                        <Border.Triggers>
-                                                            <DataTrigger TargetType="Border" Binding="{Binding BindingContext.IsDragging, Source={x:Reference this}}" Value="True">
-                                                                <Setter Property="Stroke" Value="LightBlue" />
-                                                                <Setter Property="StrokeThickness" Value="2" />
-                                                            </DataTrigger>
-                                                        </Border.Triggers>
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
                                                             <Label Text="{Binding Slot2.Competitor.LastName, FallbackValue='(BYE)'}" 
                                                                    TextColor="Black" 
                                                                    VerticalOptions="Center" />
                                                             <Label Grid.Column="1" Text="➕" 
-                                                                   IsVisible="{Binding BindingContext.IsDragging, Source={x:Reference this}}"
+                                                                   IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
                                                                    FontSize="12" VerticalOptions="Center" Opacity="0.6" />
                                                         </Grid>
                                                         <Border.GestureRecognizers>
                                                             <DragGestureRecognizer 
                                                                 CanDrag="True" 
                                                                 DragStarting="OnDragStarting"
-                                                                DragStartingCommand="{Binding BindingContext.DragStartingCommand, Source={x:Reference this}}"
+                                                                DropCompleted="OnDragCompleted"
+                                                                DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
                                                                 DragStartingCommandParameter="{Binding Slot2}" />
                                                             <DropGestureRecognizer 
                                                                 AllowDrop="True" 

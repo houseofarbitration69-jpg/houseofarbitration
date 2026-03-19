@@ -1,4 +1,5 @@
 #region Imports
+using CommunityToolkit.Maui.Core;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using System.Linq;
 #endregion
@@ -7,24 +8,44 @@ namespace House.Of.Arbitration.Views.Wizard.Competition.Steps;
 
 public partial class DrawPage
 {
-	public DrawPage(DrawPageViewModel viewModel) : base(viewModel)
-	{
-		InitializeComponent();
-	}
+    public DrawPage(DrawPageViewModel viewModel) : base(viewModel)
+    {
+        InitializeComponent();
+    }
 
     private void OnDragStarting(object sender, DragStartingEventArgs e)
     {
-        if (sender is DragGestureRecognizer recognizer && recognizer.DragStartingCommandParameter is BracketSlotViewModel slot)
-        {
-            // On Windows, DataPackage must not be empty for the drag operation to be valid
-            e.Data.Text = "slot";
-            e.Data.Properties["slot"] = slot;
+        var gestures = (sender as Border)?.GestureRecognizers;
 
-            if (BindingContext is DrawPageViewModel vm)
+        if (gestures != null)
+        {
+            var dragGesture = gestures.FirstOrDefault(g => g is DragGestureRecognizer);
+
+            if (dragGesture != null)
             {
-                vm.DraggedSlot = slot;
-                vm.IsDragging = true;
+                var slot = ((DragGestureRecognizer)dragGesture).DragStartingCommandParameter as BracketSlotViewModel;
+
+                if (slot != null)
+                {
+                    e.Data.Text = "slot";
+                    e.Data.Properties["slot"] = slot;
+
+                    if (BindingContext is DrawPageViewModel vm)
+                    {
+                        vm.DraggedSlot = slot;
+                        vm.IsDragging = true;
+                    }
+                }
             }
+        }
+    }
+
+    private void OnDragCompleted(object sender, DropCompletedEventArgs e)
+    {
+        if (BindingContext is DrawPageViewModel vm)
+        {
+            vm.IsDragging = false;
+            vm.DraggedSlot = null;
         }
     }
 
@@ -32,18 +53,8 @@ public partial class DrawPage
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
 
-#if WINDOWS
-        if (e.PlatformArgs != null && e.PlatformArgs.DragEventArgs != null)
-        {
-            // Hide everything that can block the hit testing
-            e.PlatformArgs.DragEventArgs.DragUIOverride.IsGlyphVisible = false;
-            e.PlatformArgs.DragEventArgs.DragUIOverride.IsCaptionVisible = false;
-            e.PlatformArgs.DragEventArgs.DragUIOverride.IsContentVisible = false;
-        }
-#endif
-        
-        // Visual feedback for the specific hover target
-        if (sender is DropGestureRecognizer recognizer && recognizer.Parent is Border border)
+        var border = (sender as Border);
+        if (border != null)
         {
             border.Stroke = Colors.DeepSkyBlue;
             border.StrokeThickness = 3;
@@ -52,19 +63,12 @@ public partial class DrawPage
 
     private void OnDragLeave(object sender, DragEventArgs e)
     {
-        // Reset visual feedback
-        if (sender is DropGestureRecognizer recognizer && recognizer.Parent is Border border)
+        var border = (sender as Border);
+
+        if (border != null)
         {
-            if (BindingContext is DrawPageViewModel vm && vm.IsDragging)
-            {
-                border.Stroke = Colors.LightBlue;
-                border.StrokeThickness = 2;
-            }
-            else
-            {
-                border.Stroke = Colors.Gray;
-                border.StrokeThickness = 1;
-            }
+            border.Stroke = Colors.Gray;
+            border.StrokeThickness = 1;
         }
     }
 
@@ -74,22 +78,27 @@ public partial class DrawPage
         {
             vm.IsDragging = false;
 
-            // Robustness: ensure we have the dragged slot
-            if (vm.DraggedSlot == null && e.Data.Properties.TryGetValue("slot", out var draggedSlotObj) && draggedSlotObj is BracketSlotViewModel draggedSlot)
-            {
-                vm.DraggedSlot = draggedSlot;
-            }
+            var gestures = (sender as Border)?.GestureRecognizers;
 
-            if (sender is DropGestureRecognizer recognizer && recognizer.DropCommandParameter is BracketSlotViewModel targetSlot)
+            if (gestures != null)
             {
-                // Reset visual feedback for the target
-                if (recognizer.Parent is Border border)
+                var dropGesture = gestures.FirstOrDefault(g => g is DropGestureRecognizer);
+
+                if (dropGesture != null)
                 {
-                    border.Stroke = Colors.Gray;
-                    border.StrokeThickness = 1;
-                }
+                    var slot = ((DropGestureRecognizer)dropGesture).DropCommandParameter as BracketSlotViewModel;
 
-                vm.DropCommand.Execute(targetSlot);
+                    if (slot != null)
+                    {
+                        if (sender is Border border)
+                        {
+                            border.Stroke = Colors.Gray;
+                            border.StrokeThickness = 1;
+                        }
+
+                        vm.DropCommand.Execute(slot);
+                    }
+                }
             }
         }
     }
