@@ -23,6 +23,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<CompetitionsPage>();
         builder.Services.AddTransient<CompetitorsPage>();
         builder.Services.AddTransient<DrawPage>();
+        builder.Services.AddTransient<DragDropPage>();
 
         builder.Services.AddTransientPopup<CategoryPopup, CategoryPopupViewModel>();
         builder.Services.AddTransientPopup<CompetitorPopup, CompetitorPopupViewModel>();

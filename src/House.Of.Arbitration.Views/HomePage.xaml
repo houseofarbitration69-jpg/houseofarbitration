@@ -33,8 +33,7 @@
                 TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="MasterPage"
-            >
-            </controls:IconButton>
+            />
             <controls:IconButton 
                 Text="{Binding Resources.SLAVE}"
                 IsFullWidth="True"
@@ -42,8 +41,15 @@
                 TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="SlavePage"
-            >
-            </controls:IconButton>
+            />
+            <controls:IconButton 
+                Text="TEST"
+                IsFullWidth="True"
+                ButtonBackgroundColor="{DynamicResource Valid}"
+                TextColor="{DynamicResource PrimaryTextColor}"
+                Command="{Binding NavigateToCommand}"
+                CommandParameter="Test"
+            />
         </VerticalStackLayout>
     </Grid>
 </base:BasePage>
