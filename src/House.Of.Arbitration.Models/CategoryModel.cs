@@ -43,5 +43,5 @@ public enum RoundType
 {
     None,
     Elimination,
-    Group
+    Robin
 }

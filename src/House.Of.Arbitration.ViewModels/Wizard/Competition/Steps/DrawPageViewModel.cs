@@ -22,6 +22,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     private CategoryModel? _category;
     private ObservableCollection<CompetitorModel> _competitors = new();
     private ObservableCollection<BracketRoundViewModel> _rounds = new();
+    private List<BracketSlotViewModel> _pouleSlots = new();
     private BracketSlotViewModel? _draggedSlot;
     private bool _isDragging;
     #endregion
@@ -53,8 +54,13 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                     {
                         InitializeBracket();
                     }
+                    else if (IsRobin)
+                    {
+                        InitializeRobin();
+                    }
                 }
                 OnPropertyChanged(nameof(IsElimination));
+                OnPropertyChanged(nameof(IsRobin));
                 OnPropertyChanged(nameof(Rounds));
             }
         }
@@ -73,6 +79,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     }
 
     public bool IsElimination => Category?.RoundType == RoundType.Elimination;
+    public bool IsRobin => Category?.RoundType == RoundType.Robin;
     #endregion
 
     #region Constructors
@@ -105,6 +112,8 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         while (m < n) m *= 2;
         if (m < 2) m = 2; // Min 1 match
 
+        int globalMatchOrder = 1;
+
         // Prepare Round 1 matches
         var round1 = new BracketRoundViewModel { Name = "Round 1" };
         var matchesInRound = m / 2;
@@ -112,6 +121,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         for (int i = 0; i < matchesInRound; i++)
         {
             var match = new BracketMatchViewModel();
+            match.Order = globalMatchOrder++;
             match.Slot1.Competitor = (i * 2 < n) ? Category.Competitors[i * 2] : null;
             match.Slot2.Competitor = (i * 2 + 1 < n) ? Category.Competitors[i * 2 + 1] : null;
             round1.Matches.Add(match);
@@ -127,7 +137,9 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             var nextRound = new BracketRoundViewModel { Name = $"Round {roundIndex++}" };
             for (int i = 0; i < currentMatches; i++)
             {
-                nextRound.Matches.Add(new BracketMatchViewModel());
+                var match = new BracketMatchViewModel();
+                match.Order = globalMatchOrder++;
+                nextRound.Matches.Add(match);
             }
             newRounds.Add(nextRound);
         }
@@ -139,6 +151,44 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
         CalculateMargins(newRounds);
 
+        Rounds = newRounds;
+    }
+
+    private void InitializeRobin()
+    {
+        if (Category == null) return;
+
+        var newRounds = new ObservableCollection<BracketRoundViewModel>();
+        var pouleRound = new BracketRoundViewModel { Name = "Matchs de Poule" };
+
+        var competitors = Category.Competitors;
+        int n = competitors.Count;
+        int globalMatchOrder = 1;
+
+        // Create shared slots for each competitor position in the poule
+        _pouleSlots = new List<BracketSlotViewModel>();
+        for (int i = 0; i < n; i++)
+        {
+            _pouleSlots.Add(new BracketSlotViewModel { Competitor = competitors[i] });
+        }
+
+        // Generate all unique combinations (everyone against everyone)
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = i + 1; j < n; j++)
+            {
+                var match = new BracketMatchViewModel();
+                match.Order = globalMatchOrder++;
+                // Link shared instances
+                match.Slot1 = _pouleSlots[i];
+                match.Slot2 = _pouleSlots[j];
+                match.Height = 100;
+                match.Margin = new Thickness(0, 10, 0, 10);
+                pouleRound.Matches.Add(match);
+            }
+        }
+
+        newRounds.Add(pouleRound);
         Rounds = newRounds;
     }
 
@@ -186,6 +236,57 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
     #region Commands
     [RelayCommand]
+    private async Task Save()
+    {
+        if (Category == null) return;
+
+        try
+        {
+            // Update Category.Competitors as before
+            UpdateCategoryCompetitors();
+
+            // Prepare DrawModel to save
+            var draw = new DrawModel
+            {
+                CategoryId = Category.Id,
+                Category = Category,
+                DrawSandas = new List<DrawSandaModel>()
+            };
+
+            // Gather all matches from all rounds
+            foreach (var round in Rounds)
+            {
+                foreach (var match in round.Matches)
+                {
+                    if (match.IsWinnerSlot) continue;
+
+                    draw.DrawSandas.Add(new DrawSandaModel
+                    {
+                        Draw = draw,
+                        Order = match.Order,
+                        Competitor1Id = match.Slot1.Competitor?.Id,
+                        Competitor1 = match.Slot1.Competitor,
+                        Competitor2Id = match.Slot2.Competitor?.Id,
+                        Competitor2 = match.Slot2.Competitor
+                    });
+                }
+            }
+
+            // Persistence
+            // We might need to check if a draw already exists for this category to use Update instead of Add
+            // For now, let's assume Add/Update logic handled by repository or simpler:
+            await _repository.AddAsync(draw);
+
+            await Shell.Current.DisplayAlert("Succès", "Le tirage et l'ordre des matchs ont été sauvegardés.", "OK");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors de la sauvegarde du tirage");
+            await Shell.Current.DisplayAlert("Erreur", "Impossible de sauvegarder le tirage.", "OK");
+        }
+    }
+
+    [RelayCommand]
     private async Task Close()
     {
         await Shell.Current.GoToAsync("..");
@@ -219,8 +320,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         targetSlot.Competitor = DraggedSlot.Competitor;
         DraggedSlot.Competitor = temp;
 
-        // Update Category.Competitors list if we are in Round 1
-        // (This is a bit simplified, but ensures persistence for basic draws)
+        // Update Category.Competitors list
         UpdateCategoryCompetitors();
 
         DraggedSlot = null;
@@ -231,20 +331,27 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
     private void UpdateCategoryCompetitors()
     {
-        if (Category == null || Rounds.Count == 0) return;
+        if (Category == null) return;
 
-        var round1 = Rounds[0];
-        var newCompetitors = new List<CompetitorModel>();
-        
-        foreach (var match in round1.Matches)
+        if (IsElimination && Rounds.Count > 0)
         {
-            if (match.Slot1.Competitor != null)
-                newCompetitors.Add(match.Slot1.Competitor);
-            if (match.Slot2.Competitor != null)
-                newCompetitors.Add(match.Slot2.Competitor);
+            var round1 = Rounds[0];
+            var newCompetitors = new List<CompetitorModel>();
+            
+            foreach (var match in round1.Matches)
+            {
+                if (match.Slot1.Competitor != null)
+                    newCompetitors.Add(match.Slot1.Competitor);
+                if (match.Slot2.Competitor != null)
+                    newCompetitors.Add(match.Slot2.Competitor);
+            }
+            
+            Category.Competitors = newCompetitors;
         }
-        
-        Category.Competitors = newCompetitors;
+        else if (IsRobin)
+        {
+            Category.Competitors = _pouleSlots.Select(s => s.Competitor).ToList()!;
+        }
     }
     #endregion
 }
@@ -272,6 +379,9 @@ public partial class BracketMatchViewModel : ObservableObject
     private Thickness _margin = new Thickness(0);
     private double _height = 0.0;
     private bool _isWinnerSlot =false;
+    private int _order;
+    private BracketSlotViewModel _slot1 = new();
+    private BracketSlotViewModel _slot2 = new();
     #endregion
 
     #region Properties
@@ -293,8 +403,38 @@ public partial class BracketMatchViewModel : ObservableObject
         set => SetProperty(ref _isWinnerSlot, value);
     }
 
-    public BracketSlotViewModel Slot1 { get; } = new();
-    public BracketSlotViewModel Slot2 { get; } = new();
+    public int Order
+    {
+        get => _order;
+        set => SetProperty(ref _order, value);
+    }
+
+    public BracketSlotViewModel Slot1 
+    { 
+        get => _slot1; 
+        set => SetProperty(ref _slot1, value); 
+    }
+    
+    public BracketSlotViewModel Slot2 
+    { 
+        get => _slot2; 
+        set => SetProperty(ref _slot2, value); 
+    }
+    #endregion
+
+    #region Commands
+    [RelayCommand]
+    private void IncrementOrder()
+    {
+        Order++;
+    }
+
+    [RelayCommand]
+    private void DecrementOrder()
+    {
+        if (Order > 1)
+            Order--;
+    }
     #endregion
 }
 

@@ -210,8 +210,8 @@
   <data name="ENUM_ROUND_NONE" xml:space="preserve">
     <value>[ENUM ROUND NONE]</value>
   </data>
-  <data name="ENUM_ROUND_GROUP" xml:space="preserve">
-    <value>[ENUM ROUND GROUP]</value>
+  <data name="ENUM_ROUND_ROBIN" xml:space="preserve">
+    <value>[ENUM ROUND Robin]</value>
   </data>
   <data name="ENUM_GENRE_NONE" xml:space="preserve">
     <value>[ENUM GENRE NONE]</value>

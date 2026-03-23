@@ -210,8 +210,8 @@
   <data name="ENUM_ROUND_NONE" xml:space="preserve">
     <value>Sélectionnez un type de round</value>
   </data>
-  <data name="ENUM_ROUND_GROUP" xml:space="preserve">
-    <value>Poule</value>
+  <data name="ENUM_ROUND_ROBIN" xml:space="preserve">
+    <value>Round Robin</value>
   </data>
   <data name="ENUM_GENRE_NONE" xml:space="preserve">
     <value>Sélectionnez un genre</value>
@@ -291,4 +291,4 @@
   <data name="DELETE_COMPETITOR_MESSAGE" xml:space="preserve">
     <value>Êtes-vous sûr de vouloir supprimer ce compétiteur ?</value>
   </data>
-  </root>
+</root>

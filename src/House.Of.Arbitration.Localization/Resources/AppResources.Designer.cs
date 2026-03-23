@@ -187,6 +187,33 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [CONFIRM DELETE].
+        /// </summary>
+        public static string CONFIRM_DELETE {
+            get {
+                return ResourceManager.GetString("CONFIRM_DELETE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ARE YOU SURE YOU WANT TO DELETE THIS CATEGORY ?].
+        /// </summary>
+        public static string DELETE_CATEGORY_MESSAGE {
+            get {
+                return ResourceManager.GetString("DELETE_CATEGORY_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ARE YOU SURE YOU WANT TO DELETE THIS COMPETITOR ?].
+        /// </summary>
+        public static string DELETE_COMPETITOR_MESSAGE {
+            get {
+                return ResourceManager.GetString("DELETE_COMPETITOR_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [ENUM AGE CADETS].
         /// </summary>
         public static string ENUM_AGE_CADETS {
@@ -313,20 +340,20 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à [ENUM ROUND GROUP].
-        /// </summary>
-        public static string ENUM_ROUND_GROUP {
-            get {
-                return ResourceManager.GetString("ENUM_ROUND_GROUP", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Recherche une chaîne localisée semblable à [ENUM ROUND NONE].
         /// </summary>
         public static string ENUM_ROUND_NONE {
             get {
                 return ResourceManager.GetString("ENUM_ROUND_NONE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM ROUND Robin].
+        /// </summary>
+        public static string ENUM_ROUND_ROBIN {
+            get {
+                return ResourceManager.GetString("ENUM_ROUND_ROBIN", resourceCulture);
             }
         }
         
@@ -399,6 +426,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string NEXT {
             get {
                 return ResourceManager.GetString("NEXT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [NO].
+        /// </summary>
+        public static string NO {
+            get {
+                return ResourceManager.GetString("NO", resourceCulture);
             }
         }
         
@@ -534,6 +570,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string WEIGHT_UNIT {
             get {
                 return ResourceManager.GetString("WEIGHT_UNIT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [YES].
+        /// </summary>
+        public static string YES {
+            get {
+                return ResourceManager.GetString("YES", resourceCulture);
             }
         }
     }

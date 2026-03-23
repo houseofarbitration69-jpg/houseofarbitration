@@ -1,25 +1,25 @@
 <svg viewBox="0 0 24 24" width="32" height="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <style>
         :root, .palette0 {color: currentColor;
-            --color0: #fcc219;
-            --color1: #865c50;
-            --color2: #d1701c;
-            --color3: #ffefab;
-            --color4: #fffcfd;
-            --color5: #ffa828;
-            --color6: #fec417;
-            --color7: #191919;
-            --color8: #fff;
-            --color9: #ffbfc5;
-            --color10: #ff808c;
+            --color0: #191919;
+            --color1: #fff;
+            --color2: #ffbfc5;
+            --color3: #ff808c;
+            --color4: #fcc219;
+            --color5: #865c50;
+            --color6: #d1701c;
+            --color7: #ffefab;
+            --color8: #fffcfd;
+            --color9: #ffa828;
+            --color10: #fec417;
         }
     </style>
     <!-- Icon from Ultimate color icons by Streamline - https://creativecommons.org/licenses/by/4.0/ -->
     <g fill="none">
-        <path fill="var(--color10, #ff808c)" d="M1.459 7.875V4.208a0.917 0.917 0 0 1 0.916-0.916h19.25a0.916 0.916 0 0 1 0.917 0.916v3.667z" />
-        <path fill="var(--color9, #ffbfc5)" d="M1.459 5.583V4.208a0.917 0.917 0 0 1 0.916-0.916h19.25a0.916 0.916 0 0 1 0.917 0.916v1.375z" />
-        <path fill="var(--color8, #fff)" d="M1.459 7.875h21.083v13.75a0.917 0.917 0 0 1-0.917 0.917H2.375a0.917 0.917 0 0 1-0.916-0.917z" />
-        <path stroke="var(--color7, #191919)" stroke-linecap="round" stroke-linejoin="round" d="M21.625 3.293H2.375a0.917 0.917 0 0 0-0.916 0.916v17.417c0 0.506 0.41 0.917 0.916 0.917h19.25c0.506 0 0.917-0.41 0.917-0.917V4.209a0.917 0.917 0 0 0-0.917-0.916M6.042 1.46v4.583M17.959 1.46v4.583M1.459 7.876h21.083M6.959 18.418h4.583" />
-        <path stroke="var(--color7, #191919)" stroke-linecap="round" stroke-linejoin="round" d="M9.25 18.417v-6.875a0.458 0.458 0 0 0-0.744-0.359l-1.548 1.239M15.208 18.417l2.687-6.65a0.43 0.43 0 0 0-5e-3-0.46 0.5 0.5 0 0 0-0.425-0.224h-3.632a0.46 0.46 0 0 0-0.458 0.459v0.916" />
+        <path fill="var(--color3, #ff808c)" d="M1.459 7.875V4.208a0.917 0.917 0 0 1 0.916-0.916h19.25a0.916 0.916 0 0 1 0.917 0.916v3.667z" />
+        <path fill="var(--color2, #ffbfc5)" d="M1.459 5.583V4.208a0.917 0.917 0 0 1 0.916-0.916h19.25a0.916 0.916 0 0 1 0.917 0.916v1.375z" />
+        <path fill="var(--color1, #fff)" d="M1.459 7.875h21.083v13.75a0.917 0.917 0 0 1-0.917 0.917H2.375a0.917 0.917 0 0 1-0.916-0.917z" />
+        <path stroke="var(--color0, #191919)" stroke-linecap="round" stroke-linejoin="round" d="M21.625 3.293H2.375a0.917 0.917 0 0 0-0.916 0.916v17.417c0 0.506 0.41 0.917 0.916 0.917h19.25c0.506 0 0.917-0.41 0.917-0.917V4.209a0.917 0.917 0 0 0-0.917-0.916M6.042 1.46v4.583M17.959 1.46v4.583M1.459 7.876h21.083M6.959 18.418h4.583" />
+        <path stroke="var(--color0, #191919)" stroke-linecap="round" stroke-linejoin="round" d="M9.25 18.417v-6.875a0.458 0.458 0 0 0-0.744-0.359l-1.548 1.239M15.208 18.417l2.687-6.65a0.43 0.43 0 0 0-5e-3-0.46 0.5 0.5 0 0 0-0.425-0.224h-3.632a0.46 0.46 0 0 0-0.458 0.459v0.916" />
     </g>
 </svg>

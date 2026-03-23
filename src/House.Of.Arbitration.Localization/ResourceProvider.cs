@@ -178,10 +178,10 @@ LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_ELIMINATION));
     public string ENUM_ROUND_NONE =>
 LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_NONE));
     /// <summary>
-    /// Gets the translated "ENUM_ROUND_GROUP" string.
+    /// Gets the translated "ENUM_ROUND_ROBIN" string.
     /// </summary>
-    public string ENUM_ROUND_GROUP =>
-LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_GROUP));
+    public string ENUM_ROUND_ROBIN =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_ROBIN));
     /// <summary>
     /// Gets the translated "ENUM_GENRE_NONE" string.
     /// </summary>
