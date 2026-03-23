@@ -49,6 +49,11 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             {
                 if (value != null)
                 {
+                    if (value.Type == CategoryType.Taolu)
+                    {
+                        value.RoundType = RoundType.Order;
+                    }
+
                     Competitors = new ObservableCollection<CompetitorModel>(value.Competitors ?? new());
                     if (IsElimination)
                     {
@@ -58,9 +63,14 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                     {
                         InitializeRobin();
                     }
+                    else if (IsOrder)
+                    {
+                        InitializeOrder();
+                    }
                 }
                 OnPropertyChanged(nameof(IsElimination));
                 OnPropertyChanged(nameof(IsRobin));
+                OnPropertyChanged(nameof(IsOrder));
                 OnPropertyChanged(nameof(Rounds));
             }
         }
@@ -80,6 +90,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
     public bool IsElimination => Category?.RoundType == RoundType.Elimination;
     public bool IsRobin => Category?.RoundType == RoundType.Robin;
+    public bool IsOrder => Category?.RoundType == RoundType.Order;
     #endregion
 
     #region Constructors
@@ -189,6 +200,36 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
 
         newRounds.Add(pouleRound);
+        Rounds = newRounds;
+    }
+
+    private void InitializeOrder()
+    {
+        if (Category == null) return;
+
+        var newRounds = new ObservableCollection<BracketRoundViewModel>();
+        var orderRound = new BracketRoundViewModel { Name = "Ordre de passage" };
+
+        var competitors = Category.Competitors;
+        int n = competitors.Count;
+        int globalMatchOrder = 1;
+
+        _pouleSlots = new List<BracketSlotViewModel>();
+        for (int i = 0; i < n; i++)
+        {
+            var slot = new BracketSlotViewModel { Competitor = competitors[i] };
+            _pouleSlots.Add(slot);
+
+            var match = new BracketMatchViewModel();
+            match.Order = globalMatchOrder++;
+            match.Slot1 = slot;
+            // Slot2 remains empty for Order type
+            match.Height = 80;
+            match.Margin = new Thickness(0, 5, 0, 5);
+            orderRound.Matches.Add(match);
+        }
+
+        newRounds.Add(orderRound);
         Rounds = newRounds;
     }
 
@@ -348,7 +389,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             
             Category.Competitors = newCompetitors;
         }
-        else if (IsRobin)
+        else if (IsRobin || IsOrder)
         {
             Category.Competitors = _pouleSlots.Select(s => s.Competitor).ToList()!;
         }

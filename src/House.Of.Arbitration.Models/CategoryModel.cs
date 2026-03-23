@@ -43,5 +43,6 @@ public enum RoundType
 {
     None,
     Elimination,
-    Robin
+    Robin,
+    Order
 }

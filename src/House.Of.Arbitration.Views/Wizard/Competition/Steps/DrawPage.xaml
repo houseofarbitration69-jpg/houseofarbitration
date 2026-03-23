@@ -371,6 +371,126 @@
                     </BindableLayout.ItemTemplate>
                 </Grid>
 
+                <!-- Order View (Simple List) -->
+                <Grid 
+                    IsVisible="{Binding IsOrder}"
+                    Padding="20"
+                    VerticalOptions="Start"
+                    HorizontalOptions="Center"
+                    BindableLayout.ItemsSource="{Binding Rounds}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BracketRoundViewModel">
+                            <VerticalStackLayout Spacing="0">
+                                <Label Text="{Binding Name}" 
+                                       TextColor="White" 
+                                       FontSize="18" 
+                                       FontAttributes="Bold" 
+                                       HorizontalOptions="Center" 
+                                       Margin="0,0,0,20" />
+
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Matches}" HorizontalOptions="Center" Spacing="10">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:BracketMatchViewModel">
+                                            <Grid HeightRequest="80" WidthRequest="300" ColumnDefinitions="45, *">
+                                                <!-- Match Order Badge -->
+                                                <Grid Grid.Column="0" 
+                                                      VerticalOptions="Center" 
+                                                      RowDefinitions="Auto, Auto, Auto"
+                                                      RowSpacing="0">
+                                                    <Label Text="▴" 
+                                                           TextColor="{DynamicResource Primary}" 
+                                                           HorizontalOptions="Center" 
+                                                           FontSize="20"
+                                                           Padding="0"
+                                                           Margin="0">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding IncrementOrderCommand}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                    <Border Grid.Row="1" 
+                                                            BackgroundColor="#333" 
+                                                            Stroke="Gray" 
+                                                            StrokeThickness="1" 
+                                                            HeightRequest="30" WidthRequest="35"
+                                                            HorizontalOptions="Center"
+                                                            Padding="0">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Grid>
+                                                            <Label Text="{Binding Order}"
+                                                                   TextColor="White"
+                                                                   FontSize="12"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center" />
+                                                            <Entry Text="{Binding Order}"
+                                                                   Keyboard="Numeric"
+                                                                   Opacity="0"
+                                                                   HorizontalOptions="Fill"
+                                                                   VerticalOptions="Fill"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center"
+                                                                   MinimumHeightRequest="0"
+                                                                   MinimumWidthRequest="0" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <Label Grid.Row="2" Text="▾" 
+                                                           TextColor="{DynamicResource Primary}" 
+                                                           HorizontalOptions="Center" 
+                                                           FontSize="20"
+                                                           Padding="0"
+                                                           Margin="0">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding DecrementOrderCommand}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                </Grid>
+
+                                                <!-- Competitor Slot -->
+                                                <Border Grid.Column="1" 
+                                                        Padding="10" 
+                                                        HeightRequest="40" 
+                                                        BackgroundColor="#F5F5F5" 
+                                                        Stroke="Gray"
+                                                        StrokeThickness="1"
+                                                        VerticalOptions="Center">
+                                                    <Border.StrokeShape>
+                                                        <RoundRectangle CornerRadius="5"/>
+                                                    </Border.StrokeShape>
+                                                    <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
+                                                        <Label Text="{Binding Slot1.Competitor.LastName}" 
+                                                               TextColor="Black" 
+                                                               VerticalOptions="Center" />
+                                                        <Label Grid.Column="1" Text="➕" 
+                                                               IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
+                                                               FontSize="12" VerticalOptions="Center" Opacity="0.6" />
+                                                    </Grid>
+                                                    <Border.GestureRecognizers>
+                                                        <DragGestureRecognizer 
+                                                            CanDrag="True" 
+                                                            DragStarting="OnDragStarting"
+                                                            DropCompleted="OnDragCompleted"
+                                                            DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
+                                                            DragStartingCommandParameter="{Binding Slot1}" />
+                                                        <DropGestureRecognizer 
+                                                            AllowDrop="True" 
+                                                            DragOver="OnDragOver"
+                                                            DragLeave="OnDragLeave"
+                                                            Drop="OnDrop"
+                                                            DropCommandParameter="{Binding Slot1}" />
+                                                    </Border.GestureRecognizers>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </Grid>
+
                 <!-- Unsupported View -->
                 <VerticalStackLayout IsVisible="{Binding Rounds.Count, Converter={StaticResource InvertBoolConverter}}"
                                      HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
