@@ -54,7 +54,7 @@
                                                     </Border.StrokeShape>
                                                     <Border.Triggers>
                                                         <DataTrigger TargetType="Border" Binding="{Binding BindingContext.IsDragging, Source={x:Reference this}}" Value="True">
-                                                            <Setter Property="Stroke" Value="LightBlue" />
+                                                            <Setter Property="Stroke" Value="{DynamicResource EditColor}" />
                                                             <Setter Property="StrokeThickness" Value="2" />
                                                         </DataTrigger>
                                                     </Border.Triggers>
@@ -91,7 +91,7 @@
                                                     </Border.StrokeShape>
                                                     <Border.Triggers>
                                                         <DataTrigger TargetType="Border" Binding="{Binding BindingContext.IsDragging, Source={x:Reference this}}" Value="True">
-                                                            <Setter Property="Stroke" Value="LightBlue" />
+                                                            <Setter Property="Stroke" Value="{DynamicResource EditColor}" />
                                                             <Setter Property="StrokeThickness" Value="2" />
                                                         </DataTrigger>
                                                     </Border.Triggers>

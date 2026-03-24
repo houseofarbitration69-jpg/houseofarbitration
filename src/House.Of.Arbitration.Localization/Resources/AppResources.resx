@@ -291,4 +291,10 @@
   <data name="DELETE_COMPETITOR_MESSAGE" xml:space="preserve">
     <value>[ARE YOU SURE YOU WANT TO DELETE THIS COMPETITOR ?]</value>
   </data>
+  <data name="DELETE_COMPETITION_MESSAGE" xml:space="preserve">
+    <value>[DELETE COMPETITION MESSAGE]</value>
+  </data>
+  <data name="DRAW" xml:space="preserve">
+    <value>[DRAW]</value>
+  </data>
 </root>

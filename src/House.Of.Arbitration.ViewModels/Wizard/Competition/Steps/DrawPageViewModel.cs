@@ -1,5 +1,6 @@
 #region Imports
 using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
@@ -283,6 +284,16 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
         try
         {
+            // Delete existing draws for this category
+            var existingDraws = await _repository.GetAllAsync();
+            if (existingDraws != null)
+            {
+                foreach (var existingDraw in existingDraws.Where(d => d.CategoryId == Category.Id))
+                {
+                    await _repository.DeleteAsync(existingDraw);
+                }
+            }
+
             // Update Category.Competitors as before
             UpdateCategoryCompetitors();
 
@@ -290,7 +301,6 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             var draw = new DrawModel
             {
                 CategoryId = Category.Id,
-                Category = Category,
                 DrawSandas = new List<DrawSandaModel>()
             };
 
@@ -306,9 +316,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                         Draw = draw,
                         Order = match.Order,
                         Competitor1Id = match.Slot1.Competitor?.Id,
-                        Competitor1 = match.Slot1.Competitor,
                         Competitor2Id = match.Slot2.Competitor?.Id,
-                        Competitor2 = match.Slot2.Competitor
                     });
                 }
             }
@@ -318,12 +326,13 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             // For now, let's assume Add/Update logic handled by repository or simpler:
             await _repository.AddAsync(draw);
 
-            await Shell.Current.DisplayAlert("Succès", "Le tirage et l'ordre des matchs ont été sauvegardés.", "OK");
+            var toast = Toast.Make("Le tirage et l'ordre des matchs ont été sauvegardés.", CommunityToolkit.Maui.Core.ToastDuration.Long, 14);
+            await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erreur lors de la sauvegarde du tirage");
-            await Shell.Current.DisplayAlert("Erreur", "Impossible de sauvegarder le tirage.", "OK");
+            await Shell.Current.DisplayAlertAsync("Erreur", "Impossible de sauvegarder le tirage.", "OK");
         }
     }
 

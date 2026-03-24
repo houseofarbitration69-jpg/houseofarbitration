@@ -33,6 +33,7 @@
                     FontSize="22" 
                     VerticalOptions="Center"
                     HorizontalOptions="Start"
+                    TextColor="White"
                 />
             </HorizontalStackLayout>
 
@@ -50,7 +51,7 @@
                 <controls:IconButton
                     Grid.Column="0" 
                     Text="{Binding CancelText}"
-                    ButtonBackgroundColor="{DynamicResource Valid}"
+                    ButtonBackgroundColor="{DynamicResource ValidColor}"
                     TextColor="Black"
                     IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                     Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
@@ -61,11 +62,11 @@
                 <controls:IconButton
                     Grid.Column="1"
                     Text="{Binding AcceptText}"
-                    TextColor="White"
-                    ButtonBackgroundColor="{DynamicResource Error}"
+                    TextColor="Black"
+                    ButtonBackgroundColor="{DynamicResource ErrorColor}"
                     IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                     Icon="{x:Static helpers:FontCustomIcons.TRASH}"
-                    IconColor="White"
+                    IconColor="Black"
                     Command="{Binding AcceptCommand}"
                 />
             </Grid>

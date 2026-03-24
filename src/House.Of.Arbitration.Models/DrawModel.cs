@@ -6,7 +6,7 @@ public class DrawModel
 
     public required int CategoryId { get; set; }
 
-    public required CategoryModel Category { get; set; }
+    public CategoryModel? Category { get; set; }
 
     public List<DrawSandaModel>? DrawSandas { get; set; }
 

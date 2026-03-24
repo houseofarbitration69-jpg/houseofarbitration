@@ -73,7 +73,7 @@
                                         <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                             Icon="{x:Static helpers:FontCustomIcons.PEN}"
-                                            ButtonBackgroundColor="LightBlue"
+                                            ButtonBackgroundColor="{DynamicResource EditColor}"
                                             IconColor="Black"
                                             Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=EditCategoryCommand}"
                                             CommandParameter="{Binding}"
@@ -81,7 +81,7 @@
                                         <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                             Icon="{x:Static helpers:FontCustomIcons.DOGI}"
-                                            ButtonBackgroundColor="LightGreen"
+                                            ButtonBackgroundColor="{DynamicResource ValidColor}"
                                             IconColor="Black"
                                             Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=ShowCompetitorsCommand}"
                                             CommandParameter="{Binding}"
@@ -89,7 +89,7 @@
                                         <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                             Icon="{x:Static helpers:FontCustomIcons.DRAWS}"
-                                            ButtonBackgroundColor="LightGreen"
+                                            ButtonBackgroundColor="{DynamicResource ValidColor}"
                                             IconColor="Black"
                                             Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=ShowDrawCommand}"
                                             CommandParameter="{Binding}"
@@ -97,8 +97,8 @@
                                         <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                             Icon="{x:Static helpers:FontCustomIcons.TRASH}"
-                                            ButtonBackgroundColor="Red"
-                                            IconColor="White"
+                                            ButtonBackgroundColor="{DynamicResource ErrorColor}"
+                                            IconColor="Black"
                                             Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=DeleteCategoryCommand}"
                                             CommandParameter="{Binding}"
                                         />

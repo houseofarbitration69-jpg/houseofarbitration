@@ -71,7 +71,13 @@ public partial class MasterViewModel : BaseViewModel
     private async Task DeleteCompetition(CompetitionModel competition)
     {
         if (competition == null) return;
-        bool confirm = await Shell.Current.DisplayAlertAsync("Suppression", $"Voulez-vous supprimer {competition.Name} ?", "Oui", "Non");
+
+        bool confirm = await DisplayConfirmation(
+            Resources.CONFIRM_DELETE,
+            Resources.DELETE_COMPETITION_MESSAGE,
+            Resources.YES,
+            Resources.NO);
+
         if (confirm)
         {
             await _repository.DeleteAsync(competition);

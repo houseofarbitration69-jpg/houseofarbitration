@@ -74,7 +74,7 @@
                                 <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                             Icon="{x:Static helpers:FontCustomIcons.PEN}"
-                                            ButtonBackgroundColor="LightBlue"
+                                            ButtonBackgroundColor="{DynamicResource EditColor}"
                                             IconColor="Black"
                                             Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=EditCommand}"
                                             CommandParameter="{Binding}"
@@ -82,8 +82,8 @@
                                 <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                             Icon="{x:Static helpers:FontCustomIcons.TRASH}"
-                                            ButtonBackgroundColor="Red"
-                                            IconColor="White"
+                                            ButtonBackgroundColor="{DynamicResource ErrorColor}"
+                                            IconColor="Black"
                                             Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=DeleteCommand}"
                                             CommandParameter="{Binding}"
                                         />
@@ -105,7 +105,7 @@
             <Button 
                 Grid.Column="1" 
                 Text="{Binding Resources.CLOSE_ACTION}" 
-                BackgroundColor="{DynamicResource Error}"
+                BackgroundColor="{DynamicResource ErrorColor}"
                 TextColor="White"
                 Command="{Binding CloseCommand}" 
                 Padding="15" 

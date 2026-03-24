@@ -29,7 +29,7 @@
             <controls:IconButton 
                 Text="{Binding Resources.MASTER}"
                 IsFullWidth="True"
-                ButtonBackgroundColor="{DynamicResource Valid}"
+                ButtonBackgroundColor="{DynamicResource ValidColor}"
                 TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="MasterPage"
@@ -37,7 +37,7 @@
             <controls:IconButton 
                 Text="{Binding Resources.SLAVE}"
                 IsFullWidth="True"
-                ButtonBackgroundColor="{DynamicResource Valid}"
+                ButtonBackgroundColor="{DynamicResource ValidColor}"
                 TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="SlavePage"
@@ -45,7 +45,7 @@
             <controls:IconButton 
                 Text="TEST"
                 IsFullWidth="True"
-                ButtonBackgroundColor="{DynamicResource Valid}"
+                ButtonBackgroundColor="{DynamicResource ValidColor}"
                 TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="Test"

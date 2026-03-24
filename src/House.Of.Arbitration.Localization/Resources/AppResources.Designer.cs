@@ -205,11 +205,29 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [DELETE COMPETITION MESSAGE].
+        /// </summary>
+        public static string DELETE_COMPETITION_MESSAGE {
+            get {
+                return ResourceManager.GetString("DELETE_COMPETITION_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [ARE YOU SURE YOU WANT TO DELETE THIS COMPETITOR ?].
         /// </summary>
         public static string DELETE_COMPETITOR_MESSAGE {
             get {
                 return ResourceManager.GetString("DELETE_COMPETITOR_MESSAGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [DRAW].
+        /// </summary>
+        public static string DRAW {
+            get {
+                return ResourceManager.GetString("DRAW", resourceCulture);
             }
         }
         

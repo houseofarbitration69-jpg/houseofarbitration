@@ -40,7 +40,7 @@
                         />
                         <Border 
                             x:Name="NameBorder"
-                            Stroke="{DynamicResource Valid}"
+                            Stroke="{DynamicResource ValidColor}"
                             StrokeThickness="1"
                             BackgroundColor="{DynamicResource EntryBackgroundColor}"
                             Padding="12,4"
@@ -50,7 +50,7 @@
                             </Border.StrokeShape>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
-                                    <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <Grid RowDefinitions="35" ColumnDefinitions="Auto, *">
@@ -74,7 +74,7 @@
                         </Border>
                         <Label 
                             Text="{Binding Resources.NAME_REQUIRED}" 
-                            TextColor="{DynamicResource Error}" 
+                            TextColor="{DynamicResource ErrorColor}" 
                             FontSize="11" 
                             Margin="12,0"
                             IsVisible="{Binding Name, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" 
@@ -92,7 +92,7 @@
                         />
                         <Border 
                             x:Name="DateBorder"
-                            Stroke="{DynamicResource Valid}"
+                            Stroke="{DynamicResource ValidColor}"
                             StrokeThickness="1"
                             BackgroundColor="{DynamicResource EntryBackgroundColor}"
                             Padding="12,4"

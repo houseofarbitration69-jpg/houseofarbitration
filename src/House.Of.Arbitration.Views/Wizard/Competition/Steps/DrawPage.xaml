@@ -16,6 +16,7 @@
     <ContentPage.Resources>
         <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
         <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+        <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
@@ -24,14 +25,14 @@
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
             <VerticalStackLayout Grid.Column="0">
                 <Label 
-                    Text="DRAWS" 
+                    Text="{Binding Category, Converter={StaticResource CategoryToNameConverter}}" 
                     TextColor="{DynamicResource PageTitleColor}"
                     FontSize="28" 
                     VerticalOptions="Center"
                     HorizontalOptions="Start"
                 />
                 <Label 
-                    Text="{Binding Category.RoundType}"
+                    Text="{Binding Resources.DRAW}"
                     FontSize="14"
                     TextColor="White"
                     VerticalOptions="Center"
@@ -504,18 +505,18 @@
         <Grid Grid.Row="2" ColumnDefinitions="*, 200, 200, *" ColumnSpacing="20">
             <Button 
                 Grid.Column="1" 
-                Text="SAVE" 
-                BackgroundColor="{DynamicResource Primary}"
-                TextColor="White"
-                Command="{Binding SaveCommand}" 
+                Text="{Binding Resources.CLOSE_ACTION}" 
+                BackgroundColor="{DynamicResource ErrorColor}"
+                TextColor="Black"
+                Command="{Binding CloseCommand}" 
                 Padding="15" 
             />
             <Button 
                 Grid.Column="2" 
-                Text="{Binding Resources.CLOSE_ACTION}" 
-                BackgroundColor="{DynamicResource Error}"
-                TextColor="White"
-                Command="{Binding CloseCommand}" 
+                Text="{Binding Resources.VALIDATE_ACTION}" 
+                BackgroundColor="{DynamicResource ValidColor}"
+                TextColor="Black"
+                Command="{Binding SaveCommand}" 
                 Padding="15" 
             />
         </Grid>

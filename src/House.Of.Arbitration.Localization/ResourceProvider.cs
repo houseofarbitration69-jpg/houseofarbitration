@@ -312,6 +312,16 @@ LocalizationResourceManager.Instance.GetValue(nameof(DELETE_CATEGORY_MESSAGE));
     /// </summary>
     public string DELETE_COMPETITOR_MESSAGE =>
 LocalizationResourceManager.Instance.GetValue(nameof(DELETE_COMPETITOR_MESSAGE));
+    /// <summary>
+    /// Gets the translated "DELETE_COMPETITION_MESSAGE" string.
+    /// </summary>
+    public string DELETE_COMPETITION_MESSAGE =>
+LocalizationResourceManager.Instance.GetValue(nameof(DELETE_COMPETITION_MESSAGE));
+    /// <summary>
+    /// Gets the translated "DRAW" string.
+    /// </summary>
+    public string DRAW =>
+LocalizationResourceManager.Instance.GetValue(nameof(DRAW));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

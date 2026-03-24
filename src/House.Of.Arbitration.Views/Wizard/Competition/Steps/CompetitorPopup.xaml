@@ -48,7 +48,7 @@
                             TextColor="LightGray"
                         />
                         <Border 
-                            Stroke="{DynamicResource Valid}"
+                            Stroke="{DynamicResource ValidColor}"
                             StrokeThickness="1"
                             BackgroundColor="White"
                             Padding="0"
@@ -59,7 +59,7 @@
                             </Border.StrokeShape>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding LastName, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
-                                    <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <Entry 
@@ -83,7 +83,7 @@
                             TextColor="LightGray"
                         />
                         <Border 
-                            Stroke="{DynamicResource Valid}"
+                            Stroke="{DynamicResource ValidColor}"
                             StrokeThickness="1"
                             BackgroundColor="White"
                             Padding="0"
@@ -94,7 +94,7 @@
                             </Border.StrokeShape>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding FirstName, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
-                                    <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <Entry 
@@ -119,7 +119,7 @@
                             TextColor="LightGray"
                         />
                         <Border 
-                            Stroke="{DynamicResource Valid}"
+                            Stroke="{DynamicResource ValidColor}"
                             StrokeThickness="1"
                             BackgroundColor="{DynamicResource EntryBackgroundColor}"
                             MinimumHeightRequest="30"
@@ -131,7 +131,7 @@
                             </Border.StrokeShape>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding SelectedGenre.Value, Converter={StaticResource GenreToBoolConverter}, ConverterParameter='Invert'}" Value="True">
-                                    <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <Picker 
@@ -156,7 +156,7 @@
                             TextColor="LightGray"
                         />
                         <Border 
-                            Stroke="{DynamicResource Valid}"
+                            Stroke="{DynamicResource ValidColor}"
                             StrokeThickness="1"
                             BackgroundColor="White"
                             Padding="0"
@@ -167,7 +167,7 @@
                             </Border.StrokeShape>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding Club, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
-                                    <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <controls:SuggestEntry 
@@ -193,7 +193,7 @@
                             TextColor="LightGray"
                         />
                         <Border 
-                            Stroke="{DynamicResource Valid}"
+                            Stroke="{DynamicResource ValidColor}"
                             StrokeThickness="1"
                             BackgroundColor="{DynamicResource EntryBackgroundColor}"
                             MinimumHeightRequest="30"
@@ -207,7 +207,7 @@
                             </Border.StrokeShape>
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding BirthDate, Converter={StaticResource BirthDateToBoolConverter}}" Value="False">
-                                    <Setter Property="Stroke" Value="{DynamicResource Error}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <DatePicker 
@@ -229,7 +229,7 @@
                             TextColor="LightGray"
                         />
                         <Border 
-                            Stroke="{DynamicResource Valid}"
+                            Stroke="{DynamicResource ValidColor}"
                             StrokeThickness="1"
                             BackgroundColor="White"
                             Padding="0"
@@ -262,7 +262,7 @@
                 <controls:IconButton
                     Grid.Column="0" 
                     Text="{Binding Resources.CLOSE_ACTION}"
-                    ButtonBackgroundColor="{DynamicResource Error}"
+                    ButtonBackgroundColor="{DynamicResource ErrorColor}"
                     TextColor="{DynamicResource PrimaryTextColor}"
                     IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                     Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
@@ -274,7 +274,7 @@
                     Grid.Column="1"
                     Text="{Binding Resources.VALIDATE_ACTION}"
                     TextColor="{DynamicResource PrimaryTextColor}"
-                    ButtonBackgroundColor="{DynamicResource Valid}"
+                    ButtonBackgroundColor="{DynamicResource ValidColor}"
                     IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                     Icon="{x:Static helpers:FontCustomIcons.CHECK}"
                     IconColor="{DynamicResource PrimaryTextColor}"
