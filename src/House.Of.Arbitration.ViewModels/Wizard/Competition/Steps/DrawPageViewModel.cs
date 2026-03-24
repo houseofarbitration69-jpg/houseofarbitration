@@ -56,23 +56,10 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                     }
 
                     Competitors = new ObservableCollection<CompetitorModel>(value.Competitors ?? new());
-                    if (IsElimination)
-                    {
-                        InitializeBracket();
-                    }
-                    else if (IsRobin)
-                    {
-                        InitializeRobin();
-                    }
-                    else if (IsOrder)
-                    {
-                        InitializeOrder();
-                    }
                 }
                 OnPropertyChanged(nameof(IsElimination));
                 OnPropertyChanged(nameof(IsRobin));
                 OnPropertyChanged(nameof(IsOrder));
-                OnPropertyChanged(nameof(Rounds));
             }
         }
     }
@@ -103,17 +90,42 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     #endregion
 
     #region Implement IQueryAttributable
-    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey(nameof(Category)))
         {
             Category = (CategoryModel?)query[nameof(Category)];
+            await LoadDrawAsync();
         }
     }
     #endregion
 
     #region Private Methods
-    private void InitializeBracket()
+    private async Task LoadDrawAsync()
+    {
+        if (Category == null) return;
+
+        // Try to load existing draw from DB
+        var draws = await _repository.GetAllAsync("DrawSandas.Competitor1", "DrawSandas.Competitor2");
+        var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
+
+        if (IsElimination)
+        {
+            InitializeBracket(existingDraw);
+        }
+        else if (IsRobin)
+        {
+            InitializeRobin(existingDraw);
+        }
+        else if (IsOrder)
+        {
+            InitializeOrder(existingDraw);
+        }
+        
+        OnPropertyChanged(nameof(Rounds));
+    }
+
+    private void InitializeBracket(DrawModel? existingDraw = null)
     {
         if (Category == null) return;
 
@@ -134,8 +146,21 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         {
             var match = new BracketMatchViewModel();
             match.Order = globalMatchOrder++;
-            match.Slot1.Competitor = (i * 2 < n) ? Category.Competitors[i * 2] : null;
-            match.Slot2.Competitor = (i * 2 + 1 < n) ? Category.Competitors[i * 2 + 1] : null;
+            
+            if (existingDraw != null)
+            {
+                var savedMatch = existingDraw.DrawSandas?.FirstOrDefault(ms => ms.Order == match.Order);
+                if (savedMatch != null)
+                {
+                    match.Slot1.Competitor = savedMatch.Competitor1;
+                    match.Slot2.Competitor = savedMatch.Competitor2;
+                }
+            }
+            else
+            {
+                match.Slot1.Competitor = (i * 2 < n) ? Category.Competitors[i * 2] : null;
+                match.Slot2.Competitor = (i * 2 + 1 < n) ? Category.Competitors[i * 2 + 1] : null;
+            }
             round1.Matches.Add(match);
         }
         newRounds.Add(round1);
@@ -151,6 +176,17 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             {
                 var match = new BracketMatchViewModel();
                 match.Order = globalMatchOrder++;
+
+                if (existingDraw != null)
+                {
+                    var savedMatch = existingDraw.DrawSandas?.FirstOrDefault(ms => ms.Order == match.Order);
+                    if (savedMatch != null)
+                    {
+                        match.Slot1.Competitor = savedMatch.Competitor1;
+                        match.Slot2.Competitor = savedMatch.Competitor2;
+                    }
+                }
+
                 nextRound.Matches.Add(match);
             }
             newRounds.Add(nextRound);
@@ -166,7 +202,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         Rounds = newRounds;
     }
 
-    private void InitializeRobin()
+    private void InitializeRobin(DrawModel? existingDraw = null)
     {
         if (Category == null) return;
 
@@ -185,15 +221,41 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
 
         // Generate all unique combinations (everyone against everyone)
+        // If existing draw, we need to try to map competitors to the shared slots to maintain consistency if possible
+        // But for Robin, matches are between everyone. The DrawSandas might have specific Order.
+        
         for (int i = 0; i < n; i++)
         {
             for (int j = i + 1; j < n; j++)
             {
                 var match = new BracketMatchViewModel();
                 match.Order = globalMatchOrder++;
-                // Link shared instances
-                match.Slot1 = _pouleSlots[i];
-                match.Slot2 = _pouleSlots[j];
+                
+                if (existingDraw != null)
+                {
+                    var savedMatch = existingDraw.DrawSandas?.FirstOrDefault(ms => ms.Order == match.Order);
+                    if (savedMatch != null)
+                    {
+                        // For Robin, we rely on the same shared slots if possible, but existingDraw might have swapped them
+                        // Simple approach: if existingDraw exists, we might need a more complex mapping or just use saved data
+                        // For now, let's at least respect the saved competitors for that Order
+                        match.Slot1 = new BracketSlotViewModel { Competitor = savedMatch.Competitor1 };
+                        match.Slot2 = new BracketSlotViewModel { Competitor = savedMatch.Competitor2 };
+                        // We add these to _pouleSlots if they are "new" unique competitors? 
+                        // Actually Robin usually has fixed slots.
+                    }
+                    else
+                    {
+                        match.Slot1 = _pouleSlots[i];
+                        match.Slot2 = _pouleSlots[j];
+                    }
+                }
+                else
+                {
+                    match.Slot1 = _pouleSlots[i];
+                    match.Slot2 = _pouleSlots[j];
+                }
+
                 match.Height = 100;
                 match.Margin = new Thickness(0, 10, 0, 10);
                 pouleRound.Matches.Add(match);
@@ -204,7 +266,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         Rounds = newRounds;
     }
 
-    private void InitializeOrder()
+    private void InitializeOrder(DrawModel? existingDraw = null)
     {
         if (Category == null) return;
 
@@ -216,18 +278,37 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         int globalMatchOrder = 1;
 
         _pouleSlots = new List<BracketSlotViewModel>();
-        for (int i = 0; i < n; i++)
+        
+        if (existingDraw != null && existingDraw.DrawSandas != null)
         {
-            var slot = new BracketSlotViewModel { Competitor = competitors[i] };
-            _pouleSlots.Add(slot);
+            var sortedMatches = existingDraw.DrawSandas.OrderBy(ms => ms.Order).ToList();
+            foreach (var savedMatch in sortedMatches)
+            {
+                var slot = new BracketSlotViewModel { Competitor = savedMatch.Competitor1 };
+                _pouleSlots.Add(slot);
 
-            var match = new BracketMatchViewModel();
-            match.Order = globalMatchOrder++;
-            match.Slot1 = slot;
-            // Slot2 remains empty for Order type
-            match.Height = 80;
-            match.Margin = new Thickness(0, 5, 0, 5);
-            orderRound.Matches.Add(match);
+                var match = new BracketMatchViewModel();
+                match.Order = savedMatch.Order;
+                match.Slot1 = slot;
+                match.Height = 80;
+                match.Margin = new Thickness(0, 5, 0, 5);
+                orderRound.Matches.Add(match);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < n; i++)
+            {
+                var slot = new BracketSlotViewModel { Competitor = competitors[i] };
+                _pouleSlots.Add(slot);
+
+                var match = new BracketMatchViewModel();
+                match.Order = globalMatchOrder++;
+                match.Slot1 = slot;
+                match.Height = 80;
+                match.Margin = new Thickness(0, 5, 0, 5);
+                orderRound.Matches.Add(match);
+            }
         }
 
         newRounds.Add(orderRound);
