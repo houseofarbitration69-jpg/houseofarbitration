@@ -17,6 +17,7 @@
         <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
         <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
         <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
+        <converters:EqualityToBoolConverter x:Key="EqualityToBoolConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
@@ -146,13 +147,13 @@
                                                         </Grid>
                                                         <Border.GestureRecognizers>
                                                             <DragGestureRecognizer 
-                                                                CanDrag="True" 
+                                                                CanDrag="{Binding x:DataType='vm:BracketRoundViewModel', Source={RelativeSource AncestorType={x:Type vm:BracketRoundViewModel}}, Path=Name, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter='Round 1'}" 
                                                                 DragStarting="OnDragStarting"
                                                                 DropCompleted="OnDragCompleted"
                                                                 DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
                                                                 DragStartingCommandParameter="{Binding Slot1}" />
                                                             <DropGestureRecognizer 
-                                                                AllowDrop="True" 
+                                                                AllowDrop="{Binding x:DataType='vm:BracketRoundViewModel', Source={RelativeSource AncestorType={x:Type vm:BracketRoundViewModel}}, Path=Name, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter='Round 1'}" 
                                                                 DragOver="OnDragOver"
                                                                 DragLeave="OnDragLeave"
                                                                 Drop="OnDrop"
@@ -180,13 +181,13 @@
                                                         </Grid>
                                                         <Border.GestureRecognizers>
                                                             <DragGestureRecognizer 
-                                                                CanDrag="True" 
+                                                                CanDrag="{Binding x:DataType='vm:BracketRoundViewModel', Source={RelativeSource AncestorType={x:Type vm:BracketRoundViewModel}}, Path=Name, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter='Round 1'}" 
                                                                 DragStarting="OnDragStarting"
                                                                 DropCompleted="OnDragCompleted"
                                                                 DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
                                                                 DragStartingCommandParameter="{Binding Slot2}" />
                                                             <DropGestureRecognizer 
-                                                                AllowDrop="True" 
+                                                                AllowDrop="{Binding x:DataType='vm:BracketRoundViewModel', Source={RelativeSource AncestorType={x:Type vm:BracketRoundViewModel}}, Path=Name, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter='Round 1'}" 
                                                                 DragOver="OnDragOver"
                                                                 DragLeave="OnDragLeave"
                                                                 Drop="OnDrop"
@@ -310,24 +311,7 @@
                                                             <Label Text="{Binding Slot1.Competitor.LastName, FallbackValue='(BYE)'}" 
                                                                    TextColor="Black" 
                                                                    VerticalOptions="Center" />
-                                                            <Label Grid.Column="1" Text="➕" 
-                                                                   IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
-                                                                   FontSize="12" VerticalOptions="Center" Opacity="0.6" />
                                                         </Grid>
-                                                        <Border.GestureRecognizers>
-                                                            <DragGestureRecognizer 
-                                                                CanDrag="True" 
-                                                                DragStarting="OnDragStarting"
-                                                                DropCompleted="OnDragCompleted"
-                                                                DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
-                                                                DragStartingCommandParameter="{Binding Slot1}" />
-                                                            <DropGestureRecognizer 
-                                                                AllowDrop="True" 
-                                                                DragOver="OnDragOver"
-                                                                DragLeave="OnDragLeave"
-                                                                Drop="OnDrop"
-                                                                DropCommandParameter="{Binding Slot1}" />
-                                                        </Border.GestureRecognizers>
                                                     </Border>
 
                                                     <!-- Slot 2 -->
@@ -343,24 +327,7 @@
                                                             <Label Text="{Binding Slot2.Competitor.LastName, FallbackValue='(BYE)'}" 
                                                                    TextColor="Black" 
                                                                    VerticalOptions="Center" />
-                                                            <Label Grid.Column="1" Text="➕" 
-                                                                   IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
-                                                                   FontSize="12" VerticalOptions="Center" Opacity="0.6" />
                                                         </Grid>
-                                                        <Border.GestureRecognizers>
-                                                            <DragGestureRecognizer 
-                                                                CanDrag="True" 
-                                                                DragStarting="OnDragStarting"
-                                                                DropCompleted="OnDragCompleted"
-                                                                DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
-                                                                DragStartingCommandParameter="{Binding Slot2}" />
-                                                            <DropGestureRecognizer 
-                                                                AllowDrop="True" 
-                                                                DragOver="OnDragOver"
-                                                                DragLeave="OnDragLeave"
-                                                                Drop="OnDrop"
-                                                                DropCommandParameter="{Binding Slot2}" />
-                                                        </Border.GestureRecognizers>
                                                     </Border>
                                                 </VerticalStackLayout>
                                             </Grid>
@@ -464,24 +431,7 @@
                                                         <Label Text="{Binding Slot1.Competitor.LastName}" 
                                                                TextColor="Black" 
                                                                VerticalOptions="Center" />
-                                                        <Label Grid.Column="1" Text="➕" 
-                                                               IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
-                                                               FontSize="12" VerticalOptions="Center" Opacity="0.6" />
                                                     </Grid>
-                                                    <Border.GestureRecognizers>
-                                                        <DragGestureRecognizer 
-                                                            CanDrag="True" 
-                                                            DragStarting="OnDragStarting"
-                                                            DropCompleted="OnDragCompleted"
-                                                            DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
-                                                            DragStartingCommandParameter="{Binding Slot1}" />
-                                                        <DropGestureRecognizer 
-                                                            AllowDrop="True" 
-                                                            DragOver="OnDragOver"
-                                                            DragLeave="OnDragLeave"
-                                                            Drop="OnDrop"
-                                                            DropCommandParameter="{Binding Slot1}" />
-                                                    </Border.GestureRecognizers>
                                                 </Border>
                                             </Grid>
                                         </DataTemplate>

@@ -69,4 +69,9 @@ public interface IRepository<T> where T : class
     /// <param name="entity">Item must be deleted</param>
     /// <returns><c>true</c> if deleted <c>false</c> otherwise</returns>
     Task<bool> DeleteAsync(T entity);
+
+    /// <summary>
+    /// Force clearing the change tracker
+    /// </summary>
+    void ClearTracker();
 }

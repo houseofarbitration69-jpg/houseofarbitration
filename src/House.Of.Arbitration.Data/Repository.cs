@@ -15,13 +15,9 @@ public class Repository<T> : IRepository<T> where T : class
     /// <summary>
     /// Nettoie complètement le suivi du DbContext pour éviter les conflits dans MAUI.
     /// </summary>
-    private void ClearTracker()
+    public void ClearTracker()
     {
-        var entries = _context.ChangeTracker.Entries().ToList();
-        foreach (var entry in entries)
-        {
-            entry.State = EntityState.Detached;
-        }
+        _context.ChangeTracker.Clear();
     }
 
     public async Task<T?> GetByIdAsync(int id)

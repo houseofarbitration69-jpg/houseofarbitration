@@ -19,7 +19,10 @@ namespace House.Of.Arbitration.App
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .UseMauiCommunityToolkit()
+                .UseMauiCommunityToolkit(options =>
+                {
+                    options.SetShouldEnableSnackbarOnWindows(true);
+                })
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont(FontHelper.OPENSANS_REGULAR_FILENAME, FontHelper.OPENSANS_REGULAR_NAME);

@@ -200,6 +200,61 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         CalculateMargins(newRounds);
 
         Rounds = newRounds;
+
+        if (existingDraw == null)
+        {
+            RefreshAdvancements();
+        }
+    }
+
+    private void RefreshAdvancements()
+    {
+        if (!IsElimination || Rounds == null || Rounds.Count < 2) return;
+
+        var round1 = Rounds[0];
+        var round2 = Rounds[1];
+
+        if (round2.Name == "Winner") return;
+
+        // Reset Round 2 slots to clear previous automatic advancements
+        foreach (var match in round2.Matches)
+        {
+            match.Slot1.Competitor = null;
+            match.Slot2.Competitor = null;
+        }
+
+        // Advance competitors ONLY from Round 1 to Round 2
+        for (int i = 0; i < round1.Matches.Count; i++)
+        {
+            var match = round1.Matches[i];
+            int competitorsCount = 0;
+            CompetitorModel? winner = null;
+
+            if (match.Slot1.Competitor != null)
+            {
+                competitorsCount++;
+                winner = match.Slot1.Competitor;
+            }
+            if (match.Slot2.Competitor != null)
+            {
+                competitorsCount++;
+                winner = match.Slot2.Competitor;
+            }
+
+            // If only one competitor in Round 1 match, they advance to Round 2
+            if (competitorsCount == 1)
+            {
+                int nextMatchIndex = i / 2;
+                if (nextMatchIndex < round2.Matches.Count)
+                {
+                    var nextMatch = round2.Matches[nextMatchIndex];
+                    if (i % 2 == 0)
+                        nextMatch.Slot1.Competitor = winner;
+                    else
+                        nextMatch.Slot2.Competitor = winner;
+                }
+            }
+        }
     }
 
     private void InitializeRobin(DrawModel? existingDraw = null)
@@ -365,12 +420,20 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
         try
         {
+            // Clear tracker at the beginning to ensure we start from a clean state
+            _repository.ClearTracker();
+
             // Delete existing draws for this category
             var existingDraws = await _repository.GetAllAsync();
             if (existingDraws != null)
             {
-                foreach (var existingDraw in existingDraws.Where(d => d.CategoryId == Category.Id))
+                // Materialize the list with ToList() to avoid modification issues and ensure it's not a dynamic query
+                foreach (var existingDraw in existingDraws.Where(d => d.CategoryId == Category.Id).ToList())
                 {
+                    // Null out navigation properties to avoid EF tracking conflicts during delete
+                    existingDraw.Category = null;
+                    existingDraw.DrawSandas = null;
+                    existingDraw.DrawTaolus = null;
                     await _repository.DeleteAsync(existingDraw);
                 }
             }
@@ -396,6 +459,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                     {
                         Draw = draw,
                         Order = match.Order,
+                        // Set IDs only to avoid tracking conflicts with CompetitorModel instances
                         Competitor1Id = match.Slot1.Competitor?.Id,
                         Competitor2Id = match.Slot2.Competitor?.Id,
                     });
@@ -403,11 +467,16 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             }
 
             // Persistence
-            // We might need to check if a draw already exists for this category to use Update instead of Add
-            // For now, let's assume Add/Update logic handled by repository or simpler:
+            // Clear tracker again before AddAsync to be absolutely safe
+            _repository.ClearTracker();
             await _repository.AddAsync(draw);
 
-            var toast = Toast.Make("Le tirage et l'ordre des matchs ont été sauvegardés.", CommunityToolkit.Maui.Core.ToastDuration.Long, 14);
+            // Notify and go back
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await Snackbar.Make("Le tirage et l'ordre des matchs ont été sauvegardés.").Show();
+            });
+
             await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
@@ -453,6 +522,11 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
         // Update Category.Competitors list
         UpdateCategoryCompetitors();
+
+        if (IsElimination)
+        {
+            RefreshAdvancements();
+        }
 
         DraggedSlot = null;
         
