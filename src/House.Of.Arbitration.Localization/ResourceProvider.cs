@@ -168,20 +168,20 @@ LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_NONE));
     public string ENUM_CATEGORY_TAOLU =>
 LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_TAOLU));
     /// <summary>
-    /// Gets the translated "ENUM_ROUND_ELIMINATION" string.
+    /// Gets the translated "ENUM_ROUND_KNOCKOUTS" string.
     /// </summary>
-    public string ENUM_ROUND_ELIMINATION =>
-LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_ELIMINATION));
+    public string ENUM_ROUND_KNOCKOUTS =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_KNOCKOUTS));
     /// <summary>
     /// Gets the translated "ENUM_ROUND_NONE" string.
     /// </summary>
     public string ENUM_ROUND_NONE =>
 LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_NONE));
     /// <summary>
-    /// Gets the translated "ENUM_ROUND_ROBIN" string.
+    /// Gets the translated "ENUM_ROUND_POOLS" string.
     /// </summary>
-    public string ENUM_ROUND_ROBIN =>
-LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_ROBIN));
+    public string ENUM_ROUND_POOLS =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_POOLS));
     /// <summary>
     /// Gets the translated "ENUM_GENRE_NONE" string.
     /// </summary>
@@ -322,6 +322,21 @@ LocalizationResourceManager.Instance.GetValue(nameof(DELETE_COMPETITION_MESSAGE)
     /// </summary>
     public string DRAW =>
 LocalizationResourceManager.Instance.GetValue(nameof(DRAW));
+    /// <summary>
+    /// Gets the translated "ENUM_ROUND_ORDER" string.
+    /// </summary>
+    public string ENUM_ROUND_ORDER =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_ROUND_ORDER));
+    /// <summary>
+    /// Gets the translated "CATEGORIES" string.
+    /// </summary>
+    public string CATEGORIES =>
+LocalizationResourceManager.Instance.GetValue(nameof(CATEGORIES));
+    /// <summary>
+    /// Gets the translated "SETTINGS" string.
+    /// </summary>
+    public string SETTINGS =>
+LocalizationResourceManager.Instance.GetValue(nameof(SETTINGS));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

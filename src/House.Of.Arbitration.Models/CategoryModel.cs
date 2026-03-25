@@ -42,7 +42,7 @@ public enum AgeRange
 public enum RoundType
 {
     None,
-    Elimination,
-    Robin,
+    Knockouts,
+    Pools,
     Order
 }

@@ -204,14 +204,14 @@
   <data name="ENUM_CATEGORY_TAOLU" xml:space="preserve">
     <value>[ENUM CATEGORY TAOLU]</value>
   </data>
-  <data name="ENUM_ROUND_ELIMINATION" xml:space="preserve">
-    <value>[ENUM ROUND ELIMINATION]</value>
+  <data name="ENUM_ROUND_KNOCKOUTS" xml:space="preserve">
+    <value>[ENUM ROUND KNOCKOUT]</value>
   </data>
   <data name="ENUM_ROUND_NONE" xml:space="preserve">
     <value>[ENUM ROUND NONE]</value>
   </data>
-  <data name="ENUM_ROUND_ROBIN" xml:space="preserve">
-    <value>[ENUM ROUND Robin]</value>
+  <data name="ENUM_ROUND_POOLS" xml:space="preserve">
+    <value>[ENUM ROUND POOLS]</value>
   </data>
   <data name="ENUM_GENRE_NONE" xml:space="preserve">
     <value>[ENUM GENRE NONE]</value>
@@ -296,5 +296,14 @@
   </data>
   <data name="DRAW" xml:space="preserve">
     <value>[DRAW]</value>
+  </data>
+  <data name="ENUM_ROUND_ORDER" xml:space="preserve">
+    <value>[ENUM ROUND ORDER]</value>
+  </data>
+  <data name="CATEGORIES" xml:space="preserve">
+    <value>[CATEGORIES]</value>
+  </data>
+  <data name="SETTINGS" xml:space="preserve">
+    <value>[SETTINGS]</value>
   </data>
 </root>

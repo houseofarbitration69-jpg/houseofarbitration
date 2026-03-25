@@ -13,8 +13,9 @@ public class CategoryToNameConverter : IValueConverter
             var localizer = LocalizationResourceManager.Instance;
 
             var weights =
-    (category.WeightMin <= 0 && category.WeightMax > 0) ? $"-{category.WeightMax}" :
-    ((category.WeightMin > 0 && category.WeightMax <= 0) ? $"+{category.WeightMin}" : String.Empty);
+    ((category.WeightMin <= 0 && category.WeightMax > 0) ? $"-{category.WeightMax}" :
+    ((category.WeightMin > 0 && category.WeightMax <= 0) ? $"+{category.WeightMin}" :
+    ((category.WeightMin > 0 && category.WeightMax > 0) ? $"-{category.WeightMax}" : String.Empty)));
 
             switch (category.Type)
             {

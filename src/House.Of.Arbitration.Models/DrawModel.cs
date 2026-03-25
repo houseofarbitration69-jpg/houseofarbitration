@@ -8,7 +8,9 @@ public class DrawModel
 
     public CategoryModel? Category { get; set; }
 
-    public List<DrawSandaModel>? DrawSandas { get; set; }
+    public List<DrawKnockoutModel>? DrawKnockouts { get; set; }
 
-    public List<DrawTaoluModel>? DrawTaolus { get; set; }
+    public List<DrawPoolsModel>? DrawPools { get; set; }
+    
+    public List<DrawOrderModel>? DrawOrders { get; set; }
 }

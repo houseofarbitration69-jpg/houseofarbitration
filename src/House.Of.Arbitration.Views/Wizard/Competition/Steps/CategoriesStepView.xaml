@@ -36,7 +36,7 @@
                     <controls:IconButton 
                         Grid.Column="1"
                         Text="{Binding Resources.ADD_CATEGORY}"
-                        ButtonBackgroundColor="LightGreen"
+                        ButtonBackgroundColor="{DynamicResource ValidColor}"
                         TextColor="Black"
                         Command="{Binding AddCategoryCommand}"
                         VerticalOptions="Center"

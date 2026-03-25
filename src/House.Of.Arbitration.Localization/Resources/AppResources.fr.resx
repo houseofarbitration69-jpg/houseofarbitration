@@ -204,13 +204,13 @@
   <data name="ENUM_CATEGORY_TAOLU" xml:space="preserve">
     <value>Taolu</value>
   </data>
-  <data name="ENUM_ROUND_ELIMINATION" xml:space="preserve">
+  <data name="ENUM_ROUND_KNOCKOUTS" xml:space="preserve">
     <value>Eliminatoire</value>
   </data>
   <data name="ENUM_ROUND_NONE" xml:space="preserve">
     <value>Sélectionnez un type de round</value>
   </data>
-  <data name="ENUM_ROUND_ROBIN" xml:space="preserve">
+  <data name="ENUM_ROUND_POOLS" xml:space="preserve">
     <value>Round Robin</value>
   </data>
   <data name="ENUM_GENRE_NONE" xml:space="preserve">
@@ -296,5 +296,14 @@
   </data>
   <data name="DRAW" xml:space="preserve">
     <value>Tirage</value>
+  </data>
+  <data name="ENUM_ROUND_ORDER" xml:space="preserve">
+    <value>Ordre</value>
+  </data>
+  <data name="CATEGORIES" xml:space="preserve">
+    <value>Catègories</value>
+  </data>
+  <data name="SETTINGS" xml:space="preserve">
+    <value>Paramètres</value>
   </data>
 </root>

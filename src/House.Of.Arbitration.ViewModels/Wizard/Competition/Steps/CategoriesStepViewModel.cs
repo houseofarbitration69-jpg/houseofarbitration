@@ -14,6 +14,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 {
     #region Services
     private readonly IRepository<CategoryModel> _repository;
+    private readonly IRepository<DrawModel> _drawsRepository;
     #endregion
 
     #region Attributs
@@ -21,7 +22,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     #endregion
 
     #region Properties
-    public override string Title => "Catégories";
+    public override string Title => Resources.CATEGORIES;
 
     public ObservableCollection<CategoryModel> Categories
     {
@@ -31,10 +32,18 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     #endregion
 
     #region Constructors
-    public CategoriesStepViewModel(IPopupService popupService, ResourceProvider resourceProvider, IRepository<CategoryModel> repository) : base(resourceProvider, popupService)
+    public CategoriesStepViewModel(
+        IPopupService popupService, 
+        ResourceProvider resourceProvider, 
+        IRepository<CategoryModel> repository,
+        IRepository<DrawModel> drawRepository
+    ) : base(resourceProvider, popupService)
     {
         _repository = repository;
+        _drawsRepository = drawRepository;
+
         Categories.CollectionChanged += OnCategoriesCollectionChanged;
+        
         Validate();
     }
     #endregion
@@ -46,6 +55,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         {
             Model.Categories = Categories.ToList();
         }
+
         Validate();
     }
 
@@ -59,9 +69,21 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         }
     }
 
-    private void Validate()
+    private async void Validate()
     {
+        // L'ensemble des categories doivent avoir un tirage
+        var draws = await _drawsRepository.GetAllAsync();
+
         IsValid = Categories != null && Categories.Count > 0;
+
+        if (draws != null && Categories != null)
+        {
+            Categories.ToList().ForEach(c => IsValid = (IsValid && draws.FirstOrDefault(d => d.CategoryId == c.Id) != null));
+        }
+        else
+        {
+            IsValid = false;
+        }
     }
     #endregion
 

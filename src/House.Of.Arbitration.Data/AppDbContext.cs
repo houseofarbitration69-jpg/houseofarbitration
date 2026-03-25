@@ -15,8 +15,9 @@ public class AppDbContext : DbContext
     public DbSet<CategoryModel> Categories{ get; set; }
     public DbSet<CompetitorModel> Competitors { get; set; }
     public DbSet<DrawModel> Draws { get; set; }
-    public DbSet<DrawTaoluModel> DrawsTaolus { get; set; }
-    public DbSet<DrawSandaModel> DrawsSandas { get; set; }
+    public DbSet<DrawOrderModel> DrawsOrders { get; set; }
+    public DbSet<DrawKnockoutModel> DrawsKnockouts { get; set; }
+    public DbSet<DrawPoolsModel> DrawsPools { get; set; }
     public DbSet<RefereeDataModel> RefereeDatas { get; set; }
     #endregion
 
@@ -67,12 +68,12 @@ public class AppDbContext : DbContext
             item.HasOne(i => i.Competition).WithMany(c => c.Categories).HasForeignKey(c => c.CompetitionId);
         });
 
-        builder.Entity<DrawSandaModel>(item =>
+        builder.Entity<DrawKnockoutModel>(item =>
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
             item.HasOne(i => i.Draw)
-                .WithMany(d => d.DrawSandas)
+                .WithMany(d => d.DrawKnockouts)
                 .HasForeignKey(i => i.DrawId);
 
             item.HasOne(i => i.Competitor1)
@@ -100,13 +101,51 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        builder.Entity<DrawTaoluModel>(item =>
+        builder.Entity<DrawPoolsModel>(item =>
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
             item.HasOne(i => i.Draw)
-                .WithMany(d => d.DrawTaolus)
+                .WithMany(d => d.DrawPools)
                 .HasForeignKey(i => i.DrawId);
+
+            item.HasOne(i => i.Competitor1)
+                .WithMany()
+                .HasForeignKey(i => i.Competitor1Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            item.HasOne(i => i.Competitor2)
+                .WithMany()
+                .HasForeignKey(i => i.Competitor2Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            item.HasOne(i => i.Winner)
+                .WithMany()
+                .HasForeignKey(i => i.WinnerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            item.HasOne(i => i.Looser)
+                .WithMany()
+                .HasForeignKey(i => i.LooserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            item.HasMany(i => i.RefereeDatas)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<DrawOrderModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+            item.HasOne(i => i.Draw)
+                .WithMany(d => d.DrawOrders)
+                .HasForeignKey(i => i.DrawId);
+
+            item.HasOne(i => i.Competitor)
+                .WithMany()
+                .HasForeignKey(i => i.CompetitorId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             item.HasMany(i => i.RefereeDatas)
                 .WithOne()

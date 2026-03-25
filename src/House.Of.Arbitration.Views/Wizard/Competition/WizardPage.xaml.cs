@@ -12,12 +12,19 @@ namespace House.Of.Arbitration.Views.Wizard.Competition;
 
 public partial class WizardPage : BasePage<CompetitionWizardViewModel>
 {
-    public WizardPage(IPopupService popupService, CompetitionWizardViewModel viewModel, ResourceProvider resource, IRepository<CompetitionModel> competitionRepository, IRepository<CategoryModel> categoryRepository) : base(viewModel)
+    public WizardPage(
+        IPopupService popupService,
+        CompetitionWizardViewModel viewModel,
+        ResourceProvider resource,
+        IRepository<CompetitionModel> competitionRepository,
+        IRepository<CategoryModel> categoryRepository,
+        IRepository<DrawModel> drawRepository
+    ) : base(viewModel)
     {
         InitializeComponent();
         
         var settingsStep = new SettingsStepViewModel(resource, popupService, competitionRepository);
-        var categoriesStep = new CategoriesStepViewModel(popupService, resource, categoryRepository);
+        var categoriesStep = new CategoriesStepViewModel(popupService, resource, categoryRepository, drawRepository);
         //var userStep = new UserStepViewModel();
         //var termsStep = new TermsStepViewModel();
         //var summaryStep = new SummaryStepViewModel(userStep, termsStep);

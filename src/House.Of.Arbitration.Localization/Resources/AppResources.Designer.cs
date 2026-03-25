@@ -106,6 +106,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [CATEGORIES].
+        /// </summary>
+        public static string CATEGORIES {
+            get {
+                return ResourceManager.GetString("CATEGORIES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [CATEGORIES LIST].
         /// </summary>
         public static string CATEGORY_LIST {
@@ -349,11 +358,11 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à [ENUM ROUND ELIMINATION].
+        ///   Recherche une chaîne localisée semblable à [ENUM ROUND KNOCKOUT].
         /// </summary>
-        public static string ENUM_ROUND_ELIMINATION {
+        public static string ENUM_ROUND_KNOCKOUTS {
             get {
-                return ResourceManager.GetString("ENUM_ROUND_ELIMINATION", resourceCulture);
+                return ResourceManager.GetString("ENUM_ROUND_KNOCKOUTS", resourceCulture);
             }
         }
         
@@ -367,11 +376,20 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à [ENUM ROUND Robin].
+        ///   Recherche une chaîne localisée semblable à [ENUM ROUND ORDER].
         /// </summary>
-        public static string ENUM_ROUND_ROBIN {
+        public static string ENUM_ROUND_ORDER {
             get {
-                return ResourceManager.GetString("ENUM_ROUND_ROBIN", resourceCulture);
+                return ResourceManager.GetString("ENUM_ROUND_ORDER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM ROUND POOLS].
+        /// </summary>
+        public static string ENUM_ROUND_POOLS {
+            get {
+                return ResourceManager.GetString("ENUM_ROUND_POOLS", resourceCulture);
             }
         }
         
@@ -507,6 +525,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string ROUND_TYPE {
             get {
                 return ResourceManager.GetString("ROUND_TYPE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [SETTINGS].
+        /// </summary>
+        public static string SETTINGS {
+            get {
+                return ResourceManager.GetString("SETTINGS", resourceCulture);
             }
         }
         

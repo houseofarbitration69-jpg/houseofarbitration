@@ -1,10 +1,11 @@
 namespace House.Of.Arbitration.Models;
 
-public class DrawSandaModel
+public class DrawPoolsModel
 {
     public int Id { get; set; } = 0;
 
     public int Order { get; set; } = 0;
+    public int GlobalOrder { get; set; } = 0;
 
     public int DrawId { get; set; } = 0;
     public required DrawModel Draw { get; set; }

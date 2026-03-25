@@ -19,7 +19,7 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
     #endregion
 
     #region Properties
-    public override string Title => "Paramètres";
+    public override string Title => Resources.SETTINGS;
 
     public string Name
     {

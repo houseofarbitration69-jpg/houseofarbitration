@@ -47,7 +47,7 @@
             <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
                 <!-- Bracket View (Elimination) -->
                 <HorizontalStackLayout 
-                    IsVisible="{Binding IsElimination}"
+                    IsVisible="{Binding IsKnockouts}"
                     Spacing="40" 
                     Padding="20"
                     VerticalOptions="Start"
@@ -95,7 +95,7 @@
                                                         </Border.StrokeShape>
                                                         <Grid>
                                                             <!-- Using a Label for display to ensure perfect centering -->
-                                                            <Label Text="{Binding Order}"
+                                                            <Label Text="{Binding GlobalOrder}"
                                                                    TextColor="White"
                                                                    FontSize="12"
                                                                    HorizontalOptions="Center"
@@ -103,7 +103,7 @@
                                                                    HorizontalTextAlignment="Center"
                                                                    VerticalTextAlignment="Center" />
                                                             <!-- Hidden Entry for keyboard input if tapped -->
-                                                            <Entry Text="{Binding Order}"
+                                                            <Entry Text="{Binding GlobalOrder}"
                                                                    Keyboard="Numeric"
                                                                    Opacity="0"
                                                                    HorizontalOptions="Fill"
@@ -223,7 +223,7 @@
 
                 <!-- Poule View (Group) -->
                 <Grid 
-                    IsVisible="{Binding IsRobin}"
+                    IsVisible="{Binding IsPools}"
                     Padding="20"
                     VerticalOptions="Fill"
                     HorizontalOptions="Fill"
@@ -267,14 +267,14 @@
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
                                                         <Grid>
-                                                            <Label Text="{Binding Order}"
+                                                            <Label Text="{Binding GlobalOrder}"
                                                                    TextColor="White"
                                                                    FontSize="12"
                                                                    HorizontalOptions="Center"
                                                                    VerticalOptions="Center"
                                                                    HorizontalTextAlignment="Center"
                                                                    VerticalTextAlignment="Center" />
-                                                            <Entry Text="{Binding Order}"
+                                                            <Entry Text="{Binding GlobalOrder}"
                                                                    Keyboard="Numeric"
                                                                    Opacity="0"
                                                                    HorizontalOptions="Fill"
@@ -386,14 +386,14 @@
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
                                                         <Grid>
-                                                            <Label Text="{Binding Order}"
+                                                            <Label Text="{Binding GlobalOrder}"
                                                                    TextColor="White"
                                                                    FontSize="12"
                                                                    HorizontalOptions="Center"
                                                                    VerticalOptions="Center"
                                                                    HorizontalTextAlignment="Center"
                                                                    VerticalTextAlignment="Center" />
-                                                            <Entry Text="{Binding Order}"
+                                                            <Entry Text="{Binding GlobalOrder}"
                                                                    Keyboard="Numeric"
                                                                    Opacity="0"
                                                                    HorizontalOptions="Fill"
