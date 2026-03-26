@@ -14,7 +14,6 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
-    private readonly IPopupService _popupService;
     private readonly IRepository<CompetitorModel> _repository;
     #endregion
 
@@ -31,6 +30,9 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Properties
+    /// <summary>
+    /// Obtient ou définit le compétiteur
+    /// </summary>
     public CompetitorModel Competitor
     {
         get => _competitor;
@@ -44,17 +46,23 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
                 LastName = value.LastName;
                 Club = value.Club;
                 BirthDate = value.BirthDate;
-                Weight = value.CurrentWeight;
+                Weight = value.Weight;
             }
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit la catégorie courante
+    /// </summary>
     public CategoryModel? Category
     {
         get => _category;
         set => SetProperty(ref _category, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le prénom du compétiteur
+    /// </summary>
     public string FirstName
     {
         get => _firstName;
@@ -65,6 +73,9 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit le nom du compétiteur
+    /// </summary>
     public string LastName
     {
         get => _lastName;
@@ -75,6 +86,9 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit le club du compétiteur
+    /// </summary>
     public string Club
     {
         get => _club;
@@ -85,6 +99,9 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit la date de naissance du compétiteur
+    /// </summary>
     public DateTime? BirthDate
     {
         get => _birthDate;
@@ -95,6 +112,9 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit le poids du compétiteur
+    /// </summary>
     public double Weight
     {
         get => _weight;
@@ -105,6 +125,9 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit le genre du compétiteur
+    /// </summary>
     public LocalizedEnum<Genre>? SelectedGenre
     {
         get => _selectedGenre;
@@ -114,9 +137,14 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
             ValidateCommand.NotifyCanExecuteChanged();
         }
     }
-
+    /// <summary>
+    /// Obtient ou définit la liste des genres
+    /// </summary>
     public List<LocalizedEnum<Genre>> Genres { get; }
     
+    /// <summary>
+    /// Obtient ou définit la liste des clubs déjà présent dans la base
+    /// </summary>
     public List<string> Clubs
     {
         get => _clubs;
@@ -128,7 +156,6 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     public CompetitorPopupViewModel(IPopupService popupService, ILogger<CompetitorPopupViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitorModel> repository)
         : base(logger, resourceProvider, popupService)
     {
-        _popupService = popupService;
         _repository = repository;
 
         Genres = LocalizeEnum<Genre>("ENUM_GENRE_");
@@ -137,6 +164,10 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Implement IQueryAttributable
+    /// <summary>
+    /// Méthode permettant de récupérer les paramètres
+    /// </summary>
+    /// <param name="query"></param>
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey(nameof(Competitor)))
@@ -152,6 +183,9 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Init Methods
+    /// <summary>
+    /// Méthode permettant l'initialisation des données
+    /// </summary>
     private async void InitData()
     {
         // Récupération de la liste des clubs
@@ -159,18 +193,14 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     }
     #endregion
 
-    #region Private Methods
-    private List<LocalizedEnum<T>> LocalizeEnum<T>(string prefix) where T : Enum
-    {
-        return Enum.GetValues(typeof(T))
-            .Cast<T>()
-            .Select(e => new LocalizedEnum<T>(e, LocalizationResourceManager.Instance.GetValue($"{prefix}{e.ToString().ToUpper()}")))
-            .ToList();
-    }
-
+    #region Public Methods
+    /// <summary>
+    /// Méthode permettant de récupérer les données saisie par l'utilisateur
+    /// </summary>
+    /// <returns></returns>
     public CompetitorModel GetResult()
     {
-        return new CompetitorModel
+        var competitor = new CompetitorModel
         {
             Id = Competitor?.Id ?? 0,
             LastName = LastName,
@@ -178,25 +208,59 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
             Genre = SelectedGenre?.Value ?? Genre.None,
             Club = Club,
             BirthDate = BirthDate ?? DateTime.Now,
-            CurrentWeight = Weight,
-            CategoryId = Category?.Id ?? 0
+            Weight = Weight
         };
+
+        if (Category != null)
+        {
+            competitor.Categories = new List<CategoryModel> { Category };
+        }
+
+        return competitor;
+    }
+    #endregion
+
+    #region Private Methods
+    /// <summary>
+    /// Méthode permettant de traduire les enumétrations
+    /// </summary>
+    /// <typeparam name="T">Type de l'énumération</typeparam>
+    /// <param name="prefix"></param>
+    /// <returns></returns>
+    private List<LocalizedEnum<T>> LocalizeEnum<T>(string prefix) where T : Enum
+    {
+        return Enum.GetValues(typeof(T))
+            .Cast<T>()
+            .Select(e => new LocalizedEnum<T>(e, LocalizationResourceManager.Instance.GetValue($"{prefix}{e.ToString().ToUpper()}")))
+            .ToList();
     }
     #endregion
 
     #region Commands
+    /// <summary>
+    /// Commande permettant de fermer la popup sans sauvegarder les données
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Close()
     {
         await _popupService.ClosePopupAsync(Shell.Current);
     }
 
+    /// <summary>
+    /// Méthode permettant de fermer la popup en sauvegardant les données saisies
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand(CanExecute = nameof(CanValidate))]
     private async Task Validate()
     {
         await _popupService.ClosePopupAsync<CompetitorModel>(Shell.Current, GetResult());
     }
 
+    /// <summary>
+    /// Méthode permettant de valider si les données sont correct
+    /// </summary>
+    /// <returns></returns>
     private bool CanValidate()
     {
         var result = !String.IsNullOrEmpty(LastName);

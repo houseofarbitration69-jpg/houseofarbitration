@@ -111,9 +111,12 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     [RelayCommand]
     private async Task Edit(CompetitorModel competitor)
     {
+        if (Category == null) return;
+
         var queryAttributes = new Dictionary<string, object>
         {
-            [nameof(CompetitorPopupViewModel.Competitor)] = competitor
+            [nameof(CompetitorPopupViewModel.Competitor)] = competitor,
+            [nameof(CompetitorPopupViewModel.Category)] = Category,
         } as IDictionary<string, object>;
 
         var result = await _popupService.ShowPopupAsync<CompetitorPopupViewModel, CompetitorModel?>(Shell.Current, shellParameters: queryAttributes);
@@ -121,7 +124,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (result != null && result.Result != null)
         {
             var updated = result.Result;
-            updated.CategoryId = competitor.CategoryId;
+            updated.Categories = competitor.Categories;
 
             await _repository.UpdateAsync(updated);
 

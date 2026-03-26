@@ -337,6 +337,11 @@ LocalizationResourceManager.Instance.GetValue(nameof(CATEGORIES));
     /// </summary>
     public string SETTINGS =>
 LocalizationResourceManager.Instance.GetValue(nameof(SETTINGS));
+    /// <summary>
+    /// Gets the translated "ENUM_GENRE_MIXTE" string.
+    /// </summary>
+    public string ENUM_GENRE_MIXTE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_GENRE_MIXTE));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

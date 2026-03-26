@@ -340,6 +340,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [ENUM GENRE MIXTE].
+        /// </summary>
+        public static string ENUM_GENRE_MIXTE {
+            get {
+                return ResourceManager.GetString("ENUM_GENRE_MIXTE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [ENUM GENRE NONE].
         /// </summary>
         public static string ENUM_GENRE_NONE {

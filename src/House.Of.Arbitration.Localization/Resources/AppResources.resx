@@ -306,4 +306,7 @@
   <data name="SETTINGS" xml:space="preserve">
     <value>[SETTINGS]</value>
   </data>
+  <data name="ENUM_GENRE_MIXTE" xml:space="preserve">
+    <value>[ENUM GENRE MIXTE]</value>
+  </data>
 </root>

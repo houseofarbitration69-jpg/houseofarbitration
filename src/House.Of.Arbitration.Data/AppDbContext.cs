@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<DrawKnockoutModel> DrawsKnockouts { get; set; }
     public DbSet<DrawPoolsModel> DrawsPools { get; set; }
     public DbSet<RefereeDataModel> RefereeDatas { get; set; }
+    public DbSet<WarningModel> Warnings { get; set; }
     #endregion
 
     #region Constructors
@@ -58,7 +59,8 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
-            item.HasOne(i => i.Category).WithMany(c => c.Competitors).HasForeignKey(c => c.CategoryId);
+            item.HasMany(i => i.Categories)
+                .WithMany(c => c.Competitors);
         });
 
         builder.Entity<CategoryModel>(item =>
@@ -165,6 +167,20 @@ public class AppDbContext : DbContext
             item.HasOne(i => i.Category)
                 .WithMany()
                 .HasForeignKey(i => i.CategoryId);
+        });
+
+        builder.Entity<WarningModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+            
+            item.HasOne(i => i.Category)
+                .WithMany()
+                .HasForeignKey(i => i.CategoryId);
+
+            item.HasOne(i => i.Competitor)
+                .WithMany(c => c.Warnings)
+                .HasForeignKey(i => i.CompetitorId);
         });
     }
     #endregion

@@ -67,7 +67,8 @@ public class Repository<T> : IRepository<T> where T : class
     public async Task<T?> AddAsync(T entity)
     {
         ClearTracker();
-        await _context.Set<T>().AddAsync(entity);
+        _context.Set<T>().Attach(entity);
+        _context.Entry(entity).State = EntityState.Added;
         await _context.SaveChangesAsync();
         return entity;
     }
@@ -75,7 +76,8 @@ public class Repository<T> : IRepository<T> where T : class
     public async Task<bool> UpdateAsync(T entity)
     {
         ClearTracker();
-        _context.Update(entity);
+        _context.Set<T>().Attach(entity);
+        _context.Entry(entity).State = EntityState.Modified;
         await _context.SaveChangesAsync();
         return true;
     }
