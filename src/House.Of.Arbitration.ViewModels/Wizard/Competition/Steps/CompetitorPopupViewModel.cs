@@ -200,7 +200,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     /// <returns></returns>
     public CompetitorModel GetResult()
     {
-        var competitor = new CompetitorModel
+        return new CompetitorModel
         {
             Id = Competitor?.Id ?? 0,
             LastName = LastName,
@@ -210,13 +210,6 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
             BirthDate = BirthDate ?? DateTime.Now,
             Weight = Weight
         };
-
-        if (Category != null)
-        {
-            competitor.Categories = new List<CategoryModel> { Category };
-        }
-
-        return competitor;
     }
     #endregion
 

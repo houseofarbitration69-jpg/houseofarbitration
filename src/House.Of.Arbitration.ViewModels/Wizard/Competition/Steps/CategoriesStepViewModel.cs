@@ -76,9 +76,9 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 
         IsValid = Categories != null && Categories.Count > 0;
 
-        if (draws != null && Categories != null)
+        if (draws != null && Categories != null && Categories.Count > 0)
         {
-            Categories.ToList().ForEach(c => IsValid = (IsValid && draws.FirstOrDefault(d => d.CategoryId == c.Id) != null));
+            Categories.ToList().ForEach(c => IsValid = (IsValid && draws.FirstOrDefault(d => c != null && d.CategoryId == c.Id) != null));
         }
         else
         {
@@ -169,67 +169,8 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         };
 
         await Shell.Current.GoToAsync("CompetitorsPage", queryAttributes);
-        //RefreshCategory(category);
-    }
-
-    [RelayCommand]
-    private async Task AddCompetitor(CategoryModel category)
-    {
-        if (category == null) return;
-
-        var newCompetitor = new CompetitorModel
-        {
-            Genre = category.Genre,
-            BirthDate = DateTime.Now.AddYears(-20)
-        };
-
-        category.Competitors.Add(newCompetitor);
-
-        var navigationParameter = new Dictionary<string, object>
-        {
-            { "Competitor", newCompetitor }
-        };
-
-        await Shell.Current.GoToAsync("CompetitorPage", navigationParameter);
+        
         RefreshCategory(category);
-    }
-
-    [RelayCommand]
-    private async Task EditCompetitor(CompetitorModel competitor)
-    {
-        if (competitor == null) return;
-
-        var navigationParameter = new Dictionary<string, object>
-        {
-            { "Competitor", competitor }
-        };
-
-        await Shell.Current.GoToAsync("CompetitorPage", navigationParameter);
-    }
-
-    [RelayCommand]
-    private async Task DeleteCompetitor(CompetitorModel competitor)
-    {
-        if (competitor == null) return;
-
-        bool confirm = await DisplayConfirmation(
-            Resources.CONFIRM_DELETE,
-            Resources.DELETE_COMPETITOR_MESSAGE,
-            Resources.YES,
-            Resources.NO);
-
-        if (confirm)
-        {
-            foreach (var cat in Categories)
-            {
-                if (cat.Competitors.Contains(competitor))
-                {
-                    cat.Competitors.Remove(competitor);
-                    RefreshCategory(cat);
-                    break;
-                }
-            }
-        }
     }
 
     [RelayCommand]

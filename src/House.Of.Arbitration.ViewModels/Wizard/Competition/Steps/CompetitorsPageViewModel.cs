@@ -102,8 +102,13 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (result != null && result.Result != null)
         {
             var competitor = result.Result;
+            // Add category link using a stub to avoid UNIQUE constraint on Category.Id
+            competitor.Categories = new List<CategoryModel> { new CategoryModel { Id = Category.Id } };
 
             await _repository.AddAsync(competitor);
+            
+            // Link back the full category for UI/Model consistency in memory
+            competitor.Categories = new List<CategoryModel> { Category };
             Competitors.Add(competitor);
         }
     }
@@ -124,15 +129,40 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (result != null && result.Result != null)
         {
             var updated = result.Result;
-            updated.Categories = competitor.Categories;
+            
+            // Map properties to the original instance to maintain object identity in the UI
+            competitor.FirstName = updated.FirstName;
+            competitor.LastName = updated.LastName;
+            competitor.Genre = updated.Genre;
+            competitor.BirthDate = updated.BirthDate;
+            competitor.Club = updated.Club;
+            competitor.Weight = updated.Weight;
 
-            await _repository.UpdateAsync(updated);
+            // Use stubs for categories during update to avoid circularity tracking conflicts
+            var categoryStubs = competitor.Categories?.Select(c => new CategoryModel { Id = c.Id }).ToList();
+            
+            // Create a temporary clone for database update to not mess with the UI's full objects
+            var dbCompetitor = new CompetitorModel
+            {
+                Id = competitor.Id,
+                FirstName = competitor.FirstName,
+                LastName = competitor.LastName,
+                Genre = competitor.Genre,
+                BirthDate = competitor.BirthDate,
+                Club = competitor.Club,
+                Weight = competitor.Weight,
+                Categories = categoryStubs,
+                Warnings = null // Do not update warnings through this path
+            };
 
+            await _repository.UpdateAsync(dbCompetitor);
+
+            // UI Refresh
             var index = Competitors.IndexOf(competitor);
             if (index != -1)
             {
                 Competitors[index] = null!;
-                Competitors[index] = updated;
+                Competitors[index] = competitor;
             }
         }
     }
