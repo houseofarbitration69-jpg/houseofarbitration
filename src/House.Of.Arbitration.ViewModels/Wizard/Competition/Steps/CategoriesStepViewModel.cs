@@ -88,7 +88,32 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     #endregion
 
     #region Override Methods
+    
+    #endregion
 
+    #region Virtual Methods
+    /// <summary>
+    /// Refresh categories when appearing to catch updates (like new competitors or draws)
+    /// </summary>
+    public override async Task OnAppearing()
+    {
+        if (Model != null)
+        {
+            // Reload categories with their competitors to update counts in UI
+            var categories = await _repository.GetAllAsync("AgeRange","Competitors.Competitor");
+            if (categories != null)
+            {
+                var competitionCategories = categories.Where(c => c.CompetitionId == Model.Id).ToList();
+                
+                Categories.CollectionChanged -= OnCategoriesCollectionChanged;
+                Categories = new ObservableCollection<CategoryModel>(competitionCategories);
+                Categories.CollectionChanged += OnCategoriesCollectionChanged;
+                
+                Model.Categories = competitionCategories;
+            }
+        }
+        Validate();
+    }
     #endregion
 
     #region Commands
@@ -170,7 +195,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 
         await Shell.Current.GoToAsync("CompetitorsPage", queryAttributes);
         
-        RefreshCategory(category);
+        //RefreshCategory(category);
     }
 
     [RelayCommand]

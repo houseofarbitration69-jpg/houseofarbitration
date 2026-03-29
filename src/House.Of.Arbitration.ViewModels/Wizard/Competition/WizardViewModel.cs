@@ -74,6 +74,9 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
             
             ((Command)NextCommand).ChangeCanExecute();
             ((Command)PreviousCommand).ChangeCanExecute();
+
+            // Refresh step data when navigating to it
+            MainThread.BeginInvokeOnMainThread(async () => await CurrentStep?.OnAppearing()!);
         }
     }
 
@@ -96,6 +99,17 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
 
         NextCommand = new Command(async () => await GoNext(), () => CurrentStep?.IsValid ?? false);
         PreviousCommand = new Command(async () => await GoPrevious(), () => CurrentStepIndex > 0);
+    }
+    #endregion
+
+    #region Virtual Methods
+    public override async Task OnAppearing()
+    {
+        await base.OnAppearing();
+        if (CurrentStep != null)
+        {
+            await CurrentStep.OnAppearing();
+        }
     }
     #endregion
 

@@ -77,6 +77,11 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
     #endregion
 
     #region Public Methods
+    public virtual async Task OnAppearing()
+    {
+        await Task.CompletedTask;
+    }
+
     public virtual async Task Save()
     {
     }

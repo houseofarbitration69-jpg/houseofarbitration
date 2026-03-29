@@ -135,7 +135,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == CategoryType.None);
         SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == RoundType.None);
         SelectedGenre = Genres.FirstOrDefault(x => x.Value == Genre.None);
-        SelectedAgeRange = null;
+        SelectedAgeRange = AgeRanges.FirstOrDefault();
     }
     #endregion
 
@@ -191,7 +191,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     {
         var result = SelectedType != null && SelectedType.Value != CategoryType.None;
         result = result && (SelectedGenre != null && SelectedGenre.Value != Genre.None);
-        result = result && (SelectedAgeRange != null);
+        result = result && (SelectedAgeRange != null && SelectedAgeRange.Id > 0);
 
         result = result && ((SelectedType != null && (SelectedType.Value == CategoryType.Sanda || SelectedType.Value == CategoryType.SandaLight)) ? (SelectedRoundType != null && SelectedRoundType.Value != RoundType.None) : true);
 

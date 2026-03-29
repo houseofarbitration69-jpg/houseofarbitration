@@ -309,4 +309,7 @@
   <data name="ENUM_GENRE_MIXTE" xml:space="preserve">
     <value>Mixte</value>
   </data>
+  <data name="CHOOSE_AGE_RANGE" xml:space="preserve">
+    <value>Choisissez une tranche d'âge</value>
+  </data>
 </root>

@@ -23,10 +23,16 @@ public class AgeRangeModel
     public int MaxAge { get; set; }
 
     /// <summary>
+    /// Représente une plage d'âge vide (placeholder)
+    /// </summary>
+    public static AgeRangeModel Empty => new AgeRangeModel { Id = -1, Label = "Choisissez une tranche d'âge", MinAge = 0, MaxAge = 0 };
+
+    /// <summary>
     /// Liste statique des plages d'âge par défaut
     /// </summary>
     public static List<AgeRangeModel> DefaultRanges => new()
     {
+        Empty,
         new AgeRangeModel { Id = 1, Label = "Cadets", MinAge = 12, MaxAge = 14 },
         new AgeRangeModel { Id = 2, Label = "Juniors", MinAge = 15, MaxAge = 17 },
         new AgeRangeModel { Id = 3, Label = "Seniors", MinAge = 18, MaxAge = 34 },

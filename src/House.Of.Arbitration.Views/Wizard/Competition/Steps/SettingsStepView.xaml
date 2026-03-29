@@ -65,7 +65,7 @@
                                     Grid.Column="1"
                                     Text="{Binding Name, Mode=TwoWay, UpdateSourceEventName=TextChanged}" 
                                     Placeholder="{Binding Resources.PLACEHOLDER_COMPETITION_NAME}"
-                                    PlaceholderColor="{DynamicResource Placeholder}"
+                                    PlaceholderColor="White"
                                     TextColor="{DynamicResource PrimaryTextColor}"
                                     VerticalOptions="Center" 
                                     MinimumHeightRequest="35"

@@ -635,5 +635,14 @@ namespace House.Of.Arbitration.Localization.Resources {
                 return ResourceManager.GetString("YES", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à Choose an age range.
+        /// </summary>
+        public static string CHOOSE_AGE_RANGE {
+            get {
+                return ResourceManager.GetString("CHOOSE_AGE_RANGE", resourceCulture);
+            }
+        }
     }
 }
