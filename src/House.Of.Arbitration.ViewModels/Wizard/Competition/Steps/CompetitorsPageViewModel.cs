@@ -17,6 +17,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #region Services
     private readonly IRepository<CompetitorModel> _repository;
     private readonly IRepository<CompetitorCategoryModel> _competitorCategoryRepository;
+    private readonly IRepository<DrawModel> _drawsRepository;
     #endregion
 
     #region Attributs
@@ -53,11 +54,13 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         ILogger<CompetitorsPageViewModel> logger, 
         ResourceProvider resourceProvider, 
         IRepository<CompetitorModel> repository,
-        IRepository<CompetitorCategoryModel> competitorCategoryRepository)
+        IRepository<CompetitorCategoryModel> competitorCategoryRepository,
+        IRepository<DrawModel> drawsRepository)
         : base(logger, resourceProvider, popupService)
     {
         _repository = repository;
         _competitorCategoryRepository = competitorCategoryRepository;
+        _drawsRepository = drawsRepository;
     }
     #endregion
 
@@ -67,6 +70,19 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (query.ContainsKey(nameof(Category)))
         {
             Category = (CategoryModel?)query[nameof(Category)];
+        }
+    }
+    #endregion
+
+    #region Private Methods
+    private async Task DeleteDrawAsync()
+    {
+        if (Category == null) return;
+        var draws = await _drawsRepository.GetAllAsync();
+        var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
+        if (existingDraw != null)
+        {
+            await _drawsRepository.DeleteAsync(existingDraw);
         }
     }
     #endregion
@@ -118,6 +134,9 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             if (Category.Competitors == null) Category.Competitors = new();
             Category.Competitors.Add(link);
             Competitors.Add(competitor);
+
+            // 4. Invalidate Draw
+            await DeleteDrawAsync();
         }
     }
 
@@ -197,6 +216,9 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             // because they might be registered in other categories.
             // We only remove them from THIS category.
             Competitors.Remove(competitor);
+
+            // 2. Invalidate Draw
+            await DeleteDrawAsync();
         }
     }
     #endregion

@@ -69,6 +69,16 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         }
     }
 
+    private async Task DeleteDrawAsync(int categoryId)
+    {
+        var draws = await _drawsRepository.GetAllAsync();
+        var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == categoryId);
+        if (existingDraw != null)
+        {
+            await _drawsRepository.DeleteAsync(existingDraw);
+        }
+    }
+
     private async void Validate()
     {
         // L'ensemble des categories doivent avoir un tirage
@@ -156,6 +166,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
                 if (index >= 0)
                 {
                     await _repository.UpdateAsync(editCategory);
+                    await DeleteDrawAsync(editCategory.Id);
                     Categories[index] = editCategory;                    
                 }
             }
