@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<CompetitionModel> Competitions { get; set; }
     public DbSet<CategoryModel> Categories{ get; set; }
     public DbSet<CompetitorModel> Competitors { get; set; }
+    public DbSet<CompetitorCategoryModel> CompetitorCategories { get; set; }
+    public DbSet<AgeRangeModel> AgeRanges { get; set; }
     public DbSet<DrawModel> Draws { get; set; }
     public DbSet<DrawOrderModel> DrawsOrders { get; set; }
     public DbSet<DrawKnockoutModel> DrawsKnockouts { get; set; }
@@ -59,8 +61,6 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
-            item.HasMany(i => i.Categories)
-                .WithMany(c => c.Competitors);
         });
 
         builder.Entity<CategoryModel>(item =>
@@ -68,6 +68,26 @@ public class AppDbContext : DbContext
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
             item.HasOne(i => i.Competition).WithMany(c => c.Categories).HasForeignKey(c => c.CompetitionId);
+            item.HasOne(i => i.AgeRange).WithMany().HasForeignKey("AgeRangeId");
+        });
+
+        builder.Entity<CompetitorCategoryModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+            item.HasOne(i => i.Competitor)
+                .WithMany(c => c.Categories)
+                .HasForeignKey(i => i.CompetitorId);
+            item.HasOne(i => i.Category)
+                .WithMany(c => c.Competitors)
+                .HasForeignKey(i => i.CategoryId);
+        });
+
+        builder.Entity<AgeRangeModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+            item.HasData(AgeRangeModel.DefaultRanges);
         });
 
         builder.Entity<DrawKnockoutModel>(item =>
@@ -179,8 +199,12 @@ public class AppDbContext : DbContext
                 .HasForeignKey(i => i.CategoryId);
 
             item.HasOne(i => i.Competitor)
-                .WithMany(c => c.Warnings)
+                .WithMany()
                 .HasForeignKey(i => i.CompetitorId);
+
+            item.HasOne<CompetitorCategoryModel>()
+                .WithMany(cc => cc.Warnings)
+                .HasForeignKey("CompetitorCategoryId");
         });
     }
     #endregion

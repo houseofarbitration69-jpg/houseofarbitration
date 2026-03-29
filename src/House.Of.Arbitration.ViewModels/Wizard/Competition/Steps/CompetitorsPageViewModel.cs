@@ -16,6 +16,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
 {
     #region Services
     private readonly IRepository<CompetitorModel> _repository;
+    private readonly IRepository<CompetitorCategoryModel> _competitorCategoryRepository;
     #endregion
 
     #region Attributs
@@ -32,8 +33,9 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             SetProperty(ref _category, value);
             if (value != null)
             {
-                Competitors = new ObservableCollection<CompetitorModel>(value.Competitors ?? new());
-                Competitors.CollectionChanged += OnCompetitorsCollectionChanged;
+                // In many-to-many with join table, value.Competitors is List<CompetitorCategoryModel>
+                var competitorModels = value.Competitors?.Select(cc => cc.Competitor).ToList() ?? new();
+                Competitors = new ObservableCollection<CompetitorModel>(competitorModels);
             }
         }
     }
@@ -46,10 +48,16 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Constructors
-    public CompetitorsPageViewModel(IPopupService popupService, ILogger<CompetitorsPageViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitorModel> repository)
+    public CompetitorsPageViewModel(
+        IPopupService popupService, 
+        ILogger<CompetitorsPageViewModel> logger, 
+        ResourceProvider resourceProvider, 
+        IRepository<CompetitorModel> repository,
+        IRepository<CompetitorCategoryModel> competitorCategoryRepository)
         : base(logger, resourceProvider, popupService)
     {
         _repository = repository;
+        _competitorCategoryRepository = competitorCategoryRepository;
     }
     #endregion
 
@@ -59,16 +67,6 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (query.ContainsKey(nameof(Category)))
         {
             Category = (CategoryModel?)query[nameof(Category)];
-        }
-    }
-    #endregion
-
-    #region Private Methods
-    private void OnCompetitorsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (Category != null)
-        {
-            Category.Competitors = Competitors.ToList();
         }
     }
     #endregion
@@ -102,13 +100,23 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (result != null && result.Result != null)
         {
             var competitor = result.Result;
-            // Add category link using a stub to avoid UNIQUE constraint on Category.Id
-            competitor.Categories = new List<CategoryModel> { new CategoryModel { Id = Category.Id } };
 
+            // 1. Save or Update the Competitor
             await _repository.AddAsync(competitor);
             
-            // Link back the full category for UI/Model consistency in memory
-            competitor.Categories = new List<CategoryModel> { Category };
+            // 2. Create the link in join table
+            var link = new CompetitorCategoryModel
+            {
+                CompetitorId = competitor.Id,
+                Competitor = competitor,
+                CategoryId = Category.Id,
+                Category = Category
+            };
+            await _competitorCategoryRepository.AddAsync(link);
+
+            // 3. Update local collections
+            if (Category.Competitors == null) Category.Competitors = new();
+            Category.Competitors.Add(link);
             Competitors.Add(competitor);
         }
     }
@@ -130,7 +138,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         {
             var updated = result.Result;
             
-            // Map properties to the original instance to maintain object identity in the UI
+            // Map properties to the original instance to maintain object identity
             competitor.FirstName = updated.FirstName;
             competitor.LastName = updated.LastName;
             competitor.Genre = updated.Genre;
@@ -138,10 +146,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             competitor.Club = updated.Club;
             competitor.Weight = updated.Weight;
 
-            // Use stubs for categories during update to avoid circularity tracking conflicts
-            var categoryStubs = competitor.Categories?.Select(c => new CategoryModel { Id = c.Id }).ToList();
-            
-            // Create a temporary clone for database update to not mess with the UI's full objects
+            // Create flat clone for DB update to avoid tracking conflicts
             var dbCompetitor = new CompetitorModel
             {
                 Id = competitor.Id,
@@ -150,9 +155,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
                 Genre = competitor.Genre,
                 BirthDate = competitor.BirthDate,
                 Club = competitor.Club,
-                Weight = competitor.Weight,
-                Categories = categoryStubs,
-                Warnings = null // Do not update warnings through this path
+                Weight = competitor.Weight
             };
 
             await _repository.UpdateAsync(dbCompetitor);
@@ -170,7 +173,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     [RelayCommand]
     private async Task Delete(CompetitorModel competitor)
     {
-        if (competitor == null) return;
+        if (competitor == null || Category == null) return;
 
         bool confirm = await DisplayConfirmation(
             Resources.CONFIRM_DELETE,
@@ -180,7 +183,19 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
 
         if (confirm)
         {
-            await _repository.DeleteAsync(competitor);
+            // 1. Find the link in the join table
+            var links = await _competitorCategoryRepository.GetAllAsync();
+            var linkToRemove = links?.FirstOrDefault(cc => cc.CompetitorId == competitor.Id && cc.CategoryId == Category.Id);
+            
+            if (linkToRemove != null)
+            {
+                await _competitorCategoryRepository.DeleteAsync(linkToRemove);
+                Category.Competitors.Remove(linkToRemove);
+            }
+
+            // Note: We don't delete the competitor itself from the database 
+            // because they might be registered in other categories.
+            // We only remove them from THIS category.
             Competitors.Remove(competitor);
         }
     }

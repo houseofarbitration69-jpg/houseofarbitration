@@ -7,17 +7,14 @@ public class AgeRangeToBoolConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is AgeRange age)
+        bool hasValue = value is AgeRangeModel age && age.Id > 0;
+        
+        if (parameter as string == "Invert")
         {
-            var result = age != AgeRange.None;
-
-            if (parameter as string == "Invert")
-            {
-                return !result;
-            }
+            return !hasValue;
         }
 
-        return false;
+        return hasValue;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

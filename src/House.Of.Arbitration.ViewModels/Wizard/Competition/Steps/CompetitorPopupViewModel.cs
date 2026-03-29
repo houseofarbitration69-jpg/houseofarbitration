@@ -141,7 +141,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     /// Obtient ou définit la liste des genres
     /// </summary>
     public List<LocalizedEnum<Genre>> Genres { get; }
-    
+
     /// <summary>
     /// Obtient ou définit la liste des clubs déjà présent dans la base
     /// </summary>
@@ -226,6 +226,17 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
             .Cast<T>()
             .Select(e => new LocalizedEnum<T>(e, LocalizationResourceManager.Instance.GetValue($"{prefix}{e.ToString().ToUpper()}")))
             .ToList();
+    }
+
+    private void CheckWarning()
+    {
+        // Check Grade ?
+
+        // Check Genre
+
+        // Check Old
+
+        // Check Weight
     }
     #endregion
 

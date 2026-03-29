@@ -55,7 +55,9 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                         value.RoundType = RoundType.Order;
                     }
 
-                    Competitors = new ObservableCollection<CompetitorModel>(value.Competitors ?? new());
+                    // Extract CompetitorModels from CompetitorCategoryModels for UI usage
+                    var competitorModels = value.Competitors?.Select(cc => cc.Competitor).ToList() ?? new();
+                    Competitors = new ObservableCollection<CompetitorModel>(competitorModels);
                 }
                 OnPropertyChanged(nameof(IsKnockouts));
                 OnPropertyChanged(nameof(IsPools));
@@ -167,8 +169,8 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             }
             else
             {
-                match.Slot1.Competitor = (i * 2 < n) ? Category.Competitors[i * 2] : null;
-                match.Slot2.Competitor = (i * 2 + 1 < n) ? Category.Competitors[i * 2 + 1] : null;
+                match.Slot1.Competitor = (i * 2 < n) ? Category.Competitors[i * 2].Competitor : null;
+                match.Slot2.Competitor = (i * 2 + 1 < n) ? Category.Competitors[i * 2 + 1].Competitor : null;
             }
             round1.Matches.Add(match);
         }
@@ -283,7 +285,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         _pouleSlots = new List<BracketSlotViewModel>();
         for (int i = 0; i < n; i++)
         {
-            _pouleSlots.Add(new BracketSlotViewModel { Competitor = competitors[i] });
+            _pouleSlots.Add(new BracketSlotViewModel { Competitor = competitors[i].Competitor });
         }
 
         // Generate all unique combinations (everyone against everyone)
@@ -368,7 +370,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         {
             for (int i = 0; i < n; i++)
             {
-                var slot = new BracketSlotViewModel { Competitor = competitors[i] };
+                var slot = new BracketSlotViewModel { Competitor = competitors[i].Competitor };
                 _pouleSlots.Add(slot);
 
                 var match = new BracketMatchViewModel();
@@ -580,25 +582,54 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     {
         if (Category == null) return;
 
+        var newLinks = new List<CompetitorCategoryModel>();
+
         if (IsKnockouts && Rounds.Count > 0)
         {
             var round1 = Rounds[0];
-            var newCompetitors = new List<CompetitorModel>();
-
+            
             foreach (var match in round1.Matches)
             {
                 if (match.Slot1.Competitor != null)
-                    newCompetitors.Add(match.Slot1.Competitor);
+                {
+                    newLinks.Add(new CompetitorCategoryModel 
+                    { 
+                        CompetitorId = match.Slot1.Competitor.Id, 
+                        Competitor = match.Slot1.Competitor,
+                        CategoryId = Category.Id, 
+                        Category = Category 
+                    });
+                }
                 if (match.Slot2.Competitor != null)
-                    newCompetitors.Add(match.Slot2.Competitor);
+                {
+                    newLinks.Add(new CompetitorCategoryModel 
+                    { 
+                        CompetitorId = match.Slot2.Competitor.Id, 
+                        Competitor = match.Slot2.Competitor,
+                        CategoryId = Category.Id, 
+                        Category = Category 
+                    });
+                }
             }
-
-            Category.Competitors = newCompetitors;
         }
         else if (IsPools || IsOrder)
         {
-            Category.Competitors = _pouleSlots.Select(s => s.Competitor).ToList()!;
+            foreach (var slot in _pouleSlots)
+            {
+                if (slot.Competitor != null)
+                {
+                    newLinks.Add(new CompetitorCategoryModel 
+                    { 
+                        CompetitorId = slot.Competitor.Id, 
+                        Competitor = slot.Competitor,
+                        CategoryId = Category.Id, 
+                        Category = Category 
+                    });
+                }
+            }
         }
+
+        Category.Competitors = newLinks;
     }
     #endregion
 }

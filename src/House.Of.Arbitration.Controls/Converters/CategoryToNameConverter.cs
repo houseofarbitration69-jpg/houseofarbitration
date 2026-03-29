@@ -22,11 +22,11 @@ public class CategoryToNameConverter : IValueConverter
                 case CategoryType.None:
                     return String.Empty;
                 case CategoryType.Sanda:
-                    return $"Sanda {localizer.GetValue($"ENUM_AGE_{category.AgeRange.ToString().ToUpper()}")} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{((weights!=String.Empty)?localizer.GetValue("WEIGHT_UNIT"):"")}";
+                    return $"Sanda {category.AgeRange.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{((weights!=String.Empty)?localizer.GetValue("WEIGHT_UNIT"):"")}";
                 case CategoryType.SandaLight:
-                    return $"Sanda Light {localizer.GetValue($"ENUM_AGE_{category.AgeRange.ToString().ToUpper()}")} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
+                    return $"Sanda Light {category.AgeRange.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
                 case CategoryType.Taolu:
-                    return $"Taolu {localizer.GetValue($"ENUM_AGE_{category.AgeRange.ToString().ToUpper()}")} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")}";
+                    return $"Taolu {category.AgeRange.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")}";
                 default:
                     return String.Empty;
             }

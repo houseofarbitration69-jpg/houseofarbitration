@@ -172,14 +172,14 @@
                         <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                     </Border.StrokeShape>
                     <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding SelectedAgeRange.Value, Converter={StaticResource AgeRangeToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                        <DataTrigger TargetType="Border" Binding="{Binding SelectedAgeRange, Converter={StaticResource AgeRangeToBoolConverter}, ConverterParameter='Invert'}" Value="True">
                             <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                         </DataTrigger>
                     </Border.Triggers>
                     <Picker 
                         ItemsSource="{Binding AgeRanges}"
                         SelectedItem="{Binding SelectedAgeRange}"
-                        ItemDisplayBinding="{Binding DisplayName}"
+                        ItemDisplayBinding="{Binding Label}"
                         TextColor="Black"
                         BackgroundColor="White"
                         MinimumHeightRequest="30"

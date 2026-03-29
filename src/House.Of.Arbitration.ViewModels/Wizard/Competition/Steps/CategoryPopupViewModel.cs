@@ -24,7 +24,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     private LocalizedEnum<CategoryType>? _selectedType;
     private LocalizedEnum<RoundType>? _selectedRoundType;
     private LocalizedEnum<Genre>? _selectedGenre;
-    private LocalizedEnum<AgeRange>? _selectedAgeRange;
+    private AgeRangeModel? _selectedAgeRange;
     private int _weightMin = 0;
     private int _weightMax = 0;
     #endregion
@@ -43,7 +43,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
                 SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == value.Type);
                 SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == value.RoundType);
                 SelectedGenre = Genres.FirstOrDefault(x => x.Value == value.Genre);
-                SelectedAgeRange = AgeRanges.FirstOrDefault(x => x.Value == value.AgeRange);
+                SelectedAgeRange = AgeRanges.FirstOrDefault(x => x.Id == value.AgeRange?.Id);
                 WeightMin = value.WeightMin;
                 WeightMax = value.WeightMax;
             }
@@ -80,7 +80,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
-    public LocalizedEnum<AgeRange>? SelectedAgeRange
+    public AgeRangeModel? SelectedAgeRange
     {
         get => _selectedAgeRange;
         set
@@ -114,7 +114,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
 
     public List<LocalizedEnum<Genre>> Genres { get; }
 
-    public List<LocalizedEnum<AgeRange>> AgeRanges { get; }
+    public List<AgeRangeModel> AgeRanges { get; }
     #endregion
 
     #region Constructors
@@ -129,13 +129,13 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         CategoryTypes = LocalizeEnum<CategoryType>("ENUM_CATEGORY_");
         RoundTypes = LocalizeEnum<RoundType>("ENUM_ROUND_");
         Genres = LocalizeEnum<Genre>("ENUM_GENRE_");
-        AgeRanges = LocalizeEnum<AgeRange>("ENUM_AGE_");
+        AgeRanges = AgeRangeModel.DefaultRanges;
 
         // Valeurs par défaut
         SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == CategoryType.None);
         SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == RoundType.None);
         SelectedGenre = Genres.FirstOrDefault(x => x.Value == Genre.None);
-        SelectedAgeRange = AgeRanges.FirstOrDefault(x => x.Value == AgeRange.None);
+        SelectedAgeRange = null;
     }
     #endregion
 
@@ -166,7 +166,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
             Type = SelectedType?.Value ?? CategoryType.None,
             RoundType = SelectedRoundType?.Value ?? RoundType.None,
             Genre = SelectedGenre?.Value ?? Genre.None,
-            AgeRange = SelectedAgeRange?.Value ?? AgeRange.None,
+            AgeRange = SelectedAgeRange!,
             WeightMin = WeightMin,
             WeightMax = WeightMax,
             Competition = null!
@@ -191,7 +191,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     {
         var result = SelectedType != null && SelectedType.Value != CategoryType.None;
         result = result && (SelectedGenre != null && SelectedGenre.Value != Genre.None);
-        result = result && (SelectedAgeRange != null && SelectedAgeRange.Value != AgeRange.None);
+        result = result && (SelectedAgeRange != null);
 
         result = result && ((SelectedType != null && (SelectedType.Value == CategoryType.Sanda || SelectedType.Value == CategoryType.SandaLight)) ? (SelectedRoundType != null && SelectedRoundType.Value != RoundType.None) : true);
 

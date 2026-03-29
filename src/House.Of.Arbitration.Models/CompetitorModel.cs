@@ -45,10 +45,5 @@ public class CompetitorModel
     /// <summary>
     /// Obtient ou définit la liste des catégoriesdu compétiteur
     /// </summary>
-    public List<CategoryModel>? Categories { get; set; }
-
-    /// <summary>
-    /// Obtient ou définit la liste des alertes sur le compétiteur
-    /// </summary>
-    public List<WarningModel>? Warnings { get; set; }
+    public List<CompetitorCategoryModel>? Categories { get; set; }
 }

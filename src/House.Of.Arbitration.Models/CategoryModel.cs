@@ -30,7 +30,7 @@ public class CategoryModel
     /// <summary>
     /// Obtient ou définit la plage d'age de la catégorie
     /// </summary>
-    public AgeRange AgeRange { get; set; }
+    public AgeRangeModel? AgeRange { get; set; }
 
     /// <summary>
     /// Obtient ou définit le type de round de la catégorie
@@ -50,12 +50,7 @@ public class CategoryModel
     /// <summary>
     /// Obtient ou définit la liste des compétiteurs de la catégorie
     /// </summary>
-    public List<CompetitorModel> Competitors { get; set; } = new();
-
-    /// <summary>
-    /// Obtient ou définit la liste des alertes de la catégorie
-    /// </summary>
-    public List<WarningModel>? Warnings { get; set; }
+    public List<CompetitorCategoryModel> Competitors { get; set; } = new();
 }
 
 /// <summary>
@@ -78,19 +73,6 @@ public enum Genre
     Men,
     Women,
     Mixte
-}
-
-/// <summary>
-/// Enumération des plages d'age
-/// </summary>
-public enum AgeRange
-{
-    None, 
-    Cadets,
-    Juniors,
-    Seniors,
-    Espoirs,
-    Veterans
 }
 
 /// <summary>
