@@ -1,4 +1,6 @@
-﻿namespace House.Of.Arbitration.Services;
+﻿using House.Of.Arbitration.Services.Abstractions;
+
+namespace House.Of.Arbitration.Services;
 
 /// <summary>
 /// Extension methods for configuring localization services.
@@ -12,6 +14,7 @@ public static class ServicesExtensions
     /// <returns>The configured <see cref="MauiAppBuilder"/>.</returns>
     public static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
     {
+        builder.Services.AddScoped<IWarningService, WarningService>();
         return builder;
     }
 }

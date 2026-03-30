@@ -4,10 +4,10 @@ using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
@@ -18,11 +18,12 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     private readonly IRepository<CompetitorModel> _repository;
     private readonly IRepository<CompetitorCategoryModel> _competitorCategoryRepository;
     private readonly IRepository<DrawModel> _drawsRepository;
+    private readonly IWarningService _warningService;
     #endregion
 
     #region Attributs
     private CategoryModel? _category;
-    private ObservableCollection<CompetitorModel> _competitors = new();
+    private ObservableCollection<CompetitorCategoryModel> _competitors = new();
     #endregion
 
     #region Properties    
@@ -35,13 +36,12 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             if (value != null)
             {
                 // In many-to-many with join table, value.Competitors is List<CompetitorCategoryModel>
-                var competitorModels = value.Competitors?.Select(cc => cc.Competitor).ToList() ?? new();
-                Competitors = new ObservableCollection<CompetitorModel>(competitorModels);
+                Competitors = new ObservableCollection<CompetitorCategoryModel>(value.Competitors ?? new());
             }
         }
     }
 
-    public ObservableCollection<CompetitorModel> Competitors
+    public ObservableCollection<CompetitorCategoryModel> Competitors
     {
         get => _competitors;
         set => SetProperty(ref _competitors, value);
@@ -55,12 +55,14 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         ResourceProvider resourceProvider, 
         IRepository<CompetitorModel> repository,
         IRepository<CompetitorCategoryModel> competitorCategoryRepository,
-        IRepository<DrawModel> drawsRepository)
+        IRepository<DrawModel> drawsRepository,
+        IWarningService warningService)
         : base(logger, resourceProvider, popupService)
     {
         _repository = repository;
         _competitorCategoryRepository = competitorCategoryRepository;
         _drawsRepository = drawsRepository;
+        _warningService = warningService;
     }
     #endregion
 
@@ -83,6 +85,24 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (existingDraw != null)
         {
             await _drawsRepository.DeleteAsync(existingDraw);
+        }
+    }
+    #endregion
+
+    #region Virtual Methods
+    public override async Task OnAppearing()
+    {
+        if (Category != null)
+        {
+            // Reload the category with its registrations and warnings to ensure UI is up-to-date
+            var links = await _competitorCategoryRepository.GetAllAsync("Competitor", "Warnings");
+            var categoryLinks = links?.Where(l => l.CategoryId == Category.Id).ToList();
+            
+            if (categoryLinks != null)
+            {
+                Category.Competitors = categoryLinks;
+                Competitors = new ObservableCollection<CompetitorCategoryModel>(categoryLinks);
+            }
         }
     }
     #endregion
@@ -133,21 +153,27 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             // 3. Update local collections
             if (Category.Competitors == null) Category.Competitors = new();
             Category.Competitors.Add(link);
-            Competitors.Add(competitor);
+            Competitors.Add(link);
 
-            // 4. Invalidate Draw
+            // 4. Update Warnings
+            await _warningService.UpdateWarningsForCompetitorAsync(competitor.Id);
+
+            // 5. Invalidate Draw
             await DeleteDrawAsync();
+            
+            // 6. Refresh warnings from DB
+            await OnAppearing();
         }
     }
 
     [RelayCommand]
-    private async Task Edit(CompetitorModel competitor)
+    private async Task Edit(CompetitorCategoryModel link)
     {
-        if (Category == null) return;
+        if (Category == null || link.Competitor == null) return;
 
         var queryAttributes = new Dictionary<string, object>
         {
-            [nameof(CompetitorPopupViewModel.Competitor)] = competitor,
+            [nameof(CompetitorPopupViewModel.Competitor)] = link.Competitor,
             [nameof(CompetitorPopupViewModel.Category)] = Category,
         } as IDictionary<string, object>;
 
@@ -158,41 +184,39 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             var updated = result.Result;
             
             // Map properties to the original instance to maintain object identity
-            competitor.FirstName = updated.FirstName;
-            competitor.LastName = updated.LastName;
-            competitor.Genre = updated.Genre;
-            competitor.BirthDate = updated.BirthDate;
-            competitor.Club = updated.Club;
-            competitor.Weight = updated.Weight;
+            link.Competitor.FirstName = updated.FirstName;
+            link.Competitor.LastName = updated.LastName;
+            link.Competitor.Genre = updated.Genre;
+            link.Competitor.BirthDate = updated.BirthDate;
+            link.Competitor.Club = updated.Club;
+            link.Competitor.Weight = updated.Weight;
 
             // Create flat clone for DB update to avoid tracking conflicts
             var dbCompetitor = new CompetitorModel
             {
-                Id = competitor.Id,
-                FirstName = competitor.FirstName,
-                LastName = competitor.LastName,
-                Genre = competitor.Genre,
-                BirthDate = competitor.BirthDate,
-                Club = competitor.Club,
-                Weight = competitor.Weight
+                Id = link.Competitor.Id,
+                FirstName = link.Competitor.FirstName,
+                LastName = link.Competitor.LastName,
+                Genre = link.Competitor.Genre,
+                BirthDate = link.Competitor.BirthDate,
+                Club = link.Competitor.Club,
+                Weight = link.Competitor.Weight
             };
 
             await _repository.UpdateAsync(dbCompetitor);
 
-            // UI Refresh
-            var index = Competitors.IndexOf(competitor);
-            if (index != -1)
-            {
-                Competitors[index] = null!;
-                Competitors[index] = competitor;
-            }
+            // Update Warnings
+            await _warningService.UpdateWarningsForCompetitorAsync(link.Competitor.Id);
+
+            // Refresh warnings from DB
+            await OnAppearing();
         }
     }
 
     [RelayCommand]
-    private async Task Delete(CompetitorModel competitor)
+    private async Task Delete(CompetitorCategoryModel link)
     {
-        if (competitor == null || Category == null) return;
+        if (link == null || Category == null) return;
 
         bool confirm = await DisplayConfirmation(
             Resources.CONFIRM_DELETE,
@@ -202,22 +226,11 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
 
         if (confirm)
         {
-            // 1. Find the link in the join table
-            var links = await _competitorCategoryRepository.GetAllAsync();
-            var linkToRemove = links?.FirstOrDefault(cc => cc.CompetitorId == competitor.Id && cc.CategoryId == Category.Id);
-            
-            if (linkToRemove != null)
-            {
-                await _competitorCategoryRepository.DeleteAsync(linkToRemove);
-                Category.Competitors.Remove(linkToRemove);
-            }
+            await _competitorCategoryRepository.DeleteAsync(link);
+            Category.Competitors.Remove(link);
+            Competitors.Remove(link);
 
-            // Note: We don't delete the competitor itself from the database 
-            // because they might be registered in other categories.
-            // We only remove them from THIS category.
-            Competitors.Remove(competitor);
-
-            // 2. Invalidate Draw
+            // Invalidate Draw
             await DeleteDrawAsync();
         }
     }

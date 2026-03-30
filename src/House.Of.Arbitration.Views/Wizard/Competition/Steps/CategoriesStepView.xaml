@@ -15,6 +15,7 @@
     <ContentView.Resources>
         <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
         <converters:NbCompetitorConverter x:Key="NbCompetitorConverter"/>
+        <converters:CategoryToWarningBoolConverter x:Key="CategoryToWarningBoolConverter" />
     </ContentView.Resources>
 
     <Grid>
@@ -54,20 +55,29 @@
                         <DataTemplate x:DataType="models:CategoryModel">
                             <controls:Card CardPadding="15" CardColor="White">
                                 <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
-                                    <VerticalStackLayout Grid.Row="0" Grid.Column="0">
-                                        <Label 
-                                            Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
-                                            TextColor="Black"
-                                            VerticalOptions="Center"
-                                        />
-                                        <Label 
-                                            Text="{Binding Competitors.Count, Converter={StaticResource NbCompetitorConverter}}"
-                                            TextColor="Black"
-                                            VerticalOptions="Center"
-                                            FontAttributes="Italic"
-                                            FontSize="10"
-                                        />
-                                    </VerticalStackLayout>
+                                    <HorizontalStackLayout Grid.Row="0" Grid.Column="0" VerticalOptions="Center" Spacing="10">
+                                        <Label Text="{x:Static helpers:FontCustomIcons.WARNING}" 
+                                               FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                               TextColor="{DynamicResource ErrorColor}"
+                                               FontSize="24"
+                                               VerticalOptions="Center"
+                                               IsVisible="{Binding ., Converter={StaticResource CategoryToWarningBoolConverter}}" />
+                                        
+                                        <VerticalStackLayout>
+                                            <Label 
+                                                Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
+                                                TextColor="Black"
+                                                VerticalOptions="Center"
+                                            />
+                                            <Label 
+                                                Text="{Binding Competitors.Count, Converter={StaticResource NbCompetitorConverter}}"
+                                                TextColor="Black"
+                                                VerticalOptions="Center"
+                                                FontAttributes="Italic"
+                                                FontSize="10"
+                                            />
+                                        </VerticalStackLayout>
+                                    </HorizontalStackLayout>
                                     
                                     <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
                                         <controls:IconButton

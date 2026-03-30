@@ -3,6 +3,7 @@ using CommunityToolkit.Maui;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Wizard.Competition;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using House.Of.Arbitration.Views.Core;
@@ -16,6 +17,7 @@ public partial class WizardPage : BasePage<CompetitionWizardViewModel>
         IPopupService popupService,
         CompetitionWizardViewModel viewModel,
         ResourceProvider resource,
+        IWarningService warningService,
         IRepository<CompetitionModel> competitionRepository,
         IRepository<CategoryModel> categoryRepository,
         IRepository<DrawModel> drawRepository
@@ -24,7 +26,7 @@ public partial class WizardPage : BasePage<CompetitionWizardViewModel>
         InitializeComponent();
         
         var settingsStep = new SettingsStepViewModel(resource, popupService, competitionRepository);
-        var categoriesStep = new CategoriesStepViewModel(popupService, resource, categoryRepository, drawRepository);
+        var categoriesStep = new CategoriesStepViewModel(popupService, resource, categoryRepository, drawRepository, warningService);
         //var userStep = new UserStepViewModel();
         //var termsStep = new TermsStepViewModel();
         //var summaryStep = new SummaryStepViewModel(userStep, termsStep);

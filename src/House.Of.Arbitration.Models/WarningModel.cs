@@ -28,6 +28,11 @@ public class WarningModel
     public CategoryModel? Category { get; set; }
 
     /// <summary>
+    /// Obtient ou définit l'identifiant du lien Competiteur/Categorie
+    /// </summary>
+    public int? CompetitorCategoryId { get; set; }
+
+    /// <summary>
     /// Obtient ou définit a quoi correspond l'alerte
     /// </summary>
     public required string Label { get; set; }

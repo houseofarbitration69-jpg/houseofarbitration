@@ -16,4 +16,5 @@ public static class FontCustomIcons
     public const string CHECK = "\uf009";
     public const string DOGI = "\uf00A";
     public const string DRAWS = "\uf00B";
+    public const string WARNING = "\uf00C";
 }

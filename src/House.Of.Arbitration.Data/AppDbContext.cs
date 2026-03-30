@@ -204,7 +204,7 @@ public class AppDbContext : DbContext
 
             item.HasOne<CompetitorCategoryModel>()
                 .WithMany(cc => cc.Warnings)
-                .HasForeignKey("CompetitorCategoryId");
+                .HasForeignKey(i => i.CompetitorCategoryId);
         });
     }
     #endregion

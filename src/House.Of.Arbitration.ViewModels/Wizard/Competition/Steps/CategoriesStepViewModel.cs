@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Services.Abstractions;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 #endregion
@@ -15,6 +16,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     #region Services
     private readonly IRepository<CategoryModel> _repository;
     private readonly IRepository<DrawModel> _drawsRepository;
+    private readonly IWarningService _warningService;
     #endregion
 
     #region Attributs
@@ -36,11 +38,13 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         IPopupService popupService, 
         ResourceProvider resourceProvider, 
         IRepository<CategoryModel> repository,
-        IRepository<DrawModel> drawRepository
+        IRepository<DrawModel> drawRepository,
+        IWarningService warningService
     ) : base(resourceProvider, popupService)
     {
         _repository = repository;
         _drawsRepository = drawRepository;
+        _warningService = warningService;
 
         Categories.CollectionChanged += OnCategoriesCollectionChanged;
         
@@ -109,8 +113,8 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     {
         if (Model != null)
         {
-            // Reload categories with their competitors to update counts in UI
-            var categories = await _repository.GetAllAsync("AgeRange","Competitors.Competitor");
+            // Reload categories with their competitors and warnings to update UI
+            var categories = await _repository.GetAllAsync("AgeRange","Competitors.Competitor", "Competitors.Warnings");
             if (categories != null)
             {
                 var competitionCategories = categories.Where(c => c.CompetitionId == Model.Id).ToList();
@@ -166,8 +170,11 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
                 if (index >= 0)
                 {
                     await _repository.UpdateAsync(editCategory);
+                    await _warningService.UpdateWarningsForCategoryAsync(editCategory.Id);
                     await DeleteDrawAsync(editCategory.Id);
-                    Categories[index] = editCategory;                    
+                    
+                    // Reload to get updated warnings in the object graph
+                    await OnAppearing();
                 }
             }
         }

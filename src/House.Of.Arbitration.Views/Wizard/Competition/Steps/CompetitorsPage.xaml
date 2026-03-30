@@ -10,11 +10,13 @@
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
     x:TypeArguments="vm:CompetitorsPageViewModel"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CompetitorsPage"
+    x:Name="this"
     Shell.PresentationMode="ModalNotAnimated"
     BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <base:BasePage.Resources>
         <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
+        <converters:WarningsToStringConverter x:Key="WarningsToStringConverter" />
     </base:BasePage.Resources>
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
@@ -59,15 +61,27 @@
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:CompetitorModel">
+                <DataTemplate x:DataType="models:CompetitorCategoryModel">
                     <controls:Card CardPadding="15" CardColor="White">
                         <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
                                 <HorizontalStackLayout Spacing="9">
-                                    <Label Text="{Binding LastName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
-                                    <Label Text="{Binding FirstName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label Text="{Binding Competitor.LastName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label Text="{Binding Competitor.FirstName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
                                 </HorizontalStackLayout>
-                                <Label Text="{Binding Club}" FontSize="13" TextColor="Gray" />
+                                <Label Text="{Binding Competitor.Club}" FontSize="13" TextColor="Gray" />
+                                
+                                <!-- Warnings -->
+                                <Label Text="{Binding Warnings, Converter={StaticResource WarningsToStringConverter}}"
+                                       TextColor="{DynamicResource ErrorColor}" 
+                                       FontSize="12" 
+                                       Margin="0,5,0,0">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Source={RelativeSource Self}, Path=Text}" Value="">
+                                            <Setter Property="IsVisible" Value="False" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
                             </VerticalStackLayout>
 
                             <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
