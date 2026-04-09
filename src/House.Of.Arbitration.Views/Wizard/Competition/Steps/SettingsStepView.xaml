@@ -53,7 +53,7 @@
                                     <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
-                            <Grid RowDefinitions="35" ColumnDefinitions="Auto, *">
+                            <Grid RowDefinitions="40" ColumnDefinitions="Auto, *">
                                 <Label 
                                     Grid.Column="0"
                                     Text="{x:Static helpers:FontCustomIcons.COLOR_TROPHY}" 
@@ -68,7 +68,7 @@
                                     PlaceholderColor="White"
                                     TextColor="{DynamicResource PrimaryTextColor}"
                                     VerticalOptions="Center" 
-                                    MinimumHeightRequest="35"
+                                    MinimumHeightRequest="40"
                                 />
                             </Grid>
                         </Border>

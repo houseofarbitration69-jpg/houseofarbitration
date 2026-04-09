@@ -312,4 +312,7 @@
   <data name="CHOOSE_AGE_RANGE" xml:space="preserve">
     <value>Choisissez une tranche d'âge</value>
   </data>
+  <data name="NO_CATEGORIES" xml:space="preserve">
+    <value>Aucune catégories</value>
+  </data>
 </root>

@@ -347,6 +347,11 @@ LocalizationResourceManager.Instance.GetValue(nameof(ENUM_GENRE_MIXTE));
     /// </summary>
     public string CHOOSE_AGE_RANGE =>
 LocalizationResourceManager.Instance.GetValue(nameof(CHOOSE_AGE_RANGE));
+    /// <summary>
+    /// Gets the translated "NO_CATEGORIES" string.
+    /// </summary>
+    public string NO_CATEGORIES =>
+LocalizationResourceManager.Instance.GetValue(nameof(NO_CATEGORIES));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

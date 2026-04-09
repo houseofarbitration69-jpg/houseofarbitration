@@ -19,125 +19,135 @@
         <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
     </ContentView.Resources>
 
-    <Grid>
-        <!-- Background/Main Content -->
-        <ScrollView>
-            <VerticalStackLayout Spacing="24" Padding="20">
-                <!-- Header -->
-                <Grid ColumnDefinitions="*,Auto">
-                    <Label 
-                        Grid.Column="0"
-                        Text="{Binding Resources.CATEGORY_LIST}" 
-                        Style="{DynamicResource Headline}" 
-                        TextColor="{DynamicResource PageTitleColor}"
-                        FontSize="32" 
-                        VerticalOptions="Center"
-                        HorizontalOptions="Start"
-                    />
+    <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="20">
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+            <Label 
+                Grid.Column="0"
+                Text="{Binding Resources.CATEGORY_LIST}" 
+                FontSize="32" 
+                TextColor="{DynamicResource PageTitleColor}"
+                VerticalOptions="Center"
+                HorizontalOptions="Start"
+            />
 
-                    <controls:IconButton 
-                        Grid.Column="1"
-                        Text="{Binding Resources.ADD_CATEGORY}"
-                        ButtonBackgroundColor="{DynamicResource ValidColor}"
-                        TextColor="Black"
-                        Command="{Binding AddCategoryCommand}"
-                        VerticalOptions="Center"
-                    >
-                        <controls:IconButton.Icons>
-                            <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
-                            <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
-                        </controls:IconButton.Icons>
-                    </controls:IconButton>
-                </Grid>
+            <controls:IconButton 
+                Grid.Column="1"
+                Text="{Binding Resources.ADD_CATEGORY}"
+                ButtonBackgroundColor="{DynamicResource ValidColor}"
+                TextColor="Black"
+                Command="{Binding AddCategoryCommand}"
+            >
+                <controls:IconButton.Icons>
+                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
+                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
+                </controls:IconButton.Icons>
+            </controls:IconButton>
+        </Grid>
 
-                <!-- Categories List -->
-                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Categories}" Spacing="15">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:CategoryModel">
-                            <controls:Card CardPadding="15" CardColor="White">
-                                <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
-                                    <HorizontalStackLayout Grid.Row="0" Grid.Column="0" VerticalOptions="Center" Spacing="10">
-                                        <Label Text="{x:Static helpers:FontCustomIcons.WARNING}" 
-                                               FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                               TextColor="{DynamicResource ErrorColor}"
-                                               FontSize="24"
-                                               VerticalOptions="Center"
-                                               IsVisible="{Binding ., Converter={StaticResource CategoryToWarningBoolConverter}}"/>
+        <!-- Categories List -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Categories}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:CategoryModel">
+                    <controls:Card CardPadding="15" CardColor="White">
+                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="0" VerticalOptions="Center" Spacing="10">
+                                <Label Text="{x:Static helpers:FontCustomIcons.WARNING}" 
+                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    TextColor="{DynamicResource ErrorColor}"
+                                    FontSize="24"
+                                    VerticalOptions="Center"
+                                    IsVisible="{Binding ., Converter={StaticResource CategoryToWarningBoolConverter}}"
+                                />
 
-                                        <Label Text="{x:Static helpers:FontCustomIcons.DRAWS}" 
-                                               FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                               TextColor="{DynamicResource ErrorColor}"
-                                               FontSize="24"
-                                               VerticalOptions="Center">
-                                            <Label.Triggers>
-                                                <DataTrigger TargetType="Label" Binding="{Binding HasDraw}" Value="True">
-                                                    <Setter Property="TextColor" Value="{DynamicResource ValidColor}" />
-                                                </DataTrigger>
-                                            </Label.Triggers>
-                                        </Label>
-                                        
-                                        <VerticalStackLayout>
-                                            <Label 
-                                                Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
-                                                TextColor="Black"
-                                                VerticalOptions="Center"
-                                            />
-                                            <Label 
-                                                Text="{Binding Competitors.Count, Converter={StaticResource NbCompetitorConverter}}"
-                                                TextColor="Black"
-                                                VerticalOptions="Center"
-                                                FontAttributes="Italic"
-                                                FontSize="10"
-                                            />
-                                        </VerticalStackLayout>
-                                    </HorizontalStackLayout>
+                                <Label Text="{x:Static helpers:FontCustomIcons.DRAWS}" 
+                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    TextColor="{DynamicResource ErrorColor}"
+                                    FontSize="24"
+                                    VerticalOptions="Center"
+                                >
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding HasDraw}" Value="True">
+                                            <Setter Property="TextColor" Value="{DynamicResource ValidColor}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+
+                                <VerticalStackLayout>
+                                    <Label 
+                                        Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
+                                        TextColor="Black"
+                                        VerticalOptions="Center"
+                                    />
                                     
-                                    <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
-                                        <controls:IconButton
-                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                            Icon="{x:Static helpers:FontCustomIcons.PEN}"
-                                            ButtonBackgroundColor="{DynamicResource EditColor}"
-                                            IconColor="Black"
-                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=EditCategoryCommand}"
-                                            CommandParameter="{Binding}"
-                                        />
-                                        <controls:IconButton
-                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                            Icon="{x:Static helpers:FontCustomIcons.DOGI}"
-                                            ButtonBackgroundColor="{DynamicResource ValidColor}"
-                                            IconColor="Black"
-                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=ShowCompetitorsCommand}"
-                                            CommandParameter="{Binding}"
-                                        />
-                                        <controls:IconButton
-                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                            Icon="{x:Static helpers:FontCustomIcons.DRAWS}"
-                                            ButtonBackgroundColor="{DynamicResource ValidColor}"
-                                            IconColor="Black"
-                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=ShowDrawCommand}"
-                                            CommandParameter="{Binding}">
-                                            <controls:IconButton.Triggers>
-                                                <DataTrigger TargetType="controls:IconButton" Binding="{Binding HasDraw}" Value="False">
-                                                    <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ErrorColor}" />
-                                                </DataTrigger>
-                                            </controls:IconButton.Triggers>
-                                        </controls:IconButton>
-                                        <controls:IconButton
-                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                            Icon="{x:Static helpers:FontCustomIcons.TRASH}"
-                                            ButtonBackgroundColor="{DynamicResource ErrorColor}"
-                                            IconColor="Black"
-                                            Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=DeleteCategoryCommand}"
-                                            CommandParameter="{Binding}"
-                                        />
-                                    </HorizontalStackLayout>
-                                </Grid>
-                            </controls:Card>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+                                    <Label 
+                                        Text="{Binding Competitors.Count, Converter={StaticResource NbCompetitorConverter}}"
+                                        TextColor="Black"
+                                        VerticalOptions="Center"
+                                        FontAttributes="Italic"
+                                        FontSize="10"
+                                    />
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
 
-            </VerticalStackLayout>
-        </ScrollView>
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.PEN}"
+                                    ButtonBackgroundColor="{DynamicResource EditColor}"
+                                    IconColor="Black"
+                                    Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=EditCategoryCommand}"
+                                    CommandParameter="{Binding}"
+                                />
+                                
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.DOGI}"
+                                    ButtonBackgroundColor="{DynamicResource ValidColor}"
+                                    IconColor="Black"
+                                    Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=ShowCompetitorsCommand}"
+                                    CommandParameter="{Binding}"
+                                />
+                                
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.DRAWS}"
+                                    ButtonBackgroundColor="{DynamicResource ValidColor}"
+                                    IconColor="Black"
+                                    Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=ShowDrawCommand}"
+                                    CommandParameter="{Binding}"
+                                >
+                                    <controls:IconButton.Triggers>
+                                        <DataTrigger TargetType="controls:IconButton" Binding="{Binding HasDraw}" Value="False">
+                                            <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ErrorColor}" />
+                                        </DataTrigger>
+                                    </controls:IconButton.Triggers>
+                                </controls:IconButton>
+                                
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                                    ButtonBackgroundColor="{DynamicResource ErrorColor}"
+                                    IconColor="Black"
+                                    Command="{Binding x:DataType='vm:CategoriesStepViewModel', Source={RelativeSource AncestorType={x:Type vm:CategoriesStepViewModel}}, Path=DeleteCategoryCommand}"
+                                    CommandParameter="{Binding}"
+                                />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </controls:Card>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*" RowSpacing="10">
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
+                        <Label Text="{x:Static helpers:FontCustomIcons.CATEGORY}" FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" FontSize="48" HorizontalOptions="Center" />
+                        <Label Text="{Binding Resources.NO_CATEGORIES}" FontAttributes="Italic" Opacity="0.6" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </CollectionView.EmptyView>
+        </CollectionView>
     </Grid>
 </ContentView>

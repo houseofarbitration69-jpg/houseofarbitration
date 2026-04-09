@@ -124,6 +124,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à Choose an age range.
+        /// </summary>
+        public static string CHOOSE_AGE_RANGE {
+            get {
+                return ResourceManager.GetString("CHOOSE_AGE_RANGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [CLOSE].
         /// </summary>
         public static string CLOSE_ACTION {
@@ -484,6 +493,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [NO CATEGORIES].
+        /// </summary>
+        public static string NO_CATEGORIES {
+            get {
+                return ResourceManager.GetString("NO_CATEGORIES", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [NO COMPETITION].
         /// </summary>
         public static string NO_COMPETITION {
@@ -633,15 +651,6 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string YES {
             get {
                 return ResourceManager.GetString("YES", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Recherche une chaîne localisée semblable à Choose an age range.
-        /// </summary>
-        public static string CHOOSE_AGE_RANGE {
-            get {
-                return ResourceManager.GetString("CHOOSE_AGE_RANGE", resourceCulture);
             }
         }
     }
