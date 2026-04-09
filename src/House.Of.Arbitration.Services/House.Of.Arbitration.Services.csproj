@@ -13,6 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Maui" />
     <PackageReference Include="Microsoft.Maui.Controls" />
   </ItemGroup>
 
@@ -20,6 +21,10 @@
     <ProjectReference Include="..\House.Of.Arbitration.Data.Abstractions\House.Of.Arbitration.Data.Abstractions.csproj" />
     <ProjectReference Include="..\House.Of.Arbitration.Models\House.Of.Arbitration.Models.csproj" />
     <ProjectReference Include="..\House.Of.Arbitration.Services.Abstractions\House.Of.Arbitration.Services.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Platforms\iOS\Bluetooth\" />
   </ItemGroup>
 
 </Project>

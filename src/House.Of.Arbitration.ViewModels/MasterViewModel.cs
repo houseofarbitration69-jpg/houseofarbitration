@@ -81,7 +81,13 @@ public partial class MasterViewModel : BaseViewModel
         if (confirm)
         {
             await _repository.DeleteAsync(competition);
-            Competitions?.Remove(competition);
+
+            var item = Competitions?.FirstOrDefault(c => c.Id == competition.Id);
+
+            if (item != null)
+            {
+                Competitions?.Remove(item);
+            }
         }
     }
 

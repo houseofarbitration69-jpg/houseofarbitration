@@ -1,4 +1,11 @@
-﻿using House.Of.Arbitration.Services.Abstractions;
+﻿#region Imports
+using House.Of.Arbitration.Services.Abstractions;
+
+#if ANDROID
+using House.Of.Arbitration.Services.Platforms.Android.Bluetooth;
+#endif
+
+#endregion
 
 namespace House.Of.Arbitration.Services;
 
@@ -15,6 +22,14 @@ public static class ServicesExtensions
     public static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
     {
         builder.Services.AddScoped<IWarningService, WarningService>();
+        builder.Services.AddScoped<IAlertService, AlertService>();
+
+#if ANDROID
+        builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
+        builder.Services.AddSingleton<IBluetoothServer, BluetoothServer>();
+        builder.Services.AddSingleton<IBluetoothClient, BluetoothClient>();
+#endif
+
         return builder;
     }
 }

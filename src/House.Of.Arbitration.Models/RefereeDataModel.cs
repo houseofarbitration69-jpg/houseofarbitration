@@ -1,6 +1,10 @@
+#region Imports
+using CommunityToolkit.Mvvm.ComponentModel;
+#endregion
+
 namespace House.Of.Arbitration.Models;
 
-public class RefereeDataModel
+public partial class RefereeDataModel : ObservableObject
 {
     /// <summary>
     /// Obtient ou définit l'identifiant 

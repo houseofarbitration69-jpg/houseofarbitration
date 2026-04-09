@@ -83,29 +83,33 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         }
     }
 
-    private async void Validate()
+    private void Validate()
     {
-        // L'ensemble des categories doivent avoir un tirage
-        var draws = await _drawsRepository.GetAllAsync();
+        bool allValid = Categories != null && Categories.Count > 0;
 
-        IsValid = Categories != null && Categories.Count > 0;
-
-        if (draws != null && Categories != null && Categories.Count > 0)
+        if (Categories != null)
         {
-            Categories.ToList().ForEach(c => IsValid = (IsValid && draws.FirstOrDefault(d => c != null && d.CategoryId == c.Id) != null));
+            foreach (var category in Categories)
+            {
+                if (category == null) continue;
+
+                // Un tirage est considéré comme existant si l'objet Draw existe
+                category.HasDraw = category.Draw != null;
+
+                // On met à jour l'indicateur global de validité
+                allValid = allValid && category.HasDraw;
+            }
         }
         else
         {
-            IsValid = false;
+            allValid = false;
         }
+
+        IsValid = allValid;
     }
     #endregion
 
     #region Override Methods
-    
-    #endregion
-
-    #region Virtual Methods
     /// <summary>
     /// Refresh categories when appearing to catch updates (like new competitors or draws)
     /// </summary>
@@ -113,21 +117,35 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     {
         if (Model != null)
         {
-            // Reload categories with their competitors and warnings to update UI
-            var categories = await _repository.GetAllAsync("AgeRange","Competitors.Competitor", "Competitors.Warnings");
+            // Reload categories with their competitors, warnings and draws to update UI
+            var categories = await _repository.GetAllAsync("AgeRange", "Competitors.Competitor", "Competitors.Warnings", "Draw.DrawKnockouts", "Draw.DrawPools", "Draw.DrawOrders");
+            var allDraws = await _drawsRepository.GetAllAsync("DrawKnockouts", "DrawPools", "DrawOrders");
+
             if (categories != null)
             {
                 var competitionCategories = categories.Where(c => c.CompetitionId == Model.Id).ToList();
-                
+
+                // On pré-calcule HasDraw avant l'affichage pour éviter les flashs ou retards de notification
+                foreach (var category in competitionCategories)
+                {
+                    // Fallback manuel si l'Include d'EF Core n'a pas fonctionné (conflits de schéma ou tracking)
+                    if (category.Draw == null && allDraws != null)
+                    {
+                        category.Draw = allDraws.FirstOrDefault(d => d.CategoryId == category.Id);
+                    }
+
+                    category.HasDraw = category.Draw != null;
+                }
+
                 Categories.CollectionChanged -= OnCategoriesCollectionChanged;
                 Categories = new ObservableCollection<CategoryModel>(competitionCategories);
                 Categories.CollectionChanged += OnCategoriesCollectionChanged;
-                
+
                 Model.Categories = competitionCategories;
             }
         }
         Validate();
-    }
+    }    
     #endregion
 
     #region Commands
@@ -144,6 +162,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 
             await _repository.AddAsync(category);
             Categories.Add(category);
+            Validate();
         }
     }
 

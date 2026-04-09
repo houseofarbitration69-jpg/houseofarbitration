@@ -32,7 +32,7 @@
                     Text="{Binding Resources.START_COMPETITION}"
                     IsFullWidth="True"
                     IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                    Icon="{x:Static helpers:FontCustomIcons.TROPHY}"
+                    Icon="{x:Static helpers:FontCustomIcons.COLOR_TROPHY}"
                     ButtonBackgroundColor="{StaticResource Primary}"
                     IconColor="{StaticResource PrimaryTextColor}"
                     TextColor="{StaticResource PrimaryTextColor}"

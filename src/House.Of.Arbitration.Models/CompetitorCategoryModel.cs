@@ -1,6 +1,10 @@
+#region Imports
+using CommunityToolkit.Mvvm.ComponentModel;
+#endregion
+
 namespace House.Of.Arbitration.Models;
 
-public class CompetitorCategoryModel
+public partial class CompetitorCategoryModel : ObservableObject
 {
     /// <summary>
     /// Obtient ou définit l'identifiant de la catégorie

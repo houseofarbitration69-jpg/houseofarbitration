@@ -10,7 +10,7 @@
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CompetitorPopup"
     x:DataType="vm:CompetitorPopupViewModel"
-    Color="Transparent"
+    BackgroundColor="Transparent"
     Padding="0"
 >
     <ContentView.Resources>
@@ -24,11 +24,14 @@
     <Border 
         VerticalOptions="Center"
         BackgroundColor="{DynamicResource PageBackgroundColor}"
-        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
         Padding="15"
         MaximumWidthRequest="400"
         WidthRequest="350"
     >
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
+        </Border.StrokeShape>
+        
         <Grid RowDefinitions="Auto,*,Auto">
             <Label 
                 Grid.Row="0"

@@ -1,27 +1,30 @@
-using BluetoothApp.Services;
-using Android.Content;
+﻿#region Imports
 using Android.Bluetooth;
-using Android.App;
-using Android.Content.PM;
-using Microsoft.Maui.ApplicationModel;
+using House.Of.Arbitration.Services.Abstractions;
+#endregion
 
-namespace BluetoothApp.Platforms.Android.Bluetooth;
+namespace House.Of.Arbitration.Services.Platforms.Android.Bluetooth;
 
-public class AndroidBluetoothService : IBluetoothService
+public class BluetoothService : IBluetoothService
 {
     public bool IsBluetoothAvailable => GetBluetoothAdapter() != null;
 
+    #region Implement IBluetoothService
     public async Task<bool> RequestBluetoothPermissions()
     {
         var bluetoothStatus = await Permissions.RequestAsync<Permissions.Bluetooth>();
+
         var locationStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
 
         return bluetoothStatus == PermissionStatus.Granted && locationStatus == PermissionStatus.Granted;
     }
+    #endregion
 
-    public BluetoothAdapter? GetBluetoothAdapter()
+    #region Private Methods
+    private BluetoothAdapter? GetBluetoothAdapter()
     {
         var bluetoothManager = MauiApplication.Current.GetSystemService("bluetooth") as BluetoothManager;
         return bluetoothManager?.Adapter;
     }
+    #endregion
 }

@@ -50,9 +50,9 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
 
     #region Constructors
     public CompetitorsPageViewModel(
-        IPopupService popupService, 
-        ILogger<CompetitorsPageViewModel> logger, 
-        ResourceProvider resourceProvider, 
+        IPopupService popupService,
+        ILogger<CompetitorsPageViewModel> logger,
+        ResourceProvider resourceProvider,
         IRepository<CompetitorModel> repository,
         IRepository<CompetitorCategoryModel> competitorCategoryRepository,
         IRepository<DrawModel> drawsRepository,
@@ -97,7 +97,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             // Reload the category with its registrations and warnings to ensure UI is up-to-date
             var links = await _competitorCategoryRepository.GetAllAsync("Competitor", "Warnings");
             var categoryLinks = links?.Where(l => l.CategoryId == Category.Id).ToList();
-            
+
             if (categoryLinks != null)
             {
                 Category.Competitors = categoryLinks;
@@ -137,30 +137,56 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         {
             var competitor = result.Result;
 
-            // 1. Save or Update the Competitor
-            await _repository.AddAsync(competitor);
-            
-            // 2. Create the link in join table
-            var link = new CompetitorCategoryModel
-            {
-                CompetitorId = competitor.Id,
-                Competitor = competitor,
-                CategoryId = Category.Id,
-                Category = Category
-            };
-            await _competitorCategoryRepository.AddAsync(link);
+            // 1. Check if competitor already exists in DB (same FirstName, LastName and BirthDate)
+            var allCompetitors = await _repository.GetAllAsync();
+            var existingCompetitor = allCompetitors?.FirstOrDefault(c =>
+                string.Equals(c.FirstName, competitor.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(c.LastName, competitor.LastName, StringComparison.OrdinalIgnoreCase) &&
+                c.BirthDate.Date == competitor.BirthDate.Date);
 
-            // 3. Update local collections
-            if (Category.Competitors == null) Category.Competitors = new();
-            Category.Competitors.Add(link);
-            Competitors.Add(link);
+            if (existingCompetitor != null)
+            {
+                // Use the existing competitor instead of creating a new one
+                competitor = existingCompetitor;
+
+                // Also update club/weight from popup if changed
+                competitor.Club = result.Result.Club;
+                competitor.Weight = (result.Result.Weight > 0) ? result.Result.Weight : existingCompetitor.Weight;
+                await _repository.UpdateAsync(competitor);
+            }
+            else
+            {
+                // Save new competitor
+                await _repository.AddAsync(competitor);
+            }
+
+            // 2. Create the link in join table if it doesn't already exist for this category
+            var links = await _competitorCategoryRepository.GetAllAsync();
+            var existingLink = links?.FirstOrDefault(cc => cc.CompetitorId == competitor.Id && cc.CategoryId == Category.Id);
+
+            if (existingLink == null)
+            {
+                var link = new CompetitorCategoryModel
+                {
+                    CompetitorId = competitor.Id,
+                    Competitor = competitor,
+                    CategoryId = Category.Id,
+                    Category = Category
+                };
+                await _competitorCategoryRepository.AddAsync(link);
+
+                // 3. Update local collections
+                if (Category.Competitors == null) Category.Competitors = new();
+                Category.Competitors.Add(link);
+                Competitors.Add(link);
+            }
 
             // 4. Update Warnings
             await _warningService.UpdateWarningsForCompetitorAsync(competitor.Id);
 
             // 5. Invalidate Draw
             await DeleteDrawAsync();
-            
+
             // 6. Refresh warnings from DB
             await OnAppearing();
         }
@@ -182,7 +208,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (result != null && result.Result != null)
         {
             var updated = result.Result;
-            
+
             // Map properties to the original instance to maintain object identity
             link.Competitor.FirstName = updated.FirstName;
             link.Competitor.LastName = updated.LastName;

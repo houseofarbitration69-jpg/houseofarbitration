@@ -166,7 +166,8 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
             Type = SelectedType?.Value ?? CategoryType.None,
             RoundType = SelectedRoundType?.Value ?? RoundType.None,
             Genre = SelectedGenre?.Value ?? Genre.None,
-            AgeRange = SelectedAgeRange!,
+            AgeRangeId = SelectedAgeRange?.Id,
+            AgeRange = SelectedAgeRange,
             WeightMin = WeightMin,
             WeightMax = WeightMax,
             Competition = null!

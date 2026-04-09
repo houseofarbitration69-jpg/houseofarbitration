@@ -1,6 +1,10 @@
+#region Imports
+using CommunityToolkit.Mvvm.ComponentModel;
+#endregion
+
 namespace House.Of.Arbitration.Models;
 
-public class AgeRangeModel
+public partial class AgeRangeModel : ObservableObject
 {
     /// <summary>
     /// Obtient ou définit l'identifiant de la plage d'âge
@@ -27,18 +31,30 @@ public class AgeRangeModel
     /// </summary>
     public static AgeRangeModel Empty => new AgeRangeModel { Id = -1, Label = "Choisissez une tranche d'âge", MinAge = 0, MaxAge = 0 };
 
+    private static List<AgeRangeModel>? _defaultRanges;
+
     /// <summary>
     /// Liste statique des plages d'âge par défaut
     /// </summary>
-    public static List<AgeRangeModel> DefaultRanges => new()
+    public static List<AgeRangeModel> DefaultRanges
     {
-        Empty,
-        new AgeRangeModel { Id = 1, Label = "Cadets", MinAge = 12, MaxAge = 14 },
-        new AgeRangeModel { Id = 2, Label = "Juniors", MinAge = 15, MaxAge = 17 },
-        new AgeRangeModel { Id = 3, Label = "Seniors", MinAge = 18, MaxAge = 34 },
-        new AgeRangeModel { Id = 4, Label = "Espoirs", MinAge = 18, MaxAge = 21 },
-        new AgeRangeModel { Id = 5, Label = "Veterans", MinAge = 35, MaxAge = 99 }
-    };
+        get
+        {
+            if (_defaultRanges == null)
+            {
+                _defaultRanges = new List<AgeRangeModel>
+                {
+                    Empty,
+                    new AgeRangeModel { Id = 1, Label = "Cadets", MinAge = 12, MaxAge = 14 },
+                    new AgeRangeModel { Id = 2, Label = "Juniors", MinAge = 15, MaxAge = 17 },
+                    new AgeRangeModel { Id = 3, Label = "Seniors", MinAge = 18, MaxAge = 34 },
+                    new AgeRangeModel { Id = 4, Label = "Espoirs", MinAge = 18, MaxAge = 21 },
+                    new AgeRangeModel { Id = 5, Label = "Veterans", MinAge = 35, MaxAge = 99 }
+                };
+            }
+            return _defaultRanges;
+        }
+    }
 
     public override bool Equals(object? obj)
     {

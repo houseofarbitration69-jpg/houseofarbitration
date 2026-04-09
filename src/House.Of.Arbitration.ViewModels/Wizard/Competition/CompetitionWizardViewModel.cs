@@ -23,8 +23,7 @@ public class CompetitionWizardViewModel : WizardViewModel<CompetitionModel>
     {
         if (CompetitionId > 0)
         {
-            var competition = await _repository.GetByIdAsync(CompetitionId, "Categories.Competitors.Competitor", "Categories.AgeRange");
-            //var competition = (await _repository.GetAllAsync(c => c.Categories, c => c.Categories.Select(cat => cat.Competitors)))?.FirstOrDefault(c => c.Id == CompetitionId);
+            var competition = await _repository.GetByIdAsync(CompetitionId);
             if (competition != null)
             {
                 Model = competition;

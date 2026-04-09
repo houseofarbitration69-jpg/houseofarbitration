@@ -3,22 +3,25 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Core;assembly=House.Of.Arbitration.ViewModels.Core"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.ConfirmationPopup"
     x:DataType="vm:ConfirmationPopupViewModel"
-    Color="Transparent"
+    BackgroundColor="Transparent"
     Padding="0"
 >
     <Border 
         VerticalOptions="Center"
         BackgroundColor="{DynamicResource PageBackgroundColor}"
-        StrokeShape="RoundRectangle {DynamicResource ButtonCornerRadius}"
         Padding="20"
         MaximumWidthRequest="450"
         WidthRequest="400"
     >
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
+        </Border.StrokeShape>
+
         <VerticalStackLayout Spacing="20">
             <!-- Icon & Title -->
             <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">

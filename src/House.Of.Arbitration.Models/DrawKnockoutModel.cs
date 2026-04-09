@@ -1,6 +1,10 @@
+#region Imports
+using CommunityToolkit.Mvvm.ComponentModel;
+#endregion
+
 namespace House.Of.Arbitration.Models;
 
-public class DrawKnockoutModel
+public partial class DrawKnockoutModel : ObservableObject
 {
     /// <summary>
     /// Obtient ou définit l'identifiant du tirage en mode knockout

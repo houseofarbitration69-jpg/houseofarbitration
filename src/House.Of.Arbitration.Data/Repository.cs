@@ -22,19 +22,19 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<T?> GetByIdAsync(int id)
     {
-        return await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
+        return await _context.Set<T>().AsNoTrackingWithIdentityResolution().FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
     }
 
     public async Task<T?> GetByIdAsync(int id, params System.Linq.Expressions.Expression<System.Func<T, object>>[] includes)
     {
-        IQueryable<T> query = _context.Set<T>().AsNoTracking();
+        IQueryable<T> query = _context.Set<T>().AsNoTrackingWithIdentityResolution();
         foreach (var include in includes) query = query.Include(include);
         return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
     }
 
     public async Task<T?> GetByIdAsync(int id, params string[] includePaths)
     {
-        IQueryable<T> query = _context.Set<T>().AsNoTracking();
+        IQueryable<T> query = _context.Set<T>().AsNoTrackingWithIdentityResolution();
         foreach (var path in includePaths)
         {
             if (!string.IsNullOrWhiteSpace(path)) query = query.Include(path);
@@ -44,19 +44,19 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<IReadOnlyList<T>?> GetAllAsync()
     {
-        return await _context.Set<T>().AsNoTracking().ToListAsync();
+        return await _context.Set<T>().AsNoTrackingWithIdentityResolution().ToListAsync();
     }
 
     public async Task<IReadOnlyList<T>?> GetAllAsync(params System.Linq.Expressions.Expression<System.Func<T, object>>[] includes)
     {
-        IQueryable<T> query = _context.Set<T>().AsNoTracking();
+        IQueryable<T> query = _context.Set<T>().AsNoTrackingWithIdentityResolution();
         foreach (var include in includes) query = query.Include(include);
         return await query.ToListAsync();
     }
 
     public async Task<IReadOnlyList<T>?> GetAllAsync(params string[] includePaths)
     {
-        IQueryable<T> query = _context.Set<T>().AsNoTracking();
+        IQueryable<T> query = _context.Set<T>().AsNoTrackingWithIdentityResolution();
         foreach (var path in includePaths)
         {
             if (!string.IsNullOrWhiteSpace(path)) query = query.Include(path);

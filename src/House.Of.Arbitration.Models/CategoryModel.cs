@@ -1,6 +1,10 @@
+#region Imports
+using CommunityToolkit.Mvvm.ComponentModel;
+#endregion
+
 namespace House.Of.Arbitration.Models;
 
-public class CategoryModel
+public partial class CategoryModel : ObservableObject
 {
     /// <summary>
     /// Obtient ou définit l'identifiant de la catégorie
@@ -28,6 +32,11 @@ public class CategoryModel
     public int WeightMax { get; set; }
 
     /// <summary>
+    /// Obtient ou définit l'identifiant de la plage d'age de la catégorie
+    /// </summary>
+    public int? AgeRangeId { get; set; }
+
+    /// <summary>
     /// Obtient ou définit la plage d'age de la catégorie
     /// </summary>
     public AgeRangeModel? AgeRange { get; set; }
@@ -51,6 +60,24 @@ public class CategoryModel
     /// Obtient ou définit la liste des compétiteurs de la catégorie
     /// </summary>
     public List<CompetitorCategoryModel> Competitors { get; set; } = new();
+
+    /// <summary>
+    /// Obtient ou définit le tirage de la catégorie
+    /// </summary>
+    public DrawModel? Draw { get; set; }
+
+    /// <summary>
+    /// Indique si la catégorie possède un tirage (Non persisté)
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    private bool _hasDraw;
+
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool HasDraw
+    {
+        get => _hasDraw;
+        set => SetProperty(ref _hasDraw, value);
+    }
 }
 
 /// <summary>

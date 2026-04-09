@@ -68,7 +68,8 @@ public class AppDbContext : DbContext
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
             item.HasOne(i => i.Competition).WithMany(c => c.Categories).HasForeignKey(c => c.CompetitionId);
-            item.HasOne(i => i.AgeRange).WithMany().HasForeignKey("AgeRangeId");
+            item.HasOne(i => i.AgeRange).WithMany().HasForeignKey(i => i.AgeRangeId);
+            item.HasOne(i => i.Draw).WithOne(d => d.Category).HasForeignKey<DrawModel>(i => i.CategoryId);
         });
 
         builder.Entity<CompetitorCategoryModel>(item =>
@@ -184,9 +185,6 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
-            item.HasOne(i => i.Category)
-                .WithMany()
-                .HasForeignKey(i => i.CategoryId);
         });
 
         builder.Entity<WarningModel>(item =>

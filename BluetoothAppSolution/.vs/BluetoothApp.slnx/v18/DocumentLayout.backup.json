@@ -3,32 +3,40 @@
   "WorkspaceRootPath": "C:\\Works\\KungFu\\BluetoothAppSolution\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\platforms\\android\\bluetooth\\androidbluetoothserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\platforms\\android\\bluetooth\\androidbluetoothserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\mauiprogram.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\platforms\\ios\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\platforms\\ios\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\platforms\\android\\bluetooth\\androidbluetoothclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\platforms\\android\\bluetooth\\androidbluetoothclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\platforms\\ios\\bluetooth\\iosbluetoothservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\platforms\\ios\\bluetooth\\iosbluetoothservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\platforms\\android\\bluetooth\\androidbluetoothserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\platforms\\android\\bluetooth\\androidbluetoothserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\platforms\\ios\\bluetooth\\iosbluetoothclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\platforms\\ios\\bluetooth\\iosbluetoothclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\platforms\\android\\bluetooth\\androidbluetoothservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\platforms\\android\\bluetooth\\androidbluetoothservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\platforms\\ios\\bluetooth\\iosbluetoothserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\platforms\\ios\\bluetooth\\iosbluetoothserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\bluetoothapp.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\bluetoothapp.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\services\\ibluetoothserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\services\\ibluetoothserver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\services\\ibluetoothclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\services\\ibluetoothclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|c:\\works\\kungfu\\bluetoothappsolution\\bluetoothapp\\bluetoothapp\\services\\ibluetoothservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D1CF8D4F-C4E6-DE0A-FE4E-2617EEF8025F}|BluetoothApp\\BluetoothApp\\BluetoothApp.csproj|solutionrelative:bluetoothapp\\bluetoothapp\\services\\ibluetoothservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -43,87 +51,119 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "AndroidBluetoothServer.cs",
-              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothServer.cs",
-              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothServer.cs",
-              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothServer.cs",
-              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothServer.cs",
-              "ViewState": "AgIAAHcAAAAAAAAAAAASwIwAAAAMAAAAAAAAAA==",
+              "Title": "MauiProgram.cs",
+              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\MauiProgram.cs",
+              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\MauiProgram.cs",
+              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\MauiProgram.cs",
+              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\MauiProgram.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-31T15:41:49.1Z",
+              "WhenOpened": "2026-04-06T10:42:42.645Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Program.cs",
+              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Program.cs",
+              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Program.cs",
+              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-06T10:37:53.368Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "MainPage.xaml",
-              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\MainPage.xaml",
-              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\MainPage.xaml",
-              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\MainPage.xaml",
-              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\MainPage.xaml",
-              "ViewState": "AgIAACEAAAAAAAAAAAAAACkAAAA1AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-01-31T16:24:36.813Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MainViewModel.cs",
-              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\ViewModels\\MainViewModel.cs",
-              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\ViewModels\\MainViewModel.cs",
-              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\ViewModels\\MainViewModel.cs",
-              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\ViewModels\\MainViewModel.cs",
-              "ViewState": "AgIAAIMAAAAAAAAAAAAiwJYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-31T16:23:25.606Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "iOSBluetoothClient.cs",
-              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothClient.cs",
-              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothClient.cs",
-              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothClient.cs",
-              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothClient.cs",
-              "ViewState": "AgIAAEYAAAAAAAAAAAAkwFgAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-31T15:45:41.978Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
               "Title": "AndroidBluetoothClient.cs",
               "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothClient.cs",
               "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothClient.cs",
               "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothClient.cs",
               "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothClient.cs",
-              "ViewState": "AgIAAB0AAAAAAAAAAAAQwCsAAAAxAAAAAAAAAA==",
+              "ViewState": "AgIAAOIAAAAAAAAAAAAAAAYAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-31T15:45:52.844Z"
+              "WhenOpened": "2026-04-06T09:02:54.85Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "iOSBluetoothServer.cs",
-              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothServer.cs",
-              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothServer.cs",
-              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothServer.cs",
-              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothServer.cs",
-              "ViewState": "AgIAADcAAAAAAAAAAAAkwEUAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 3,
+              "Title": "AndroidBluetoothServer.cs",
+              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothServer.cs",
+              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothServer.cs",
+              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothServer.cs",
+              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothServer.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAAAPIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-31T15:52:45.179Z"
+              "WhenOpened": "2026-04-06T07:53:20.559Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "iOSBluetoothService.cs",
-              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothService.cs",
-              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothService.cs",
-              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothService.cs",
-              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Platforms\\iOS\\Bluetooth\\iOSBluetoothService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAgAAAAtAAAAAAAAAA==",
+              "Title": "AndroidBluetoothService.cs",
+              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothService.cs",
+              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothService.cs",
+              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothService.cs",
+              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Platforms\\Android\\Bluetooth\\AndroidBluetoothService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-01-31T16:02:11.252Z"
+              "WhenOpened": "2026-04-06T07:47:57.132Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "BluetoothApp",
+              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\BluetoothApp.csproj",
+              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\BluetoothApp.csproj",
+              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\BluetoothApp.csproj",
+              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\BluetoothApp.csproj",
+              "ViewState": "AgIAABwAAAAAAAAAAAAswEEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-04-06T07:46:48.93Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "IBluetoothServer.cs",
+              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Services\\IBluetoothServer.cs",
+              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Services\\IBluetoothServer.cs",
+              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Services\\IBluetoothServer.cs",
+              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Services\\IBluetoothServer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-06T07:41:20.885Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "IBluetoothClient.cs",
+              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Services\\IBluetoothClient.cs",
+              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Services\\IBluetoothClient.cs",
+              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Services\\IBluetoothClient.cs",
+              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Services\\IBluetoothClient.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-06T07:39:29.659Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "IBluetoothService.cs",
+              "DocumentMoniker": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Services\\IBluetoothService.cs",
+              "RelativeDocumentMoniker": "BluetoothApp\\BluetoothApp\\Services\\IBluetoothService.cs",
+              "ToolTip": "C:\\Works\\KungFu\\BluetoothAppSolution\\BluetoothApp\\BluetoothApp\\Services\\IBluetoothService.cs",
+              "RelativeToolTip": "BluetoothApp\\BluetoothApp\\Services\\IBluetoothService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-06T07:37:49.585Z",
+              "EditorCaption": ""
             }
           ]
         }

@@ -1,6 +1,10 @@
+#region Imports
+using CommunityToolkit.Mvvm.ComponentModel;
+#endregion
+
 namespace House.Of.Arbitration.Models;
 
-public class DrawOrderModel
+public partial class DrawOrderModel : ObservableObject
 {
     /// <summary>
     /// Obtient ou définit l'identifiant du tirage en mode 'Pools'
