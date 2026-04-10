@@ -26,6 +26,9 @@
     <Compile Update="Competition\CompetitionsPage.xaml.cs">
       <DependentUpon>CompetitionsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="ServerPage.xaml.cs">
+      <DependentUpon>ServerPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="SlavePage.xaml.cs">
       <DependentUpon>SlavePage.xaml</DependentUpon>
     </Compile>
@@ -60,6 +63,9 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="HomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="ServerPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="SlavePage.xaml">

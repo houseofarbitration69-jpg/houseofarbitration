@@ -4,11 +4,9 @@ using Android.Bluetooth.LE;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
-using Android.Views.Accessibility;
 using House.Of.Arbitration.Services.Abstractions;
 using System.Collections.ObjectModel;
 using System.Text;
-using Xamarin.Google.Crypto.Tink.Subtle;
 #endregion
 
 namespace House.Of.Arbitration.Services.Platforms.Android.Bluetooth;
@@ -59,13 +57,18 @@ public class BluetoothServer : IBluetoothServer
     #endregion
 
     #region Implement IBluetoothServer
-    public async Task<bool> StartAdvertising(string serviceUuid)
+    public async Task<bool> StartAdvertising(string serviceUuid, string deviceName)
     {
         if (_bluetoothAdapter == null || !_bluetoothAdapter.IsMultipleAdvertisementSupported)
         {
             await _alertService.ShowToast("Advertising not supported on this device");
 
             return false;
+        }
+
+        if(!String.IsNullOrEmpty(deviceName))
+        {
+            _bluetoothAdapter.SetName(deviceName);
         }
 
         _bluetoothLeAdvertiser = _bluetoothAdapter.BluetoothLeAdvertiser;

@@ -10,7 +10,7 @@ public interface IBluetoothServer
 
     ObservableCollection<string> ConnectedClients { get; }
 
-    Task<bool> StartAdvertising(string serviceUuid);
+    Task<bool> StartAdvertising(string serviceUuid, string deviceName);
     Task StopAdvertising();
     Task SendMessage(string message);
     Task SendToAllAsync(string message);

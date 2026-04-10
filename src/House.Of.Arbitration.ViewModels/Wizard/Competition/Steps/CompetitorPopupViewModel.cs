@@ -25,7 +25,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     private string _lastName = String.Empty;
     private string _club = String.Empty;
     private DateTime? _birthDate;
-    private double _weight;
+    private double? _weight = null;
     private List<string> _clubs = new();
     #endregion
 
@@ -115,7 +115,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     /// <summary>
     /// Obtient ou définit le poids du compétiteur
     /// </summary>
-    public double Weight
+    public double? Weight
     {
         get => _weight;
         set
@@ -208,7 +208,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
             Genre = SelectedGenre?.Value ?? Genre.None,
             Club = Club,
             BirthDate = BirthDate ?? DateTime.Now,
-            Weight = Weight
+            Weight = Weight ?? 0
         };
     }
     #endregion

@@ -6,13 +6,18 @@ namespace House.Of.Arbitration.Services.Abstractions;
 
 public interface IBluetoothServer
 {
+    #region Events
     event EventHandler<string> MessageReceived;
     event EventHandler<string> DeviceConnected;
     event EventHandler<string> DeviceDisconnected;
+    #endregion
 
+    #region Properties
     ObservableCollection<string> ConnectedClients { get; }
+    #endregion
 
-    Task<bool> StartAdvertising(string serviceUuid);
+    #region Methods
+    Task<bool> StartAdvertising(string serviceUuid, string deviceName);
 
     Task StopAdvertising();
 
@@ -21,4 +26,5 @@ public interface IBluetoothServer
     Task SendToAllAsync(string message);
 
     Task SendToClientAsync(string message, string clientId);
+    #endregion
 }

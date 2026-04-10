@@ -44,7 +44,7 @@
             <ScrollView Grid.Row="1">
                 <VerticalStackLayout Spacing="15">
                     <!-- FirstName & LastName -->
-                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                    <VerticalStackLayout Spacing="5">
                         <Label 
                             Text="{Binding Resources.LASTNAME}" 
                             FontAttributes="Bold" 
@@ -79,7 +79,7 @@
                         </Border>
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Grid.Column="1" Spacing="5">
+                    <VerticalStackLayout Spacing="5">
                         <Label 
                             Text="{Binding Resources.FIRSTNAME}" 
                             FontAttributes="Bold" 
@@ -189,7 +189,7 @@
                     </VerticalStackLayout>
 
                     <!-- BirthDate & Weight -->
-                    <Grid ColumnDefinitions="150,40,*" RowSpacing="8">
+                    <Grid ColumnDefinitions="150,40,*" ColumnSpacing="15">
                         <VerticalStackLayout Grid.Column="0" Spacing="5">
                             <Label 
                                 Text="{Binding Resources.BIRTHDATE}" 
@@ -233,17 +233,13 @@
                                 FontSize="14" 
                                 Margin="4,0" 
                                 TextColor="LightGray"
-                                HorizontalOptions="Center"
                             />
                             <Border 
                                 Stroke="{DynamicResource ValidColor}"
                                 StrokeThickness="1"
                                 BackgroundColor="White"
-                                MinimumHeightRequest="34"
-                                MinimumWidthRequest="40"
                                 Margin="0"
                                 Padding="0"
-                                HorizontalOptions="Start"
                             >
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
@@ -253,18 +249,14 @@
                                         <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                     </DataTrigger>
                                 </Border.Triggers>
-                                <Label
-                                    VerticalOptions="Center"
-                                    HorizontalOptions="Center"
-                                    BackgroundColor="White"
-                                >
-                                    <Label.Text>
+                                <Entry Margin="0" IsReadOnly="True" MinimumHeightRequest="30">
+                                    <Entry.Text>
                                         <MultiBinding Converter="{StaticResource BirthdayToOldConverter}">
                                             <Binding Path="BirthDate"/>
                                             <Binding Path="Category.Competition.Date"/>
                                         </MultiBinding>
-                                    </Label.Text>
-                                </Label>
+                                    </Entry.Text>
+                                </Entry>
                             </Border>
                         </VerticalStackLayout>
                     </Grid>

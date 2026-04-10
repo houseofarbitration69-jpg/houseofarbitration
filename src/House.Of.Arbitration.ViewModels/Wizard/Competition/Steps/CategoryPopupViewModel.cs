@@ -25,8 +25,8 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     private LocalizedEnum<RoundType>? _selectedRoundType;
     private LocalizedEnum<Genre>? _selectedGenre;
     private AgeRangeModel? _selectedAgeRange;
-    private int _weightMin = 0;
-    private int _weightMax = 0;
+    private int? _weightMin = null;
+    private int? _weightMax = null;
     #endregion
 
     #region Properties    
@@ -90,13 +90,13 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
-    public int WeightMin
+    public int? WeightMin
     {
         get => _weightMin;
         set => SetProperty(ref _weightMin, value);
     }
 
-    public int WeightMax
+    public int? WeightMax
     {
         get => _weightMax;
         set => SetProperty(ref _weightMax, value);
@@ -168,8 +168,8 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
             Genre = SelectedGenre?.Value ?? Genre.None,
             AgeRangeId = SelectedAgeRange?.Id,
             AgeRange = SelectedAgeRange,
-            WeightMin = WeightMin,
-            WeightMax = WeightMax,
+            WeightMin = WeightMin ?? 0,
+            WeightMax = WeightMax ?? 0,
             Competition = null!
         };
     }

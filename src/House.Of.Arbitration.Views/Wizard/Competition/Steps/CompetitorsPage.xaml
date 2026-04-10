@@ -107,10 +107,12 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
-                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
-                    <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
-                    <Label Text="{Binding Resources.NO_COMPETITORS}" TextColor="Gray" HorizontalOptions="Center" />
-                </VerticalStackLayout>
+                <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*" RowSpacing="10">
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
+                        <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
+                        <Label Text="{Binding Resources.NO_COMPETITORS}" FontAttributes="Italic" Opacity="0.6"  HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Grid>
             </CollectionView.EmptyView>
         </CollectionView>
 
