@@ -17,43 +17,129 @@
     >
     <ContentPage.Resources>
         <ResourceDictionary>
+            <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
+            
+            <Style x:Key="CompetitorInfoLabelStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="Gray"/>
+            </Style>
+
             <DataTemplate x:Key="KnockoutTemplate" x:DataType="models:DrawKnockoutModel">
-                <Grid Padding="10" ColumnDefinitions="Auto, *">
-                    <Label Text="[K]" FontAttributes="Bold" TextColor="Red"/>
-                    <HorizontalStackLayout Grid.Column="1" Spacing="5" Margin="5,0,0,0">
-                        <Label Text="{Binding Competitor1.LastName}"/>
-                        <Label Text="vs"/>
-                        <Label Text="{Binding Competitor2.LastName}"/>
-                    </HorizontalStackLayout>
-                </Grid>
+                <Frame Margin="0,2" Padding="10" BorderColor="#EEEEEE" CornerRadius="8" HasShadow="False">
+                    <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, *">
+                        <Label Text="MATCH" Grid.RowSpan="3" VerticalOptions="Center" HorizontalOptions="Center"
+                               FontAttributes="Bold" TextColor="Red" Rotation="-90" WidthRequest="60"/>
+                        
+                        <Grid Grid.Column="1" Grid.Row="0" ColumnDefinitions="Auto, *">
+                            <Image Grid.Column="0" Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                            <VerticalStackLayout Grid.Column="1">
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor1.FirstName}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Competitor1.LastName}" FontAttributes="Bold"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor1.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
+                                    <Label Text="{Binding Competitor1.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Label Grid.Column="1" Grid.Row="1" Text="VS" HorizontalOptions="Center" 
+                               TextColor="#DDDDDD" FontAttributes="Bold" Margin="0,5"/>
+
+                        <Grid Grid.Column="1" Grid.Row="2" ColumnDefinitions="Auto, *">
+                            <Image Grid.Column="0" Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                            <VerticalStackLayout Grid.Column="1">
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor2.FirstName}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Competitor2.LastName}" FontAttributes="Bold"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor2.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
+                                    <Label Text="{Binding Competitor2.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Grid>
+                </Frame>
             </DataTemplate>
 
             <DataTemplate x:Key="PoolTemplate" x:DataType="models:DrawPoolsModel">
-                <Grid Padding="10" ColumnDefinitions="Auto, *">
-                    <Label Text="[P]" FontAttributes="Bold" TextColor="Blue"/>
-                    <HorizontalStackLayout Grid.Column="1" Spacing="5" Margin="5,0,0,0">
-                        <Label Text="{Binding Competitor1.LastName}"/>
-                        <Label Text="vs"/>
-                        <Label Text="{Binding Competitor2.LastName}"/>
-                    </HorizontalStackLayout>
-                </Grid>
+                <Frame Margin="0,2" Padding="10" BorderColor="#EEEEEE" CornerRadius="8" HasShadow="False">
+                    <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, *">
+                        <Label Text="POOL" Grid.RowSpan="3" VerticalOptions="Center" HorizontalOptions="Center"
+                               FontAttributes="Bold" TextColor="Blue" Rotation="-90" WidthRequest="60"/>
+
+                        <Grid Grid.Column="1" Grid.Row="0" ColumnDefinitions="Auto, *">
+                            <Image Grid.Column="0" Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                            <VerticalStackLayout Grid.Column="1">
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor1.FirstName}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Competitor1.LastName}" FontAttributes="Bold"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor1.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
+                                    <Label Text="{Binding Competitor1.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Label Grid.Column="1" Grid.Row="1" Text="VS" HorizontalOptions="Center" 
+                               TextColor="#DDDDDD" FontAttributes="Bold" Margin="0,5"/>
+
+                        <Grid Grid.Column="1" Grid.Row="2" ColumnDefinitions="Auto, *">
+                            <Image Grid.Column="0" Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                            <VerticalStackLayout Grid.Column="1">
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor2.FirstName}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Competitor2.LastName}" FontAttributes="Bold"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor2.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
+                                    <Label Text="{Binding Competitor2.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Grid>
+                </Frame>
             </DataTemplate>
 
             <DataTemplate x:Key="OrderTemplate" x:DataType="models:DrawOrderModel">
-                <Grid Padding="10" ColumnDefinitions="Auto, *">
-                    <Label Text="[O]" FontAttributes="Bold" TextColor="Green"/>
-                    <Label Grid.Column="1" Text="{Binding Competitor.LastName}" Margin="5,0,0,0"/>
-                </Grid>
+                <Frame Margin="0,2" Padding="10" BorderColor="#EEEEEE" CornerRadius="8" HasShadow="False">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <Label Text="ORDER" VerticalOptions="Center" HorizontalOptions="Center"
+                               FontAttributes="Bold" TextColor="Green" Rotation="-90" WidthRequest="60"/>
+
+                        <Grid Grid.Column="1" ColumnDefinitions="Auto, *">
+                            <Image Grid.Column="0" Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                            <VerticalStackLayout Grid.Column="1">
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor.FirstName}" FontAttributes="Bold"/>
+                                    <Label Text="{Binding Competitor.LastName}" FontAttributes="Bold"/>
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Spacing="5">
+                                    <Label Text="{Binding Competitor.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
+                                    <Label Text="{Binding Competitor.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Grid>
+                </Frame>
             </DataTemplate>
 
             <DataTemplate x:Key="HeaderTemplate" x:DataType="x:String">
-                <Label 
-                    Text="{Binding .}" 
-                    BackgroundColor="LightGray" 
-                    FontAttributes="Bold" 
-                    Padding="10,5"
-                    FontSize="12"
-                />
+                <Label Text="{Binding .}" 
+                       BackgroundColor="#F5F5F5" 
+                       TextColor="#333333"
+                       FontAttributes="Bold" 
+                       Padding="10,8"
+                       FontSize="14"
+                       Margin="0,10,0,5"/>
             </DataTemplate>
 
             <selectors:DrawTemplateSelector x:Key="DrawTemplateSelector"

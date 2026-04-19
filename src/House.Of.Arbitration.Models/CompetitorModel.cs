@@ -42,6 +42,16 @@ public partial class CompetitorModel : ObservableObject
     public string Club { get; set; } = string.Empty;
 
     /// <summary>
+    /// Obtient ou définit le code ISO du pays du compétiteur
+    /// </summary>
+    public string? CountryIsoCode { get; set; }
+
+    /// <summary>
+    /// Obtient ou définit le pays du compétiteur
+    /// </summary>
+    public CountryModel? Country { get; set; }
+
+    /// <summary>
     /// Obtient ou définit le poids du compétiteurs
     /// </summary>
     public double Weight { get; set; }

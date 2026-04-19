@@ -95,7 +95,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         if (Category != null)
         {
             // Reload the category with its registrations and warnings to ensure UI is up-to-date
-            var links = await _competitorCategoryRepository.GetAllAsync("Competitor", "Warnings");
+            var links = await _competitorCategoryRepository.GetAllAsync("Competitor.Country", "Warnings");
             var categoryLinks = links?.Where(l => l.CategoryId == Category.Id).ToList();
 
             if (categoryLinks != null)
@@ -149,13 +149,16 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
                 // Use the existing competitor instead of creating a new one
                 competitor = existingCompetitor;
 
-                // Also update club/weight from popup if changed
+                // Also update club/weight/country from popup if changed
                 competitor.Club = result.Result.Club;
                 competitor.Weight = (result.Result.Weight > 0) ? result.Result.Weight : existingCompetitor.Weight;
+                competitor.CountryIsoCode = result.Result.CountryIsoCode;
                 await _repository.UpdateAsync(competitor);
             }
             else
             {
+                competitor.Country = null;
+
                 // Save new competitor
                 await _repository.AddAsync(competitor);
             }
@@ -215,6 +218,8 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             link.Competitor.BirthDate = updated.BirthDate;
             link.Competitor.Club = updated.Club;
             link.Competitor.Weight = updated.Weight;
+            link.Competitor.CountryIsoCode = updated.CountryIsoCode;
+            link.Competitor.Country = updated.Country;
 
             // Create flat clone for DB update to avoid tracking conflicts
             var dbCompetitor = new CompetitorModel
@@ -225,7 +230,8 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
                 Genre = link.Competitor.Genre,
                 BirthDate = link.Competitor.BirthDate,
                 Club = link.Competitor.Club,
-                Weight = link.Competitor.Weight
+                Weight = link.Competitor.Weight,
+                CountryIsoCode = link.Competitor.CountryIsoCode
             };
 
             await _repository.UpdateAsync(dbCompetitor);

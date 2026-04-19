@@ -15,6 +15,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
 {
     #region Services
     private readonly IRepository<CompetitorModel> _repository;
+    private readonly IRepository<CountryModel> _countryRepository;
     #endregion
 
     #region Attributs
@@ -24,9 +25,12 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     private string _firstName = String.Empty;
     private string _lastName = String.Empty;
     private string _club = String.Empty;
+    private string _countryName = String.Empty;
     private DateTime? _birthDate;
     private double? _weight = null;
     private List<string> _clubs = new();
+    private List<CountryModel> _countries = new();
+    private List<string> _countryNames = new();
     #endregion
 
     #region Properties
@@ -47,6 +51,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
                 Club = value.Club;
                 BirthDate = value.BirthDate;
                 Weight = value.Weight;
+                CountryName = value.Country?.Name ?? string.Empty;
             }
         }
     }
@@ -95,6 +100,19 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         set
         {
             SetProperty(ref _club, value);
+            ValidateCommand.NotifyCanExecuteChanged();
+        }
+    }
+
+    /// <summary>
+    /// Obtient ou définit le nom du pays du compétiteur
+    /// </summary>
+    public string CountryName
+    {
+        get => _countryName;
+        set
+        {
+            SetProperty(ref _countryName, value);
             ValidateCommand.NotifyCanExecuteChanged();
         }
     }
@@ -150,13 +168,23 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         get => _clubs;
         set => SetProperty(ref _clubs, value);
     }
+
+    /// <summary>
+    /// Obtient ou définit la liste des noms de pays
+    /// </summary>
+    public List<string> CountryNames
+    {
+        get => _countryNames;
+        set => SetProperty(ref _countryNames, value);
+    }
     #endregion
 
     #region Constructor
-    public CompetitorPopupViewModel(IPopupService popupService, ILogger<CompetitorPopupViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitorModel> repository)
+    public CompetitorPopupViewModel(IPopupService popupService, ILogger<CompetitorPopupViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitorModel> repository, IRepository<CountryModel> countryRepository)
         : base(logger, resourceProvider, popupService)
     {
         _repository = repository;
+        _countryRepository = countryRepository;
 
         Genres = LocalizeEnum<Genre>("ENUM_GENRE_");
         InitData();
@@ -190,6 +218,10 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     {
         // Récupération de la liste des clubs
         Clubs = (await _repository.GetAllAsync())?.Select(c => c.Club).Distinct()?.ToList() ?? new();
+
+        // Récupération de la liste des pays
+        _countries = (await _countryRepository.GetAllAsync())?.ToList() ?? new();
+        CountryNames = _countries.Select(c => c.Name).OrderBy(n => n).ToList();
     }
     #endregion
 
@@ -200,6 +232,8 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     /// <returns></returns>
     public CompetitorModel GetResult()
     {
+        var country = _countries.FirstOrDefault(c => string.Equals(c.Name, CountryName, StringComparison.OrdinalIgnoreCase));
+
         return new CompetitorModel
         {
             Id = Competitor?.Id ?? 0,
@@ -207,6 +241,8 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
             FirstName = FirstName,
             Genre = SelectedGenre?.Value ?? Genre.None,
             Club = Club,
+            CountryIsoCode = country?.IsoCode,
+            Country = country,
             BirthDate = BirthDate ?? DateTime.Now,
             Weight = Weight ?? 0
         };
@@ -271,6 +307,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         result = result && !String.IsNullOrEmpty(FirstName);
         result = result && (SelectedGenre != null && SelectedGenre.Value != Genre.None);
         result = result && !String.IsNullOrEmpty(Club);
+        result = result && !String.IsNullOrEmpty(CountryName);
         result = result && (BirthDate != null);
 
         return result;

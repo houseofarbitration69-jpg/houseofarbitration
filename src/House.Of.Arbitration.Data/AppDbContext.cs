@@ -22,6 +22,7 @@ public class AppDbContext : DbContext
     public DbSet<DrawPoolsModel> DrawsPools { get; set; }
     public DbSet<RefereeDataModel> RefereeDatas { get; set; }
     public DbSet<WarningModel> Warnings { get; set; }
+    public DbSet<CountryModel> Countries { get; set; }
     #endregion
 
     #region Constructors
@@ -61,6 +62,15 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
+            item.HasOne(i => i.Country)
+                .WithMany()
+                .HasForeignKey(i => i.CountryIsoCode);
+        });
+
+        builder.Entity<CountryModel>(item =>
+        {
+            item.HasKey(i => i.IsoCode);
+            item.HasData(CountryModel.DefaultCountries);
         });
 
         builder.Entity<CategoryModel>(item =>

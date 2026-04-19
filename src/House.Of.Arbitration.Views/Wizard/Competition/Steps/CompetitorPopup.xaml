@@ -188,6 +188,54 @@
                         </Border>
                     </VerticalStackLayout>
 
+                    <!-- Country -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label 
+                            Text="PAYS" 
+                            FontAttributes="Bold" 
+                            FontSize="14" 
+                            Margin="4,0" 
+                            TextColor="LightGray"
+                        />
+                        <Grid ColumnDefinitions="Auto, *">
+                            <Image Grid.Column="0" Source="{Binding CountryName, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                   WidthRequest="32" HeightRequest="24" VerticalOptions="Center" Margin="0,0,10,0">
+                                <Image.Triggers>
+                                    <DataTrigger TargetType="Image" Binding="{Binding CountryName}" Value="">
+                                        <Setter Property="IsVisible" Value="False" />
+                                    </DataTrigger>
+                                </Image.Triggers>
+                            </Image>
+                            <Border 
+                                Grid.Column="1"
+                                Stroke="{DynamicResource ValidColor}"
+                                StrokeThickness="1"
+                                BackgroundColor="White"
+                                Padding="0"
+                                Margin="0"
+                            >
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                                </Border.StrokeShape>
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding CountryName, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                        <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+                                <controls:SuggestEntry 
+                                    Placeholder="Tapez le nom d'un pays"
+                                    Text="{Binding CountryName}"
+                                    ItemsSource="{Binding CountryNames}"
+                                    TextColor="Black"
+                                    PlaceholderColor="Gray"
+                                    Stroke="Transparent"
+                                    StrokeThickness="0"
+                                    CornerRadius="10"
+                                />
+                            </Border>
+                        </Grid>
+                    </VerticalStackLayout>
+
                     <!-- BirthDate & Weight -->
                     <Grid ColumnDefinitions="150,40,*" ColumnSpacing="15">
                         <VerticalStackLayout Grid.Column="0" Spacing="5">
