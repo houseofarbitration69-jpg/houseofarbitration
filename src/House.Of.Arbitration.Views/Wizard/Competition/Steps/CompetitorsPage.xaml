@@ -17,6 +17,7 @@
     <base:BasePage.Resources>
         <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
         <converters:WarningsToStringConverter x:Key="WarningsToStringConverter" />
+        <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
     </base:BasePage.Resources>
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
@@ -63,8 +64,16 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:CompetitorCategoryModel">
                     <controls:Card CardPadding="15" CardColor="White">
-                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
-                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                            <!-- Flag -->
+                            <Image Grid.Column="0" Grid.RowSpan="2"
+                                   Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                   WidthRequest="32" 
+                                   HeightRequest="24" 
+                                   VerticalOptions="Center" 
+                                   Aspect="AspectFit"/>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
                                 <HorizontalStackLayout Spacing="9">
                                     <Label Text="{Binding Competitor.LastName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
                                     <Label Text="{Binding Competitor.FirstName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
@@ -84,7 +93,7 @@
                                 </Label>
                             </VerticalStackLayout>
 
-                            <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="2" Spacing="8">
                                 <controls:IconButton
                                             IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                             Icon="{x:Static helpers:FontCustomIcons.PEN}"
