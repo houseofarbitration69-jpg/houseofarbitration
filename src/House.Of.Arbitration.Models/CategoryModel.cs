@@ -1,5 +1,6 @@
 #region Imports
 using CommunityToolkit.Mvvm.ComponentModel;
+using House.Of.Arbitration.Localization;
 #endregion
 
 namespace House.Of.Arbitration.Models;
@@ -77,6 +78,33 @@ public partial class CategoryModel : ObservableObject
     {
         get => _hasDraw;
         set => SetProperty(ref _hasDraw, value);
+    }
+
+    public string Name
+    {
+        get
+        {
+            var localizer = LocalizationResourceManager.Instance;
+
+            var weights =
+    ((WeightMin <= 0 && WeightMax > 0) ? $"-{WeightMax}" :
+    ((WeightMin > 0 && WeightMax <= 0) ? $"+{WeightMin}" :
+    ((WeightMin > 0 && WeightMax > 0) ? $"-{WeightMax}" : String.Empty)));
+
+            switch (Type)
+            {
+                case CategoryType.None:
+                    return String.Empty;
+                case CategoryType.Sanda:
+                    return $"Sanda {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
+                case CategoryType.SandaLight:
+                    return $"Sanda Light {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
+                case CategoryType.Taolu:
+                    return $"Taolu {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")}";
+                default:
+                    return String.Empty;
+            }
+        }
     }
 }
 

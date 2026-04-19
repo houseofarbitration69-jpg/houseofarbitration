@@ -27,4 +27,16 @@
     <Folder Include="Platforms\iOS\Bluetooth\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Platforms\Windows\Bluetooth\BluetoothClient.cs">
+      <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+    </Compile>
+    <Compile Update="Platforms\Windows\Bluetooth\BluetoothServer.cs">
+      <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+    </Compile>
+    <Compile Update="Platforms\Windows\Bluetooth\BluetoothService.cs">
+      <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+    </Compile>
+  </ItemGroup>
+
 </Project>

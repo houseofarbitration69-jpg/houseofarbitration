@@ -169,10 +169,9 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
                 var link = new CompetitorCategoryModel
                 {
                     CompetitorId = competitor.Id,
-                    Competitor = competitor,
                     CategoryId = Category.Id,
-                    Category = Category
                 };
+
                 await _competitorCategoryRepository.AddAsync(link);
 
                 // 3. Update local collections

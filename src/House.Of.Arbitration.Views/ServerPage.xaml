@@ -8,10 +8,184 @@
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
-    x:TypeArguments="vm:SlaveViewModel"
+    xmlns:selectors="clr-namespace:House.Of.Arbitration.Views.Selectors;assembly=House.Of.Arbitration.Views"
+    x:TypeArguments="vm:ServerViewModel"
     x:Class="House.Of.Arbitration.Views.ServerPage"
     x:DataType="vm:ServerViewModel"
     x:Name="this"
     Title="{Binding Title}"
->
+    >
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="KnockoutTemplate" x:DataType="models:DrawKnockoutModel">
+                <Grid Padding="10" ColumnDefinitions="Auto, *">
+                    <Label Text="[K]" FontAttributes="Bold" TextColor="Red"/>
+                    <HorizontalStackLayout Grid.Column="1" Spacing="5" Margin="5,0,0,0">
+                        <Label Text="{Binding Competitor1.LastName}"/>
+                        <Label Text="vs"/>
+                        <Label Text="{Binding Competitor2.LastName}"/>
+                    </HorizontalStackLayout>
+                </Grid>
+            </DataTemplate>
+
+            <DataTemplate x:Key="PoolTemplate" x:DataType="models:DrawPoolsModel">
+                <Grid Padding="10" ColumnDefinitions="Auto, *">
+                    <Label Text="[P]" FontAttributes="Bold" TextColor="Blue"/>
+                    <HorizontalStackLayout Grid.Column="1" Spacing="5" Margin="5,0,0,0">
+                        <Label Text="{Binding Competitor1.LastName}"/>
+                        <Label Text="vs"/>
+                        <Label Text="{Binding Competitor2.LastName}"/>
+                    </HorizontalStackLayout>
+                </Grid>
+            </DataTemplate>
+
+            <DataTemplate x:Key="OrderTemplate" x:DataType="models:DrawOrderModel">
+                <Grid Padding="10" ColumnDefinitions="Auto, *">
+                    <Label Text="[O]" FontAttributes="Bold" TextColor="Green"/>
+                    <Label Grid.Column="1" Text="{Binding Competitor.LastName}" Margin="5,0,0,0"/>
+                </Grid>
+            </DataTemplate>
+
+            <selectors:DrawTemplateSelector x:Key="DrawTemplateSelector"
+                                            KnockoutTemplate="{StaticResource KnockoutTemplate}"
+                                            PoolTemplate="{StaticResource PoolTemplate}"
+                                            OrderTemplate="{StaticResource OrderTemplate}"/>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid ColumnDefinitions="300,*">
+        <CollectionView ItemsSource="{Binding Draws}"
+                        ItemTemplate="{StaticResource DrawTemplateSelector}"
+                        IsGrouped="True">
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="models:DrawGroup">
+                    <Label Text="{Binding CategoryName}" 
+                           BackgroundColor="LightGray" 
+                           FontAttributes="Bold" 
+                           Padding="10,5"
+                           FontSize="Medium"/>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+        </CollectionView>
+
+        <Grid Grid.Column="1" RowDefinitions="85,*,85" ColumnDefinitions="85,*,85">
+            <BoxView 
+                Grid.Row="0" 
+                Grid.Column="0" 
+                Background="Red"
+                WidthRequest="80"
+                HeightRequest="40"
+                Rotation="-45"
+            />
+
+            <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*,*,*,*">
+                <BoxView 
+                    Grid.Column="0"
+                    Background="Red"
+                    WidthRequest="80"
+                    HeightRequest="40"
+                    VerticalOptions="Start"
+                />
+                <BoxView 
+                    Grid.Column="1"
+                    Background="Red"
+                    WidthRequest="80"
+                    HeightRequest="40"
+                    VerticalOptions="Start"
+                />
+                <BoxView 
+                    Grid.Column="2"
+                    Background="Red"
+                    WidthRequest="80"
+                    HeightRequest="40"
+                    VerticalOptions="Start"
+                />
+                <BoxView 
+                    Grid.Column="3"
+                    Background="Red"
+                    WidthRequest="80"
+                    HeightRequest="40"
+                    VerticalOptions="Start"
+                />
+            </Grid>
+
+            <BoxView 
+                Grid.Row="0" 
+                Grid.Column="2" 
+                Background="Red"
+                WidthRequest="80"
+                HeightRequest="40"
+                Rotation="45"
+            />
+
+            <BoxView 
+                Grid.Row="1"
+                Grid.Column="0"
+                Background="Red"
+                WidthRequest="80"
+                HeightRequest="40"
+                Rotation="90"
+            />
+
+            <Grid 
+                Grid.Row="1" 
+                Grid.Column="1" 
+                RowDefinitions="Auto,*,Auto" 
+                ColumnDefinitions="*,*"
+            >
+                <BoxView 
+                    Grid.RowSpan="3"
+                    Grid.Column="0" 
+                    Background="Red"
+                />
+
+                <BoxView 
+                    Grid.RowSpan="3"
+                    Grid.Column="1" 
+                    Background="Blue"
+                />
+
+                <Label Text="CATEGORIES" Grid.Row="0" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
+
+                <Label Text="CHRONO" Grid.Row="2" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
+            </Grid>
+
+            <BoxView 
+                Grid.Row="1" 
+                Grid.Column="2" 
+                Background="Red"
+                WidthRequest="80"
+                HeightRequest="40"
+                Rotation="90"
+            />
+
+            <BoxView 
+                Grid.Row="2" 
+                Grid.Column="0" 
+                Background="Red"
+                WidthRequest="80"
+                HeightRequest="40"
+                Rotation="45"
+            />
+
+            <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="*,Auto,*">
+                <BoxView 
+                    Grid.Column="1"
+                    Background="Red"
+                    WidthRequest="80"
+                    HeightRequest="40"
+                    VerticalOptions="End"
+                />
+            </Grid>
+
+            <BoxView 
+                Grid.Row="2" 
+                Grid.Column="2" 
+                Background="Red"
+                WidthRequest="80"
+                HeightRequest="40"
+                Rotation="-45"
+            />
+        </Grid>
+    </Grid>
 </base:BasePage>

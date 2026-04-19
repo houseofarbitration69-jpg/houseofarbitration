@@ -18,6 +18,7 @@ public static class BuilderExtensions
     {
         builder.Services.AddTransient<HomeViewModel>();
         builder.Services.AddTransient<MasterViewModel>();
+        builder.Services.AddTransient<ServerViewModel>();
         builder.Services.AddTransient<SlaveViewModel>();
         builder.Services.AddTransient<CompetitionsViewModel>();
 

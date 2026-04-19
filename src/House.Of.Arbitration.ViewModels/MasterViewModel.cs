@@ -95,7 +95,8 @@ public partial class MasterViewModel : BaseViewModel
     private async Task StartCompetition(CompetitionModel competition)
     {
         if (competition == null) return;
-        await Shell.Current.DisplayAlertAsync("Démarrage", $"Lancement de : {competition.Name}", "OK");
+
+        await Shell.Current.GoToAsync("Server");
     }
 
     [RelayCommand]

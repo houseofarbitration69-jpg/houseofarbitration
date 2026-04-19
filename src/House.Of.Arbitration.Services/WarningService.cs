@@ -103,6 +103,10 @@ public class WarningService : IWarningService
             warning.CategoryId = link.CategoryId;
             warning.CompetitorId = link.CompetitorId;
             warning.CompetitorCategoryId = link.Id;
+
+            // Ensure navigation properties are null to avoid tracking conflicts
+            warning.Competitor = null;
+            warning.Category = null;
             
             await _warningRepository.AddAsync(warning);
         }

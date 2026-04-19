@@ -4,7 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace House.Of.Arbitration.Models;
 
-public partial class DrawPoolsModel : ObservableObject
+public partial class DrawPoolsModel : ObservableObject, IDrawModel
 {
     /// <summary>
     /// Obtient ou définit l'identifiant du tirage en mode 'Pools'
@@ -75,4 +75,9 @@ public partial class DrawPoolsModel : ObservableObject
     /// Obtient ou définit la liste des données des arbitres
     /// </summary>
     public List<RefereeDataModel>? RefereeDatas { get; set; }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public RoundType Type { get; } = RoundType.Pools;
 }

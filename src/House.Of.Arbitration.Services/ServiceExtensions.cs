@@ -3,6 +3,8 @@ using House.Of.Arbitration.Services.Abstractions;
 
 #if ANDROID
 using House.Of.Arbitration.Services.Platforms.Android.Bluetooth;
+#elif WINDOWS
+using House.Of.Arbitration.Services.Platforms.Windows.Bluetooth;
 #endif
 
 #endregion
@@ -25,6 +27,10 @@ public static class ServicesExtensions
         builder.Services.AddScoped<IAlertService, AlertService>();
 
 #if ANDROID
+        builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
+        builder.Services.AddSingleton<IBluetoothServer, BluetoothServer>();
+        builder.Services.AddSingleton<IBluetoothClient, BluetoothClient>();
+#elif WINDOWS
         builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
         builder.Services.AddSingleton<IBluetoothServer, BluetoothServer>();
         builder.Services.AddSingleton<IBluetoothClient, BluetoothClient>();
