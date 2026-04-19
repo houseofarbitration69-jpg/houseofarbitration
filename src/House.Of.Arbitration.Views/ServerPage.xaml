@@ -46,85 +46,77 @@
                 </Grid>
             </DataTemplate>
 
+            <DataTemplate x:Key="HeaderTemplate" x:DataType="x:String">
+                <Label 
+                    Text="{Binding .}" 
+                    BackgroundColor="LightGray" 
+                    FontAttributes="Bold" 
+                    Padding="10,5"
+                    FontSize="12"
+                />
+            </DataTemplate>
+
             <selectors:DrawTemplateSelector x:Key="DrawTemplateSelector"
                                             KnockoutTemplate="{StaticResource KnockoutTemplate}"
                                             PoolTemplate="{StaticResource PoolTemplate}"
-                                            OrderTemplate="{StaticResource OrderTemplate}"/>
+                                            OrderTemplate="{StaticResource OrderTemplate}"
+                                            HeaderTemplate="{StaticResource HeaderTemplate}"/>
         </ResourceDictionary>
     </ContentPage.Resources>
 
-    <Grid ColumnDefinitions="300,*">
+    <Grid ColumnDefinitions="300,*" ColumnSpacing="15" Margin="10">
         <CollectionView ItemsSource="{Binding Draws}"
-                        ItemTemplate="{StaticResource DrawTemplateSelector}"
-                        IsGrouped="True">
-            <CollectionView.GroupHeaderTemplate>
-                <DataTemplate x:DataType="models:DrawGroup">
-                    <Label Text="{Binding CategoryName}" 
-                           BackgroundColor="LightGray" 
-                           FontAttributes="Bold" 
-                           Padding="10,5"
-                           FontSize="Medium"/>
-                </DataTemplate>
-            </CollectionView.GroupHeaderTemplate>
+                        ItemTemplate="{StaticResource DrawTemplateSelector}">
         </CollectionView>
 
         <Grid Grid.Column="1" RowDefinitions="85,*,85" ColumnDefinitions="85,*,85">
             <BoxView 
                 Grid.Row="0" 
                 Grid.Column="0" 
-                Background="Red"
+                Background="LightGray"
                 WidthRequest="80"
                 HeightRequest="40"
                 Rotation="-45"
             />
 
-            <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="*,*,*,*">
+            <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="10" HorizontalOptions="Center">
                 <BoxView 
                     Grid.Column="0"
-                    Background="Red"
+                    Background="LightGray"
                     WidthRequest="80"
                     HeightRequest="40"
                     VerticalOptions="Start"
                 />
                 <BoxView 
                     Grid.Column="1"
-                    Background="Red"
+                    Background="LightGray"
                     WidthRequest="80"
                     HeightRequest="40"
                     VerticalOptions="Start"
                 />
                 <BoxView 
                     Grid.Column="2"
-                    Background="Red"
+                    Background="LightGray"
                     WidthRequest="80"
                     HeightRequest="40"
                     VerticalOptions="Start"
                 />
                 <BoxView 
                     Grid.Column="3"
-                    Background="Red"
+                    Background="LightGray"
                     WidthRequest="80"
                     HeightRequest="40"
                     VerticalOptions="Start"
                 />
-            </Grid>
+            </HorizontalStackLayout>
 
             <BoxView 
                 Grid.Row="0" 
                 Grid.Column="2" 
-                Background="Red"
+                Background="LightGray"
                 WidthRequest="80"
                 HeightRequest="40"
                 Rotation="45"
-            />
-
-            <BoxView 
-                Grid.Row="1"
-                Grid.Column="0"
-                Background="Red"
-                WidthRequest="80"
-                HeightRequest="40"
-                Rotation="90"
             />
 
             <Grid 
@@ -151,18 +143,9 @@
             </Grid>
 
             <BoxView 
-                Grid.Row="1" 
-                Grid.Column="2" 
-                Background="Red"
-                WidthRequest="80"
-                HeightRequest="40"
-                Rotation="90"
-            />
-
-            <BoxView 
                 Grid.Row="2" 
                 Grid.Column="0" 
-                Background="Red"
+                Background="LightGray"
                 WidthRequest="80"
                 HeightRequest="40"
                 Rotation="45"
@@ -171,7 +154,7 @@
             <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="*,Auto,*">
                 <BoxView 
                     Grid.Column="1"
-                    Background="Red"
+                    Background="LightGray"
                     WidthRequest="80"
                     HeightRequest="40"
                     VerticalOptions="End"
@@ -181,7 +164,7 @@
             <BoxView 
                 Grid.Row="2" 
                 Grid.Column="2" 
-                Background="Red"
+                Background="LightGray"
                 WidthRequest="80"
                 HeightRequest="40"
                 Rotation="-45"

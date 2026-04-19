@@ -26,7 +26,7 @@ public partial class ServerViewModel : BaseViewModel
     private bool _bluetoothAvailable = false;
     private string _serverName = String.Empty;
 
-    private System.Collections.ObjectModel.ObservableCollection<DrawGroup>? _draws;
+    private System.Collections.ObjectModel.ObservableCollection<object>? _draws;
     #endregion
 
     #region Properties
@@ -48,7 +48,7 @@ public partial class ServerViewModel : BaseViewModel
         set => SetProperty(ref _serverName, value);
     }
 
-    public System.Collections.ObjectModel.ObservableCollection<DrawGroup>? Draws
+    public System.Collections.ObjectModel.ObservableCollection<object>? Draws
     {
         get => _draws;
         set => SetProperty(ref _draws, value);
@@ -83,36 +83,46 @@ public partial class ServerViewModel : BaseViewModel
     {
         CheckBluetoothAvailabilityCommand.Execute(null);
 
-        var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category", "Competitor1", "Competitor2", "Winner", "Looser"))?.ToList();
+        var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1", "Competitor2", "Winner", "Looser"))?.ToList();
 
-        var orders = (await _drawOrderService.GetAllAsync("Draw.Category", "Competitor"))?.ToList();
+        var orders = (await _drawOrderService.GetAllAsync("Draw.Category.AgeRange", "Competitor"))?.ToList();
 
-        var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category", "Competitor1","Competitor2","Winner","Looser"))?.ToList();
+        var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category.AgeRange", "Competitor1","Competitor2","Winner","Looser"))?.ToList();
 
-        var draws = new List<IDrawModel>();
+        var allDraws = new List<IDrawModel>();
 
         if (knockouts != null)
         {
-            draws.AddRange(knockouts);
+            allDraws.AddRange(knockouts);
         }
 
         if (orders != null)
         {
-            draws.AddRange(orders);
+            allDraws.AddRange(orders);
         }
 
         if (pools != null)
         {
-            draws.AddRange(pools);
+            allDraws.AddRange(pools);
         }
 
-        var grouped = draws
-            .OrderBy(d => d.GlobalOrder)
-            .GroupBy(d => d.Draw.Category?.Name ?? "N/A")
-            .Select(g => new DrawGroup(g.Key, g.ToList()))
-            .ToList();
+        var sortedDraws = allDraws.OrderBy(d => d.GlobalOrder).ToList();
+        
+        var flattenedList = new List<object>();
+        string? lastCategoryName = null;
 
-        Draws = new System.Collections.ObjectModel.ObservableCollection<DrawGroup>(grouped);
+        foreach (var draw in sortedDraws)
+        {
+            var currentCategoryName = draw.Draw.Category?.Name ?? "N/A";
+            if (currentCategoryName != lastCategoryName)
+            {
+                flattenedList.Add(currentCategoryName);
+                lastCategoryName = currentCategoryName;
+            }
+            flattenedList.Add(draw);
+        }
+
+        Draws = new System.Collections.ObjectModel.ObservableCollection<object>(flattenedList);
     }
 
     public override Task OnDisappearing()
