@@ -15,131 +15,239 @@
     x:Name="this"
     Title="{Binding Title}"
     >
-    <ContentPage.Resources>
+    <base:BasePage.Resources>
         <ResourceDictionary>
             <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
-            
+            <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />
+            <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
+            <converters:RoundTypeToBoolConverter x:Key="RoundTypeToBoolConverter" />
+
             <Style x:Key="CompetitorInfoLabelStyle" TargetType="Label">
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="TextColor" Value="Gray"/>
             </Style>
 
             <DataTemplate x:Key="KnockoutTemplate" x:DataType="models:DrawKnockoutModel">
-                <Frame Margin="0,2" Padding="10" BorderColor="#EEEEEE" CornerRadius="8" HasShadow="False">
-                    <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, *">
-                        <Label Text="MATCH" Grid.RowSpan="3" VerticalOptions="Center" HorizontalOptions="Center"
-                               FontAttributes="Bold" TextColor="Red" Rotation="-90" WidthRequest="60"/>
-                        
-                        <Grid Grid.Column="1" Grid.Row="0" ColumnDefinitions="Auto, *">
-                            <Image Grid.Column="0" Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                <Border 
+                    Padding="10,10,10,10" 
+                    Stroke="#EEEEEE" 
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="#EEEEEE"
+                >
+                    <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*">
+                        <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="Auto, *">
+                            <Image 
+                                Grid.Column="0" 
+                                Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                WidthRequest="24" 
+                                HeightRequest="16" 
+                                VerticalOptions="Start" 
+                                Margin="0,2,8,0"
+                                IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}"
+                            />
                             <VerticalStackLayout Grid.Column="1">
-                                <HorizontalStackLayout Spacing="5">
+                                <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}">
                                     <Label Text="{Binding Competitor1.FirstName}" FontAttributes="Bold"/>
                                     <Label Text="{Binding Competitor1.LastName}" FontAttributes="Bold"/>
                                 </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="5">
-                                    <Label Text="{Binding Competitor1.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
-                                    <Label Text="{Binding Competitor1.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
-                                </HorizontalStackLayout>
+                                <Label 
+                                    Text="En attente" 
+                                    IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                                    FontAttributes="Italic" 
+                                    TextColor="Gray" 
+                                    FontSize="14"
+                                    HorizontalOptions="Center"
+                                />
+                                <Label 
+                                    Text="{Binding Competitor1.Club}" 
+                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}"
+                                />
                             </VerticalStackLayout>
                         </Grid>
 
-                        <Label Grid.Column="1" Grid.Row="1" Text="VS" HorizontalOptions="Center" 
-                               TextColor="#DDDDDD" FontAttributes="Bold" Margin="0,5"/>
+                        <Label 
+                            Grid.Column="0" 
+                            Grid.Row="1" 
+                            Text="VS" 
+                            HorizontalOptions="Center" 
+                            TextColor="DarkGray" 
+                            FontAttributes="Bold" 
+                            Margin="0,5"
+                        />
 
-                        <Grid Grid.Column="1" Grid.Row="2" ColumnDefinitions="Auto, *">
-                            <Image Grid.Column="0" Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                        <Grid Grid.Column="0" Grid.Row="2" ColumnDefinitions="Auto, *">
+                            <Image 
+                                Grid.Column="0" 
+                                Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}"
+                                WidthRequest="24" 
+                                HeightRequest="16" 
+                                VerticalOptions="Start" 
+                                Margin="0,2,8,0"
+                                IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}"
+                            />
                             <VerticalStackLayout Grid.Column="1">
-                                <HorizontalStackLayout Spacing="5">
+                                <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}">
                                     <Label Text="{Binding Competitor2.FirstName}" FontAttributes="Bold"/>
                                     <Label Text="{Binding Competitor2.LastName}" FontAttributes="Bold"/>
                                 </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="5">
-                                    <Label Text="{Binding Competitor2.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
-                                    <Label Text="{Binding Competitor2.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
-                                </HorizontalStackLayout>
+                                <Label 
+                                    Text="En attente" 
+                                    IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                                    FontAttributes="Italic" 
+                                    TextColor="Gray" 
+                                    FontSize="14"
+                                    HorizontalOptions="Center"
+                                />
+
+                                <Label 
+                                    Text="{Binding Competitor2.Club}" 
+                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}"
+                                />
                             </VerticalStackLayout>
                         </Grid>
                     </Grid>
-                </Frame>
+                </Border>
             </DataTemplate>
 
             <DataTemplate x:Key="PoolTemplate" x:DataType="models:DrawPoolsModel">
-                <Frame Margin="0,2" Padding="10" BorderColor="#EEEEEE" CornerRadius="8" HasShadow="False">
-                    <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, *">
-                        <Label Text="POOL" Grid.RowSpan="3" VerticalOptions="Center" HorizontalOptions="Center"
-                               FontAttributes="Bold" TextColor="Blue" Rotation="-90" WidthRequest="60"/>
-
-                        <Grid Grid.Column="1" Grid.Row="0" ColumnDefinitions="Auto, *">
-                            <Image Grid.Column="0" Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                <Border 
+                    Margin="0,2" 
+                    Padding="10"
+                    Stroke="#EEEEEE" 
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="#EEEEEE"
+                >
+                    <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*">
+                        <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="Auto, *">
+                            <Image 
+                                Grid.Column="0" 
+                                Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                WidthRequest="24" 
+                                HeightRequest="16" 
+                                VerticalOptions="Start" 
+                                Margin="0,2,8,0"
+                                IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}"
+                            />
                             <VerticalStackLayout Grid.Column="1">
-                                <HorizontalStackLayout Spacing="5">
+                                <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}">
                                     <Label Text="{Binding Competitor1.FirstName}" FontAttributes="Bold"/>
                                     <Label Text="{Binding Competitor1.LastName}" FontAttributes="Bold"/>
                                 </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="5">
-                                    <Label Text="{Binding Competitor1.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
-                                    <Label Text="{Binding Competitor1.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
-                                </HorizontalStackLayout>
+                                <Label 
+                                    Text="En attente match précédent" 
+                                    IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                                    FontAttributes="Italic" 
+                                    TextColor="Gray" 
+                                    FontSize="14"
+                                />
+
+                                <Label 
+                                    Text="{Binding Competitor1.Club}" 
+                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}"
+                                />
                             </VerticalStackLayout>
                         </Grid>
 
-                        <Label Grid.Column="1" Grid.Row="1" Text="VS" HorizontalOptions="Center" 
-                               TextColor="#DDDDDD" FontAttributes="Bold" Margin="0,5"/>
+                        <Label 
+                            Grid.Column="1" 
+                            Grid.Row="1" 
+                            Text="VS" 
+                            HorizontalOptions="Center" 
+                            TextColor="DarkGray" 
+                            FontAttributes="Bold" 
+                            Margin="0,5"
+                        />
 
                         <Grid Grid.Column="1" Grid.Row="2" ColumnDefinitions="Auto, *">
-                            <Image Grid.Column="0" Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                            <Image 
+                                Grid.Column="0" 
+                                Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                WidthRequest="24" 
+                                HeightRequest="16" 
+                                VerticalOptions="Start" 
+                                Margin="0,2,8,0"
+                                IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}"
+                            />
                             <VerticalStackLayout Grid.Column="1">
-                                <HorizontalStackLayout Spacing="5">
+                                <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}">
                                     <Label Text="{Binding Competitor2.FirstName}" FontAttributes="Bold"/>
                                     <Label Text="{Binding Competitor2.LastName}" FontAttributes="Bold"/>
                                 </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="5">
-                                    <Label Text="{Binding Competitor2.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
-                                    <Label Text="{Binding Competitor2.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
-                                </HorizontalStackLayout>
+                                <Label 
+                                    Text="En attente match précédent" 
+                                    IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                                    FontAttributes="Italic" 
+                                    TextColor="Gray" 
+                                    FontSize="14"
+                                />
+
+                                <Label 
+                                    Text="{Binding Competitor2.Club}" 
+                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}"
+                                />
                             </VerticalStackLayout>
                         </Grid>
                     </Grid>
-                </Frame>
+                </Border>
             </DataTemplate>
 
             <DataTemplate x:Key="OrderTemplate" x:DataType="models:DrawOrderModel">
-                <Frame Margin="0,2" Padding="10" BorderColor="#EEEEEE" CornerRadius="8" HasShadow="False">
-                    <Grid ColumnDefinitions="Auto, *">
-                        <Label Text="ORDER" VerticalOptions="Center" HorizontalOptions="Center"
-                               FontAttributes="Bold" TextColor="Green" Rotation="-90" WidthRequest="60"/>
-
-                        <Grid Grid.Column="1" ColumnDefinitions="Auto, *">
-                            <Image Grid.Column="0" Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                   WidthRequest="24" HeightRequest="16" VerticalOptions="Start" Margin="0,2,8,0"/>
+                <Border 
+                    Margin="0,2" 
+                    Padding="10" 
+                    Stroke="#EEEEEE" 
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="#EEEEEE"
+                >
+                    <Grid ColumnDefinitions="*">
+                        <Grid Grid.Column="0" ColumnDefinitions="Auto, *">
+                            <Image 
+                                Grid.Column="0" 
+                                Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                WidthRequest="24" 
+                                HeightRequest="16" 
+                                VerticalOptions="Start" 
+                                Margin="0,2,8,0"
+                                IsVisible="{Binding Competitor, Converter={StaticResource EmptyToBoolConverter}}"
+                            />
                             <VerticalStackLayout Grid.Column="1">
-                                <HorizontalStackLayout Spacing="5">
+                                <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor, Converter={StaticResource EmptyToBoolConverter}}">
                                     <Label Text="{Binding Competitor.FirstName}" FontAttributes="Bold"/>
                                     <Label Text="{Binding Competitor.LastName}" FontAttributes="Bold"/>
                                 </HorizontalStackLayout>
-                                <HorizontalStackLayout Spacing="5">
-                                    <Label Text="{Binding Competitor.Club}" Style="{StaticResource CompetitorInfoLabelStyle}"/>
-                                    <Label Text="{Binding Competitor.Country.Name}" Style="{StaticResource CompetitorInfoLabelStyle}" FontAttributes="Italic"/>
-                                </HorizontalStackLayout>
+                                <Label 
+                                    Text="En attente" 
+                                    IsVisible="{Binding Competitor, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                                    FontAttributes="Italic" 
+                                    TextColor="Gray" 
+                                    FontSize="14"
+                                />
+
+                                <Label 
+                                    Text="{Binding Competitor.Club}" 
+                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    IsVisible="{Binding Competitor, Converter={StaticResource EmptyToBoolConverter}}"
+                                />
                             </VerticalStackLayout>
                         </Grid>
                     </Grid>
-                </Frame>
+                </Border>
             </DataTemplate>
 
             <DataTemplate x:Key="HeaderTemplate" x:DataType="x:String">
-                <Label Text="{Binding .}" 
-                       BackgroundColor="#F5F5F5" 
-                       TextColor="#333333"
-                       FontAttributes="Bold" 
-                       Padding="10,8"
-                       FontSize="14"
-                       Margin="0,10,0,5"/>
+                <Label 
+                    Text="{Binding .}" 
+                    BackgroundColor="#F5F5F5" 
+                    TextColor="#333333"
+                    FontAttributes="Bold" 
+                    Padding="10,8"
+                    FontSize="14"
+                    Margin="0,10,0,5"
+                />
             </DataTemplate>
 
             <selectors:DrawTemplateSelector x:Key="DrawTemplateSelector"
@@ -148,11 +256,16 @@
                                             OrderTemplate="{StaticResource OrderTemplate}"
                                             HeaderTemplate="{StaticResource HeaderTemplate}"/>
         </ResourceDictionary>
-    </ContentPage.Resources>
+    </base:BasePage.Resources>
 
     <Grid ColumnDefinitions="300,*" ColumnSpacing="15" Margin="10">
-        <CollectionView ItemsSource="{Binding Draws}"
-                        ItemTemplate="{StaticResource DrawTemplateSelector}">
+        <CollectionView 
+            ItemsSource="{Binding Draws}"
+            ItemTemplate="{StaticResource DrawTemplateSelector}"
+        >
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+            </CollectionView.ItemsLayout>
         </CollectionView>
 
         <Grid Grid.Column="1" RowDefinitions="85,*,85" ColumnDefinitions="85,*,85">
@@ -211,21 +324,196 @@
                 RowDefinitions="Auto,*,Auto" 
                 ColumnDefinitions="*,*"
             >
-                <BoxView 
-                    Grid.RowSpan="3"
-                    Grid.Column="0" 
-                    Background="Red"
-                />
+                <!-- Fallback when no matches are remaining -->
+                <VerticalStackLayout 
+                    Grid.RowSpan="3" 
+                    Grid.ColumnSpan="2" 
+                    VerticalOptions="Center" 
+                    HorizontalOptions="Center" 
+                    Spacing="20"
+                    IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                >
+                    <Label Text="🏆" FontSize="64" HorizontalOptions="Center"/>
+                    <Label Text="Tous les matchs sont terminés" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
 
-                <BoxView 
-                    Grid.RowSpan="3"
-                    Grid.Column="1" 
-                    Background="Blue"
-                />
+                <!-- Current Match Area -->
+                <Grid 
+                    Grid.RowSpan="3" 
+                    Grid.ColumnSpan="2" 
+                    BindingContext="{Binding CurrentDraw}"
+                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                >
+                    <!-- Knockout / Round Robin -->
+                    <Grid 
+                        RowDefinitions="*"
+                        ColumnDefinitions="*,*"
+                        IsVisible="False"
+                    >
+                        <!-- COMPETITOR 1 -->
+                        <Border 
+                                Background="Red" 
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 8,0,8,0"
+                            />
 
-                <Label Text="CATEGORIES" Grid.Row="0" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
+                        <VerticalStackLayout Grid.Column="0" HorizontalOptions="Center">
+                            <Label Text="{Binding Competitor1.LastName}" TextColor="White" FontSize="32"/>
+                            <Label Text="{Binding Competitor1.FirstName}" TextColor="White" FontSize="32"/>
+                            <Label Text="{Binding Competitor1.Club}" TextColor="White" FontSize="32"/>
+                            <Image Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" WidthRequest="40" HeightRequest="80" Aspect="AspectFit"/>
+                        </VerticalStackLayout>
 
-                <Label Text="CHRONO" Grid.Row="2" Grid.ColumnSpan="2" HorizontalOptions="Center"/>
+                        <!-- COMPETITOR 2 -->
+                        <Border 
+                                Grid.RowSpan="3" 
+                                Grid.Column="1"
+                                Background="Blue" 
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 0,8,0,8"
+                            />
+
+                        <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center">
+                            <Label Text="{Binding Competitor2.LastName}" TextColor="White" FontSize="32"/>
+                            <Label Text="{Binding Competitor2.FirstName}" TextColor="White" FontSize="32"/>
+                            <Label Text="{Binding Competitor2.Club}" TextColor="White" FontSize="32"/>
+                            <Image Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" WidthRequest="40" HeightRequest="80" Aspect="AspectFit"/>
+                        </VerticalStackLayout>
+
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" Value="True">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
+
+                    <!-- Order -->
+                    <Grid IsVisible="False">
+                        <Label Text="ORDER"/>
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
+
+                    <!-- Category -->
+                    
+                    <!-- Chrono -->
+                    
+                    <!-- Background Layers (Red / Blue) -->
+                    <!-- Red Area -->
+                    <!--<Grid Grid.RowSpan="3" Grid.Column="0">
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Grid.ColumnSpan" Value="1"/>
+                                <Style.Triggers>
+                                    <DataTrigger TargetType="Grid" Binding="{Binding Draw.Category.Type}" Value="{x:Static models:CategoryType.Taolu}">
+                                        <Setter Property="Grid.ColumnSpan" Value="2"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <BoxView Background="Red" Opacity="0.8"/>
+                    </Grid>-->
+
+                    <!-- Blue Area (Match mode only: Sanda/SandaLight) -->
+                    <!--<Grid Grid.RowSpan="3" Grid.Column="1"
+                          IsVisible="{Binding Draw.Category.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotTaolu'}">
+                        <BoxView Background="Blue" Opacity="0.8"/>
+                    </Grid>-->
+
+                    <!-- Competitor 1 / Taolu Info -->
+                    <!--<VerticalStackLayout Grid.Row="1" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                        <VerticalStackLayout.Style>
+                            <Style TargetType="VerticalStackLayout">
+                                <Setter Property="Grid.ColumnSpan" Value="1"/>
+                                <Style.Triggers>
+                                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Draw.Category.Type}" Value="{x:Static models:CategoryType.Taolu}">
+                                        <Setter Property="Grid.ColumnSpan" Value="2"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </VerticalStackLayout.Style>
+
+                        -->
+                    <!-- Flag -->
+                    <!--
+                        <Image Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}"
+                               WidthRequest="120" HeightRequest="80" Aspect="AspectFit"
+                               IsVisible="{Binding Draw.Category.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotTaolu'}"/>
+                        <Image Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}"
+                               WidthRequest="120" HeightRequest="80" Aspect="AspectFit"
+                               IsVisible="{Binding Draw.Category.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Taolu'}"/>
+
+                        -->
+                    <!-- Name -->
+                    <!--
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" 
+                                                   IsVisible="{Binding Draw.Category.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotTaolu'}">
+                                <Label Text="{Binding Competitor1.FirstName}" TextColor="White" FontSize="32"/>
+                                <Label Text="{Binding Competitor1.LastName}" TextColor="White" FontSize="40" FontAttributes="Bold"/>
+                            </HorizontalStackLayout>
+                            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" 
+                                                   IsVisible="{Binding Draw.Category.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Taolu'}">
+                                <Label Text="{Binding Competitor.FirstName}" TextColor="White" FontSize="32"/>
+                                <Label Text="{Binding Competitor.LastName}" TextColor="White" FontSize="40" FontAttributes="Bold"/>
+                            </HorizontalStackLayout>
+                            
+                            -->
+                    <!-- Wait message -->
+                    <!--
+                            <Label Text="En attente" TextColor="White" FontSize="24" FontAttributes="Italic" Opacity="0.7" HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}" Value="True">
+                                        <Setter Property="IsVisible" Value="False" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding Competitor, Converter={StaticResource EmptyToBoolConverter}}" Value="True">
+                                        <Setter Property="IsVisible" Value="False" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </VerticalStackLayout>
+
+                        -->
+                    <!-- Club -->
+                    <!--
+                        <Label Text="{Binding Competitor1.Club}" TextColor="White" FontSize="24" HorizontalOptions="Center" Opacity="0.9"
+                               IsVisible="{Binding Draw.Category.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotTaolu'}"/>
+                        <Label Text="{Binding Competitor.Club}" TextColor="White" FontSize="24" HorizontalOptions="Center" Opacity="0.9"
+                               IsVisible="{Binding Draw.Category.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Taolu'}"/>
+                    </VerticalStackLayout>-->
+
+                    <!-- Competitor 2 Info (Match mode: Sanda/SandaLight) -->
+                    <!--<VerticalStackLayout Grid.Row="1" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" Spacing="15"
+                                         IsVisible="{Binding Draw.Category.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotTaolu'}">
+                        -->
+                    <!-- Flag -->
+                    <!--
+                        <Image Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}"
+                               WidthRequest="120" HeightRequest="80" Aspect="AspectFit"
+                               IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}"/>
+
+                        -->
+                    <!-- Name -->
+                    <!--
+                        <VerticalStackLayout HorizontalOptions="Center">
+                            <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}">
+                                <Label Text="{Binding Competitor2.FirstName}" TextColor="White" FontSize="32"/>
+                                <Label Text="{Binding Competitor2.LastName}" TextColor="White" FontSize="40" FontAttributes="Bold"/>
+                            </HorizontalStackLayout>
+                            <Label Text="En attente" TextColor="White" FontSize="24" FontAttributes="Italic" Opacity="0.7" HorizontalOptions="Center"
+                                   IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"/>
+                        </VerticalStackLayout>
+
+                        -->
+                    <!-- Club -->
+                    <!--
+                        <Label Text="{Binding Competitor2.Club}" TextColor="White" FontSize="24" HorizontalOptions="Center" Opacity="0.9"
+                               IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}"/>
+                    </VerticalStackLayout>-->
+                </Grid>
             </Grid>
 
             <BoxView 
@@ -255,6 +543,36 @@
                 HeightRequest="40"
                 Rotation="-45"
             />
+
+            <!-- CATEGORY -->
+            <Border 
+                Grid.RowSpan="3"
+                Grid.ColumnSpan="3" 
+                HorizontalOptions="Center"
+                VerticalOptions="Start"
+                Margin="0,50,0,0"
+                StrokeThickness="0"
+            >
+                <Label Text="{Binding CurrentDraw.Category.Name}"/>
+            </Border>
+            
+            <!-- CHRONO -->
+            <Border 
+                Grid.RowSpan="3"
+                Grid.ColumnSpan="3" 
+                HorizontalOptions="Center"
+                VerticalOptions="End"
+                Margin="0,0,0,65"
+                StrokeThickness="0"
+            >
+                <Label 
+                    Text="00:00" 
+                    HorizontalOptions="Center" 
+                    TextColor="White" 
+                    FontSize="32" 
+                    FontAttributes="Bold"
+                />
+            </Border>
         </Grid>
     </Grid>
 </base:BasePage>

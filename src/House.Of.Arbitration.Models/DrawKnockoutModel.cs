@@ -80,4 +80,9 @@ public partial class DrawKnockoutModel : ObservableObject, IDrawModel
     /// <inheritdoc/>
     /// </summary>
     public RoundType Type { get; } = RoundType.Knockouts;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public bool IsFinished { get; set; }
 }

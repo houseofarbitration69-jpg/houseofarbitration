@@ -6,7 +6,16 @@ public class EmptyToBoolConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        bool hasValue = !string.IsNullOrWhiteSpace(value as string) && !(value is null);
+        bool hasValue = false;
+        
+        if (value is string s)
+        {
+            hasValue = !string.IsNullOrWhiteSpace(s);
+        }
+        else
+        {
+            hasValue = value != null;
+        }
         
         if (parameter as string == "Invert")
         {

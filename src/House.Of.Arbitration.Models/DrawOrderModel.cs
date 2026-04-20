@@ -50,4 +50,9 @@ public partial class DrawOrderModel : ObservableObject, IDrawModel
     /// <inheritdoc/>
     /// </summary>
     public RoundType Type { get; } = RoundType.Order;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public bool IsFinished { get; set; }
 }

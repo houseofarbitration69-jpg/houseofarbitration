@@ -80,4 +80,9 @@ public partial class DrawPoolsModel : ObservableObject, IDrawModel
     /// <inheritdoc/>
     /// </summary>
     public RoundType Type { get; } = RoundType.Pools;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public bool IsFinished { get; set; }
 }

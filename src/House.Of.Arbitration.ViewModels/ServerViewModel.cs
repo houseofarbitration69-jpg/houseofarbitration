@@ -27,6 +27,7 @@ public partial class ServerViewModel : BaseViewModel
     private string _serverName = String.Empty;
 
     private System.Collections.ObjectModel.ObservableCollection<object>? _draws;
+    private IDrawModel? _currentDraw;
     #endregion
 
     #region Properties
@@ -52,6 +53,12 @@ public partial class ServerViewModel : BaseViewModel
     {
         get => _draws;
         set => SetProperty(ref _draws, value);
+    }
+
+    public IDrawModel? CurrentDraw
+    {
+        get => _currentDraw;
+        set => SetProperty(ref _currentDraw, value);
     }
     #endregion
 
@@ -83,11 +90,11 @@ public partial class ServerViewModel : BaseViewModel
     {
         CheckBluetoothAvailabilityCommand.Execute(null);
 
-        var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1", "Competitor2", "Winner", "Looser"))?.ToList();
+        var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
 
-        var orders = (await _drawOrderService.GetAllAsync("Draw.Category.AgeRange", "Competitor"))?.ToList();
+        var orders = (await _drawOrderService.GetAllAsync("Draw.Category.AgeRange", "Competitor.Country"))?.ToList();
 
-        var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category.AgeRange", "Competitor1","Competitor2","Winner","Looser"))?.ToList();
+        var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country","Competitor2.Country","Winner","Looser"))?.ToList();
 
         var allDraws = new List<IDrawModel>();
 
@@ -107,6 +114,8 @@ public partial class ServerViewModel : BaseViewModel
         }
 
         var sortedDraws = allDraws.OrderBy(d => d.GlobalOrder).ToList();
+
+        CurrentDraw = sortedDraws.FirstOrDefault(d => !d.IsFinished);
         
         var flattenedList = new List<object>();
         string? lastCategoryName = null;

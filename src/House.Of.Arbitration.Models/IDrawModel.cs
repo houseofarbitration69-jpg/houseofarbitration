@@ -16,4 +16,9 @@ public interface IDrawModel
     /// Obtient le tirage
     /// </summary>
     DrawModel Draw { get; }
+
+    /// <summary>
+    /// Obtient ou définit si le tirage est terminé
+    /// </summary>
+    bool IsFinished { get; set; }
 }

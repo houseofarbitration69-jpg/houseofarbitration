@@ -13,7 +13,7 @@
     x:DataType="vm:MasterViewModel"
     x:Name="this"
     Title="{Binding Title}"
-    Shell.NavBarIsVisible="False">
+>
 
     <base:BasePage.Resources>
         <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
