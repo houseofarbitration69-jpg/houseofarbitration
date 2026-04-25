@@ -154,8 +154,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         for (int i = 0; i < matchesInRound; i++)
         {
             var match = new BracketMatchViewModel();
-            match.Order = globalMatchOrder++;
-            match.GlobalOrder = match.Order;
+            match.Order = i + 1;
 
             if (existingDraw != null)
             {
@@ -165,6 +164,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                     match.Slot1.Competitor = savedMatch.Competitor1;
                     match.Slot2.Competitor = savedMatch.Competitor2;
                     match.GlobalOrder = savedMatch.GlobalOrder;
+                    if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
                 }
             }
             else
@@ -179,6 +179,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         // Prepare subsequent rounds
         int currentMatches = matchesInRound;
         int roundIndex = 2;
+        int matchOffset = matchesInRound;
         while (currentMatches > 1)
         {
             currentMatches /= 2;
@@ -186,8 +187,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             for (int i = 0; i < currentMatches; i++)
             {
                 var match = new BracketMatchViewModel();
-                match.Order = globalMatchOrder++;
-                match.GlobalOrder = match.Order;
+                match.Order = matchOffset + i + 1;
 
                 if (existingDraw != null)
                 {
@@ -197,11 +197,13 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                         match.Slot1.Competitor = savedMatch.Competitor1;
                         match.Slot2.Competitor = savedMatch.Competitor2;
                         match.GlobalOrder = savedMatch.GlobalOrder;
+                        if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
                     }
                 }
 
                 nextRound.Matches.Add(match);
             }
+            matchOffset += currentMatches;
             newRounds.Add(nextRound);
         }
 
@@ -218,54 +220,139 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         {
             RefreshAdvancements();
         }
+        else
+        {
+            // Even if existing draw, we need to set IsBye flags for UI visibility
+            UpdateByeFlags();
+        }
+    }
+
+    private void UpdateByeFlags()
+    {
+        if (Rounds.Count == 0) return;
+        var round1 = Rounds[0];
+        foreach (var match in round1.Matches)
+        {
+            int count = (match.Slot1.Competitor != null ? 1 : 0) + (match.Slot2.Competitor != null ? 1 : 0);
+            match.IsBye = count < 2;
+        }
+        // Round 2+ are never byes for order selection
+        for (int r = 1; r < Rounds.Count; r++)
+        {
+            foreach (var match in Rounds[r].Matches)
+            {
+                match.IsBye = false;
+            }
+        }
     }
 
     private void RefreshAdvancements()
     {
-        if (IsKnockouts || Rounds.Count < 2) return;
+        if (Rounds.Count < 2 || (!IsKnockouts && !IsPools)) return;
 
-        var round1 = Rounds[0];
-        var round2 = Rounds[1];
-
-        if (round2.Name == "Winner") return;
-
-        // Reset Round 2 slots to clear previous automatic advancements
-        foreach (var match in round2.Matches)
+        if (IsKnockouts)
         {
-            match.Slot1.Competitor = null;
-            match.Slot2.Competitor = null;
-        }
-
-        // Advance competitors ONLY from Round 1 to Round 2
-        for (int i = 0; i < round1.Matches.Count; i++)
-        {
-            var match = round1.Matches[i];
-            int competitorsCount = 0;
-            CompetitorModel? winner = null;
-
-            if (match.Slot1.Competitor != null)
+            // Clear all rounds except Round 1 to re-calculate everything
+            for (int r = 1; r < Rounds.Count; r++)
             {
-                competitorsCount++;
-                winner = match.Slot1.Competitor;
-            }
-            if (match.Slot2.Competitor != null)
-            {
-                competitorsCount++;
-                winner = match.Slot2.Competitor;
-            }
-
-            // If only one competitor in Round 1 match, they advance to Round 2
-            if (competitorsCount == 1)
-            {
-                int nextMatchIndex = i / 2;
-                if (nextMatchIndex < round2.Matches.Count)
+                foreach (var match in Rounds[r].Matches)
                 {
-                    var nextMatch = round2.Matches[nextMatchIndex];
-                    if (i % 2 == 0)
-                        nextMatch.Slot1.Competitor = winner;
-                    else
-                        nextMatch.Slot2.Competitor = winner;
+                    match.Slot1.Competitor = null;
+                    match.Slot2.Competitor = null;
+                    match.IsBye = false;
                 }
+            }
+
+            int globalMatchOrder = 1;
+
+            // Propagate byes through all rounds and re-calculate GlobalOrder
+            for (int r = 0; r < Rounds.Count - 1; r++)
+            {
+                var currentRound = Rounds[r];
+                var nextRound = Rounds[r + 1];
+
+                for (int i = 0; i < currentRound.Matches.Count; i++)
+                {
+                    var match = currentRound.Matches[i];
+                    if (match.IsWinnerSlot) continue;
+
+                    int competitorsCount = (match.Slot1.Competitor != null ? 1 : 0) + (match.Slot2.Competitor != null ? 1 : 0);
+                    CompetitorModel? winner = match.Slot1.Competitor ?? match.Slot2.Competitor;
+
+                    // 1. Only Round 1 matches can be byes for skipping order selection
+                    if (r == 0)
+                    {
+                        match.IsBye = (competitorsCount < 2);
+                    }
+                    else
+                    {
+                        match.IsBye = false;
+                    }
+
+                    // 2. Assign GlobalOrder only to non-byes
+                    if (!match.IsBye)
+                    {
+                        match.GlobalOrder = globalMatchOrder++;
+                    }
+                    else
+                    {
+                        match.GlobalOrder = 0;
+                    }
+
+                    // 3. Propagation logic
+                    // If exactly one competitor in this match, they advance to next round
+                    if (competitorsCount == 1)
+                    {
+                        if (nextRound.Matches.Count > 0)
+                        {
+                            var nextMatch = nextRound.Matches[0]; // Default for Winner slot
+                            
+                            if (!nextMatch.IsWinnerSlot)
+                            {
+                                int nextMatchIndex = i / 2;
+                                if (nextMatchIndex < nextRound.Matches.Count)
+                                {
+                                    nextMatch = nextRound.Matches[nextMatchIndex];
+                                    if (i % 2 == 0)
+                                        nextMatch.Slot1.Competitor = winner;
+                                    else
+                                        nextMatch.Slot2.Competitor = winner;
+                                }
+                            }
+                            else
+                            {
+                                // It's the winner slot. 
+                                // User: "on ne peux définir le gagnant que lorsque l'ensemble des matches a été fait"
+                                // We only show the winner name if there is ONLY 1 competitor in the whole category.
+                                if (Category?.Competitors.Count == 1)
+                                {
+                                    nextMatch.Slot1.Competitor = winner;
+                                }
+                                else
+                                {
+                                    nextMatch.Slot1.Competitor = null; // Stays "WINNER"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if (IsPools)
+        {
+            var round1 = Rounds[0];
+            var round2 = Rounds.Count > 1 ? Rounds[1] : null;
+
+            if (round2 != null && round2.Matches.Count > 0 && round2.Matches[0].IsWinnerSlot)
+            {
+                round2.Matches[0].Slot1.Competitor = null;
+
+                // If only 1 competitor in the whole category, they are the winner
+                if (Category?.Competitors.Count == 1)
+                {
+                    round2.Matches[0].Slot1.Competitor = Category.Competitors[0].Competitor;
+                }
+                // Else, it stays "WINNER" until the real result is known
             }
         }
     }
@@ -289,41 +376,35 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
 
         // Generate all unique combinations (everyone against everyone)
-        // If existing draw, we need to try to map competitors to the shared slots to maintain consistency if possible
-        // But for Robin, matches are between everyone. The DrawSandas might have specific Order.
-
         for (int i = 0; i < n; i++)
         {
             for (int j = i + 1; j < n; j++)
             {
                 var match = new BracketMatchViewModel();
-                match.Order = globalMatchOrder++;
-                match.GlobalOrder = match.Order;
+                match.Order = globalMatchOrder; // Will be assigned GlobalOrder
 
                 if (existingDraw != null)
                 {
                     var savedMatch = existingDraw.DrawPools?.FirstOrDefault(ms => ms.Order == match.Order);
                     if (savedMatch != null)
                     {
-                        // For Robin, we rely on the same shared slots if possible, but existingDraw might have swapped them
-                        // Simple approach: if existingDraw exists, we might need a more complex mapping or just use saved data
-                        // For now, let's at least respect the saved competitors for that Order
                         match.Slot1 = new BracketSlotViewModel { Competitor = savedMatch.Competitor1 };
                         match.Slot2 = new BracketSlotViewModel { Competitor = savedMatch.Competitor2 };
                         match.GlobalOrder = savedMatch.GlobalOrder;
-                        // We add these to _pouleSlots if they are "new" unique competitors? 
-                        // Actually Robin usually has fixed slots.
+                        if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
                     }
                     else
                     {
                         match.Slot1 = _pouleSlots[i];
                         match.Slot2 = _pouleSlots[j];
+                        match.GlobalOrder = globalMatchOrder++;
                     }
                 }
                 else
                 {
                     match.Slot1 = _pouleSlots[i];
                     match.Slot2 = _pouleSlots[j];
+                    match.GlobalOrder = globalMatchOrder++;
                 }
 
                 match.Height = 100;
@@ -333,7 +414,18 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
 
         newRounds.Add(pouleRound);
+
+        // Add Winner slot round
+        var winnerRound = new BracketRoundViewModel { Name = "Winner" };
+        winnerRound.Matches.Add(new BracketMatchViewModel { IsWinnerSlot = true });
+        newRounds.Add(winnerRound);
+
         Rounds = newRounds;
+
+        if (existingDraw == null)
+        {
+            RefreshAdvancements();
+        }
     }
 
     private void InitializeOrder(DrawModel? existingDraw = null)
@@ -364,6 +456,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                 match.Height = 80;
                 match.Margin = new Thickness(0, 5, 0, 5);
                 orderRound.Matches.Add(match);
+                if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
             }
         }
         else
@@ -374,8 +467,8 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                 _pouleSlots.Add(slot);
 
                 var match = new BracketMatchViewModel();
-                match.Order = globalMatchOrder++;
-                match.GlobalOrder = match.Order;
+                match.Order = i + 1;
+                match.GlobalOrder = globalMatchOrder++;
                 match.Slot1 = slot;
                 match.Height = 80;
                 match.Margin = new Thickness(0, 5, 0, 5);
@@ -473,7 +566,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             {
                 foreach (var match in round.Matches)
                 {
-                    if (match.IsWinnerSlot) continue;
+                    if (match.IsWinnerSlot || match.IsBye) continue;
 
                     if (Category.RoundType == RoundType.Knockouts)
                     {
@@ -567,7 +660,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         // Update Category.Competitors list
         UpdateCategoryCompetitors();
 
-        if (IsKnockouts)
+        if (IsKnockouts || IsPools)
         {
             RefreshAdvancements();
         }
@@ -657,6 +750,7 @@ public partial class BracketMatchViewModel : ObservableObject
     private Thickness _margin = new Thickness(0);
     private double _height = 0.0;
     private bool _isWinnerSlot = false;
+    private bool _isBye = false;
     private int _order;
     private int _globalOrder;
     private BracketSlotViewModel _slot1 = new();
@@ -681,6 +775,20 @@ public partial class BracketMatchViewModel : ObservableObject
         get => _isWinnerSlot;
         set => SetProperty(ref _isWinnerSlot, value);
     }
+
+    public bool IsBye
+    {
+        get => _isBye;
+        set
+        {
+            if (SetProperty(ref _isBye, value))
+            {
+                OnPropertyChanged(nameof(IsOrderVisible));
+            }
+        }
+    }
+
+    public bool IsOrderVisible => !IsWinnerSlot && !IsBye;
 
     public int Order
     {

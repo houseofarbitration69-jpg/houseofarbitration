@@ -28,6 +28,10 @@ public partial class ServerViewModel : BaseViewModel
 
     private System.Collections.ObjectModel.ObservableCollection<object>? _draws;
     private IDrawModel? _currentDraw;
+
+    private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
+    private bool _isTimerRunning;
+    private IDispatcherTimer? _timer;
     #endregion
 
     #region Properties
@@ -53,6 +57,14 @@ public partial class ServerViewModel : BaseViewModel
     {
         get => _draws;
         set => SetProperty(ref _draws, value);
+    }
+
+    public string TimeLeftDisplay => _timeLeft.ToString(@"mm\:ss");
+
+    public bool IsTimerRunning
+    {
+        get => _isTimerRunning;
+        set => SetProperty(ref _isTimerRunning, value);
     }
 
     public IDrawModel? CurrentDraw
@@ -82,6 +94,24 @@ public partial class ServerViewModel : BaseViewModel
         _drawKnockoutService = drawKnockoutService;
         _drawOrderService = drawOrderService;
         _drawPoolsModel = drawPoolsService;
+
+        _timer = Application.Current?.Dispatcher.CreateTimer();
+        if (_timer != null)
+        {
+            _timer.Interval = TimeSpan.FromSeconds(1);
+            _timer.Tick += (s, e) =>
+            {
+                if (_timeLeft.TotalSeconds > 0)
+                {
+                    _timeLeft = _timeLeft.Subtract(TimeSpan.FromSeconds(1));
+                    OnPropertyChanged(nameof(TimeLeftDisplay));
+                }
+                else
+                {
+                    StopTimer();
+                }
+            };
+        }
     }
     #endregion
 
@@ -140,6 +170,14 @@ public partial class ServerViewModel : BaseViewModel
     }
     #endregion
 
+    #region Private Methods
+    private void StopTimer()
+    {
+        _timer?.Stop();
+        IsTimerRunning = false;
+    }
+    #endregion
+
     #region Commands
     [RelayCommand]
     private async Task CheckBluetoothAvailability()
@@ -158,6 +196,45 @@ public partial class ServerViewModel : BaseViewModel
     private async Task StartServer()
     {
         await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName);
+    }
+
+    [RelayCommand]
+    private void StartTimer()
+    {
+        if (!IsTimerRunning && _timeLeft.TotalSeconds > 0)
+        {
+            _timer?.Start();
+            IsTimerRunning = true;
+        }
+    }
+
+    [RelayCommand]
+    private void PauseTimer()
+    {
+        StopTimer();
+    }
+
+    [RelayCommand]
+    private void ResetTimer()
+    {
+        StopTimer();
+        _timeLeft = TimeSpan.FromMinutes(2); // Default reset
+        OnPropertyChanged(nameof(TimeLeftDisplay));
+    }
+
+    [RelayCommand]
+    private async Task SetTimer()
+    {
+        string result = await Shell.Current.DisplayActionSheet("Définir le temps", "Annuler", null, "1:00", "1:30", "2:00", "3:00", "5:00");
+        if (result != null && result != "Annuler")
+        {
+            StopTimer();
+            if (TimeSpan.TryParseExact(result, @"m\:ss", null, out var newTime))
+            {
+                _timeLeft = newTime;
+                OnPropertyChanged(nameof(TimeLeftDisplay));
+            }
+        }
     }
     #endregion
 }

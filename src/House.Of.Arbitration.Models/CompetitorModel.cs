@@ -57,6 +57,11 @@ public partial class CompetitorModel : ObservableObject
     public double Weight { get; set; }
     
     /// <summary>
+    /// Obtient ou définit la photo du compétiteur
+    /// </summary>
+    public string? Photo { get; set; }
+
+    /// <summary>
     /// Obtient ou définit la liste des catégoriesdu compétiteur
     /// </summary>
     public List<CompetitorCategoryModel>? Categories { get; set; }
