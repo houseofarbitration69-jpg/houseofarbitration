@@ -130,7 +130,8 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             item.HasMany(i => i.RefereeDatas)
-                .WithOne()
+                .WithOne(r => r.DrawKnockoutModel)
+                .HasForeignKey(r => r.DrawKnockoutId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -163,7 +164,8 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             item.HasMany(i => i.RefereeDatas)
-                .WithOne()
+                .WithOne(r => r.DrawPools)
+                .HasForeignKey(r => r.DrawPoolsId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -181,7 +183,8 @@ public class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             item.HasMany(i => i.RefereeDatas)
-                .WithOne()
+                .WithOne(r => r.DrawOrder)
+                .HasForeignKey(r => r.DrawOrderId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

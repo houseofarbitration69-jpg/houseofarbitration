@@ -28,6 +28,7 @@ public partial class ServerViewModel : BaseViewModel
 
     private System.Collections.ObjectModel.ObservableCollection<object>? _draws;
     private IDrawModel? _currentDraw;
+    private System.Collections.ObjectModel.ObservableCollection<JudgeModel> _judges = new();
 
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private bool _isTimerRunning;
@@ -57,6 +58,12 @@ public partial class ServerViewModel : BaseViewModel
     {
         get => _draws;
         set => SetProperty(ref _draws, value);
+    }
+
+    public System.Collections.ObjectModel.ObservableCollection<JudgeModel> Judges
+    {
+        get => _judges;
+        set => SetProperty(ref _judges, value);
     }
 
     public string TimeLeftDisplay => _timeLeft.ToString(@"mm\:ss");
@@ -95,6 +102,11 @@ public partial class ServerViewModel : BaseViewModel
         _drawOrderService = drawOrderService;
         _drawPoolsModel = drawPoolsService;
 
+        for (int i = 1; i <= 5; i++)
+        {
+            Judges.Add(new JudgeModel { Name = $"JUGE {i}", Number = i });
+        }
+
         _timer = Application.Current?.Dispatcher.CreateTimer();
         if (_timer != null)
         {
@@ -124,7 +136,7 @@ public partial class ServerViewModel : BaseViewModel
 
         var orders = (await _drawOrderService.GetAllAsync("Draw.Category.AgeRange", "Competitor.Country"))?.ToList();
 
-        var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country","Competitor2.Country","Winner","Looser"))?.ToList();
+        var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
 
         var allDraws = new List<IDrawModel>();
 
@@ -146,11 +158,11 @@ public partial class ServerViewModel : BaseViewModel
         var sortedDraws = allDraws.OrderBy(d => d.GlobalOrder).ToList();
 
         CurrentDraw = sortedDraws.FirstOrDefault(d => !d.IsFinished);
-        
+
         var flattenedList = new List<object>();
         string? lastCategoryName = null;
 
-        foreach (var draw in sortedDraws)
+        foreach (var draw in sortedDraws.Where(d => !d.IsFinished))
         {
             var currentCategoryName = draw.Draw.Category?.Name ?? "N/A";
             if (currentCategoryName != lastCategoryName)
@@ -179,6 +191,108 @@ public partial class ServerViewModel : BaseViewModel
     #endregion
 
     #region Commands
+    [RelayCommand]
+    private async Task SetWinner(string color)
+    {
+        if (CurrentDraw == null) return;
+
+        CompetitorModel? winner = null;
+        CompetitorModel? looser = null;
+
+        if (CurrentDraw is DrawKnockoutModel knockout)
+        {
+            winner = color == "Red" ? knockout.Competitor1 : knockout.Competitor2;
+            looser = color == "Red" ? knockout.Competitor2 : knockout.Competitor1;
+
+            if (winner == null) return;
+
+            knockout.WinnerId = winner.Id;
+            knockout.LooserId = looser?.Id;
+            knockout.IsFinished = true;
+            await _drawKnockoutService.UpdateAsync(knockout);
+
+            // Propagation logic for Knockouts
+            var allKnockouts = (await _drawKnockoutService.GetAllAsync()).Where(k => k.DrawId == knockout.DrawId).OrderBy(k => k.Order).ToList();
+            if (allKnockouts.Count > 0)
+            {
+                // Determine 'm' (power of 2 bracket size)
+                // Total matches = m - 1
+                int m = allKnockouts.Max(k => k.Order) + 1;
+
+                // Find current round and local index
+                int currentOrder = knockout.Order;
+                int roundStart = 0;
+                int matchesInRound = m / 2;
+
+                while (matchesInRound > 0)
+                {
+                    if (currentOrder > roundStart && currentOrder <= roundStart + matchesInRound)
+                    {
+                        // Found current round
+                        int localIndex = currentOrder - roundStart; // 1-indexed
+                        int nextRoundStart = roundStart + matchesInRound;
+                        int nextMatchesInRound = matchesInRound / 2;
+
+                        if (nextMatchesInRound > 0)
+                        {
+                            int nextMatchOrder = nextRoundStart + (localIndex + 1) / 2;
+                            var nextMatch = allKnockouts.FirstOrDefault(k => k.Order == nextMatchOrder);
+
+                            if (nextMatch != null)
+                            {
+                                if (localIndex % 2 != 0) // Odd index -> Slot 1
+                                {
+                                    nextMatch.Competitor1Id = winner.Id;
+                                }
+                                else // Even index -> Slot 2
+                                {
+                                    nextMatch.Competitor2Id = winner.Id;
+                                }
+                                await _drawKnockoutService.UpdateAsync(nextMatch);
+                            }
+                        }
+                        break;
+                    }
+
+                    roundStart += matchesInRound;
+                    matchesInRound /= 2;
+                }
+            }
+        }
+        else if (CurrentDraw is DrawPoolsModel pool)
+        {
+            winner = color == "Red" ? pool.Competitor1 : pool.Competitor2;
+            looser = color == "Red" ? pool.Competitor2 : pool.Competitor1;
+
+            if (winner == null) return;
+
+            pool.WinnerId = winner.Id;
+            pool.LooserId = looser?.Id;
+            pool.IsFinished = true;
+            await _drawPoolsModel.UpdateAsync(pool);
+        }
+        else if (CurrentDraw is DrawOrderModel order)
+        {
+            order.IsFinished = true;
+            await _drawOrderService.UpdateAsync(order);
+            winner = order.Competitor; // Just to trigger next
+        }
+
+        if (winner != null)
+        {
+            // Reset judge points
+            foreach (var judge in Judges)
+            {
+                judge.RedPoints = 0;
+                judge.BluePoints = 0;
+            }
+
+            // Reset timer and load next
+            ResetTimer();
+            await OnAppearing();
+        }
+    }
+
     [RelayCommand]
     private async Task CheckBluetoothAvailability()
     {
@@ -234,6 +348,23 @@ public partial class ServerViewModel : BaseViewModel
                 _timeLeft = newTime;
                 OnPropertyChanged(nameof(TimeLeftDisplay));
             }
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenJudgePopup(JudgeModel? judge)
+    {
+        var parameters = new Dictionary<string, object>
+        {
+            { "Judge", judge }
+        };
+
+        var result = await _popupService.ShowPopupAsync<JudgePointsPopupViewModel, JudgeModel>(Shell.Current, shellParameters: parameters);
+
+        if (result.Result != null)
+        {
+            judge.RedPoints = result.Result.RedPoints;
+            judge.BluePoints = result.Result.BluePoints;
         }
     }
     #endregion

@@ -289,14 +289,20 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                         match.IsBye = false;
                     }
 
-                    // 2. Assign GlobalOrder only to non-byes
-                    if (!match.IsBye)
+                    // 2. Assign GlobalOrder
+                    // Round 1: match gets an order if there is at least one competitor (bye or real match)
+                    // so it appears in the competition flow.
+                    // Round 2+: always gets an order.
+                    if (r == 0)
                     {
-                        match.GlobalOrder = globalMatchOrder++;
+                        if (competitorsCount > 0)
+                            match.GlobalOrder = globalMatchOrder++;
+                        else
+                            match.GlobalOrder = 0;
                     }
                     else
                     {
-                        match.GlobalOrder = 0;
+                        match.GlobalOrder = globalMatchOrder++;
                     }
 
                     // 3. Propagation logic
@@ -340,20 +346,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
         else if (IsPools)
         {
-            var round1 = Rounds[0];
-            var round2 = Rounds.Count > 1 ? Rounds[1] : null;
-
-            if (round2 != null && round2.Matches.Count > 0 && round2.Matches[0].IsWinnerSlot)
-            {
-                round2.Matches[0].Slot1.Competitor = null;
-
-                // If only 1 competitor in the whole category, they are the winner
-                if (Category?.Competitors.Count == 1)
-                {
-                    round2.Matches[0].Slot1.Competitor = Category.Competitors[0].Competitor;
-                }
-                // Else, it stays "WINNER" until the real result is known
-            }
+            // Points-based system, no automatic winner advancement displayed in this view
         }
     }
 
@@ -414,11 +407,6 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
 
         newRounds.Add(pouleRound);
-
-        // Add Winner slot round
-        var winnerRound = new BracketRoundViewModel { Name = "Winner" };
-        winnerRound.Matches.Add(new BracketMatchViewModel { IsWinnerSlot = true });
-        newRounds.Add(winnerRound);
 
         Rounds = newRounds;
 
@@ -566,18 +554,30 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             {
                 foreach (var match in round.Matches)
                 {
-                    if (match.IsWinnerSlot || match.IsBye) continue;
+                    if (match.IsWinnerSlot || match.GlobalOrder == 0) continue;
 
                     if (Category.RoundType == RoundType.Knockouts)
                     {
-                        draw.DrawKnockouts.Add(new DrawKnockoutModel
+                        var knockoutMatch = new DrawKnockoutModel
                         {
                             Draw = draw,
                             Order = match.Order,
                             GlobalOrder = match.GlobalOrder,
                             Competitor1Id = match.Slot1.Competitor?.Id,
                             Competitor2Id = match.Slot2.Competitor?.Id,
-                        });
+                        };
+
+                        // If it's a Round 1 bye (only one competitor), set winner and mark as finished
+                        bool isRound1 = round == Rounds.FirstOrDefault();
+                        int compCount = (match.Slot1.Competitor != null ? 1 : 0) + (match.Slot2.Competitor != null ? 1 : 0);
+
+                        if (isRound1 && compCount == 1)
+                        {
+                            knockoutMatch.WinnerId = match.Slot1.Competitor?.Id ?? match.Slot2.Competitor?.Id;
+                            knockoutMatch.IsFinished = true;
+                        }
+
+                        draw.DrawKnockouts.Add(knockoutMatch);
                     }
                     else if (Category.RoundType == RoundType.Pools)
                     {

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mct:Popup xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
+             x:Class="House.Of.Arbitration.Views.JudgePointsPopup"
+             x:DataType="vm:JudgePointsPopupViewModel"
+             Color="Transparent">
+    
+    <Border StrokeShape="RoundRectangle 15" BackgroundColor="White" Padding="20" WidthRequest="400">
+        <VerticalStackLayout Spacing="20">
+            <Label Text="{Binding Judge.Name}" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" />
+            
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="20">
+                <!-- Red Competitor -->
+                <VerticalStackLayout Grid.Column="0" Spacing="10">
+                    <Label Text="ROUGE" TextColor="Red" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Label Text="{Binding Judge.RedPoints}" FontSize="48" HorizontalOptions="Center" />
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Button Text="-" Command="{Binding RemoveRedPointCommand}" BackgroundColor="Red" WidthRequest="50" HeightRequest="50" CornerRadius="25" />
+                        <Button Text="+" Command="{Binding AddRedPointCommand}" BackgroundColor="Red" WidthRequest="50" HeightRequest="50" CornerRadius="25" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                
+                <!-- Blue Competitor -->
+                <VerticalStackLayout Grid.Column="1" Spacing="10">
+                    <Label Text="BLEU" TextColor="Blue" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Label Text="{Binding Judge.BluePoints}" FontSize="48" HorizontalOptions="Center" />
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Button Text="-" Command="{Binding RemoveBluePointCommand}" BackgroundColor="Blue" WidthRequest="50" HeightRequest="50" CornerRadius="25" />
+                        <Button Text="+" Command="{Binding AddBluePointCommand}" BackgroundColor="Blue" WidthRequest="50" HeightRequest="50" CornerRadius="25" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Grid>
+            
+            <HorizontalStackLayout Spacing="15" HorizontalOptions="End">
+                <Button Text="Annuler" Command="{Binding CancelCommand}" BackgroundColor="Gray" />
+                <Button Text="Valider" Command="{Binding ValidateCommand}" BackgroundColor="Green" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</mct:Popup>

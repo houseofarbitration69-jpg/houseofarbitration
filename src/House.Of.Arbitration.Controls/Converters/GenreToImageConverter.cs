@@ -7,15 +7,23 @@ public class GenreToImageConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is Genre genre)
+        if (value is CompetitorModel competitor)
         {
-            return genre switch
+            if (!string.IsNullOrEmpty(competitor.Photo))
             {
-                Genre.Women => "woman.png",
-                _ => "man.png"
+                return ImageSource.FromFile(competitor.Photo);
+            }
+
+            string imageName = competitor.Genre switch
+            {
+                Genre.Women => "user_woman",
+                _ => "user_man"
             };
+
+            return imageName;
         }
-        return "man.png";
+
+        return null;
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

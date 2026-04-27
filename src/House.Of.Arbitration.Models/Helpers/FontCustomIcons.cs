@@ -4,18 +4,20 @@
 // Add more from the FontAwesome gallery as needed.
 public static class FontCustomIcons
 {
-    public const string PEN = "\uf000";
-    public const string TRASH = "\uf001";
-    public const string CIRCLE = "\uf002";
-    public const string ADD = "\uf003";
-    public const string PLAY = "\uf004";
-    public const string COLOR_TROPHY = "\uf005";
-    public const string COLOR_CALENDAR = "\uf006";
-    public const string CLOSE_CIRCLE = "\uf007";
-    public const string CLOSE = "\uf008";
-    public const string CHECK = "\uf009";
-    public const string DOGI = "\uf00A";
-    public const string DRAWS = "\uf00B";
-    public const string WARNING = "\uf00C";
-    public const string CATEGORY = "\uf00D";
+    public const string PEN = "\uF000";
+    public const string TRASH = "\uF001";
+    public const string CIRCLE = "\uF002";
+    public const string ADD = "\uF003";
+    public const string PLAY = "\uF004";
+    public const string COLOR_TROPHY = "\uF005";
+    public const string COLOR_CALENDAR = "\uF006";
+    public const string CLOSE_CIRCLE = "\uF007";
+    public const string CLOSE = "\uF008";
+    public const string CHECK = "\uF009";
+    public const string DOGI = "\uF00A";
+    public const string DRAWS = "\uF00B";
+    public const string WARNING = "\uF00C";
+    public const string CATEGORY = "\uF00D";
+    public const string MAN = "\uF00F";
+    public const string WOMAN = "\uF00E";
 }

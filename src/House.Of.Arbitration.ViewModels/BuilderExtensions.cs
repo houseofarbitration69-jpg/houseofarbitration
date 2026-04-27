@@ -30,6 +30,8 @@ public static class BuilderExtensions
 
         builder.Services.AddTransient<ConfirmationPopupViewModel>();
 
+        builder.Services.AddTransient<JudgePointsPopupViewModel>();
+
         builder.Services.AddTransient<DrawPageViewModel>();
         builder.Services.AddTransient<DragDropPageViewModel>();
 

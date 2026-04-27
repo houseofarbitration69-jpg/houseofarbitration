@@ -1,9 +1,10 @@
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Models.Helpers;
 using System.Globalization;
 
 namespace House.Of.Arbitration.Controls.Converters;
 
-public class GenreToBoolConverter : IValueConverter
+public class GenreToFontConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
@@ -11,13 +12,18 @@ public class GenreToBoolConverter : IValueConverter
         {
             var result = genre != Genre.None;
 
-            if (parameter as string == "Invert")
+            switch (genre)
             {
-                return !result;
-            }
-            else if(parameter is Genre target)
-            {
-                result = genre == target;
+                case Genre.None:
+                    return FontCustomIcons.MAN;
+                case Genre.Men:
+                    return FontCustomIcons.MAN;
+                case Genre.Women:
+                    return FontCustomIcons.WOMAN;
+                case Genre.Mixte:
+                    return FontCustomIcons.MAN;
+                default:
+                    return FontCustomIcons.MAN;
             }
         }
 

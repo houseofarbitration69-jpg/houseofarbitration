@@ -22,7 +22,10 @@
             <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
             <converters:RoundTypeToBoolConverter x:Key="RoundTypeToBoolConverter" />
             <converters:GenreToImageConverter x:Key="GenreToImageConverter" />
+            <converters:GenreToBoolConverter x:Key="GenreToBoolConverter" />
+            <converters:GenreToFontConverter x:Key="GenreToFontConverter" />
             <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+            <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter" />
 
             <Style x:Key="CompetitorInfoLabelStyle" TargetType="Label">
                 <Setter Property="FontSize" Value="12"/>
@@ -294,54 +297,124 @@
         </CollectionView>
 
         <Grid Grid.Column="1" RowDefinitions="85,*,85" ColumnDefinitions="85,*,85">
-            <BoxView 
+            <Border 
                 Grid.Row="0" 
                 Grid.Column="0" 
                 Background="LightGray"
                 WidthRequest="80"
-                HeightRequest="40"
+                HeightRequest="45"
                 Rotation="-45"
-            />
+                StrokeShape="RoundRectangle 5"
+            >
+                <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
+                    <Label 
+                        Grid.Row="0"
+                        Grid.ColumnSpan="2"
+                        Text="{Binding Judges[0].Name}"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        TextColor="Black"
+                    />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="{Binding Judges[0].RedPoints}"
+                        FontSize="16"
+                        TextColor="Red"
+                        HorizontalOptions="Center"
+                    />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Text="{Binding Judges[0].BluePoints}"
+                        TextColor="Blue"
+                        FontSize="16"
+                        HorizontalOptions="Center"
+                    />
+                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[0]}" />
+                </Border.GestureRecognizers>
+            </Border>
 
             <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="10" HorizontalOptions="Center">
-                <BoxView 
+                <Border 
                     Grid.Column="0"
                     Background="LightGray"
                     WidthRequest="80"
-                    HeightRequest="40"
+                    HeightRequest="45"
                     VerticalOptions="Start"
+                    StrokeShape="RoundRectangle 5"
                 />
-                <BoxView 
+                <Border 
                     Grid.Column="1"
                     Background="LightGray"
                     WidthRequest="80"
-                    HeightRequest="40"
+                    HeightRequest="45"
                     VerticalOptions="Start"
+                    StrokeShape="RoundRectangle 5"
                 />
-                <BoxView 
+                <Border 
                     Grid.Column="2"
                     Background="LightGray"
                     WidthRequest="80"
-                    HeightRequest="40"
+                    HeightRequest="45"
                     VerticalOptions="Start"
+                    StrokeShape="RoundRectangle 5"
                 />
-                <BoxView 
+                <Border 
                     Grid.Column="3"
                     Background="LightGray"
                     WidthRequest="80"
-                    HeightRequest="40"
+                    HeightRequest="45"
                     VerticalOptions="Start"
+                    StrokeShape="RoundRectangle 5"
                 />
             </HorizontalStackLayout>
 
-            <BoxView 
+            <Border
                 Grid.Row="0" 
                 Grid.Column="2" 
                 Background="LightGray"
                 WidthRequest="80"
-                HeightRequest="40"
+                HeightRequest="45"
                 Rotation="45"
-            />
+                StrokeShape="RoundRectangle 5"
+            >
+                <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
+                    <Label 
+                        Grid.Row="0"
+                        Grid.ColumnSpan="2"
+                        Text="{Binding Judges[1].Name}"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        TextColor="Black"
+                    />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="{Binding Judges[1].RedPoints}"
+                        FontSize="16"
+                        TextColor="Red"
+                        HorizontalOptions="Center"
+                    />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Text="{Binding Judges[1].BluePoints}"
+                        TextColor="Blue"
+                        FontSize="16"
+                        HorizontalOptions="Center"
+                    />
+                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[1]}" />
+                </Border.GestureRecognizers>
+            </Border>
 
             <Grid 
                 Grid.Row="1" 
@@ -372,10 +445,22 @@
                 >
                     <!-- Background Layers (Red / Blue) -->
                     <Grid RowDefinitions="*" ColumnDefinitions="*,*">
-                        <Border Grid.Column="0" Background="Red" StrokeThickness="0" Opacity="0.8" />
-                        <Border Grid.Column="1" Background="Blue" StrokeThickness="0" Opacity="0.8"
-                                IsVisible="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" />
-                        
+                        <Border 
+                            Grid.Column="0" 
+                            Background="Red" 
+                            StrokeThickness="0" 
+                            Opacity="0.8" 
+                            StrokeShape="RoundRectangle 8,0,8,0"
+                        />
+                        <Border 
+                            Grid.Column="1" 
+                            Background="Blue" 
+                            StrokeThickness="0" 
+                            Opacity="0.8"
+                            IsVisible="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" 
+                            StrokeShape="RoundRectangle 0,8,0,8"
+                        />
+
                         <!-- For Order mode, red covers full width -->
                         <Border Grid.ColumnSpan="2" Background="Red" StrokeThickness="0" Opacity="0.8"
                                 IsVisible="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" />
@@ -386,11 +471,41 @@
                         <!-- Competitor 1 (Red Side) -->
                         <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="10">
                             <!-- Circular Photo / Icon -->
-                            <Border StrokeShape="RoundRectangle 50" HeightRequest="100" WidthRequest="100" HorizontalOptions="Center" Stroke="White" StrokeThickness="3">
-                                <Image Source="{Binding Competitor1.Photo, TargetNullValue={Binding Competitor1.Genre, Converter={StaticResource GenreToImageConverter}}}" 
-                                       Aspect="AspectFill" />
+                            <Border 
+                                StrokeShape="RoundRectangle 50" 
+                                HeightRequest="100" 
+                                WidthRequest="100" 
+                                HorizontalOptions="Center" 
+                                Stroke="White" 
+                                BackgroundColor="White"
+                                StrokeThickness="3"
+                                IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                            >
+                                <Image 
+                                    Source="{Binding Competitor1, Converter={StaticResource GenreToImageConverter}, ConverterParameter=20}" 
+                                    Aspect="AspectFill" 
+                                />
                             </Border>
-                            
+
+                            <Border 
+                                StrokeShape="RoundRectangle 50" 
+                                HeightRequest="100" 
+                                WidthRequest="100" 
+                                HorizontalOptions="Center" 
+                                Stroke="White" 
+                                StrokeThickness="3"
+                                BackgroundColor="White"
+                                IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
+                            >
+                                <Label 
+                                    Text="{Binding Competitor1.Genre, Converter={StaticResource GenreToFontConverter}}" 
+                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                                    FontSize="99" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center"
+                                />
+                            </Border>
+
                             <!-- Name on two lines -->
                             <VerticalStackLayout HorizontalOptions="Center">
                                 <Label Text="{Binding Competitor1.LastName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" />
@@ -406,14 +521,53 @@
                                     <Label Text="{Binding Competitor1.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
+
+                            <!-- Winner Button -->
+                            <Button Text="GAGNANT ROUGE" 
+                                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
+                                    CommandParameter="Red"
+                                    BackgroundColor="DarkRed"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    CornerRadius="20"
+                                    HeightRequest="40"
+                                    Margin="0,10,0,0" />
                         </VerticalStackLayout>
 
                         <!-- Competitor 2 (Blue Side) -->
                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="10">
                             <!-- Circular Photo / Icon -->
-                            <Border StrokeShape="RoundRectangle 50" HeightRequest="100" WidthRequest="100" HorizontalOptions="Center" Stroke="White" StrokeThickness="3">
-                                <Image Source="{Binding Competitor2.Photo, TargetNullValue={Binding Competitor2.Genre, Converter={StaticResource GenreToImageConverter}}}" 
+                            <Border 
+                                StrokeShape="RoundRectangle 50" 
+                                HeightRequest="100" 
+                                WidthRequest="100" 
+                                HorizontalOptions="Center" 
+                                Stroke="White" 
+                                BackgroundColor="White"
+                                StrokeThickness="3"
+                                IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                            >
+                                <Image Source="{Binding Competitor2, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
                                        Aspect="AspectFill" />
+                            </Border>
+
+                            <Border 
+                                StrokeShape="RoundRectangle 50" 
+                                HeightRequest="100" 
+                                WidthRequest="100" 
+                                HorizontalOptions="Center" 
+                                Stroke="White" 
+                                StrokeThickness="3"
+                                BackgroundColor="White"
+                                IsVisible="{Binding Competitor2.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
+                            >
+                                <Label 
+                                    Text="{Binding Competitor2.Genre, Converter={StaticResource GenreToFontConverter}}" 
+                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                                    FontSize="99" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center"
+                                />
                             </Border>
 
                             <!-- Name on two lines -->
@@ -431,6 +585,17 @@
                                     <Label Text="{Binding Competitor2.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
+
+                            <!-- Winner Button -->
+                            <Button Text="GAGNANT BLEU" 
+                                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
+                                    CommandParameter="Blue"
+                                    BackgroundColor="DarkBlue"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    CornerRadius="20"
+                                    HeightRequest="40"
+                                    Margin="0,10,0,0" />
                         </VerticalStackLayout>
 
                         <Grid.Triggers>
@@ -445,7 +610,7 @@
                         <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
                             <!-- Circular Photo / Icon -->
                             <Border StrokeShape="RoundRectangle 75" HeightRequest="150" WidthRequest="150" HorizontalOptions="Center" Stroke="White" StrokeThickness="4">
-                                <Image Source="{Binding Competitor.Photo, TargetNullValue={Binding Competitor.Genre, Converter={StaticResource GenreToImageConverter}}}" 
+                                <Image Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=90}" 
                                        Aspect="AspectFill" />
                             </Border>
 
@@ -464,6 +629,18 @@
                                     <Label Text="{Binding Competitor.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="24" VerticalOptions="Center" />
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
+
+                            <!-- Finish Button for Order mode -->
+                            <Button Text="VALIDER LE PASSAGE" 
+                                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
+                                    CommandParameter="Finish"
+                                    BackgroundColor="DarkGreen"
+                                    TextColor="White"
+                                    FontAttributes="Bold"
+                                    CornerRadius="20"
+                                    HeightRequest="50"
+                                    WidthRequest="250"
+                                    Margin="0,20,0,0" />
                         </VerticalStackLayout>
 
                         <Grid.Triggers>
@@ -475,41 +652,139 @@
                 </Grid>
             </Grid>
 
-            <BoxView 
+            <Border 
                 Grid.Row="2" 
                 Grid.Column="0" 
                 Background="LightGray"
                 WidthRequest="80"
-                HeightRequest="40"
+                HeightRequest="45"
                 Rotation="45"
-            />
+                StrokeShape="RoundRectangle 5"
+            >
+                <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
+                    <Label 
+                        Grid.Row="0"
+                        Grid.ColumnSpan="2"
+                        Text="{Binding Judges[2].Name}"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        TextColor="Black"
+                    />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="{Binding Judges[2].RedPoints}"
+                        FontSize="16"
+                        TextColor="Red"
+                        HorizontalOptions="Center"
+                    />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Text="{Binding Judges[2].BluePoints}"
+                        TextColor="Blue"
+                        FontSize="16"
+                        HorizontalOptions="Center"
+                    />
+                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[2]}" />
+                </Border.GestureRecognizers>
+            </Border>
 
             <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="*,Auto,*">
-                <BoxView 
+                <Border 
                     Grid.Column="1"
                     Background="LightGray"
                     WidthRequest="80"
-                    HeightRequest="40"
+                    HeightRequest="45"
                     VerticalOptions="End"
-                />
+                    StrokeShape="RoundRectangle 5"
+                >
+                    <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
+                        <Label 
+                        Grid.Row="0"
+                        Grid.ColumnSpan="2"
+                        Text="{Binding Judges[3].Name}"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        TextColor="Black"
+                    />
+
+                        <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="{Binding Judges[3].RedPoints}"
+                        FontSize="16"
+                        TextColor="Red"
+                        HorizontalOptions="Center"
+                    />
+
+                        <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Text="{Binding Judges[3].BluePoints}"
+                        TextColor="Blue"
+                        FontSize="16"
+                        HorizontalOptions="Center"
+                    />
+                    </Grid>
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[3]}" />
+                    </Border.GestureRecognizers>
+                </Border>
             </Grid>
 
-            <BoxView 
+            <Border 
                 Grid.Row="2" 
                 Grid.Column="2" 
                 Background="LightGray"
                 WidthRequest="80"
-                HeightRequest="40"
+                HeightRequest="45"
                 Rotation="-45"
-            />
+                StrokeShape="RoundRectangle 5"
+            >
+                <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
+                    <Label 
+                        Grid.Row="0"
+                        Grid.ColumnSpan="2"
+                        Text="{Binding Judges[4].Name}"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        TextColor="Black"
+                    />
 
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        Text="{Binding Judges[4].RedPoints}"
+                        FontSize="16"
+                        TextColor="Red"
+                        HorizontalOptions="Center"
+                    />
+
+                    <Label
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Text="{Binding Judges[4].BluePoints}"
+                        TextColor="Blue"
+                        FontSize="16"
+                        HorizontalOptions="Center"
+                    />
+                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[4]}" />
+                </Border.GestureRecognizers>
+            </Border>
             <!-- CATEGORY -->
             <Border 
                 Grid.RowSpan="3"
                 Grid.ColumnSpan="3" 
                 HorizontalOptions="Center"
                 VerticalOptions="Start"
-                Margin="0,50,0,0"
+                Margin="0,30,0,0"
                 StrokeThickness="0"
             >
                 <Label 
@@ -520,15 +795,15 @@
                     Padding="0,10,0,0"
                 />
             </Border>
-            
+
             <!-- CHRONO & CONTROLS -->
             <Border 
                 Grid.RowSpan="3"
                 Grid.ColumnSpan="3" 
                 HorizontalOptions="Center"
                 VerticalOptions="End"
-                Margin="0,0,0,30"
-                Padding="15,10"
+                Margin="0,0,0,50"
+                Padding="15,10,15,10"
                 BackgroundColor="#333"
                 Stroke="White"
                 StrokeThickness="2"
@@ -566,7 +841,7 @@
                                 <TapGestureRecognizer Command="{Binding ResetTimerCommand}" />
                             </Border.GestureRecognizers>
                         </Border>
-                        
+
                         <!-- Start -->
                         <Border BackgroundColor="Green"
                                 HeightRequest="36"
