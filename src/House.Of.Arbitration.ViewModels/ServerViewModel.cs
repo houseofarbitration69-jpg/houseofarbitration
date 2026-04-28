@@ -367,5 +367,31 @@ public partial class ServerViewModel : BaseViewModel
             judge.BluePoints = result.Result.BluePoints;
         }
     }
+
+    [RelayCommand]
+    private void AddRedPoint(JudgeModel judge)
+    {
+        judge.RedPoints++;
+    }
+
+    [RelayCommand]
+    private void RemoveRedPoint(JudgeModel judge)
+    {
+        if (judge.RedPoints > 0)
+            judge.RedPoints--;
+    }
+
+    [RelayCommand]
+    private void AddBluePoint(JudgeModel judge)
+    {
+        judge.BluePoints++;
+    }
+
+    [RelayCommand]
+    private void RemoveBluePoint(JudgeModel judge)
+    {
+        if (judge.BluePoints > 0)
+            judge.BluePoints--;
+    }
     #endregion
 }
