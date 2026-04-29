@@ -310,6 +310,7 @@
                 Stroke="White"
                 StrokeThickness="2"
                 StrokeShape="RoundRectangle 15"
+                IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <Label 
                     Text="{Binding CurrentDraw.Draw.Category.Name}"
@@ -322,10 +323,11 @@
             <!-- JUGE 1 -->
             <VerticalStackLayout 
                 Grid.Row="1" 
-                Grid.ColumnSpan="2"                 
+                Grid.ColumnSpan="2"
                 VerticalOptions="Start"
                 HorizontalOptions="Start"
                 Spacing="5"
+                IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <Border 
                     Background="LightGray"
@@ -434,6 +436,7 @@
                 VerticalOptions="Start"
                 HorizontalOptions="End"
                 Spacing="5"
+                IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <Border
                     Background="LightGray"
@@ -539,7 +542,8 @@
                 Grid.Column="2" 
                 VerticalOptions="Start" 
                 HorizontalOptions="Center" 
-                Spacing="5" 
+                Spacing="5"
+                IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <Border 
                     Background="LightGray"
@@ -890,6 +894,7 @@
                 VerticalOptions="End"
                 HorizontalOptions="End"
                 Spacing="5"
+                IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <Border 
                     Background="LightGray"
@@ -998,6 +1003,7 @@
                 VerticalOptions="End"
                 HorizontalOptions="Start"
                 Spacing="5"
+                IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <Border 
                     Background="LightGray"
@@ -1105,6 +1111,7 @@
                 Spacing="10" 
                 HorizontalOptions="Center" 
                 VerticalOptions="End"
+                IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <Border 
                     Grid.Column="0"
@@ -1152,6 +1159,7 @@
                 Stroke="White"
                 StrokeThickness="2"
                 StrokeShape="RoundRectangle 15"
+                IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <VerticalStackLayout Spacing="5">
                     <Label 
