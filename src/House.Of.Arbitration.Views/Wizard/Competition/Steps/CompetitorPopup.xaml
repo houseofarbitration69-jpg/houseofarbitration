@@ -19,6 +19,7 @@
         <converters:BirthDateToBoolConverter x:Key="BirthDateToBoolConverter" />
         <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
         <converters:BirthdayToOldConverter x:Key="BirthdayToOldConverter"/>
+        <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
     </ContentView.Resources>
 
     <Border 
@@ -43,7 +44,7 @@
 
             <ScrollView Grid.Row="1">
                 <VerticalStackLayout Spacing="15">
-                    <!-- FirstName & LastName -->
+                    <!-- LastName -->
                     <VerticalStackLayout Spacing="5">
                         <Label 
                             Text="{Binding Resources.LASTNAME}" 
@@ -79,6 +80,7 @@
                         </Border>
                     </VerticalStackLayout>
 
+                    <!-- FirstName -->
                     <VerticalStackLayout Spacing="5">
                         <Label 
                             Text="{Binding Resources.FIRSTNAME}" 
@@ -146,7 +148,7 @@
                                 TextColor="Black"
                                 BackgroundColor="White"
                                 MinimumHeightRequest="30"
-                                IsEnabled="False"
+                                IsEnabled="{Binding GenreIsEnabled}"
                             />
                         </Border>
                     </VerticalStackLayout>

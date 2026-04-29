@@ -31,6 +31,7 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     private List<string> _clubs = new();
     private List<CountryModel> _countries = new();
     private List<string> _countryNames = new();
+    private bool _genreIsEnabled = false;
     #endregion
 
     #region Properties
@@ -45,12 +46,22 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
             SetProperty(ref _competitor, value);
             if (value != null)
             {
-                SelectedGenre = Genres.FirstOrDefault(x => x.Value == value.Genre);
+                if (value.Genre == Genre.Mixte)
+                {
+                    GenreIsEnabled = true;
+                    SelectedGenre = Genres[0];
+                }
+                else
+                {
+                    GenreIsEnabled = false;
+                    SelectedGenre = Genres.FirstOrDefault(x => x.Value == value.Genre);
+                }
+
                 FirstName = value.FirstName;
                 LastName = value.LastName;
                 Club = value.Club;
                 BirthDate = value.BirthDate;
-                Weight = value.Weight;
+                Weight = (value.Weight > 0) ? value.Weight : null;
                 CountryName = value.Country?.Name ?? string.Empty;
             }
         }
@@ -177,6 +188,15 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         get => _countryNames;
         set => SetProperty(ref _countryNames, value);
     }
+
+    /// <summary>
+    /// Obtient ou définit si on peut choisir le genre
+    /// </summary>
+    public bool GenreIsEnabled
+    {
+        get => _genreIsEnabled;
+        set => SetProperty(ref _genreIsEnabled, value);
+    }
     #endregion
 
     #region Constructor
@@ -187,6 +207,8 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
         _countryRepository = countryRepository;
 
         Genres = LocalizeEnum<Genre>("ENUM_GENRE_");
+        Genres.RemoveAt(3);
+
         InitData();
     }
     #endregion
