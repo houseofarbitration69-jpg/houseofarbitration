@@ -56,6 +56,22 @@
                 <Setter Property="FontAttributes" Value="Italic"/>
             </Style>
 
+            <Style x:Key="JudgePointsLabelStyle" TargetType="Label">
+                <Style.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding CurrentDraw.Draw.Category.RoundType, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                        <Setter Property="IsVisible" Value="False" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="JudgeButtonsGridStyle" TargetType="Grid">
+                <Style.Triggers>
+                    <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Draw.Category.RoundType, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                        <Setter Property="IsVisible" Value="False" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
             <DataTemplate x:Key="KnockoutTemplate" x:DataType="models:DrawKnockoutModel">
                 <Border 
                     Padding="10,10,10,10" 
@@ -297,7 +313,7 @@
             </CollectionView.ItemsLayout>
         </CollectionView>
 
-        <Grid Grid.Column="1" RowDefinitions="60,85,*,90" RowSpacing="5" ColumnDefinitions="70,65,*,65,70">
+        <Grid Grid.Column="1" RowDefinitions="60,80,*,90" RowSpacing="5" ColumnDefinitions="70,65,*,65,70">
             <!-- CATEGORIE -->
             <Border 
                 Grid.Row="0"
@@ -352,6 +368,7 @@
                             FontSize="16"
                             TextColor="Red"
                             HorizontalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
                         />
 
                         <Label
@@ -361,6 +378,7 @@
                             TextColor="Blue"
                             FontSize="16"
                             HorizontalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
                         />
                     </Grid>
                     <Border.GestureRecognizers>
@@ -368,7 +386,11 @@
                     </Border.GestureRecognizers>
                 </Border>
                 
-                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="5">
+                <Grid 
+                    ColumnDefinitions="*,*,*,*" 
+                    ColumnSpacing="5" 
+                    IsVisible="True"
+                >
                     <Border
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 50"
@@ -425,6 +447,12 @@
                             <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[0]}"/>
                         </Border.GestureRecognizers>
                     </Border>
+
+                    <Grid.Triggers>
+                        <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                            <Setter Property="IsVisible" Value="False"/>
+                        </DataTrigger>
+                    </Grid.Triggers>
                 </Grid>
             </VerticalStackLayout>
 
@@ -476,7 +504,10 @@
                         <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[1]}" />
                     </Border.GestureRecognizers>
                 </Border>
-                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
+
+                <Grid 
+                    ColumnDefinitions="*,*,*,*" 
+                    ColumnSpacing="2">
                     <Border
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 50"
@@ -533,6 +564,12 @@
                             <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[1]}"/>
                         </Border.GestureRecognizers>
                     </Border>
+
+                    <Grid.Triggers>
+                        <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                            <Setter Property="IsVisible" Value="False"/>
+                        </DataTrigger>
+                    </Grid.Triggers>
                 </Grid>
             </VerticalStackLayout>
 
@@ -641,6 +678,12 @@
                             <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[4]}"/>
                         </Border.GestureRecognizers>
                     </Border>
+
+                    <Grid.Triggers>
+                        <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                            <Setter Property="IsVisible" Value="False"/>
+                        </DataTrigger>
+                    </Grid.Triggers>
                 </Grid>
             </VerticalStackLayout>
 
@@ -675,6 +718,7 @@
                             StrokeThickness="0" 
                             Opacity="0.8" 
                             StrokeShape="RoundRectangle 8,0,8,0"
+                            IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}"
                         />
                         
                         <Border 
@@ -682,17 +726,18 @@
                             Background="Blue" 
                             StrokeThickness="0" 
                             Opacity="0.8"
-                            IsVisible="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" 
+                            IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" 
                             StrokeShape="RoundRectangle 0,8,0,8"
                         />
 
                         <!-- For Order mode, red covers full width -->
                         <Border 
                             Grid.ColumnSpan="2" 
-                            Background="Red" 
+                            Background="#333" 
                             StrokeThickness="0" 
                             Opacity="0.8"
-                            IsVisible="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" 
+                            IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" 
+                            StrokeShape="RoundRectangle 8"
                         />
                     </Grid>
 
@@ -777,7 +822,7 @@
                                 Stroke="White" 
                                 BackgroundColor="White"
                                 StrokeThickness="3"
-                                IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                                IsVisible="{Binding Competitor2.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
                             >
                                 <Image Source="{Binding Competitor2, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
                                        Aspect="AspectFill" />
@@ -833,7 +878,7 @@
                         </VerticalStackLayout>
 
                         <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" Value="True">
+                            <DataTrigger TargetType="Grid" Binding="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" Value="True">
                                 <Setter Property="IsVisible" Value="True"/>
                             </DataTrigger>
                         </Grid.Triggers>
@@ -843,24 +888,52 @@
                     <Grid IsVisible="False">
                         <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
                             <!-- Circular Photo / Icon -->
-                            <Border StrokeShape="RoundRectangle 75" HeightRequest="150" WidthRequest="150" HorizontalOptions="Center" Stroke="White" StrokeThickness="4">
-                                <Image Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=90}" 
+                            <Border 
+                                StrokeShape="RoundRectangle 50" 
+                                HeightRequest="100" 
+                                WidthRequest="100" 
+                                HorizontalOptions="Center" 
+                                Stroke="White" 
+                                BackgroundColor="White"
+                                StrokeThickness="3"
+                                IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                            >
+                                <Image Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
                                        Aspect="AspectFill" />
+                            </Border>
+
+                            <Border 
+                                StrokeShape="RoundRectangle 50" 
+                                HeightRequest="100" 
+                                WidthRequest="100" 
+                                HorizontalOptions="Center" 
+                                Stroke="White" 
+                                StrokeThickness="3"
+                                BackgroundColor="White"
+                                IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
+                            >
+                                <Label 
+                                    Text="{Binding Competitor.Genre, Converter={StaticResource GenreToFontConverter}}" 
+                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                                    FontSize="99" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center"
+                                />
                             </Border>
 
                             <!-- Name on two lines -->
                             <VerticalStackLayout HorizontalOptions="Center">
-                                <Label Text="{Binding Competitor.LastName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="36" />
-                                <Label Text="{Binding Competitor.FirstName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="48" Margin="0,-8,0,0" />
+                                <Label Text="{Binding Competitor.LastName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" />
+                                <Label Text="{Binding Competitor.FirstName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="32" Margin="0,-5,0,0" />
                             </VerticalStackLayout>
 
                             <!-- Club & Country -->
                             <VerticalStackLayout Spacing="5">
-                                <Label Text="{Binding Competitor.Club}" Style="{StaticResource MainCompetitorClubStyle}" FontSize="28" />
+                                <Label Text="{Binding Competitor.Club}" Style="{StaticResource MainCompetitorClubStyle}" FontSize="18" />
                                 <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
                                     <Image Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                           WidthRequest="40" HeightRequest="25" VerticalOptions="Center" />
-                                    <Label Text="{Binding Competitor.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="24" VerticalOptions="Center" />
+                                           WidthRequest="40" HeightRequest="15" VerticalOptions="Center" />
+                                    <Label Text="{Binding Competitor.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
                                 </HorizontalStackLayout>
                             </VerticalStackLayout>
 
@@ -874,11 +947,11 @@
                                     CornerRadius="20"
                                     HeightRequest="50"
                                     WidthRequest="250"
-                                    Margin="0,20,0,0" />
+                                    Margin="0,0,0,0" />
                         </VerticalStackLayout>
 
                         <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding Draw.Category.RoundType, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                            <DataTrigger TargetType="Grid" Binding="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
                                 <Setter Property="IsVisible" Value="True"/>
                             </DataTrigger>
                         </Grid.Triggers>
@@ -992,6 +1065,12 @@
                             <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[2]}"/>
                         </Border.GestureRecognizers>
                     </Border>
+
+                    <Grid.Triggers>
+                        <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                            <Setter Property="IsVisible" Value="False"/>
+                        </DataTrigger>
+                    </Grid.Triggers>
                 </Grid>
             </VerticalStackLayout>
 
@@ -1101,6 +1180,12 @@
                             <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[3]}"/>
                         </Border.GestureRecognizers>
                     </Border>
+
+                    <Grid.Triggers>
+                        <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                            <Setter Property="IsVisible" Value="False"/>
+                        </DataTrigger>
+                    </Grid.Triggers>
                 </Grid>
             </VerticalStackLayout>
             
@@ -1161,6 +1246,11 @@
                 StrokeShape="RoundRectangle 15"
                 IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding CurrentDraw.Type, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                        <Setter Property="IsVisible" Value="False" />
+                    </DataTrigger>
+                </Border.Triggers>
                 <VerticalStackLayout Spacing="5">
                     <Label 
                         Text="{Binding TimeLeftDisplay}" 
