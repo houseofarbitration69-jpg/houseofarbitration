@@ -313,6 +313,9 @@
     <value>Choisissez une tranche d'âge</value>
   </data>
   <data name="NO_CATEGORIES" xml:space="preserve">
-    <value>Aucune catégories</value>
+    <value>Aucune catégorie</value>
   </data>
-</root>
+  <data name="JUDGE" xml:space="preserve">
+    <value>JUGE</value>
+  </data>
+  </root>

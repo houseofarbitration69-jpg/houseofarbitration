@@ -35,12 +35,12 @@
                 CommandParameter="MasterPage"
             />
             <controls:IconButton 
-                Text="{Binding Resources.SLAVE}"
+                Text="{Binding Resources.JUDGE}"
                 IsFullWidth="True"
                 ButtonBackgroundColor="{DynamicResource ValidColor}"
                 TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding NavigateToCommand}"
-                CommandParameter="SlavePage"
+                CommandParameter="JudgePage"
             />
             <controls:IconButton 
                 Text="TEST"

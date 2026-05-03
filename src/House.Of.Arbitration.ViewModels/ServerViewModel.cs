@@ -132,6 +132,12 @@ public partial class ServerViewModel : BaseViewModel
     {
         CheckBluetoothAvailabilityCommand.Execute(null);
 
+        // Start Bluetooth Server automatically
+        if (BluetoothAvailable)
+        {
+            await StartServer();
+        }
+
         var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
 
         var orders = (await _drawOrderService.GetAllAsync("Draw.Category.AgeRange", "Competitor.Country"))?.ToList();

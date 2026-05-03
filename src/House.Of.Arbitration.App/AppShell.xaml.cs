@@ -16,7 +16,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("HomePage", typeof(HomePage));
 
         Routing.RegisterRoute("MasterPage", typeof(MasterPage));
-        Routing.RegisterRoute("SlavePage", typeof(SlavePage));
+        Routing.RegisterRoute("JudgePage", typeof(JudgePage));
 
         Routing.RegisterRoute("CompetitionWizard", typeof(WizardPage));
         Routing.RegisterRoute("Competitions", typeof(CompetitionsPage));

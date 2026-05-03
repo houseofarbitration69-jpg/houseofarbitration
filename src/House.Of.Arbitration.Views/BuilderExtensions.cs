@@ -20,7 +20,7 @@ public static class BuilderExtensions
     {
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<MasterPage>();
-        builder.Services.AddTransient<SlavePage>();
+        builder.Services.AddTransient<JudgePage>();
         builder.Services.AddTransient<CompetitionsPage>();
         builder.Services.AddTransient<CompetitorsPage>();
         builder.Services.AddTransient<DrawPage>();

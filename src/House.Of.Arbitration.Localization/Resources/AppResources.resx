@@ -315,4 +315,7 @@
   <data name="NO_CATEGORIES" xml:space="preserve">
     <value>[NO CATEGORIES]</value>
   </data>
+  <data name="JUDGE" xml:space="preserve">
+    <value>JUDGE</value>
+  </data>
 </root>

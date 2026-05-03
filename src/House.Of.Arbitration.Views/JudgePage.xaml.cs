@@ -5,9 +5,9 @@ using House.Of.Arbitration.Views.Core;
 
 namespace House.Of.Arbitration.Views;
 
-public partial class SlavePage : BasePage<SlaveViewModel>
+public partial class JudgePage : BasePage<JudgeViewModel>
 {
-	public SlavePage(SlaveViewModel viewModel) : base(viewModel)
+	public JudgePage(JudgeViewModel viewModel) : base(viewModel)
 	{
 		InitializeComponent();
 	}

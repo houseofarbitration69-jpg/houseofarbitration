@@ -29,9 +29,6 @@
     <Compile Update="ServerPage.xaml.cs">
       <DependentUpon>ServerPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="SlavePage.xaml.cs">
-      <DependentUpon>SlavePage.xaml</DependentUpon>
-    </Compile>
     <Compile Update="OldHomePage.xaml.cs">
       <DependentUpon>OldHomePage.xaml</DependentUpon>
     </Compile>
@@ -66,9 +63,6 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="ServerPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="SlavePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="OldHomePage.xaml">

@@ -354,6 +354,12 @@ LocalizationResourceManager.Instance.GetValue(nameof(CHOOSE_AGE_RANGE));
 LocalizationResourceManager.Instance.GetValue(nameof(NO_CATEGORIES));
 
     /// <summary>
+    /// Gets the translated "JUDGE" string.
+    /// </summary>
+    public string JUDGE =>
+LocalizationResourceManager.Instance.GetValue(nameof(JUDGE));
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.
     /// Subscribes to the <see cref="LocalizationResourceManager"/>'s PropertyChanged event
     /// to refresh all bindings when the culture changes.

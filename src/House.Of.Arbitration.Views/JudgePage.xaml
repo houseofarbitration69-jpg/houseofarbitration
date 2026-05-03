@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:TypeArguments="vm:JudgeViewModel"
+    x:Class="House.Of.Arbitration.Views.JudgePage"
+    x:DataType="vm:JudgeViewModel"
+    Title="{Binding Title}"
+    Shell.NavBarIsVisible="False">
+
+    <base:BasePage.Resources>
+        <ResourceDictionary>
+            <mct:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+            <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter" />
+            <mct:IsNullConverter x:Key="IsNullConverter" />
+            <mct:IsNotNullConverter x:Key="IsNotNullConverter" />
+
+            <Style x:Key="MainCompetitorNameStyle" TargetType="Label">
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="HorizontalOptions" Value="Center"/>
+                <Setter Property="FontSize" Value="36"/>
+                <Setter Property="CharacterSpacing" Value="2"/>
+            </Style>
+
+            <Style x:Key="MainCompetitorClubStyle" TargetType="Label">
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="HorizontalOptions" Value="Center"/>
+                <Setter Property="FontSize" Value="24"/>
+                <Setter Property="Opacity" Value="0.9"/>
+            </Style>
+
+            <Style x:Key="MainCompetitorCountryStyle" TargetType="Label">
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="HorizontalOptions" Value="Center"/>
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="Opacity" Value="0.8"/>
+                <Setter Property="FontAttributes" Value="Italic"/>
+            </Style>
+        </ResourceDictionary>
+    </base:BasePage.Resources>
+
+    <Grid RowDefinitions="Auto, *" Padding="20" BackgroundColor="{DynamicResource Secondary}">
+        <Label Text="{Binding Resources.JUDGE}" FontSize="32" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White" Margin="0,0,0,20"/>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <!-- 1. Position Selection -->
+            <VerticalStackLayout Spacing="20" IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullConverter}}">
+                <Label Text="SÉLECTIONNEZ VOTRE POSITION" HorizontalOptions="Center" FontSize="20" FontAttributes="Bold" TextColor="White"/>
+                
+                <Grid HeightRequest="400" WidthRequest="400" HorizontalOptions="Center" VerticalOptions="Center">
+                    <!-- Ring Schema -->
+                    <Border Stroke="White" StrokeThickness="4" BackgroundColor="#2A2A2A" HeightRequest="250" WidthRequest="250" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Label Text="RING" HorizontalOptions="Center" VerticalOptions="Center" TextColor="White" FontSize="24" FontAttributes="Bold"/>
+                    </Border>
+                    
+                    <!-- Judge Buttons around the ring -->
+                    <!-- Top Left -->
+                    <Button Text="1" Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[0]}"
+                            HorizontalOptions="Start" VerticalOptions="Start" CornerRadius="30" WidthRequest="60" HeightRequest="60" 
+                            BackgroundColor="{DynamicResource Primary}" TextColor="White" FontSize="20"/>
+                    <!-- Top Right -->
+                    <Button Text="2" Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[1]}"
+                            HorizontalOptions="End" VerticalOptions="Start" CornerRadius="30" WidthRequest="60" HeightRequest="60" 
+                            BackgroundColor="{DynamicResource Primary}" TextColor="White" FontSize="20"/>
+                    <!-- Bottom Right -->
+                    <Button Text="3" Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[2]}"
+                            HorizontalOptions="End" VerticalOptions="End" CornerRadius="30" WidthRequest="60" HeightRequest="60" 
+                            BackgroundColor="{DynamicResource Primary}" TextColor="White" FontSize="20"/>
+                    <!-- Bottom Left -->
+                    <Button Text="4" Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[3]}"
+                            HorizontalOptions="Start" VerticalOptions="End" CornerRadius="30" WidthRequest="60" HeightRequest="60" 
+                            BackgroundColor="{DynamicResource Primary}" TextColor="White" FontSize="20"/>
+                    <!-- Bottom Center -->
+                    <Button Text="5" Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[4]}"
+                            HorizontalOptions="Center" VerticalOptions="End" CornerRadius="30" WidthRequest="60" HeightRequest="60" 
+                            BackgroundColor="{DynamicResource Primary}" TextColor="White" FontSize="20" Margin="0,0,0,-10"/>
+                </Grid>
+            </VerticalStackLayout>
+
+            <!-- 2. Connection & Match Info -->
+            <VerticalStackLayout Spacing="20" IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNotNullConverter}}">
+                <Border Stroke="White" Padding="15" BackgroundColor="#333333" HorizontalOptions="Center">
+                    <Label Text="{Binding SelectedJudge.Name}" FontSize="24" FontAttributes="Bold" TextColor="White"/>
+                </Border>
+
+                <!-- Not Connected: Scan and Connect -->
+                <VerticalStackLayout Spacing="15" IsVisible="{Binding IsConnected, Converter={StaticResource InvertedBoolConverter}}">
+                    <Button Text="SCANNER LES SERVEURS" Command="{Binding StartScanCommand}" 
+                            BackgroundColor="{DynamicResource ValidColor}" TextColor="White" HorizontalOptions="Center" WidthRequest="250"/>
+                    
+                    <ActivityIndicator IsRunning="{Binding IsScanning}" Color="White" HorizontalOptions="Center"/>
+                    
+                    <Label Text="Appareils trouvés :" TextColor="White" IsVisible="{Binding DiscoveredDevices.Count, Converter={mct:IntToBoolConverter}}"/>
+                    
+                    <CollectionView ItemsSource="{Binding DiscoveredDevices}" HeightRequest="200">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Button Text="{Binding .}" Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=ConnectCommand}" 
+                                        CommandParameter="{Binding .}" Margin="5" BackgroundColor="#444444" TextColor="White"/>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+
+                <!-- Connected: Wait for Match -->
+                <VerticalStackLayout Spacing="20" IsVisible="{Binding IsConnected}">
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <BoxView Color="Green" WidthRequest="15" HeightRequest="15" CornerRadius="7.5" VerticalOptions="Center"/>
+                        <Label Text="CONNECTÉ AU SERVEUR" TextColor="Green" FontAttributes="Bold" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+                    
+                    <Border Stroke="White" StrokeThickness="2" Padding="20" BackgroundColor="#222222" Margin="0,20">
+                        <VerticalStackLayout Spacing="15" HorizontalOptions="Center">
+                            <Label Text="MATCH EN COURS" FontSize="20" FontAttributes="Bold" TextColor="Gray" HorizontalOptions="Center"/>
+                            
+                            <VerticalStackLayout IsVisible="{Binding CurrentMatchInfo, Converter={StaticResource IsNullOrEmptyConverter}}">
+                                <Label Text="EN ATTENTE DU PROCHAIN MATCH..." TextColor="Yellow" HorizontalOptions="Center"/>
+                                <ActivityIndicator IsRunning="True" Color="Yellow" Margin="0,10"/>
+                            </VerticalStackLayout>
+
+                            <!-- Match Display (Simulated like ServerPage) -->
+                            <Grid ColumnDefinitions="*, *" ColumnSpacing="50" IsVisible="{Binding CurrentMatchInfo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}">
+                                <!-- Red Side -->
+                                <VerticalStackLayout Grid.Column="0" Spacing="10">
+                                    <Label Text="COMPÉTITEUR ROUGE" Style="{StaticResource MainCompetitorNameStyle}" FontSize="24" TextColor="Red"/>
+                                    <Label Text="DUMONT" Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" />
+                                    <Label Text="Jean" Style="{StaticResource MainCompetitorNameStyle}" FontSize="32" Margin="0,-5,0,0" />
+                                    <Label Text="Club Kung Fu" Style="{StaticResource MainCompetitorClubStyle}" FontSize="18" />
+                                </VerticalStackLayout>
+
+                                <!-- Blue Side -->
+                                <VerticalStackLayout Grid.Column="1" Spacing="10">
+                                    <Label Text="COMPÉTITEUR BLEU" Style="{StaticResource MainCompetitorNameStyle}" FontSize="24" TextColor="Blue"/>
+                                    <Label Text="DURAND" Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" />
+                                    <Label Text="Marc" Style="{StaticResource MainCompetitorNameStyle}" FontSize="32" Margin="0,-5,0,0" />
+                                    <Label Text="Elite Sanda" Style="{StaticResource MainCompetitorClubStyle}" FontSize="18" />
+                                </VerticalStackLayout>
+                            </Grid>
+                            
+                            <!-- Detailed Info -->
+                            <Label Text="{Binding CurrentMatchInfo}" FontSize="20" TextColor="LightGray" HorizontalOptions="Center" HorizontalTextAlignment="Center" IsVisible="{Binding CurrentMatchInfo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"/>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</base:BasePage>
