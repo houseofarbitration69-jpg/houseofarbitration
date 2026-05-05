@@ -13,7 +13,7 @@ public class BluetoothClient : IBluetoothClient
 
     #region Events
     public event EventHandler<string>? MessageReceived;
-    public event EventHandler<string>? DeviceDiscovered;
+    public event EventHandler<(string DeviceId, string Name, int Rssi)>? DeviceDiscovered;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
     #endregion

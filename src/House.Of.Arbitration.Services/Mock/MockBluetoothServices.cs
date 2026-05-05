@@ -13,16 +13,16 @@ public class MockBluetoothService : IBluetoothService
 public class MockBluetoothClient : IBluetoothClient
 {
     public event EventHandler<string>? MessageReceived;
-    public event EventHandler<string>? DeviceDiscovered;
+    public event EventHandler<(string DeviceId, string Name, int Rssi)>? DeviceDiscovered;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
 
     public async Task StartScan()
     {
         await Task.Delay(1000);
-        DeviceDiscovered?.Invoke(this, "SERVEUR_KUNGFU_MOCK");
+        DeviceDiscovered?.Invoke(this, ("SERVEUR_KUNGFU_MOCK", "Serveur Mock A", -55));
         await Task.Delay(500);
-        DeviceDiscovered?.Invoke(this, "ARENA_SERVER_B");
+        DeviceDiscovered?.Invoke(this, ("ARENA_SERVER_B", "Serveur Mock B", -75));
     }
 
     public Task StopScan() => Task.CompletedTask;
@@ -32,11 +32,19 @@ public class MockBluetoothClient : IBluetoothClient
         await Task.Delay(500);
         DeviceConnected?.Invoke(this, deviceId);
 
-        // Simulate receiving a match info after connection
+        // Simulate receiving match info after connection in the new JSON format
         _ = Task.Run(async () =>
         {
             await Task.Delay(2000);
-            MessageReceived?.Invoke(this, "CATÉGORIE: SANDA SENIORS -70KG\nMATCH #4: JEAN DUPONT VS MARC DURAND");
+            var matchData = new
+            {
+                categoryName = "SANDA SENIORS -70KG",
+                redName = "JEAN DUPONT",
+                blueName = "MARC DURAND",
+                matchNumber = 4
+            };
+            var json = System.Text.Json.JsonSerializer.Serialize(matchData);
+            MessageReceived?.Invoke(this, $"MATCH_INFO:{json}");
         });
     }
 
@@ -57,7 +65,18 @@ public class MockBluetoothServer : IBluetoothServer
 
     public ObservableCollection<string> ConnectedClients { get; } = new();
 
-    public Task<bool> StartAdvertising(string serviceUuid, string deviceName) => Task.FromResult(true);
+    public async Task<bool> StartAdvertising(string serviceUuid, string deviceName)
+    {
+        // Simulate a client connecting after a short delay
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(3000);
+            string mockClientId = "JUDGE_MOCK_01";
+            ConnectedClients.Add(mockClientId);
+            DeviceConnected?.Invoke(this, mockClientId);
+        });
+        return true;
+    }
 
     public Task StopAdvertising() => Task.CompletedTask;
 
@@ -65,5 +84,9 @@ public class MockBluetoothServer : IBluetoothServer
 
     public Task SendToAllAsync(string message) => Task.CompletedTask;
 
-    public Task SendToClientAsync(string message, string clientId) => Task.CompletedTask;
+    public Task SendToClientAsync(string message, string clientId)
+    {
+        // For mock purposes, we could log or simulate receiving it back if needed
+        return Task.CompletedTask;
+    }
 }

@@ -96,7 +96,12 @@ public partial class MasterViewModel : BaseViewModel
     {
         if (competition == null) return;
 
-        await Shell.Current.GoToAsync("Server");
+        var navigationParameter = new Dictionary<string, object>
+        {
+            { "CompetitionId", competition.Id }
+        };
+
+        await Shell.Current.GoToAsync("Server", navigationParameter);
     }
 
     [RelayCommand]

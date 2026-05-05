@@ -31,6 +31,7 @@ public static class BuilderExtensions
         builder.Services.AddTransientPopup<CompetitorPopup, CompetitorPopupViewModel>();
         builder.Services.AddTransientPopup<ConfirmationPopup, ConfirmationPopupViewModel>();
         builder.Services.AddTransientPopup<JudgePointsPopup, JudgePointsPopupViewModel>();
+        builder.Services.AddTransientPopup<ServerSetupPopup, ServerSetupPopupViewModel>();
         return builder;
     }
 }

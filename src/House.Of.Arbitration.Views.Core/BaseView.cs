@@ -53,7 +53,8 @@ public abstract class BaseView : ContentView
                 IsRunning = false, // Controlled by trigger
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
-                Color = (Color?)Application.Current?.Resources["Blue"] ?? Colors.White
+                //Color = (Color?)Application.Current?.Resources["Blue"] ?? Colors.White
+                Color = Colors.Black ?? Colors.White
             };
 
             overlay.Children.Add(indicator);

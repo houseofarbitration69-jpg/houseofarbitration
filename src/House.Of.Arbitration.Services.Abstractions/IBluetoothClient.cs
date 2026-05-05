@@ -3,7 +3,7 @@
 public interface IBluetoothClient
 {
     event EventHandler<string> MessageReceived;
-    event EventHandler<string> DeviceDiscovered;
+    event EventHandler<(string DeviceId, string Name, int Rssi)> DeviceDiscovered;
     event EventHandler<string> DeviceConnected;
     event EventHandler<string> DeviceDisconnected;
 

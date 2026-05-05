@@ -5,6 +5,7 @@ using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using House.Of.Arbitration.Services.Abstractions;
+using Microsoft.Maui.ApplicationModel;
 using System.Collections.ObjectModel;
 using System.Text;
 #endregion
@@ -248,7 +249,7 @@ public class BluetoothServer : IBluetoothServer
                 if (device != null)
                 {
                     _parent._connectedDevices.Add(device);
-                    _parent.ConnectedClients.Add(device!.Address ?? String.Empty);
+                    MainThread.BeginInvokeOnMainThread(() => _parent.ConnectedClients.Add(device!.Address ?? String.Empty));
                 }
             }
             else if (newState == ProfileState.Disconnected)
@@ -260,8 +261,11 @@ public class BluetoothServer : IBluetoothServer
                 if (device != null)
                 {
                     _parent._connectedDevices.Remove(device);
-                    _parent.ConnectedClients.Remove(device!.Address ?? String.Empty);
-                    _parent._subscribedDevices.Remove(device!.Address ?? String.Empty);
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        _parent.ConnectedClients.Remove(device!.Address ?? String.Empty);
+                        _parent._subscribedDevices.Remove(device!.Address ?? String.Empty);
+                    });
                 }
             }
         }

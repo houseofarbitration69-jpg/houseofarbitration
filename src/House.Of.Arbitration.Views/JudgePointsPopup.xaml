@@ -5,7 +5,7 @@
              xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
              x:Class="House.Of.Arbitration.Views.JudgePointsPopup"
              x:DataType="vm:JudgePointsPopupViewModel"
-             Color="Transparent">
+             BackgroundColor="Transparent">
     
     <Border StrokeShape="RoundRectangle 15" BackgroundColor="White" Padding="20" WidthRequest="400">
         <VerticalStackLayout Spacing="20">

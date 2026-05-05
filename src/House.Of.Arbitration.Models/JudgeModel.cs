@@ -11,6 +11,9 @@ public partial class JudgeModel : ObservableObject
     private int _bluePoints;
 
     [ObservableProperty]
+    private bool _isConnected;
+
+    [ObservableProperty]
     private string _name = string.Empty;
 
     public int Number { get; set; }

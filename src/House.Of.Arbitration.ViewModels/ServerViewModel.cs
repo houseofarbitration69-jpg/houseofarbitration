@@ -1,5 +1,6 @@
 #region Imports
 using CommunityToolkit.Maui;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
@@ -7,15 +8,19 @@ using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels;
 
+[QueryProperty(nameof(CompetitionId), "CompetitionId")]
 public partial class ServerViewModel : BaseViewModel
 {
     #region Services
     private readonly IBluetoothService _bluetoothService;
     private readonly IBluetoothServer _bluetoothServer;
+    private readonly IRepository<CompetitionModel> _competitionRepository;
     private readonly IRepository<DrawKnockoutModel> _drawKnockoutService;
     private readonly IRepository<DrawOrderModel> _drawOrderService;
     private readonly IRepository<DrawPoolsModel> _drawPoolsModel;
@@ -33,6 +38,17 @@ public partial class ServerViewModel : BaseViewModel
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private bool _isTimerRunning;
     private IDispatcherTimer? _timer;
+
+    [ObservableProperty]
+    private int _competitionId;
+
+    private CompetitionModel? _currentCompetition;
+
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        ReferenceHandler = ReferenceHandler.IgnoreCycles,
+        WriteIndented = false
+    };
     #endregion
 
     #region Properties
@@ -88,6 +104,7 @@ public partial class ServerViewModel : BaseViewModel
         IPopupService popupService,
         IBluetoothService bluetoothService,
         IBluetoothServer bluetoothServer,
+        IRepository<CompetitionModel> competitionRepository,
         IRepository<DrawKnockoutModel> drawKnockoutService,
         IRepository<DrawOrderModel> drawOrderService,
         IRepository<DrawPoolsModel> drawPoolsService
@@ -98,6 +115,7 @@ public partial class ServerViewModel : BaseViewModel
         _bluetoothService = bluetoothService;
         _bluetoothServer = bluetoothServer;
 
+        _competitionRepository = competitionRepository;
         _drawKnockoutService = drawKnockoutService;
         _drawOrderService = drawOrderService;
         _drawPoolsModel = drawPoolsService;
@@ -124,6 +142,86 @@ public partial class ServerViewModel : BaseViewModel
                 }
             };
         }
+
+        _bluetoothServer.DeviceConnected += OnDeviceConnected;
+        _bluetoothServer.DeviceDisconnected += OnDeviceDisconnected;
+    }
+    #endregion
+
+    #region Event Handlers
+    private async void OnDeviceConnected(object? sender, string clientId)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            // Find an available judge slot that is not yet connected
+            var availableJudge = Judges.FirstOrDefault(j => !j.IsConnected);
+            if (availableJudge != null)
+            {
+                availableJudge.IsConnected = true;
+            }
+        });
+
+        if (_currentCompetition != null)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
+                await _bluetoothServer.SendToClientAsync($"COMPETITION_DATA:{json}", clientId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending competition data to client {ClientId}", clientId);
+            }
+        }
+    }
+
+    private void OnDeviceDisconnected(object? sender, string clientId)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            // For now, we don't have a mapping between clientId and Judge index
+            // We'll just mark one connected judge as disconnected as a simple approximation
+            // In a real scenario, the client would send its judge index or name upon connection
+            var connectedJudge = Judges.LastOrDefault(j => j.IsConnected);
+            if (connectedJudge != null)
+            {
+                connectedJudge.IsConnected = false;
+            }
+        });
+    }
+
+    [RelayCommand]
+    private async Task BroadcastMatchInfo()
+    {
+        if (CurrentDraw != null)
+        {
+            try
+            {
+                var matchData = new
+                {
+                    CategoryName = CurrentDraw.Draw.Category?.Name ?? "N/A",
+                    CurrentDrawId = CurrentDraw.Id,
+                    RedName = GetCompetitorName(CurrentDraw, true),
+                    BlueName = GetCompetitorName(CurrentDraw, false),
+                    MatchNumber = CurrentDraw.GlobalOrder
+                };
+
+                var json = JsonSerializer.Serialize(matchData, _jsonOptions);
+                await _bluetoothServer.SendToAllAsync($"MATCH_INFO:{json}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error broadcasting match info");
+            }
+        }
+    }
+
+    private string GetCompetitorName(IDrawModel draw, bool red)
+    {
+        if (draw is DrawKnockoutModel k) return red ? $"{k.Competitor1?.LastName} {k.Competitor1?.FirstName}" : $"{k.Competitor2?.LastName} {k.Competitor2?.FirstName}";
+        if (draw is DrawPoolsModel p) return red ? $"{p.Competitor1?.LastName} {p.Competitor1?.FirstName}" : $"{p.Competitor2?.LastName} {p.Competitor2?.FirstName}";
+        if (draw is DrawOrderModel o) return o.Competitor?.LastName + " " + o.Competitor?.FirstName;
+        return "N/A";
     }
     #endregion
 
@@ -132,10 +230,26 @@ public partial class ServerViewModel : BaseViewModel
     {
         CheckBluetoothAvailabilityCommand.Execute(null);
 
-        // Start Bluetooth Server automatically
-        if (BluetoothAvailable)
+        // Auto-start disabled, now manual via popup
+        /*if (BluetoothAvailable)
         {
             await StartServer();
+        }*/
+
+        if (CompetitionId > 0)
+        {
+            _currentCompetition = await _competitionRepository.GetByIdAsync(CompetitionId, 
+                "Categories.AgeRange", 
+                "Categories.Competitors.Competitor.Country", 
+                "Categories.Draw.DrawKnockouts.Competitor1.Country",
+                "Categories.Draw.DrawKnockouts.Competitor2.Country",
+                "Categories.Draw.DrawKnockouts.Winner",
+                "Categories.Draw.DrawKnockouts.Looser",
+                "Categories.Draw.DrawOrders.Competitor.Country",
+                "Categories.Draw.DrawPools.Competitor1.Country",
+                "Categories.Draw.DrawPools.Competitor2.Country",
+                "Categories.Draw.DrawPools.Winner",
+                "Categories.Draw.DrawPools.Looser");
         }
 
         var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
@@ -145,20 +259,18 @@ public partial class ServerViewModel : BaseViewModel
         var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
 
         var allDraws = new List<IDrawModel>();
-
-        if (knockouts != null)
+        
+        if (CompetitionId > 0)
         {
-            allDraws.AddRange(knockouts);
+            if (knockouts != null) allDraws.AddRange(knockouts.Where(k => k.Draw?.Category?.CompetitionId == CompetitionId));
+            if (orders != null) allDraws.AddRange(orders.Where(o => o.Draw?.Category?.CompetitionId == CompetitionId));
+            if (pools != null) allDraws.AddRange(pools.Where(p => p.Draw?.Category?.CompetitionId == CompetitionId));
         }
-
-        if (orders != null)
+        else
         {
-            allDraws.AddRange(orders);
-        }
-
-        if (pools != null)
-        {
-            allDraws.AddRange(pools);
+            if (knockouts != null) allDraws.AddRange(knockouts);
+            if (orders != null) allDraws.AddRange(orders);
+            if (pools != null) allDraws.AddRange(pools);
         }
 
         var sortedDraws = allDraws.OrderBy(d => d.GlobalOrder).ToList();
@@ -180,10 +292,13 @@ public partial class ServerViewModel : BaseViewModel
         }
 
         Draws = new System.Collections.ObjectModel.ObservableCollection<object>(flattenedList);
+
+        await BroadcastMatchInfo();
     }
 
     public override Task OnDisappearing()
     {
+        _bluetoothServer.DeviceConnected -= OnDeviceConnected;
         return base.OnDisappearing();
     }
     #endregion
@@ -296,6 +411,7 @@ public partial class ServerViewModel : BaseViewModel
             // Reset timer and load next
             ResetTimer();
             await OnAppearing();
+            await BroadcastMatchInfo();
         }
     }
 
@@ -315,7 +431,14 @@ public partial class ServerViewModel : BaseViewModel
     [RelayCommand]
     private async Task StartServer()
     {
-        await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName);
+        var result = await _popupService.ShowPopupAsync<ServerSetupPopupViewModel, ServerSetupResult>(Shell.Current);
+
+        if (result.Result != null)
+        {
+            ServerName = result.Result.Name;
+            Title = $"{ServerName} - {result.Result.Description}";
+            await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName);
+        }
     }
 
     [RelayCommand]

@@ -7,7 +7,9 @@ using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.Services;
 using House.Of.Arbitration.ViewModels;
 using House.Of.Arbitration.Views;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 #endregion
 
 namespace House.Of.Arbitration.App
@@ -38,6 +40,36 @@ namespace House.Of.Arbitration.App
 #if DEBUG
     		builder.Logging.AddDebug();
 #endif
+
+            var assembly = Assembly.GetExecutingAssembly();
+            var executingNamespace = assembly.GetName().Name;
+
+            using (var stream = assembly.GetManifestResourceStream($"{executingNamespace}.appsettings.json"))
+            {
+                if (stream != null)
+                {
+                    var config = new ConfigurationBuilder()
+                                        .AddJsonStream(stream)
+                                        .Build();
+
+                    builder.Configuration.AddConfiguration(config);
+                }
+            }
+
+#if DEBUG
+        using (var stream = assembly.GetManifestResourceStream($"{executingNamespace}.appsettings.Development.json"))
+        {
+            if (stream != null)
+            {
+                var config = new ConfigurationBuilder()
+                                    .AddJsonStream(stream)
+                                    .Build();
+
+                builder.Configuration.AddConfiguration(config);
+            }
+        }
+#endif
+
 
             // Register Localization
             builder.RegisterLocalization();
@@ -77,7 +109,9 @@ namespace House.Of.Arbitration.App
 #endif
             });
 
-            return builder.Build();
+            var app = builder.Build();
+
+            return app;
         }
     }
 }

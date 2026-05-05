@@ -47,8 +47,7 @@
                 IsFullWidth="True"
                 ButtonBackgroundColor="{DynamicResource ValidColor}"
                 TextColor="{DynamicResource PrimaryTextColor}"
-                Command="{Binding NavigateToCommand}"
-                CommandParameter="Test"
+                Command="{Binding SeedDataCommand}"
             />
         </VerticalStackLayout>
     </Grid>

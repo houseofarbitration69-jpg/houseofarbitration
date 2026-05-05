@@ -359,6 +359,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
         var competitors = Category.Competitors;
         int n = competitors.Count;
+        int matchOrder = 1;
         int globalMatchOrder = 1;
 
         // Create shared slots for each competitor position in the poule
@@ -374,7 +375,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             for (int j = i + 1; j < n; j++)
             {
                 var match = new BracketMatchViewModel();
-                match.Order = globalMatchOrder; // Will be assigned GlobalOrder
+                match.Order = matchOrder; // Will be assigned GlobalOrder
 
                 if (existingDraw != null)
                 {
@@ -383,13 +384,16 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                     {
                         match.Slot1 = new BracketSlotViewModel { Competitor = savedMatch.Competitor1 };
                         match.Slot2 = new BracketSlotViewModel { Competitor = savedMatch.Competitor2 };
+                        match.Order = savedMatch.Order;
                         match.GlobalOrder = savedMatch.GlobalOrder;
+                        if (match.Order >= matchOrder) matchOrder = match.Order + 1;
                         if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
                     }
                     else
                     {
                         match.Slot1 = _pouleSlots[i];
                         match.Slot2 = _pouleSlots[j];
+                        match.Order = matchOrder++;
                         match.GlobalOrder = globalMatchOrder++;
                     }
                 }
@@ -397,6 +401,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                 {
                     match.Slot1 = _pouleSlots[i];
                     match.Slot2 = _pouleSlots[j];
+                    match.Order = matchOrder++;
                     match.GlobalOrder = globalMatchOrder++;
                 }
 

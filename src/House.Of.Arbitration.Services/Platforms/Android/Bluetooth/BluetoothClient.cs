@@ -19,7 +19,7 @@ public class BluetoothClient : IBluetoothClient
 
     #region Events
     public event EventHandler<string>? MessageReceived;
-    public event EventHandler<string>? DeviceDiscovered;
+    public event EventHandler<(string DeviceId, string Name, int Rssi)>? DeviceDiscovered;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
     #endregion
@@ -159,13 +159,13 @@ public class BluetoothClient : IBluetoothClient
         {
             base.OnScanResult(callbackType, result);
 
-            if (result != null && result.Device != null && _parent._discoveredDevices.ContainsKey(result.Device?.Address ?? String.Empty))
+            if (result != null && result.Device != null && !_parent._discoveredDevices.ContainsKey(result.Device?.Address ?? String.Empty))
             {
                 _parent._discoveredDevices.Add(result.Device!.Address ?? String.Empty, result.Device);
 
-                _parent.DeviceDiscovered?.Invoke(_parent, result.Device.Address ?? String.Empty);
+                _parent.DeviceDiscovered?.Invoke(_parent, (result.Device.Address ?? String.Empty, result.Device.Name ?? "Unknown", result.Rssi));
 
-                await _alertService.ShowToast($"Discovered device:{result.Device.Name ?? "Unknown"} ({result.Device.Address})");
+                await _alertService.ShowToast($"Discovered device:{result.Device.Name ?? "Unknown"} ({result.Device.Address}) - RSSI: {result.Rssi}");
             }
         }
 

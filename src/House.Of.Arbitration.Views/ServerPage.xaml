@@ -284,15 +284,22 @@
             </DataTemplate>
 
             <DataTemplate x:Key="HeaderTemplate" x:DataType="x:String">
-                <Label 
-                    Text="{Binding .}" 
-                    BackgroundColor="#F5F5F5" 
-                    TextColor="#333333"
-                    FontAttributes="Bold" 
-                    Padding="10,8"
-                    FontSize="14"
-                    Margin="0,10,0,5"
-                />
+                <Border
+                    Padding="10,10,10,10" 
+                    Stroke="White"
+                    StrokeThickness="2"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="#333"
+                >
+                    <Label 
+                        Text="{Binding .}" 
+                        TextColor="White"
+                        FontAttributes="Bold" 
+                        FontSize="14"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                    />
+                </Border>
             </DataTemplate>
 
             <selectors:DrawTemplateSelector x:Key="DrawTemplateSelector"
@@ -304,14 +311,43 @@
     </base:BasePage.Resources>
 
     <Grid ColumnDefinitions="300,*" ColumnSpacing="15" Margin="10,5,10,10">
-        <CollectionView 
-            ItemsSource="{Binding Draws}"
-            ItemTemplate="{StaticResource DrawTemplateSelector}"
-        >
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
-            </CollectionView.ItemsLayout>
-        </CollectionView>
+        <Grid RowDefinitions="Auto,*" RowSpacing="10">
+            <HorizontalStackLayout Grid.Row="0" Spacing="10">
+                <Button 
+                    Text="DEMARRER" 
+                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=StartServerCommand}"
+                    BackgroundColor="{DynamicResource ValidColor}"
+                    TextColor="Black"
+                    FontAttributes="Bold"
+                    CornerRadius="20"
+                    HeightRequest="50"
+                    WidthRequest="140"
+                    Margin="0,0,0,0" 
+                />
+
+                <Button 
+                    Text="DIFFUSER" 
+                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=BroadcastMatchInfoCommand}"
+                    BackgroundColor="{DynamicResource ValidColor}"
+                    TextColor="Black"
+                    FontAttributes="Bold"
+                    CornerRadius="20"
+                    HeightRequest="50"
+                    WidthRequest="140"
+                    Margin="0,0,0,0" 
+                />
+            </HorizontalStackLayout>
+
+            <CollectionView 
+                Grid.Row="1"
+                ItemsSource="{Binding Draws}"
+                ItemTemplate="{StaticResource DrawTemplateSelector}"
+            >
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                </CollectionView.ItemsLayout>
+            </CollectionView>
+        </Grid>
 
         <Grid Grid.Column="1" RowDefinitions="60,80,*,90" RowSpacing="5" ColumnDefinitions="70,65,*,65,70">
             <!-- CATEGORIE -->
@@ -351,6 +387,13 @@
                     HeightRequest="45"
                     StrokeShape="RoundRectangle 5"
                 >
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Judges[0].IsConnected}" Value="True">
+                            <Setter Property="Background" Value="Green" />
+                            <Setter Property="Stroke" Value="Lime" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                         <Label 
                             Grid.Row="0"
@@ -472,6 +515,13 @@
                     HeightRequest="45"
                     StrokeShape="RoundRectangle 5"
                 >
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Judges[1].IsConnected}" Value="True">
+                            <Setter Property="Background" Value="Green" />
+                            <Setter Property="Stroke" Value="Lime" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                         <Label 
                             Grid.Row="0"
@@ -588,6 +638,13 @@
                     HeightRequest="45"
                     StrokeShape="RoundRectangle 5"
                 >
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Judges[4].IsConnected}" Value="True">
+                            <Setter Property="Background" Value="Green" />
+                            <Setter Property="Stroke" Value="Lime" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                         <Label 
                         Grid.Row="0"
@@ -744,7 +801,7 @@
                     <!-- Knockout / Round Robin Mode -->
                     <Grid ColumnDefinitions="*,*" IsVisible="False">
                         <!-- Competitor 1 (Red Side) -->
-                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="10">
+                        <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="0,5,0,0">
                             <!-- Circular Photo / Icon -->
                             <Border 
                                 StrokeShape="RoundRectangle 50" 
@@ -757,7 +814,7 @@
                                 IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
                             >
                                 <Image 
-                                    Source="{Binding Competitor1, Converter={StaticResource GenreToImageConverter}, ConverterParameter=20}" 
+                                    Source="{Binding Competitor1, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
                                     Aspect="AspectFill" 
                                 />
                             </Border>
@@ -807,12 +864,13 @@
                                 FontAttributes="Bold"
                                 CornerRadius="20"
                                 HeightRequest="40"
+                                WidthRequest="130"
                                 Margin="0,0,0,0" 
                             />
                         </VerticalStackLayout>
 
                         <!-- Competitor 2 (Blue Side) -->
-                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="10">
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="0,5,0,0">
                             <!-- Circular Photo / Icon -->
                             <Border 
                                 StrokeShape="RoundRectangle 50" 
@@ -873,6 +931,7 @@
                                 FontAttributes="Bold"
                                 CornerRadius="20"
                                 HeightRequest="40"
+                                WidthRequest="130"
                                 Margin="0,0,0,0" 
                             />
                         </VerticalStackLayout>
@@ -941,8 +1000,8 @@
                             <Button Text="VALIDER LE PASSAGE" 
                                     Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
                                     CommandParameter="Finish"
-                                    BackgroundColor="DarkGreen"
-                                    TextColor="White"
+                                    BackgroundColor="{DynamicResource ValidColor}"
+                                    TextColor="Black"
                                     FontAttributes="Bold"
                                     CornerRadius="20"
                                     HeightRequest="50"
@@ -975,6 +1034,13 @@
                     HeightRequest="45"
                     StrokeShape="RoundRectangle 5"
                 >
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Judges[2].IsConnected}" Value="True">
+                            <Setter Property="Background" Value="Green" />
+                            <Setter Property="Stroke" Value="Lime" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                         <Label 
                             Grid.Row="0"
@@ -1090,6 +1156,13 @@
                     HeightRequest="45"
                     StrokeShape="RoundRectangle 5"
                 >
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding Judges[3].IsConnected}" Value="True">
+                            <Setter Property="Background" Value="Green" />
+                            <Setter Property="Stroke" Value="Lime" />
+                            <Setter Property="StrokeThickness" Value="2" />
+                        </DataTrigger>
+                    </Border.Triggers>
                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                         <Label 
                             Grid.Row="0"

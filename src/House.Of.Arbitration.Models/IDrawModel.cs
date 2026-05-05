@@ -3,6 +3,11 @@
 public interface IDrawModel
 {
     /// <summary>
+    /// Obtient ou définit l'identifiant du tirage en mode 'Pools'
+    /// </summary>
+    int Id { get; set; }
+
+    /// <summary>
     /// Obtient l'ordre du tirage
     /// </summary>
     int GlobalOrder { get; set; }
@@ -15,7 +20,7 @@ public interface IDrawModel
     /// <summary>
     /// Obtient le tirage
     /// </summary>
-    DrawModel Draw { get; }
+    DrawModel? Draw { get; }
 
     /// <summary>
     /// Obtient ou définit si le tirage est terminé
