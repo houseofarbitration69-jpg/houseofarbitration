@@ -198,11 +198,14 @@ public partial class JudgeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task Connect(DiscoveredDeviceModel device)
+    private async Task Connect(DiscoveredDeviceModel? device)
     {
-        await _bluetoothClient.StopScan();
-        IsScanning = false;
-        await _bluetoothClient.ConnectToDevice(device.DeviceId);
+        if (device != null)
+        {
+            await _bluetoothClient.StopScan();
+            IsScanning = false;
+            await _bluetoothClient.ConnectToDevice(device.DeviceId);
+        }
     }
 
     [RelayCommand]

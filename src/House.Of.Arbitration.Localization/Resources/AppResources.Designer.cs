@@ -439,6 +439,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à JUDGE.
+        /// </summary>
+        public static string JUDGE {
+            get {
+                return ResourceManager.GetString("JUDGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [LAST NAME].
         /// </summary>
         public static string LASTNAME {
