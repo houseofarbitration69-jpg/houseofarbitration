@@ -349,7 +349,7 @@
             </CollectionView>
         </Grid>
 
-        <Grid Grid.Column="1" RowDefinitions="60,80,*,90" RowSpacing="5" ColumnDefinitions="70,65,*,65,70">
+        <Grid Grid.Column="1" RowDefinitions="60,105,*,115" RowSpacing="5" ColumnDefinitions="85,80,*,80,85">
             <!-- CATEGORIE -->
             <Border 
                 Grid.Row="0"
@@ -383,8 +383,8 @@
             >
                 <Border 
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     StrokeShape="RoundRectangle 5"
                 >
                     <Border.Triggers>
@@ -402,13 +402,14 @@
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
                             TextColor="Black"
+                            FontSize="18"
                         />
 
                         <Label
                             Grid.Row="1"
                             Grid.Column="0"
                             Text="{Binding Judges[0].RedPoints}"
-                            FontSize="16"
+                            FontSize="18"
                             TextColor="Red"
                             HorizontalOptions="Center"
                             Style="{StaticResource JudgePointsLabelStyle}"
@@ -419,7 +420,7 @@
                             Grid.Column="1"
                             Text="{Binding Judges[0].BluePoints}"
                             TextColor="Blue"
-                            FontSize="16"
+                            FontSize="18"
                             HorizontalOptions="Center"
                             Style="{StaticResource JudgePointsLabelStyle}"
                         />
@@ -437,8 +438,8 @@
                     <Border
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkRed"
                         Stroke="DarkRed"
                     >
@@ -451,8 +452,8 @@
                     <Border
                         Grid.Column="1"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Red"
                         Stroke="Red"
                     >
@@ -465,8 +466,8 @@
                     <Border
                         Grid.Column="2"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkBlue"
                         Stroke="DarkBlue"
                     >
@@ -479,8 +480,8 @@
                     <Border
                         Grid.Column="3"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Blue"
                         Stroke="Blue"
                     >
@@ -511,8 +512,8 @@
             >
                 <Border
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     StrokeShape="RoundRectangle 5"
                 >
                     <Border.Triggers>
@@ -530,13 +531,14 @@
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
                             TextColor="Black"
+                            FontSize="18"
                         />
 
                         <Label
                             Grid.Row="1"
                             Grid.Column="0"
                             Text="{Binding Judges[1].RedPoints}"
-                            FontSize="16"
+                            FontSize="18"
                             TextColor="Red"
                             HorizontalOptions="Center"
                         />
@@ -546,7 +548,7 @@
                             Grid.Column="1"
                             Text="{Binding Judges[1].BluePoints}"
                             TextColor="Blue"
-                            FontSize="16"
+                            FontSize="18"
                             HorizontalOptions="Center"
                         />
                     </Grid>
@@ -561,8 +563,8 @@
                     <Border
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkRed"
                         Stroke="DarkRed"
                     >
@@ -575,8 +577,8 @@
                     <Border
                         Grid.Column="1"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Red"
                         Stroke="Red"
                     >
@@ -589,8 +591,8 @@
                     <Border
                         Grid.Column="2"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkBlue"
                         Stroke="DarkBlue"
                     >
@@ -603,8 +605,8 @@
                     <Border
                         Grid.Column="3"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Blue"
                         Stroke="Blue"
                     >
@@ -634,8 +636,8 @@
             >
                 <Border 
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     StrokeShape="RoundRectangle 5"
                 >
                     <Border.Triggers>
@@ -647,31 +649,32 @@
                     </Border.Triggers>
                     <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                         <Label 
-                        Grid.Row="0"
-                        Grid.ColumnSpan="2"
-                        Text="{Binding Judges[4].Name}"
-                        FontAttributes="Bold"
-                        HorizontalOptions="Center"
-                        TextColor="Black"
-                    />
+                            Grid.Row="0"
+                            Grid.ColumnSpan="2"
+                            Text="{Binding Judges[4].Name}"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            TextColor="Black"
+                            FontSize="18"
+                        />
 
                         <Label
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        Text="{Binding Judges[4].RedPoints}"
-                        FontSize="16"
-                        TextColor="Red"
-                        HorizontalOptions="Center"
-                    />
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Text="{Binding Judges[4].RedPoints}"
+                            FontSize="18"
+                            TextColor="Red"
+                            HorizontalOptions="Center"
+                        />
 
                         <Label
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Text="{Binding Judges[4].BluePoints}"
-                        TextColor="Blue"
-                        FontSize="16"
-                        HorizontalOptions="Center"
-                    />
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Text="{Binding Judges[4].BluePoints}"
+                            TextColor="Blue"
+                            FontSize="18"
+                            HorizontalOptions="Center"
+                        />
                     </Grid>
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[4]}" />
@@ -682,8 +685,8 @@
                     <Border
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkRed"
                         Stroke="DarkRed"
                     >
@@ -696,8 +699,8 @@
                     <Border
                         Grid.Column="1"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Red"
                         Stroke="Red"
                     >
@@ -710,8 +713,8 @@
                     <Border
                         Grid.Column="2"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkBlue"
                         Stroke="DarkBlue"
                     >
@@ -724,8 +727,8 @@
                     <Border
                         Grid.Column="3"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Blue"
                         Stroke="Blue"
                     >
@@ -1030,8 +1033,8 @@
             >
                 <Border 
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     StrokeShape="RoundRectangle 5"
                 >
                     <Border.Triggers>
@@ -1049,13 +1052,14 @@
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
                             TextColor="Black"
+                            FontSize="18"
                         />
 
                         <Label
                             Grid.Row="1"
                             Grid.Column="0"
                             Text="{Binding Judges[2].RedPoints}"
-                            FontSize="16"
+                            FontSize="18"
                             TextColor="Red"
                             HorizontalOptions="Center"
                         />
@@ -1065,7 +1069,7 @@
                             Grid.Column="1"
                             Text="{Binding Judges[2].BluePoints}"
                             TextColor="Blue"
-                            FontSize="16"
+                            FontSize="18"
                             HorizontalOptions="Center"
                         />
                     </Grid>
@@ -1078,8 +1082,8 @@
                     <Border
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkRed"
                         Stroke="DarkRed"
                     >
@@ -1092,8 +1096,8 @@
                     <Border
                         Grid.Column="1"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Red"
                         Stroke="Red"
                     >
@@ -1106,8 +1110,8 @@
                     <Border
                         Grid.Column="2"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkBlue"
                         Stroke="DarkBlue"
                     >
@@ -1120,8 +1124,8 @@
                     <Border
                         Grid.Column="3"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Blue"
                         Stroke="Blue"
                     >
@@ -1152,8 +1156,8 @@
             >
                 <Border 
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     StrokeShape="RoundRectangle 5"
                 >
                     <Border.Triggers>
@@ -1171,13 +1175,14 @@
                             FontAttributes="Bold"
                             HorizontalOptions="Center"
                             TextColor="Black"
+                            FontSize="18"
                         />
 
                         <Label
                             Grid.Row="1"
                             Grid.Column="0"
                             Text="{Binding Judges[3].RedPoints}"
-                            FontSize="16"
+                            FontSize="18"
                             TextColor="Red"
                             HorizontalOptions="Center"
                         />
@@ -1187,7 +1192,7 @@
                             Grid.Column="1"
                             Text="{Binding Judges[3].BluePoints}"
                             TextColor="Blue"
-                            FontSize="16"
+                            FontSize="18"
                             HorizontalOptions="Center"
                         />
                     </Grid>
@@ -1200,8 +1205,8 @@
                     <Border
                         Grid.Column="0"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkRed"
                         Stroke="DarkRed"
                     >
@@ -1214,8 +1219,8 @@
                     <Border
                         Grid.Column="1"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Red"
                         Stroke="Red"
                     >
@@ -1228,8 +1233,8 @@
                     <Border
                         Grid.Column="2"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="DarkBlue"
                         Stroke="DarkBlue"
                     >
@@ -1242,8 +1247,8 @@
                     <Border
                         Grid.Column="3"
                         StrokeShape="RoundRectangle 50"
-                        HeightRequest="30"
-                        WidthRequest="30"
+                        HeightRequest="40"
+                        WidthRequest="40"
                         BackgroundColor="Blue"
                         Stroke="Blue"
                     >
@@ -1274,32 +1279,32 @@
                 <Border 
                     Grid.Column="0"
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     VerticalOptions="Start"
                     StrokeShape="RoundRectangle 5"
                 />
                 <Border 
                     Grid.Column="1"
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     VerticalOptions="Start"
                     StrokeShape="RoundRectangle 5"
                 />
                 <Border 
                     Grid.Column="2"
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     VerticalOptions="Start"
                     StrokeShape="RoundRectangle 5"
                 />
                 <Border 
                     Grid.Column="3"
                     Background="LightGray"
-                    WidthRequest="80"
-                    HeightRequest="45"
+                    WidthRequest="100"
+                    HeightRequest="60"
                     VerticalOptions="Start"
                     StrokeShape="RoundRectangle 5"
                 />
@@ -1311,7 +1316,7 @@
                 Grid.ColumnSpan="5" 
                 HorizontalOptions="Center"
                 VerticalOptions="End"
-                Margin="0,0,0,50"
+                Margin="0,0,0,70"
                 Padding="15,10,15,10"
                 BackgroundColor="#333"
                 Stroke="White"
@@ -1340,18 +1345,23 @@
 
                     <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
                         <!-- Reset -->
-                        <Border BackgroundColor="Gray"
-                                HeightRequest="36"
-                                WidthRequest="36"
-                                StrokeThickness="0">
+                        <Border 
+                            BackgroundColor="Gray"
+                            HeightRequest="40"
+                            WidthRequest="40"
+                            StrokeThickness="0"
+                        >
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="18"/>
+                                <RoundRectangle CornerRadius="20"/>
                             </Border.StrokeShape>
-                            <Label Text="↺" 
-                                   TextColor="White"
-                                   FontSize="18"
-                                   HorizontalOptions="Center"
-                                   VerticalOptions="Center" />
+                            <Label 
+                                Text="↺" 
+                                TextColor="White"
+                                FontSize="20"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" 
+                                Padding="0,0,0,5"
+                            />
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding ResetTimerCommand}" />
                             </Border.GestureRecognizers>
@@ -1359,31 +1369,35 @@
 
                         <!-- Start -->
                         <Border BackgroundColor="Green"
-                                HeightRequest="36"
-                                WidthRequest="36"
+                                HeightRequest="40"
+                                WidthRequest="40"
                                 StrokeThickness="0"
                                 IsVisible="{Binding IsTimerRunning, Converter={StaticResource InvertBoolConverter}}">
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="18"/>
+                                <RoundRectangle CornerRadius="20"/>
                             </Border.StrokeShape>
-                            <Path Data="M 0,0 L 12,8 L 0,16 Z" 
-                                  Fill="White" 
-                                  HorizontalOptions="Center" 
-                                  VerticalOptions="Center" 
-                                  TranslationX="2" />
+                            <Path 
+                                Data="M 0,0 L 12,8 L 0,16 Z" 
+                                Fill="White" 
+                                HorizontalOptions="Center" 
+                                VerticalOptions="Center" 
+                                TranslationX="2" 
+                            />
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding StartTimerCommand}" />
                             </Border.GestureRecognizers>
                         </Border>
 
                         <!-- Pause -->
-                        <Border BackgroundColor="Orange"
-                                HeightRequest="36"
-                                WidthRequest="36"
-                                StrokeThickness="0"
-                                IsVisible="{Binding IsTimerRunning}">
+                        <Border 
+                            BackgroundColor="Orange"
+                            HeightRequest="40"
+                            WidthRequest="40"
+                            StrokeThickness="0"
+                            IsVisible="{Binding IsTimerRunning}"
+                        >
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="18"/>
+                                <RoundRectangle CornerRadius="20"/>
                             </Border.StrokeShape>
                             <Grid ColumnDefinitions="4, 4, 4" 
                                   HorizontalOptions="Center" 
