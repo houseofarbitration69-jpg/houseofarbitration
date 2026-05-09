@@ -13,10 +13,12 @@ public class BluetoothServer : IBluetoothServer
     #endregion
 
     #region Events
-    public event EventHandler<string>? MessageReceived;
+    public event EventHandler<(string ClientId, string Message)>? MessageReceived;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
     #endregion
+
+    public Guid InstanceId { get; } = Guid.NewGuid();
 
     #region Properties
     public ObservableCollection<string> ConnectedClients { get; } = new();

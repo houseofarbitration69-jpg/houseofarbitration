@@ -16,7 +16,7 @@ public class AlertService : IAlertService
     /// <returns>Une tâche représentant l'opération asynchrone.</returns>
     public Task ShowToast(string message)
     {
-        return MainThread.InvokeOnMainThreadAsync(() => Toast.Make(message).Show());
+        return MainThread.InvokeOnMainThreadAsync(() => Toast.Make(message,CommunityToolkit.Maui.Core.ToastDuration.Long).Show());
     }
 
     /// <summary>

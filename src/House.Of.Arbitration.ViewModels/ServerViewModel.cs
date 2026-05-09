@@ -17,7 +17,8 @@ namespace House.Of.Arbitration.ViewModels;
 [QueryProperty(nameof(CompetitionId), "CompetitionId")]
 public partial class ServerViewModel : BaseViewModel
 {
-    #region Services
+    #region 
+    private readonly IAlertService _alertService;
     private readonly IBluetoothService _bluetoothService;
     private readonly IBluetoothServer _bluetoothServer;
     private readonly IRepository<CompetitionModel> _competitionRepository;
@@ -43,6 +44,8 @@ public partial class ServerViewModel : BaseViewModel
     private int _competitionId;
 
     private CompetitionModel? _currentCompetition;
+
+    private readonly Dictionary<string, JudgeModel> _clientJudgeMapping = new();
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -102,6 +105,7 @@ public partial class ServerViewModel : BaseViewModel
         ILogger<ServerViewModel> logger,
         ResourceProvider resourceProvider,
         IPopupService popupService,
+        IAlertService alertService,
         IBluetoothService bluetoothService,
         IBluetoothServer bluetoothServer,
         IRepository<CompetitionModel> competitionRepository,
@@ -112,8 +116,13 @@ public partial class ServerViewModel : BaseViewModel
     {
         Title = "SERVER";
 
+        _alertService = alertService;
+
         _bluetoothService = bluetoothService;
         _bluetoothServer = bluetoothServer;
+
+        var serverId = _bluetoothServer.InstanceId.ToString().Substring(0, 8);
+        _alertService.ShowToast($"VM CREATED - ServerID:[{serverId}]");
 
         _competitionRepository = competitionRepository;
         _drawKnockoutService = drawKnockoutService;
@@ -142,24 +151,14 @@ public partial class ServerViewModel : BaseViewModel
                 }
             };
         }
-
-        _bluetoothServer.DeviceConnected += OnDeviceConnected;
-        _bluetoothServer.DeviceDisconnected += OnDeviceDisconnected;
     }
     #endregion
 
     #region Event Handlers
     private async void OnDeviceConnected(object? sender, string clientId)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            // Find an available judge slot that is not yet connected
-            var availableJudge = Judges.FirstOrDefault(j => !j.IsConnected);
-            if (availableJudge != null)
-            {
-                availableJudge.IsConnected = true;
-            }
-        });
+        var serverId = _bluetoothServer.InstanceId.ToString().Substring(0, 8);
+        await _alertService.ShowToast($"VM ServerID:[{serverId}] Connected Client:{clientId}");
 
         if (_currentCompetition != null)
         {
@@ -179,13 +178,44 @@ public partial class ServerViewModel : BaseViewModel
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            // For now, we don't have a mapping between clientId and Judge index
-            // We'll just mark one connected judge as disconnected as a simple approximation
-            // In a real scenario, the client would send its judge index or name upon connection
-            var connectedJudge = Judges.LastOrDefault(j => j.IsConnected);
-            if (connectedJudge != null)
+            if (_clientJudgeMapping.TryGetValue(clientId, out var judge))
             {
-                connectedJudge.IsConnected = false;
+                judge.IsConnected = false;
+                _clientJudgeMapping.Remove(clientId);
+            }
+        });
+    }
+
+    private async void OnMessageReceived(object? sender, (string ClientId, string Message) args)
+    {
+        await _alertService.ShowToast($"OnMessageReceived => {args.Message}");
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (args.Message.StartsWith("JUDGE_POSITION:"))
+            {
+                if (int.TryParse(args.Message.Substring("JUDGE_POSITION:".Length), out int position))
+                {
+                    var judge = Judges.FirstOrDefault(j => j.Number == position);
+                    if (judge != null)
+                    {
+                        // Remove previous mapping for this client if any
+                        if (_clientJudgeMapping.TryGetValue(args.ClientId, out var oldJudge))
+                        {
+                            oldJudge.IsConnected = false;
+                        }
+
+                        // Remove mapping for this judge if another client was using it
+                        var existingMapping = _clientJudgeMapping.FirstOrDefault(x => x.Value == judge);
+                        if (existingMapping.Key != null)
+                        {
+                            _clientJudgeMapping.Remove(existingMapping.Key);
+                        }
+
+                        judge.IsConnected = true;
+                        _clientJudgeMapping[args.ClientId] = judge;
+                    }
+                }
             }
         });
     }
@@ -228,6 +258,10 @@ public partial class ServerViewModel : BaseViewModel
     #region Override Methods
     public override async Task OnAppearing()
     {
+        _bluetoothServer.DeviceConnected += OnDeviceConnected;
+        _bluetoothServer.DeviceDisconnected += OnDeviceDisconnected;
+        _bluetoothServer.MessageReceived += OnMessageReceived;
+
         CheckBluetoothAvailabilityCommand.Execute(null);
 
         // Auto-start disabled, now manual via popup
@@ -299,6 +333,8 @@ public partial class ServerViewModel : BaseViewModel
     public override Task OnDisappearing()
     {
         _bluetoothServer.DeviceConnected -= OnDeviceConnected;
+        _bluetoothServer.DeviceDisconnected -= OnDeviceDisconnected;
+        _bluetoothServer.MessageReceived -= OnMessageReceived;
         return base.OnDisappearing();
     }
     #endregion

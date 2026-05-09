@@ -19,10 +19,12 @@ public class BluetoothServer : IBluetoothServer
     #endregion
 
     #region Events
-    public event EventHandler<string>? MessageReceived;
+    public event EventHandler<(string ClientId, string Message)>? MessageReceived;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
     #endregion
+
+    public Guid InstanceId { get; } = Guid.NewGuid();
 
     #region Constants
     private readonly Java.Util.UUID? ServiceUuid = Java.Util.UUID.FromString("0000180F-0000-1000-8000-00805F9B34FB"); // Example Battery Service UUID
@@ -303,8 +305,13 @@ public class BluetoothServer : IBluetoothServer
             if (characteristic != null && characteristic.Uuid != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
             {
                 var message = Encoding.UTF8.GetString(value ?? new byte[0]);
+                
+                await _alertService.ShowToast($"[{_parent.InstanceId.ToString().Substring(0,8)}] Invoking MessageReceived for {device?.Address}");
 
-                _parent.MessageReceived?.Invoke(_parent, message);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    _parent.MessageReceived?.Invoke(_parent, (device?.Address ?? string.Empty, message));
+                });
 
                 if (responseNeeded)
                 {

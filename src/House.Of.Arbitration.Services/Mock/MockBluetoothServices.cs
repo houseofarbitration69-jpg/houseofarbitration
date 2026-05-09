@@ -59,9 +59,11 @@ public class MockBluetoothClient : IBluetoothClient
 
 public class MockBluetoothServer : IBluetoothServer
 {
-    public event EventHandler<string>? MessageReceived;
+    public event EventHandler<(string ClientId, string Message)>? MessageReceived;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
+
+    public Guid InstanceId { get; } = Guid.NewGuid();
 
     public ObservableCollection<string> ConnectedClients { get; } = new();
 

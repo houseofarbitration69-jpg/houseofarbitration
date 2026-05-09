@@ -7,12 +7,13 @@ namespace House.Of.Arbitration.Services.Abstractions;
 public interface IBluetoothServer
 {
     #region Events
-    event EventHandler<string> MessageReceived;
+    event EventHandler<(string ClientId, string Message)> MessageReceived;
     event EventHandler<string> DeviceConnected;
     event EventHandler<string> DeviceDisconnected;
     #endregion
 
     #region Properties
+    Guid InstanceId { get; }
     ObservableCollection<string> ConnectedClients { get; }
     #endregion
 

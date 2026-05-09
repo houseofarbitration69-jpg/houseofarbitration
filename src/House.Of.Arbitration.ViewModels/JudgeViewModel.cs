@@ -18,6 +18,7 @@ namespace House.Of.Arbitration.ViewModels;
 public partial class JudgeViewModel : BaseViewModel
 {
     #region Services
+    private readonly IAlertService _alertService;
     private readonly IBluetoothClient _bluetoothClient;
     private readonly IBluetoothService _bluetoothService;
     private readonly IRepository<CompetitionModel> _competitionRepository;
@@ -51,6 +52,8 @@ public partial class JudgeViewModel : BaseViewModel
     [ObservableProperty]
     private int _matchNumber;
 
+    private string? _serverDeviceId;
+
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -68,10 +71,13 @@ public partial class JudgeViewModel : BaseViewModel
         ILogger<JudgeViewModel> logger,
         ResourceProvider resourceProvider,
         IPopupService popupService,
+        IAlertService alertService,
         IBluetoothClient bluetoothClient,
         IBluetoothService bluetoothService,
         IRepository<CompetitionModel> competitionRepository) : base(logger, resourceProvider, popupService)
     {
+        _alertService = alertService;
+
         _bluetoothClient = bluetoothClient;
         _bluetoothService = bluetoothService;
         _competitionRepository = competitionRepository;
@@ -81,11 +87,6 @@ public partial class JudgeViewModel : BaseViewModel
         {
             JudgePositions.Add(new JudgeModel { Name = $"JUGE {i}", Number = i });
         }
-
-        _bluetoothClient.DeviceDiscovered += OnDeviceDiscovered;
-        _bluetoothClient.DeviceConnected += OnDeviceConnected;
-        _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;
-        _bluetoothClient.MessageReceived += OnMessageReceived;
     }
     #endregion
 
@@ -116,6 +117,7 @@ public partial class JudgeViewModel : BaseViewModel
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            _serverDeviceId = deviceId;
             IsConnected = true;
             IsScanning = false;
         });
@@ -125,12 +127,15 @@ public partial class JudgeViewModel : BaseViewModel
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
+            _serverDeviceId = null;
             IsConnected = false;
         });
     }
 
-    private void OnMessageReceived(object? sender, string message)
+    private async void OnMessageReceived(object? sender, string message)
     {
+        await _alertService.ShowToast($"OnMessageReceived => {message}");
+
         MainThread.BeginInvokeOnMainThread(async () =>
         {
             if (message.StartsWith("COMPETITION_DATA:"))
@@ -209,9 +214,33 @@ public partial class JudgeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SelectPosition(JudgeModel judge)
+    private async Task SelectPosition(JudgeModel judge)
     {
         SelectedJudge = judge;
+        if (IsConnected && _serverDeviceId != null)
+        {
+            await _bluetoothClient.SendMessage(_serverDeviceId, $"JUDGE_POSITION:{judge.Number}");
+        }
+    }
+    #endregion
+
+    #region Override Methods
+    public override Task OnAppearing()
+    {
+        _bluetoothClient.DeviceDiscovered += OnDeviceDiscovered;
+        _bluetoothClient.DeviceConnected += OnDeviceConnected;
+        _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;
+        _bluetoothClient.MessageReceived += OnMessageReceived;
+        return base.OnAppearing();
+    }
+
+    public override Task OnDisappearing()
+    {
+        _bluetoothClient.DeviceDiscovered -= OnDeviceDiscovered;
+        _bluetoothClient.DeviceConnected -= OnDeviceConnected;
+        _bluetoothClient.DeviceDisconnected -= OnDeviceDisconnected;
+        _bluetoothClient.MessageReceived -= OnMessageReceived;
+        return base.OnDisappearing();
     }
     #endregion
 }
