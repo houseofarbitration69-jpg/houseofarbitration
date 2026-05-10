@@ -12,6 +12,7 @@ public class MockBluetoothService : IBluetoothService
 
 public class MockBluetoothClient : IBluetoothClient
 {
+    public Guid InstanceId { get; } = Guid.NewGuid();
     public event EventHandler<string>? MessageReceived;
     public event EventHandler<(string DeviceId, string Name, int Rssi)>? DeviceDiscovered;
     public event EventHandler<string>? DeviceConnected;

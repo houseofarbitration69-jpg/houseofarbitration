@@ -2,6 +2,7 @@
 
 public interface IBluetoothClient
 {
+    Guid InstanceId { get; }
     event EventHandler<string> MessageReceived;
     event EventHandler<(string DeviceId, string Name, int Rssi)> DeviceDiscovered;
     event EventHandler<string> DeviceConnected;

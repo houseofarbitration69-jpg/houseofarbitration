@@ -52,6 +52,12 @@ public partial class JudgeViewModel : BaseViewModel
     [ObservableProperty]
     private int _matchNumber;
 
+    [ObservableProperty]
+    private string _timeLeftDisplay = "02:00";
+
+    private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
+    private IDispatcherTimer? _timer;
+
     private string? _serverDeviceId;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
@@ -86,6 +92,24 @@ public partial class JudgeViewModel : BaseViewModel
         for (int i = 1; i <= 5; i++)
         {
             JudgePositions.Add(new JudgeModel { Name = $"JUGE {i}", Number = i });
+        }
+
+        _timer = Application.Current?.Dispatcher.CreateTimer();
+        if (_timer != null)
+        {
+            _timer.Interval = TimeSpan.FromSeconds(1);
+            _timer.Tick += (s, e) =>
+            {
+                if (_timeLeft.TotalSeconds > 0)
+                {
+                    _timeLeft = _timeLeft.Subtract(TimeSpan.FromSeconds(1));
+                    TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
+                }
+                else
+                {
+                    _timer.Stop();
+                }
+            };
         }
     }
     #endregion
@@ -129,20 +153,52 @@ public partial class JudgeViewModel : BaseViewModel
         {
             _serverDeviceId = null;
             IsConnected = false;
+            _timer?.Stop();
         });
     }
 
-    private async void OnMessageReceived(object? sender, string message)
+    private void OnMessageReceived(object? sender, string message)
     {
-        await _alertService.ShowToast($"OnMessageReceived => {message}");
-
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            if (message.StartsWith("COMPETITION_DATA:"))
+            try
             {
-                var json = message.Substring("COMPETITION_DATA:".Length);
-                try
+                if (message == "TIMER_START")
                 {
+                    _timer?.Start();
+                    return;
+                }
+                
+                if (message == "TIMER_PAUSE")
+                {
+                    _timer?.Stop();
+                    return;
+                }
+
+                if (message == "TIMER_STOP")
+                {
+                    _timer?.Stop();
+                    _timeLeft = TimeSpan.Zero;
+                    TimeLeftDisplay = "00:00";
+                    return;
+                }
+
+                if (message.StartsWith("TIMER_SET:"))
+                {
+                    var timeStr = message.Substring("TIMER_SET:".Length);
+                    if (TimeSpan.TryParseExact(timeStr, @"mm\:ss", null, out var newTime))
+                    {
+                        _timeLeft = newTime;
+                        TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
+                    }
+                    return;
+                }
+
+                await _alertService.ShowToast($"OnMessageReceived => {message}");
+
+                if (message.StartsWith("COMPETITION_DATA:"))
+                {
+                    var json = message.Substring("COMPETITION_DATA:".Length);
                     var competition = JsonSerializer.Deserialize<CompetitionModel>(json, _jsonOptions);
                     if (competition != null)
                     {
@@ -158,35 +214,39 @@ public partial class JudgeViewModel : BaseViewModel
                         }
                     }
                 }
-                catch (Exception ex)
+                else if (message.StartsWith("MATCH_INFO:"))
                 {
-                    _logger.LogError(ex, "Error deserializing competition data");
+                    var json = message.Substring("MATCH_INFO:".Length);
+                    var matchData = JsonSerializer.Deserialize<MatchInfoData>(json, _jsonOptions);
+                    if (matchData != null)
+                    {
+                        CategoryName = matchData.CategoryName;
+                        RedName = matchData.RedName;
+                        BlueName = matchData.BlueName;
+                        MatchNumber = matchData.MatchNumber;
+                        
+                        CurrentMatchInfo = $"{CategoryName} - Match #{MatchNumber}";
+                    }
+                }
+                else
+                {
+                    CurrentMatchInfo = message;
                 }
             }
-            else if (message.StartsWith("MATCH_INFO:"))
+            catch (Exception ex)
             {
-                var json = message.Substring("MATCH_INFO:".Length);
-                try
-                {
-                    using var doc = JsonDocument.Parse(json);
-                    var root = doc.RootElement;
-                    CategoryName = root.GetProperty("categoryName").GetString();
-                    RedName = root.GetProperty("redName").GetString();
-                    BlueName = root.GetProperty("blueName").GetString();
-                    MatchNumber = root.GetProperty("matchNumber").GetInt32();
-                    
-                    CurrentMatchInfo = $"{CategoryName} - Match #{MatchNumber}";
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error deserializing match info");
-                }
-            }
-            else
-            {
-                CurrentMatchInfo = message;
+                _logger.LogError(ex, "Error processing received message");
+                await _alertService.ShowToast($"Error: {ex.Message}");
             }
         });
+    }
+
+    private class MatchInfoData
+    {
+        public string? CategoryName { get; set; }
+        public string? RedName { get; set; }
+        public string? BlueName { get; set; }
+        public int MatchNumber { get; set; }
     }
     #endregion
 
@@ -227,6 +287,9 @@ public partial class JudgeViewModel : BaseViewModel
     #region Override Methods
     public override Task OnAppearing()
     {
+        var clientId = _bluetoothClient.InstanceId.ToString().Substring(0, 8);
+        _alertService.ShowToast($"Judge VM OnAppearing - ClientID:[{clientId}]");
+
         _bluetoothClient.DeviceDiscovered += OnDeviceDiscovered;
         _bluetoothClient.DeviceConnected += OnDeviceConnected;
         _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;

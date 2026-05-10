@@ -7,6 +7,7 @@ namespace House.Of.Arbitration.Services.Platforms.Windows.Bluetooth;
 
 public class BluetoothClient : IBluetoothClient
 {
+    public Guid InstanceId { get; } = Guid.NewGuid();
     #region Services
     private readonly IAlertService _alertService;
     #endregion

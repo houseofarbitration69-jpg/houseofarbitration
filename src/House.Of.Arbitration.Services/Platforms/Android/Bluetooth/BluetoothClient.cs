@@ -13,6 +13,8 @@ namespace House.Of.Arbitration.Services.Platforms.Android.Bluetooth;
 
 public class BluetoothClient : IBluetoothClient
 {
+    public Guid InstanceId { get; } = Guid.NewGuid();
+
     #region Services
     private readonly IAlertService _alertService;
     #endregion
@@ -215,16 +217,33 @@ public class BluetoothClient : IBluetoothClient
             {
                 await _alertService.ShowToast($"Connected to GATT server : {gatt?.Device?.Address}");
 
-                _parent.DeviceConnected?.Invoke(_parent, gatt?.Device?.Address ?? String.Empty);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    _parent.DeviceConnected?.Invoke(_parent, gatt?.Device?.Address ?? String.Empty);
+                });
 
-                gatt?.DiscoverServices();
+                // Request larger MTU to avoid truncation of JSON messages
+                gatt?.RequestMtu(512);
             }
             else if (newState == ProfileState.Disconnected)
             {
                 await _alertService.ShowToast($"Disconnected from GATT server : {gatt?.Device?.Address}");
 
-                _parent.DeviceDisconnected?.Invoke(_parent, gatt?.Device?.Address ?? String.Empty);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    _parent.DeviceDisconnected?.Invoke(_parent, gatt?.Device?.Address ?? String.Empty);
+                });
             }
+        }
+
+        public override async void OnMtuChanged(BluetoothGatt? gatt, int mtu, [GeneratedEnum] GattStatus status)
+        {
+            base.OnMtuChanged(gatt, mtu, status);
+            
+            await _alertService.ShowToast($"MTU changed to {mtu} (Status: {status})");
+            
+            // Proceed to service discovery after MTU is established
+            gatt?.DiscoverServices();
         }
 
         public override async void OnServicesDiscovered(BluetoothGatt? gatt, [GeneratedEnum] GattStatus status)
@@ -281,9 +300,12 @@ public class BluetoothClient : IBluetoothClient
 
             if(status == GattStatus.Success)
             {
-                var message = Encoding.UTF8.GetString(characteristic.GetValue());
+                var message = Encoding.UTF8.GetString(value ?? new byte[0]);
 
-                _parent.MessageReceived?.Invoke(_parent, message);
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    _parent.MessageReceived?.Invoke(_parent, message);
+                });
 
                 await _alertService.ShowToast($"Client received : {message}");
             }
@@ -303,17 +325,42 @@ public class BluetoothClient : IBluetoothClient
             }
         }
 
+        public override void OnCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value)
+        {
+            base.OnCharacteristicChanged(gatt, characteristic, value);
+
+            if (characteristic != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
+            {
+                var message = value != null ? Encoding.UTF8.GetString(value) : string.Empty;
+
+                _parent._alertService.ShowToast($"DEBUG: Raw bytes length: {value?.Length ?? 0}");
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    _parent.MessageReceived?.Invoke(_parent, message);
+                });
+
+                _parent._alertService.ShowToast($"Client received notification: {message}");
+            }
+        }
+
         public override async void OnCharacteristicChanged(BluetoothGatt? gatt, BluetoothGattCharacteristic? characteristic)
         {
             base.OnCharacteristicChanged(gatt, characteristic);
 
-            if(characteristic.Uuid.Equals(_parent.CharacteristicUuid))
+            if (characteristic != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
             {
-                var message = Encoding.UTF8.GetString(characteristic.GetValue());
+                var bytes = characteristic.GetValue();
+                var message = bytes != null ? Encoding.UTF8.GetString(bytes) : string.Empty;
 
-                _parent.MessageReceived?.Invoke(_parent, message);
+                await _alertService.ShowToast($"DEBUG (Legacy): Raw bytes length: {bytes?.Length ?? 0}");
 
-                await _alertService.ShowToast($"Client received notification: {message}");
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    _parent.MessageReceived?.Invoke(_parent, message);
+                });
+
+                await _alertService.ShowToast($"Client received notification (Legacy): {message}");
             }
         }
         #endregion

@@ -138,7 +138,7 @@ public partial class ServerViewModel : BaseViewModel
         if (_timer != null)
         {
             _timer.Interval = TimeSpan.FromSeconds(1);
-            _timer.Tick += (s, e) =>
+            _timer.Tick += async (s, e) =>
             {
                 if (_timeLeft.TotalSeconds > 0)
                 {
@@ -148,6 +148,7 @@ public partial class ServerViewModel : BaseViewModel
                 else
                 {
                     StopTimer();
+                    await _bluetoothServer.SendToAllAsync("TIMER_STOP");
                 }
             };
         }
@@ -171,6 +172,13 @@ public partial class ServerViewModel : BaseViewModel
             {
                 _logger.LogError(ex, "Error sending competition data to client {ClientId}", clientId);
             }
+        }
+
+        // Send current timer state to the new client
+        await _bluetoothServer.SendToClientAsync($"TIMER_SET:{TimeLeftDisplay}", clientId);
+        if (IsTimerRunning)
+        {
+            await _bluetoothServer.SendToClientAsync("TIMER_START", clientId);
         }
     }
 
@@ -229,11 +237,11 @@ public partial class ServerViewModel : BaseViewModel
             {
                 var matchData = new
                 {
-                    CategoryName = CurrentDraw.Draw.Category?.Name ?? "N/A",
-                    CurrentDrawId = CurrentDraw.Id,
-                    RedName = GetCompetitorName(CurrentDraw, true),
-                    BlueName = GetCompetitorName(CurrentDraw, false),
-                    MatchNumber = CurrentDraw.GlobalOrder
+                    categoryName = CurrentDraw.Draw.Category?.Name ?? "N/A",
+                    currentDrawId = CurrentDraw.Id,
+                    redName = GetCompetitorName(CurrentDraw, true),
+                    blueName = GetCompetitorName(CurrentDraw, false),
+                    matchNumber = CurrentDraw.GlobalOrder
                 };
 
                 var json = JsonSerializer.Serialize(matchData, _jsonOptions);
@@ -445,7 +453,7 @@ public partial class ServerViewModel : BaseViewModel
             }
 
             // Reset timer and load next
-            ResetTimer();
+            await ResetTimer();
             await OnAppearing();
             await BroadcastMatchInfo();
         }
@@ -478,27 +486,30 @@ public partial class ServerViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void StartTimer()
+    private async Task StartTimer()
     {
         if (!IsTimerRunning && _timeLeft.TotalSeconds > 0)
         {
             _timer?.Start();
             IsTimerRunning = true;
+            await _bluetoothServer.SendToAllAsync("TIMER_START");
         }
     }
 
     [RelayCommand]
-    private void PauseTimer()
+    private async Task PauseTimer()
     {
         StopTimer();
+        await _bluetoothServer.SendToAllAsync("TIMER_PAUSE");
     }
 
     [RelayCommand]
-    private void ResetTimer()
+    private async Task ResetTimer()
     {
         StopTimer();
         _timeLeft = TimeSpan.FromMinutes(2); // Default reset
         OnPropertyChanged(nameof(TimeLeftDisplay));
+        await _bluetoothServer.SendToAllAsync($"TIMER_SET:{TimeLeftDisplay}");
     }
 
     [RelayCommand]
@@ -512,6 +523,7 @@ public partial class ServerViewModel : BaseViewModel
             {
                 _timeLeft = newTime;
                 OnPropertyChanged(nameof(TimeLeftDisplay));
+                await _bluetoothServer.SendToAllAsync($"TIMER_SET:{TimeLeftDisplay}");
             }
         }
     }
