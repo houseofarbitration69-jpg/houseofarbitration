@@ -9,6 +9,8 @@ using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
+using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 #endregion
@@ -25,6 +27,9 @@ public partial class JudgeViewModel : BaseViewModel
     #endregion
 
     #region Attributs
+    private CompetitorModel? _competitor1;
+    private CompetitorModel? _competitor2;
+
     [ObservableProperty]
     private string _title;
 
@@ -60,6 +65,8 @@ public partial class JudgeViewModel : BaseViewModel
 
     private string? _serverDeviceId;
 
+    private readonly Dictionary<string, (string Type, string?[] Chunks)> _pendingChunks = new();
+
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -70,6 +77,18 @@ public partial class JudgeViewModel : BaseViewModel
     #region Properties
     public ObservableCollection<DiscoveredDeviceModel> DiscoveredDevices { get; } = new();
     public ObservableCollection<JudgeModel> JudgePositions { get; } = new();
+
+    public CompetitorModel? Competitor1
+    {
+        get => _competitor1;
+        set => SetProperty(ref _competitor1, value);
+    }
+
+    public CompetitorModel? Competitor2
+    {
+        get => _competitor2;
+        set => SetProperty(ref _competitor2, value);
+    }
     #endregion
 
     #region Constructors
@@ -154,6 +173,7 @@ public partial class JudgeViewModel : BaseViewModel
             _serverDeviceId = null;
             IsConnected = false;
             _timer?.Stop();
+            _pendingChunks.Clear();
         });
     }
 
@@ -163,6 +183,37 @@ public partial class JudgeViewModel : BaseViewModel
         {
             try
             {
+                await _alertService.ShowToast($"OnMessageRecevied : {message}");
+
+                // Gestion du découpage (Chunking)
+                if (message.StartsWith("CHUNK:"))
+                {
+                    var parts = message.Split(':', 6);
+                    if (parts.Length < 6) return;
+
+                    string id = parts[1];
+                    int index = int.Parse(parts[2]);
+                    int total = int.Parse(parts[3]);
+                    string type = parts[4];
+                    string payload = parts[5];
+
+                    if (!_pendingChunks.ContainsKey(id))
+                    {
+                        _pendingChunks[id] = (type, new string?[total]);
+                    }
+
+                    var msgData = _pendingChunks[id];
+                    msgData.Chunks[index] = payload;
+
+                    if (msgData.Chunks.All(c => c != null))
+                    {
+                        string fullContent = string.Join("", msgData.Chunks);
+                        _pendingChunks.Remove(id);
+                        await ProcessMessageAsync(type, fullContent);
+                    }
+                    return;
+                }
+
                 if (message == "TIMER_START")
                 {
                     _timer?.Start();
@@ -194,39 +245,14 @@ public partial class JudgeViewModel : BaseViewModel
                     return;
                 }
 
-                await _alertService.ShowToast($"OnMessageReceived => {message}");
-
+                // Pour compatibilité ou messages simples
                 if (message.StartsWith("COMPETITION_DATA:"))
                 {
-                    var json = message.Substring("COMPETITION_DATA:".Length);
-                    var competition = JsonSerializer.Deserialize<CompetitionModel>(json, _jsonOptions);
-                    if (competition != null)
-                    {
-                        // Check if competition already exists
-                        var existing = await _competitionRepository.GetByIdAsync(competition.Id);
-                        if (existing != null)
-                        {
-                            await _competitionRepository.UpdateAsync(competition);
-                        }
-                        else
-                        {
-                            await _competitionRepository.AddAsync(competition);
-                        }
-                    }
+                    await ProcessMessageAsync("COMPETITION_DATA", message.Substring("COMPETITION_DATA:".Length));
                 }
                 else if (message.StartsWith("MATCH_INFO:"))
                 {
-                    var json = message.Substring("MATCH_INFO:".Length);
-                    var matchData = JsonSerializer.Deserialize<MatchInfoData>(json, _jsonOptions);
-                    if (matchData != null)
-                    {
-                        CategoryName = matchData.CategoryName;
-                        RedName = matchData.RedName;
-                        BlueName = matchData.BlueName;
-                        MatchNumber = matchData.MatchNumber;
-                        
-                        CurrentMatchInfo = $"{CategoryName} - Match #{MatchNumber}";
-                    }
+                    await ProcessMessageAsync("MATCH_INFO", message.Substring("MATCH_INFO:".Length));
                 }
                 else
                 {
@@ -241,12 +267,63 @@ public partial class JudgeViewModel : BaseViewModel
         });
     }
 
+    private async Task ProcessMessageAsync(string type, string content)
+    {
+        try
+        {
+            if (type == "COMPETITION_DATA")
+            {
+                string decompressedContent = DecompressString(content);
+                var competition = JsonSerializer.Deserialize<CompetitionModel>(decompressedContent, _jsonOptions);
+                if (competition != null)
+                {
+                    var existing = await _competitionRepository.GetByIdAsync(competition.Id);
+                    if (existing != null)
+                        await _competitionRepository.UpdateAsync(competition);
+                    else
+                        await _competitionRepository.AddAsync(competition);
+                    
+                    await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
+                }
+            }
+            else if (type == "MATCH_INFO")
+            {
+                var matchData = JsonSerializer.Deserialize<MatchInfoData>(content, _jsonOptions);
+                if (matchData != null)
+                {
+                    CategoryName = matchData.CategoryName;
+                    Competitor1 = matchData.Competitor1;
+                    Competitor2 = matchData.Competitor2;
+
+                    MatchNumber = matchData.MatchNumber;
+                    CurrentMatchInfo = $"{CategoryName} - Match #{MatchNumber}";
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deserializing {Type}", type);
+            await _alertService.ShowToast($"Erreur de données : {type}");
+        }
+    }
+
+    private string DecompressString(string compressedText)
+    {
+        byte[] gZipBuffer = Convert.FromBase64String(compressedText);
+        using var ms = new MemoryStream(gZipBuffer);
+        using var zip = new GZipStream(ms, CompressionMode.Decompress);
+        using var reader = new StreamReader(zip, Encoding.UTF8);
+        return reader.ReadToEnd();
+    }
+
     private class MatchInfoData
     {
         public string? CategoryName { get; set; }
         public string? RedName { get; set; }
         public string? BlueName { get; set; }
         public int MatchNumber { get; set; }
+        public CompetitorModel? Competitor1 { get; set; }
+        public CompetitorModel? Competitor2 { get; set; }
     }
     #endregion
 

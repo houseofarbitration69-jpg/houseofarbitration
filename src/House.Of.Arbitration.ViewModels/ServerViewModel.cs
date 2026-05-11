@@ -8,6 +8,8 @@ using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
+using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 #endregion
@@ -166,7 +168,8 @@ public partial class ServerViewModel : BaseViewModel
             try
             {
                 var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
-                await _bluetoothServer.SendToClientAsync($"COMPETITION_DATA:{json}", clientId);
+                var compressedJson = CompressString(json);
+                await SendChunkedMessageAsync(clientId, "COMPETITION_DATA", compressedJson);
             }
             catch (Exception ex)
             {
@@ -180,6 +183,19 @@ public partial class ServerViewModel : BaseViewModel
         {
             await _bluetoothServer.SendToClientAsync("TIMER_START", clientId);
         }
+    }
+
+    private string CompressString(string text)
+    {
+        byte[] buffer = Encoding.UTF8.GetBytes(text);
+        using var ms = new MemoryStream();
+        using (var zip = new GZipStream(ms, CompressionMode.Compress, true))
+        {
+            zip.Write(buffer, 0, buffer.Length);
+        }
+        ms.Position = 0;
+        byte[] compressed = ms.ToArray();
+        return Convert.ToBase64String(compressed);
     }
 
     private void OnDeviceDisconnected(object? sender, string clientId)
@@ -235,23 +251,37 @@ public partial class ServerViewModel : BaseViewModel
         {
             try
             {
+                var competitor1 = GetCompetitor(CurrentDraw, true);
+                var competitor2 = GetCompetitor(CurrentDraw, false);
+
                 var matchData = new
                 {
-                    categoryName = CurrentDraw.Draw.Category?.Name ?? "N/A",
+                    categoryName = CurrentDraw.Draw?.Category?.Name ?? "N/A",
                     currentDrawId = CurrentDraw.Id,
-                    redName = GetCompetitorName(CurrentDraw, true),
-                    blueName = GetCompetitorName(CurrentDraw, false),
+                    competitor1 = competitor1,
+                    competitor2 = competitor2,
+                    //blueName = GetCompetitorName(CurrentDraw, false),
                     matchNumber = CurrentDraw.GlobalOrder
                 };
 
                 var json = JsonSerializer.Serialize(matchData, _jsonOptions);
-                await _bluetoothServer.SendToAllAsync($"MATCH_INFO:{json}");
+                //var json = JsonSerializer.Serialize(CurrentDraw, _jsonOptions);
+                await SendChunkedMessageAsync(null, "MATCH_INFO", json);
+                //await _bluetoothServer.SendToAllAsync($"MATCH_INFO:{json}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error broadcasting match info");
             }
         }
+    }
+
+    private CompetitorModel? GetCompetitor(IDrawModel draw, bool red)
+    {
+        if (draw is DrawKnockoutModel k) return red ? k.Competitor1 : k.Competitor2;
+        if (draw is DrawPoolsModel p) return red ? p.Competitor1 : p.Competitor2;
+        if (draw is DrawOrderModel o) return o.Competitor;
+        return null;
     }
 
     private string GetCompetitorName(IDrawModel draw, bool red)
@@ -348,6 +378,34 @@ public partial class ServerViewModel : BaseViewModel
     #endregion
 
     #region Private Methods
+    private async Task SendChunkedMessageAsync(string? clientId, string type, string message)
+    {
+        const int maxPayloadSize = 400; // Valeur sûre pour le BLE
+        int totalChunks = (int)Math.Ceiling((double)message.Length / maxPayloadSize);
+        string messageId = Guid.NewGuid().ToString().Substring(0, 4);
+
+        for (int i = 0; i < totalChunks; i++)
+        {
+            int start = i * maxPayloadSize;
+            int length = Math.Min(maxPayloadSize, message.Length - start);
+            string chunk = message.Substring(start, length);
+            
+            // Format: CHUNK:{id}:{index}:{total}:{type}:{payload}
+            string chunkMsg = $"CHUNK:{messageId}:{i}:{totalChunks}:{type}:{chunk}";
+            
+            if (string.IsNullOrEmpty(clientId))
+            {
+                await _bluetoothServer.SendToAllAsync(chunkMsg);
+            }
+            else
+            {
+                await _bluetoothServer.SendToClientAsync(chunkMsg, clientId);
+            }
+            
+            await Task.Delay(30); 
+        }
+    }
+
     private void StopTimer()
     {
         _timer?.Stop();

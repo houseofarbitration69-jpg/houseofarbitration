@@ -27,11 +27,11 @@ public static class ServicesExtensions
         builder.Services.AddScoped<IWarningService, WarningService>();
         builder.Services.AddScoped<IAlertService, AlertService>();
 
-#if DEBUG
-        builder.Services.AddSingleton<IBluetoothService, MockBluetoothService>();
-        builder.Services.AddSingleton<IBluetoothServer, MockBluetoothServer>();
-        builder.Services.AddSingleton<IBluetoothClient, MockBluetoothClient>();
-#else
+//#if DEBUG
+//        builder.Services.AddSingleton<IBluetoothService, MockBluetoothService>();
+//        builder.Services.AddSingleton<IBluetoothServer, MockBluetoothServer>();
+//        builder.Services.AddSingleton<IBluetoothClient, MockBluetoothClient>();
+//#else
 #if ANDROID
         builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
         builder.Services.AddSingleton<IBluetoothServer, BluetoothServer>();
@@ -41,7 +41,7 @@ public static class ServicesExtensions
         builder.Services.AddSingleton<IBluetoothServer, BluetoothServer>();
         builder.Services.AddSingleton<IBluetoothClient, BluetoothClient>();
 #endif
-#endif
+//#endif
 
         return builder;
     }

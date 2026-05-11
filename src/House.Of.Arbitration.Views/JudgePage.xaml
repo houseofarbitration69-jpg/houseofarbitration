@@ -5,6 +5,7 @@
     xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
@@ -21,6 +22,10 @@
             <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter" />
             <mct:IsNullConverter x:Key="IsNullConverter" />
             <mct:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <converters:GenreToImageConverter x:Key="GenreToImageConverter" />
+            <converters:GenreToBoolConverter x:Key="GenreToBoolConverter" />
+            <converters:GenreToFontConverter x:Key="GenreToFontConverter" />
+            <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
 
             <Style x:Key="MainCompetitorNameStyle" TargetType="Label">
                 <Setter Property="TextColor" Value="White"/>
@@ -91,7 +96,7 @@
                                 </Grid>
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer 
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=ConnectCommand}" 
+                                        Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=ConnectCommand}" 
                                         CommandParameter="{Binding .}"
                                     />
                                 </Border.GestureRecognizers>
@@ -180,34 +185,175 @@
 
                             <!-- Competitor Names -->
                             <Grid ColumnDefinitions="*,*">
-                                <!-- Red Side -->
+                                <!-- Competitor 1 -->
                                 <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                                    <Label Text="ROUGE" FontSize="24" FontAttributes="Bold" TextColor="White" Opacity="0.7" HorizontalOptions="Center"/>
-                                    <Label Text="{Binding RedName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="48"/>
+                                    <!--<Label Text="ROUGE" FontSize="24" FontAttributes="Bold" TextColor="White" Opacity="0.7" HorizontalOptions="Center"/>
+                                    <Label Text="{Binding RedName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="48"/>-->
+                                    <Border 
+                                        StrokeShape="RoundRectangle 50" 
+                                        HeightRequest="100" 
+                                        WidthRequest="100" 
+                                        HorizontalOptions="Center" 
+                                        Stroke="White" 
+                                        BackgroundColor="White"
+                                        StrokeThickness="3"
+                                        IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                                    >
+                                        <Image 
+                                            Source="{Binding Competitor1, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
+                                            Aspect="AspectFill" 
+                                        />
+                                    </Border>
+
+                                    <Border 
+                                        StrokeShape="RoundRectangle 50" 
+                                        HeightRequest="100" 
+                                        WidthRequest="100" 
+                                        HorizontalOptions="Center" 
+                                        Stroke="White" 
+                                        StrokeThickness="3"
+                                        BackgroundColor="White"
+                                        IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
+                                    >
+                                        <Label 
+                                            Text="{Binding Competitor1.Genre, Converter={StaticResource GenreToFontConverter}}" 
+                                            FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                                            FontSize="99" 
+                                            VerticalOptions="Center" 
+                                            HorizontalOptions="Center"
+                                        />
+                                    </Border>
+
+                                    <!-- Name on two lines -->
+                                    <VerticalStackLayout HorizontalOptions="Center">
+                                        <Label 
+                                            Text="{Binding Competitor1.LastName}" 
+                                            Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" 
+                                        />
+                                        <Label Text="{Binding Competitor1.FirstName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="32" Margin="0,-5,0,0" />
+                                    </VerticalStackLayout>
+
+                                    <!-- Club & Country -->
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Competitor1.Club}" Style="{StaticResource MainCompetitorClubStyle}" FontSize="18" />
+                                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                                            <Image Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                           WidthRequest="25" HeightRequest="15" VerticalOptions="Center" />
+                                            <Label Text="{Binding Competitor1.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
                                 </VerticalStackLayout>
 
-                                <!-- Blue Side -->
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10">
-                                    <Label Text="BLEU" FontSize="24" FontAttributes="Bold" TextColor="White" Opacity="0.7" HorizontalOptions="Center"/>
-                                    <Label Text="{Binding BlueName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="48"/>
+                                <!-- Competitor 2 -->
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="0,5,0,0">
+                                    <!-- Circular Photo / Icon -->
+                                    <Border 
+                                        StrokeShape="RoundRectangle 50" 
+                                        HeightRequest="100" 
+                                        WidthRequest="100" 
+                                        HorizontalOptions="Center" 
+                                        Stroke="White" 
+                                        BackgroundColor="White"
+                                        StrokeThickness="3"
+                                        IsVisible="{Binding Competitor2.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                                    >
+                                        <Image 
+                                            Source="{Binding Competitor2, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
+                                            Aspect="AspectFill" 
+                                        />
+                                    </Border>
+
+                                    <Border 
+                                        StrokeShape="RoundRectangle 50" 
+                                        HeightRequest="100" 
+                                        WidthRequest="100" 
+                                        HorizontalOptions="Center" 
+                                        Stroke="White" 
+                                        StrokeThickness="3"
+                                        BackgroundColor="White"
+                                        IsVisible="{Binding Competitor2.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
+                                    >
+                                        <Label 
+                                            Text="{Binding Competitor2.Genre, Converter={StaticResource GenreToFontConverter}}" 
+                                            FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                                            FontSize="99" 
+                                            VerticalOptions="Center" 
+                                            HorizontalOptions="Center"
+                                        />
+                                    </Border>
+
+                                    <!-- Name on two lines -->
+                                    <VerticalStackLayout HorizontalOptions="Center">
+                                        <Label Text="{Binding Competitor2.LastName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" />
+                                        <Label Text="{Binding Competitor2.FirstName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="32" Margin="0,-5,0,0" />
+                                    </VerticalStackLayout>
+
+                                    <!-- Club & Country -->
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Competitor2.Club}" Style="{StaticResource MainCompetitorClubStyle}" FontSize="18" />
+                                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                                            <Image 
+                                                Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                                WidthRequest="25" HeightRequest="15" VerticalOptions="Center" />
+                                            <Label Text="{Binding Competitor2.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                    </VerticalStackLayout>
                                 </VerticalStackLayout>
                             </Grid>
 
                             <!-- Timer Overlay -->
-                            <Border HorizontalOptions="Center" VerticalOptions="Center" Padding="25,10" BackgroundColor="#333" Stroke="White" StrokeThickness="3" StrokeShape="RoundRectangle 20">
-                                <Label Text="{Binding TimeLeftDisplay}" TextColor="White" FontSize="72" FontAttributes="Bold" FontFamily="Monospace"/>
+                            <Border 
+                                HorizontalOptions="Center" 
+                                VerticalOptions="End" 
+                                Padding="25,10,25,10" 
+                                Margin="0,0,0,-20"
+                                BackgroundColor="#333" 
+                                Stroke="White" 
+                                StrokeThickness="3" 
+                                StrokeShape="RoundRectangle 20"
+                            >
+                                <Label 
+                                    Text="{Binding TimeLeftDisplay}" 
+                                    TextColor="White" 
+                                    FontSize="72" 
+                                    FontAttributes="Bold" 
+                                    FontFamily="Monospace"
+                                />
                             </Border>
                         </Grid>
                     </Grid>
 
                     <!-- Footer Info (Judge Position & Connection Status) -->
-                    <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center" Spacing="30">
+                    <HorizontalStackLayout 
+                        Grid.Row="2" 
+                        HorizontalOptions="Center" 
+                        Spacing="30"
+                    >
                         <HorizontalStackLayout Spacing="10">
-                            <BoxView Color="{DynamicResource ValidColor}" WidthRequest="20" HeightRequest="20" CornerRadius="10" VerticalOptions="Center"/>
-                            <Label Text="SERVEUR CONNECTÉ" TextColor="{DynamicResource ValidColor}" FontSize="18" FontAttributes="Bold" VerticalOptions="Center"/>
+                            <BoxView 
+                                Color="{DynamicResource ValidColor}" 
+                                WidthRequest="20" 
+                                HeightRequest="20" 
+                                CornerRadius="10" 
+                                VerticalOptions="Center"
+                                BackgroundColor="Transparent"
+                            />
+                            <Label 
+                                Text="CONNECTÉ" 
+                                TextColor="{DynamicResource ValidColor}" 
+                                FontSize="18" 
+                                FontAttributes="Bold" 
+                                VerticalOptions="Center"
+                            />
                         </HorizontalStackLayout>
                         
-                        <Label Text="{Binding SelectedJudge.Name, StringFormat='POSITION : {0}'}" TextColor="White" FontSize="24" FontAttributes="Bold" VerticalOptions="Center"/>
+                        <Label 
+                            Text="{Binding SelectedJudge.Name, StringFormat='{0}'}" 
+                            TextColor="White" 
+                            FontSize="18" 
+                            FontAttributes="Bold"
+                            VerticalOptions="Center"
+                        />
                     </HorizontalStackLayout>
                 </Grid>
             </Grid>
