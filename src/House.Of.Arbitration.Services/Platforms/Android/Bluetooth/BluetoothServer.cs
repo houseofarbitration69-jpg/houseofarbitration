@@ -135,13 +135,17 @@ public class BluetoothServer : IBluetoothServer
 
                 foreach (var chunk in _transferManager.PrepareMessagesForSending(message))
                 {
+#pragma warning disable CA1422
                     characteristic.SetValue(Encoding.UTF8.GetBytes(chunk));
+#pragma warning restore CA1422
 
                     foreach (var device in _connectedDevices)
                     {
                         if (device != null && device.Address != null && _subscribedDevices.Contains(device.Address))
                         {
+#pragma warning disable CA1422
                             _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
+#pragma warning restore CA1422
                         }
                     }
 
@@ -176,8 +180,10 @@ public class BluetoothServer : IBluetoothServer
 
                     foreach (var chunk in _transferManager.PrepareMessagesForSending(message))
                     {
+#pragma warning disable CA1422
                         characteristic.SetValue(Encoding.UTF8.GetBytes(chunk));
                         _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
+#pragma warning restore CA1422
 
                         if (chunk.Length > 0)
                             await Task.Delay(30);

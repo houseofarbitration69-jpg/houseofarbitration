@@ -12,10 +12,6 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 
 public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
 {
-    #region Services
-    private readonly IPopupService _popupService;
-    #endregion
-
     #region Attributs
     private CategoryModel? _category;
 
@@ -29,7 +25,10 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     private int? _weightMax = null;
     #endregion
 
-    #region Properties    
+    #region Properties
+    /// <summary>
+    /// Obtient ou définit la catégorie
+    /// </summary>
     public CategoryModel? Category
     {
         get => _category;
@@ -121,8 +120,6 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     public CategoryPopupViewModel(IPopupService popupService, ILogger<CategoryPopupViewModel> logger, ResourceProvider resourceProvider)
         : base(logger, resourceProvider, popupService)
     {
-        _popupService = popupService;
-
         Title = resourceProvider.NEW_CATEGORY;
 
         // Initialisation des listes traduites via le manager global

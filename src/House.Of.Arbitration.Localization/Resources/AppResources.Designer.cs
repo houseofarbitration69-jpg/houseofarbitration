@@ -421,6 +421,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [GENERATE DATA].
+        /// </summary>
+        public static string GENERATE_DATA {
+            get {
+                return ResourceManager.GetString("GENERATE_DATA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [GENRE].
         /// </summary>
         public static string GENRE {
@@ -435,6 +444,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string GRADE {
             get {
                 return ResourceManager.GetString("GRADE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [HISTORICS].
+        /// </summary>
+        public static string HISTORICS {
+            get {
+                return ResourceManager.GetString("HISTORICS", resourceCulture);
             }
         }
         

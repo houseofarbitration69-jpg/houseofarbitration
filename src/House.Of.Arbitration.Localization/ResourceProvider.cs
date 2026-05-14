@@ -352,12 +352,21 @@ LocalizationResourceManager.Instance.GetValue(nameof(CHOOSE_AGE_RANGE));
     /// </summary>
     public string NO_CATEGORIES =>
 LocalizationResourceManager.Instance.GetValue(nameof(NO_CATEGORIES));
-
     /// <summary>
     /// Gets the translated "JUDGE" string.
     /// </summary>
     public string JUDGE =>
 LocalizationResourceManager.Instance.GetValue(nameof(JUDGE));
+    /// <summary>
+    /// Gets the translated "HISTORICS" string.
+    /// </summary>
+    public string HISTORICS =>
+LocalizationResourceManager.Instance.GetValue(nameof(HISTORICS));
+    /// <summary>
+    /// Gets the translated "GENERATE_DATA" string.
+    /// </summary>
+    public string GENERATE_DATA =>
+LocalizationResourceManager.Instance.GetValue(nameof(GENERATE_DATA));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

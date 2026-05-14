@@ -63,7 +63,8 @@
                             <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                         </DataTrigger>
                     </Border.Triggers>
-                    <Picker 
+                    <Picker
+                        x:DataType="models:CategoryType"
                         ItemsSource="{Binding CategoryTypes}"
                         SelectedItem="{Binding SelectedType}"
                         ItemDisplayBinding="{Binding DisplayName}"

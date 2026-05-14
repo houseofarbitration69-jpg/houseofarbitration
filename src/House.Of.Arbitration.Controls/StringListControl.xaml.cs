@@ -76,7 +76,9 @@ public partial class StringListControl : ContentView
                 foreach (var item in Items)
                 {
                     if (item != null)
-                        InternalItems.Add(item.ToString());
+                    {
+                        InternalItems.Add(item.ToString()!);
+                    }
                 }
             }
         });

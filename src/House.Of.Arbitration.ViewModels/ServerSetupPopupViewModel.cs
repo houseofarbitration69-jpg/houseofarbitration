@@ -12,19 +12,41 @@ namespace House.Of.Arbitration.ViewModels;
 
 public partial class ServerSetupPopupViewModel : BaseViewModel
 {
-    [ObservableProperty]
+    #region Attributs
     private string _serverName = "SERVEUR_KUNGFU";
-
-    [ObservableProperty]
     private string _serverDescription = "Ring 1";
+    #endregion
 
+    #region Properties
+    /// <summary>
+    /// Obtient ou définit le nom du serveur
+    /// </summary>
+    public string ServerName
+    { 
+        get => _serverName; 
+        set => SetProperty(ref _serverName, value); 
+    }
+
+    /// <summary>
+    /// Obtient ou définit la description du serveur
+    /// </summary>
+    public string ServerDescription
+    {
+        get => _serverDescription;
+        set => SetProperty(ref _serverDescription, value);
+    }
+    #endregion
+
+    #region Constructors
     public ServerSetupPopupViewModel(
         ILogger<ServerSetupPopupViewModel> logger,
         ResourceProvider resourceProvider,
         IPopupService popupService) : base(logger, resourceProvider, popupService)
     {
     }
+    #endregion
 
+    #region Commands
     [RelayCommand]
     private async Task Confirm()
     {
@@ -36,6 +58,7 @@ public partial class ServerSetupPopupViewModel : BaseViewModel
     {
         await _popupService.ClosePopupAsync(Shell.Current);
     }
+    #endregion
 }
 
 public class ServerSetupResult

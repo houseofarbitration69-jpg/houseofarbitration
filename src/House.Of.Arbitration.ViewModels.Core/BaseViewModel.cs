@@ -111,7 +111,7 @@ public partial class BaseViewModel : ObservableObject
     #region UI Methods
     protected async Task DisplayAlert(string title, string message, string cancel)
     {
-        await Shell.Current.CurrentPage.DisplayAlert(title, message, cancel);
+        await Shell.Current.CurrentPage.DisplayAlertAsync(title, message, cancel);
     }
 
     protected async Task<bool> DisplayConfirmation(string title, string message, string accept, string cancel)

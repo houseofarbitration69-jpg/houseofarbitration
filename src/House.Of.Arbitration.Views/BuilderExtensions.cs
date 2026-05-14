@@ -26,6 +26,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<DrawPage>();
         builder.Services.AddTransient<DragDropPage>();
         builder.Services.AddTransient<ServerPage>();
+        builder.Services.AddTransient<RefereeDataPage>();
 
         builder.Services.AddTransientPopup<CategoryPopup, CategoryPopupViewModel>();
         builder.Services.AddTransientPopup<CompetitorPopup, CompetitorPopupViewModel>();

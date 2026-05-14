@@ -12,7 +12,7 @@
     x:Class="House.Of.Arbitration.Views.HomePage"
     x:DataType="vm:HomeViewModel"
     x:Name="this"
-    Shell.NavBarIsVisible="False">
+>
     <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,250,*">
         <Label 
             Grid.Row="0" 
@@ -43,11 +43,20 @@
                 CommandParameter="JudgePage"
             />
             <controls:IconButton 
-                Text="TEST"
+                Text="{Binding Resources.HISTORICS}"
+                IsFullWidth="True"
+                ButtonBackgroundColor="{DynamicResource ValidColor}"
+                TextColor="{DynamicResource PrimaryTextColor}"
+                Command="{Binding NavigateToCommand}"
+                CommandParameter="RefereeDataPage"
+            />
+            <controls:IconButton 
+                Text="{Binding Resources.GENERATE_DATA}"
                 IsFullWidth="True"
                 ButtonBackgroundColor="{DynamicResource ValidColor}"
                 TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding SeedDataCommand}"
+                Margin="0,20,0,0"
             />
         </VerticalStackLayout>
     </Grid>

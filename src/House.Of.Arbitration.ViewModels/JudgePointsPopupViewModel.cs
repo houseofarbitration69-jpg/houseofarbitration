@@ -1,26 +1,48 @@
+#region Imports
 using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
+#endregion
 
 namespace House.Of.Arbitration.ViewModels;
 
 public partial class JudgePointsPopupViewModel : ObservableObject, IQueryAttributable
 {
+    #region Services
     private readonly IPopupService _popupService;
-    
-    [ObservableProperty]
+    #endregion
+
+    #region Attributs
     private JudgeModel _judge = new();
+    #endregion
 
+    #region Properties
+    /// <summary>
+    /// 
+    /// </summary>
+    public JudgeModel Judge
+    {
+        get => _judge;
+        set => SetProperty(ref _judge, value);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public ResourceProvider Resources { get; }
+    #endregion
 
+    #region Constructors
     public JudgePointsPopupViewModel(IPopupService popupService, ResourceProvider resourceProvider)
     {
         _popupService = popupService;
         Resources = resourceProvider;
     }
+    #endregion
 
+    #region Public Methods
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey("Judge") && query["Judge"] is JudgeModel judge)
@@ -35,7 +57,9 @@ public partial class JudgePointsPopupViewModel : ObservableObject, IQueryAttribu
             };
         }
     }
+    #endregion
 
+    #region Commands
     [RelayCommand]
     private void AddRedPoint() => Judge.RedPoints++;
 
@@ -59,4 +83,5 @@ public partial class JudgePointsPopupViewModel : ObservableObject, IQueryAttribu
     {
         await _popupService.ClosePopupAsync(Shell.Current);
     }
+    #endregion
 }

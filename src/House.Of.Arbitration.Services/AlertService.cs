@@ -32,7 +32,7 @@ public class AlertService : IAlertService
         {
             if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page != null)
             {
-                await Application.Current.Windows[0].Page.DisplayAlertAsync(title, message, cancel);
+                await Application.Current.Windows[0].Page!.DisplayAlertAsync(title, message, cancel);
             }
         });
     }

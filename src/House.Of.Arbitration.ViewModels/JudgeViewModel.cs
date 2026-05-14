@@ -406,7 +406,7 @@ public partial class JudgeViewModel : BaseViewModel
                 {
                     foreach (var o in category.Draw.DrawOrders)
                     {
-                        o.Draw = null;
+                        //o.Draw = null;
                         CleanDrawCompetitor(o.Competitor, c => o.Competitor = c);
                     }
                 }

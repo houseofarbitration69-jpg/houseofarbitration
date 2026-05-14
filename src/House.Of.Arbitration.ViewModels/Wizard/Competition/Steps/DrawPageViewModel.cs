@@ -21,7 +21,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
     #region Attributs
     private CategoryModel? _category;
-    private ObservableCollection<CompetitorModel> _competitors = new();
+    private ObservableCollection<CompetitorModel?> _competitors = new();
     private ObservableCollection<BracketRoundViewModel> _rounds = new();
     private List<BracketSlotViewModel> _pouleSlots = new();
     private BracketSlotViewModel? _draggedSlot;
@@ -55,10 +55,14 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                         value.RoundType = RoundType.Order;
                     }
 
-                    // Extract CompetitorModels from CompetitorCategoryModels for UI usage
                     var competitorModels = value.Competitors?.Select(cc => cc.Competitor).ToList() ?? new();
-                    Competitors = new ObservableCollection<CompetitorModel>(competitorModels);
+
+                    if (competitorModels != null)
+                    {
+                        Competitors = new ObservableCollection<CompetitorModel?>(competitorModels);
+                    }
                 }
+
                 OnPropertyChanged(nameof(IsKnockouts));
                 OnPropertyChanged(nameof(IsPools));
                 OnPropertyChanged(nameof(IsOrder));
@@ -66,7 +70,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
-    public ObservableCollection<CompetitorModel> Competitors
+    public ObservableCollection<CompetitorModel?> Competitors
     {
         get => _competitors;
         set => SetProperty(ref _competitors, value);

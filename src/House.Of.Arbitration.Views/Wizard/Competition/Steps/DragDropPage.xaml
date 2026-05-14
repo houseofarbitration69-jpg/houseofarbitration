@@ -12,7 +12,9 @@
     x:TypeArguments="vm:DragDropPageViewModel"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.DragDropPage"
     x:Name="this"
-    BackgroundColor="{DynamicResource PageBackgroundColor}">
+    x:DataType="vm:DragDropPageViewModel"
+    BackgroundColor="{DynamicResource PageBackgroundColor}"
+>
 
     <ContentPage.Resources>
         <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
@@ -53,7 +55,7 @@
                                                         <RoundRectangle CornerRadius="5"/>
                                                     </Border.StrokeShape>
                                                     <Border.Triggers>
-                                                        <DataTrigger TargetType="Border" Binding="{Binding BindingContext.IsDragging, Source={x:Reference this}}" Value="True">
+                                                        <DataTrigger TargetType="Border" Binding="{Binding x:DataType='vm:DragDropPageViewModel', Source={x:Reference this}, Path=IsDragging}" Value="True">
                                                             <Setter Property="Stroke" Value="{DynamicResource EditColor}" />
                                                             <Setter Property="StrokeThickness" Value="2" />
                                                         </DataTrigger>
@@ -63,14 +65,14 @@
                                                                    TextColor="Black" 
                                                                    VerticalOptions="Center" />
                                                         <Label Grid.Column="1" Text="➕" 
-                                                                   IsVisible="{Binding BindingContext.IsDragging, Source={x:Reference this}}"
+                                                                   IsVisible="{Binding x:DataType='vm:DragDropPageViewModel', Source={x:Reference this}, Path=IsDragging}"
                                                                    FontSize="12" VerticalOptions="Center" Opacity="0.6" />
                                                     </Grid>
                                                     <Border.GestureRecognizers>
                                                         <DragGestureRecognizer 
                                                                 CanDrag="True" 
                                                                 DragStarting="OnDragStarting"
-                                                                DragStartingCommand="{Binding BindingContext.DragStartingCommand, Source={x:Reference this}}"
+                                                                DragStartingCommand="{Binding x:DataType='vm:DragDropPageViewModel', Source={x:Reference this}, Path=DragStartingCommand}"
                                                                 DragStartingCommandParameter="{Binding Slot1}" />
                                                         <DropGestureRecognizer 
                                                                 AllowDrop="True" 
@@ -90,7 +92,7 @@
                                                         <RoundRectangle CornerRadius="5"/>
                                                     </Border.StrokeShape>
                                                     <Border.Triggers>
-                                                        <DataTrigger TargetType="Border" Binding="{Binding BindingContext.IsDragging, Source={x:Reference this}}" Value="True">
+                                                        <DataTrigger TargetType="Border" Binding="{Binding x:DataType='vm:DragDropPageViewModel', Source={x:Reference this}, Path=IsDragging}" Value="True">
                                                             <Setter Property="Stroke" Value="{DynamicResource EditColor}" />
                                                             <Setter Property="StrokeThickness" Value="2" />
                                                         </DataTrigger>
@@ -100,14 +102,14 @@
                                                                    TextColor="Black" 
                                                                    VerticalOptions="Center" />
                                                         <Label Grid.Column="1" Text="➕" 
-                                                                   IsVisible="{Binding BindingContext.IsDragging, Source={x:Reference this}}"
+                                                                   IsVisible="{Binding x:DataType='vm:DragDropPageViewModel', Source={x:Reference this}, Path=IsDragging}"
                                                                    FontSize="12" VerticalOptions="Center" Opacity="0.6" />
                                                     </Grid>
                                                     <Border.GestureRecognizers>
                                                         <DragGestureRecognizer 
                                                                 CanDrag="True" 
                                                                 DragStarting="OnDragStarting"
-                                                                DragStartingCommand="{Binding BindingContext.DragStartingCommand, Source={x:Reference this}}"
+                                                                DragStartingCommand="{Binding x:DataType='vm:DragDropPageViewModel', Source={x:Reference this}, Path=DragStartingCommand}"
                                                                 DragStartingCommandParameter="{Binding Slot2}" />
                                                         <DropGestureRecognizer 
                                                                 AllowDrop="True" 

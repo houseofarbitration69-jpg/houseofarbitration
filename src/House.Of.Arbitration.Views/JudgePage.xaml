@@ -14,8 +14,7 @@
     x:Class="House.Of.Arbitration.Views.JudgePage"
     x:DataType="vm:JudgeViewModel"
     Title="{Binding Title}"
-    Shell.NavBarIsVisible="False">
-
+>
     <base:BasePage.Resources>
         <ResourceDictionary>
             <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />

@@ -136,8 +136,10 @@ public class BluetoothClient : IBluetoothClient
         {
             foreach (var chunk in _transferManager.PrepareMessagesForSending(message))
             {
+#pragma warning disable CA1422
                 characteristic?.SetValue(Encoding.UTF8.GetBytes(chunk ?? String.Empty));
                 _bluetoothGatt.WriteCharacteristic(characteristic);
+#pragma warning restore CA1422
 
                 if (chunk != null && chunk.Length > 0)
                     await Task.Delay(30);
@@ -190,9 +192,14 @@ public class BluetoothClient : IBluetoothClient
         {
             base.OnBatchScanResults(results);
 
-            foreach (var result in results)
+            if (results != null)
             {
-                OnScanResult(ScanCallbackType.AllMatchesAutoBatch, result);
+                foreach (var result in results)
+                {
+#pragma warning disable CA1416
+                    OnScanResult(ScanCallbackType.AllMatchesAutoBatch, result);
+#pragma warning restore CA1416
+                }
             }
         }
 
@@ -282,15 +289,23 @@ public class BluetoothClient : IBluetoothClient
 
                         if (descriptor != null)
                         {
-                            var value = BluetoothGattDescriptor.EnableNotificationValue.ToArray();
-                            if (Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu)
+                            var value = BluetoothGattDescriptor.EnableNotificationValue?.ToArray();
+
+                            if (value != null)
                             {
-                                gatt?.WriteDescriptor(descriptor, value);
-                            }
-                            else
-                            {
-                                descriptor.SetValue(value);
-                                gatt?.WriteDescriptor(descriptor);
+                                if (Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu)
+                                {
+#pragma warning disable CA1416
+                                    gatt?.WriteDescriptor(descriptor, value);
+#pragma warning restore CA1416
+                                }
+                                else
+                                {
+#pragma warning disable CA1422
+                                    descriptor.SetValue(value);
+                                    gatt?.WriteDescriptor(descriptor);
+#pragma warning restore CA1422
+                                }
                             }
 
                             //await _alertService.ShowToast("Notifications enabled for characteristic.");
@@ -317,9 +332,11 @@ public class BluetoothClient : IBluetoothClient
 
         public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, [GeneratedEnum] GattStatus status)
         {
+#pragma warning disable CA1416
             base.OnCharacteristicRead(gatt, characteristic, value, status);
+#pragma warning restore CA1416
 
-            if(status == GattStatus.Success)
+            if (status == GattStatus.Success)
             {
                 var data = Encoding.UTF8.GetString(value ?? new byte[0]);
                 var message = _parent._transferManager.ProcessReceivedData(data);
@@ -346,9 +363,10 @@ public class BluetoothClient : IBluetoothClient
 
         public override void OnCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value)
         {
+#pragma warning disable CA1416
             base.OnCharacteristicChanged(gatt, characteristic, value);
 
-            if (characteristic != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
+            if (characteristic != null && characteristic.Uuid != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
             {
                 var data = value != null ? Encoding.UTF8.GetString(value) : string.Empty;
                 var message = _parent._transferManager.ProcessReceivedData(data);
@@ -361,17 +379,19 @@ public class BluetoothClient : IBluetoothClient
                     });
                 }
             }
+#pragma warning restore CA1416
         }
 
         public override void OnCharacteristicChanged(BluetoothGatt? gatt, BluetoothGattCharacteristic? characteristic)
         {
+#pragma warning disable CA1422
             base.OnCharacteristicChanged(gatt, characteristic);
 
             // On Android 13 (API 33) and above, the version with the byte[] value parameter is called.
             // We skip this one to avoid duplicate processing.
             if (OperatingSystem.IsAndroidVersionAtLeast(33)) return;
 
-            if (characteristic != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
+            if (characteristic != null && characteristic.Uuid != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
             {
                 var bytes = characteristic.GetValue();
                 var data = bytes != null ? Encoding.UTF8.GetString(bytes) : string.Empty;
@@ -385,6 +405,7 @@ public class BluetoothClient : IBluetoothClient
                     });
                 }
             }
+#pragma warning restore CA1422
         }
         #endregion
     }

@@ -151,7 +151,7 @@ public partial class SuggestEntry : ContentView
     {
         if (e.CurrentSelection.FirstOrDefault() is var selectedItem && selectedItem != null)
         {
-            Text = selectedItem.ToString();
+            Text = selectedItem.ToString()!;
             IsSuggestionsVisible = false;
             
             if (sender is CollectionView cv)

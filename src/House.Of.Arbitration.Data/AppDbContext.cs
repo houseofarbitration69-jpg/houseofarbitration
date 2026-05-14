@@ -192,6 +192,9 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
+            item.HasOne(i => i.Competitor)
+                .WithMany()
+                .HasForeignKey(i => i.CompetitorId);
         });
 
         builder.Entity<DrawModel>(item =>

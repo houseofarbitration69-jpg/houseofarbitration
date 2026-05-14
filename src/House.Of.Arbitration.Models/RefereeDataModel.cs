@@ -34,6 +34,16 @@ public partial class RefereeDataModel : ObservableObject
     /// <summary>
     /// 
     /// </summary>
+    public int? CompetitorId { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public CompetitorModel? Competitor { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
     public int? DrawKnockoutId { get; set; }
 
     /// <summary>

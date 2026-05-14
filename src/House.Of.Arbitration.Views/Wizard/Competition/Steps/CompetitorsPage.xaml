@@ -11,9 +11,10 @@
     x:TypeArguments="vm:CompetitorsPageViewModel"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CompetitorsPage"
     x:Name="this"
+    x:DataType="vm:CompetitorsPageViewModel"
     Shell.PresentationMode="ModalNotAnimated"
-    BackgroundColor="{DynamicResource PageBackgroundColor}">
-
+    BackgroundColor="{DynamicResource PageBackgroundColor}"
+>
     <base:BasePage.Resources>
         <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
         <converters:WarningsToStringConverter x:Key="WarningsToStringConverter" />
@@ -82,14 +83,9 @@
                                 
                                 <!-- Warnings -->
                                 <Label Text="{Binding Warnings, Converter={StaticResource WarningsToStringConverter}}"
-                                       TextColor="{DynamicResource ErrorColor}" 
-                                       FontSize="12" 
+                                       TextColor="{DynamicResource ErrorColor}"
+                                       FontSize="12"
                                        Margin="0,5,0,0">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label" Binding="{Binding Source={RelativeSource Self}, Path=Text}" Value="">
-                                            <Setter Property="IsVisible" Value="False" />
-                                        </DataTrigger>
-                                    </Label.Triggers>
                                 </Label>
                             </VerticalStackLayout>
 

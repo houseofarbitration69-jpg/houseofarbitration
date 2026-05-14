@@ -1,20 +1,63 @@
+#region Imports
 using CommunityToolkit.Mvvm.ComponentModel;
+#endregion
 
 namespace House.Of.Arbitration.Models;
 
 public partial class JudgeModel : ObservableObject
 {
-    [ObservableProperty]
+    #region Attributs
     private int _redPoints;
-
-    [ObservableProperty]
     private int _bluePoints;
-
-    [ObservableProperty]
     private bool _isConnected;
-
-    [ObservableProperty]
     private string _name = string.Empty;
+    private int _number;
+    #endregion
 
-    public int Number { get; set; }
+    #region Properties
+    /// <summary>
+    /// Obtient ou définit les points rouge
+    /// </summary>
+    public int RedPoints
+    {
+        get => _redPoints;
+        set => SetProperty(ref _redPoints, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit les points bleu
+    /// </summary>
+    public int BluePoints
+    {
+        get => _bluePoints;
+        set => SetProperty(ref _bluePoints, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit si c'est connecté
+    /// </summary>
+    public bool IsConnected
+    {
+        get => _isConnected;
+        set => SetProperty(ref _isConnected, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le nom du jueg
+    /// </summary>
+    public string Name
+    {
+        get => _name;
+        set => SetProperty(ref _name, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le nombre
+    /// </summary>
+    public int Number 
+    {
+        get => _number;
+        set => SetProperty(ref _number, value);
+    }
+    #endregion
 }

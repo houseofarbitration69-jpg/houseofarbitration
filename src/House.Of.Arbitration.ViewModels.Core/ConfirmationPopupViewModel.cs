@@ -14,21 +14,51 @@ public partial class ConfirmationPopupViewModel : ObservableObject, IQueryAttrib
     #endregion
 
     #region Attributs
-    [ObservableProperty]
     private string _title = string.Empty;
-
-    [ObservableProperty]
     private string _message = string.Empty;
-
-    [ObservableProperty]
     private string _acceptText = string.Empty;
-
-    [ObservableProperty]
     private string _cancelText = string.Empty;
     #endregion
 
     #region Properties
     public ResourceProvider Resources { get; }
+
+    
+    /// <summary>
+    /// Obtient ou définit le titre
+    /// </summary>
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le message
+    /// </summary>
+    public string Message
+    {
+        get => _message;
+        set => SetProperty(ref _message, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le message d'acceptation
+    /// </summary>
+    public string AcceptText
+    {
+        get => _acceptText;
+        set => SetProperty(ref _acceptText, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le message d'annulation
+    /// </summary>
+    public string CancelText
+    {
+        get => _cancelText;
+        set => SetProperty(ref _cancelText, value);
+    }
     #endregion
 
     #region Constructor

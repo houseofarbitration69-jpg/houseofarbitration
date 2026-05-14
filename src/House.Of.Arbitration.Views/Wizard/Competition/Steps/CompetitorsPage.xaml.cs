@@ -9,5 +9,5 @@ public partial class CompetitorsPage
 	public CompetitorsPage(CompetitorsPageViewModel viewModel) : base(viewModel)
 	{
 		InitializeComponent();
-	}
+    }
 }

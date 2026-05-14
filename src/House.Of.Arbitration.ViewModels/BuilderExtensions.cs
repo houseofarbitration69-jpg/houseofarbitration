@@ -35,6 +35,7 @@ public static class BuilderExtensions
 
         builder.Services.AddTransient<DrawPageViewModel>();
         builder.Services.AddTransient<DragDropPageViewModel>();
+        builder.Services.AddTransient<RefereeDataViewModel>();
 
         return builder;
     }

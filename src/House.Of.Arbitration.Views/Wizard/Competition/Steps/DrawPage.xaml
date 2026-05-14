@@ -11,6 +11,7 @@
     x:TypeArguments="vm:DrawPageViewModel"
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.DrawPage"
     x:Name="this"
+    x:DataType="vm:DrawPageViewModel"
     BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ContentPage.Resources>

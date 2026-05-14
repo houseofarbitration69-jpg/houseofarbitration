@@ -25,6 +25,7 @@ public partial class ServerViewModel : BaseViewModel
     private readonly IRepository<DrawKnockoutModel> _drawKnockoutService;
     private readonly IRepository<DrawOrderModel> _drawOrderService;
     private readonly IRepository<DrawPoolsModel> _drawPoolsModel;
+    private readonly IRepository<RefereeDataModel> _refereeDataRepository;
     #endregion
 
     #region Attributs
@@ -124,7 +125,8 @@ public partial class ServerViewModel : BaseViewModel
         IRepository<CompetitionModel> competitionRepository,
         IRepository<DrawKnockoutModel> drawKnockoutService,
         IRepository<DrawOrderModel> drawOrderService,
-        IRepository<DrawPoolsModel> drawPoolsService
+        IRepository<DrawPoolsModel> drawPoolsService,
+        IRepository<RefereeDataModel> refereeDataRepository
     ) : base(logger, resourceProvider, popupService)
     {
         Title = "SERVER";
@@ -140,6 +142,7 @@ public partial class ServerViewModel : BaseViewModel
         _drawKnockoutService = drawKnockoutService;
         _drawOrderService = drawOrderService;
         _drawPoolsModel = drawPoolsService;
+        _refereeDataRepository = refereeDataRepository;
 
         for (int i = 1; i <= 5; i++)
         {
@@ -290,10 +293,12 @@ public partial class ServerViewModel : BaseViewModel
                             if (competitor1 != null && scoreData.CompetitorId == competitor1.Id)
                             {
                                 judge.RedPoints += scoreData.Score;
+                                await SaveRefereeData(judge, competitor1, scoreData.Score);
                             }
                             else if (competitor2 != null && scoreData.CompetitorId == competitor2.Id)
                             {
                                 judge.BluePoints += scoreData.Score;
+                                await SaveRefereeData(judge, competitor2, scoreData.Score);
                             }
                         }
                     }
@@ -335,7 +340,7 @@ public partial class ServerViewModel : BaseViewModel
         }
     }
 
-    private CompetitorModel? GetCompetitor(IDrawModel draw, bool red)
+    private CompetitorModel? GetCompetitor(IDrawModel? draw, bool red)
     {
         if (draw is DrawKnockoutModel k) return red ? k.Competitor1 : k.Competitor2;
         if (draw is DrawPoolsModel p) return red ? p.Competitor1 : p.Competitor2;
@@ -407,7 +412,7 @@ public partial class ServerViewModel : BaseViewModel
 
         foreach (var draw in sortedDraws.Where(d => !d.IsFinished))
         {
-            var currentCategoryName = draw.Draw.Category?.Name ?? "N/A";
+            var currentCategoryName = draw.Draw?.Category?.Name ?? "N/A";
             if (currentCategoryName != lastCategoryName)
             {
                 flattenedList.Add(currentCategoryName);
@@ -431,6 +436,26 @@ public partial class ServerViewModel : BaseViewModel
     #endregion
 
     #region Private Methods
+    private async Task SaveRefereeData(JudgeModel judge, CompetitorModel competitor, int score, bool isCorrection = false)
+    {
+        if (CurrentDraw == null) return;
+
+        var data = new RefereeDataModel
+        {
+            Date = DateTime.Now,
+            Referee = judge.Name,
+            Data = score.ToString(),
+            IsCorrection = isCorrection,
+            CompetitorId = competitor.Id
+        };
+
+        if (CurrentDraw is DrawKnockoutModel k) data.DrawKnockoutId = k.Id;
+        else if (CurrentDraw is DrawOrderModel o) data.DrawOrderId = o.Id;
+        else if (CurrentDraw is DrawPoolsModel p) data.DrawPoolsId = p.Id;
+
+        await _refereeDataRepository.AddAsync(data);
+    }
+
     private void StopTimer()
     {
         _timer?.Stop();
@@ -460,8 +485,8 @@ public partial class ServerViewModel : BaseViewModel
             await _drawKnockoutService.UpdateAsync(knockout);
 
             // Propagation logic for Knockouts
-            var allKnockouts = (await _drawKnockoutService.GetAllAsync()).Where(k => k.DrawId == knockout.DrawId).OrderBy(k => k.Order).ToList();
-            if (allKnockouts.Count > 0)
+            var allKnockouts = (await _drawKnockoutService.GetAllAsync())?.Where(k => k.DrawId == knockout.DrawId).OrderBy(k => k.Order).ToList();
+            if (allKnockouts != null && allKnockouts.Count > 0)
             {
                 // Determine 'm' (power of 2 bracket size)
                 // Total matches = m - 1
@@ -609,7 +634,7 @@ public partial class ServerViewModel : BaseViewModel
     [RelayCommand]
     private async Task SetTimer()
     {
-        string result = await Shell.Current.DisplayActionSheet("Définir le temps", "Annuler", null, "1:00", "1:30", "2:00", "3:00", "5:00");
+        string result = await Shell.Current.DisplayActionSheetAsync("Définir le temps", "Annuler", null, "1:00", "1:30", "2:00", "3:00", "5:00");
         if (result != null && result != "Annuler")
         {
             StopTimer();
@@ -625,44 +650,56 @@ public partial class ServerViewModel : BaseViewModel
     [RelayCommand]
     private async Task OpenJudgePopup(JudgeModel? judge)
     {
-        var parameters = new Dictionary<string, object>
+        if (judge != null)
         {
-            { "Judge", judge }
-        };
+            var parameters = new Dictionary<string, object> { { "Judge", judge } };
 
-        var result = await _popupService.ShowPopupAsync<JudgePointsPopupViewModel, JudgeModel>(Shell.Current, shellParameters: parameters);
+            var result = await _popupService.ShowPopupAsync<JudgePointsPopupViewModel, JudgeModel>(Shell.Current, shellParameters: parameters);
 
-        if (result.Result != null)
-        {
-            judge.RedPoints = result.Result.RedPoints;
-            judge.BluePoints = result.Result.BluePoints;
+            if (result.Result != null)
+            {
+                judge?.RedPoints = result.Result.RedPoints;
+                judge?.BluePoints = result.Result.BluePoints;
+            }
         }
     }
 
     [RelayCommand]
-    private void AddRedPoint(JudgeModel judge)
+    private async Task AddRedPoint(JudgeModel judge)
     {
         judge.RedPoints++;
+        var competitor = GetCompetitor(CurrentDraw, true);
+        if (competitor != null) await SaveRefereeData(judge, competitor, 1, true);
     }
 
     [RelayCommand]
-    private void RemoveRedPoint(JudgeModel judge)
+    private async Task RemoveRedPoint(JudgeModel judge)
     {
         if (judge.RedPoints > 0)
+        {
             judge.RedPoints--;
+            var competitor = GetCompetitor(CurrentDraw, true);
+            if (competitor != null) await SaveRefereeData(judge, competitor, -1, true);
+        }
     }
 
     [RelayCommand]
-    private void AddBluePoint(JudgeModel judge)
+    private async Task AddBluePoint(JudgeModel judge)
     {
         judge.BluePoints++;
+        var competitor = GetCompetitor(CurrentDraw, false);
+        if (competitor != null) await SaveRefereeData(judge, competitor, 1, true);
     }
 
     [RelayCommand]
-    private void RemoveBluePoint(JudgeModel judge)
+    private async Task RemoveBluePoint(JudgeModel judge)
     {
         if (judge.BluePoints > 0)
+        {
             judge.BluePoints--;
+            var competitor = GetCompetitor(CurrentDraw, false);
+            if (competitor != null) await SaveRefereeData(judge, competitor, -1, true);
+        }
     }
     #endregion
 }

@@ -318,4 +318,10 @@
   <data name="JUDGE" xml:space="preserve">
     <value>JUDGE</value>
   </data>
+  <data name="HISTORICS" xml:space="preserve">
+    <value>[HISTORICS]</value>
+  </data>
+  <data name="GENERATE_DATA" xml:space="preserve">
+    <value>[GENERATE DATA]</value>
+  </data>
 </root>

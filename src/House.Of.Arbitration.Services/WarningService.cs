@@ -112,12 +112,12 @@ public class WarningService : IWarningService
         }
     }
 
-    private List<WarningModel> CalculateWarnings(CompetitorModel competitor, CategoryModel category)
+    private List<WarningModel> CalculateWarnings(CompetitorModel? competitor, CategoryModel? category)
     {
         var warnings = new List<WarningModel>();
 
         // Genre Warning
-        if (category.Genre != Genre.Mixte && competitor.Genre != category.Genre)
+        if (category != null && category.Genre != Genre.Mixte && competitor != null && competitor.Genre != category.Genre)
         {
             warnings.Add(new WarningModel 
             { 
@@ -128,24 +128,24 @@ public class WarningService : IWarningService
         }
 
         // Age Warning
-        if (category.AgeRange != null)
+        if (category != null && category.AgeRange != null)
         {
-            int age = CalculateAge(competitor.BirthDate);
+            int age = CalculateAge(competitor?.BirthDate);
             if (age < category.AgeRange.MinAge || age > category.AgeRange.MaxAge)
             {
                 warnings.Add(new WarningModel 
                 { 
                     Label = $"L'âge ({age} ans) n'est pas dans la tranche {category.AgeRange.Label} ({category.AgeRange.MinAge}-{category.AgeRange.MaxAge} ans)",
-                    CompetitorId = competitor.Id,
+                    CompetitorId = competitor?.Id,
                     CategoryId = category.Id
                 });
             }
         }
 
         // Weight Warning (only for Sanda style categories)
-        if (category.Type == CategoryType.Sanda || category.Type == CategoryType.SandaLight)
+        if (category != null && category.Type == CategoryType.Sanda || category != null && category.Type == CategoryType.SandaLight)
         {
-            if (competitor.Weight < category.WeightMin || competitor.Weight > category.WeightMax)
+            if (competitor != null && competitor.Weight < category.WeightMin || competitor != null && competitor.Weight > category.WeightMax)
             {
                 warnings.Add(new WarningModel 
                 { 
@@ -159,11 +159,11 @@ public class WarningService : IWarningService
         return warnings;
     }
 
-    private int CalculateAge(DateTime birthDate)
+    private int CalculateAge(DateTime? birthDate)
     {
         DateTime today = DateTime.Today;
-        int age = today.Year - birthDate.Year;
-        if (birthDate.Date > today.AddYears(-age)) age--;
+        int age = today.Year - birthDate?.Year ?? DateTime.Now.Year;
+        if (birthDate?.Date > today.AddYears(-age)) age--;
         return age;
     }
 }

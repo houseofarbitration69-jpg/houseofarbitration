@@ -5,6 +5,7 @@
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls"
     x:Class="House.Of.Arbitration.Controls.IconButton"
+    x:DataType="controls:IconButton"
     x:Name="root">
 
     <ContentView.Resources>
@@ -12,14 +13,15 @@
         <converters:DoubleToCornerRadiusConverter x:Key="DoubleToCornerRadiusConverter" />
     </ContentView.Resources>
 
-    <Border x:Name="MainBorder" 
-            BackgroundColor="{Binding ButtonBackgroundColor, Source={x:Reference root}}"
-            Stroke="{Binding BorderBrush, Source={x:Reference root}}"
-            StrokeThickness="{Binding BorderThickness, Source={x:Reference root}}"
-            Padding="{Binding ButtonPadding, Source={x:Reference root}}"
-            HorizontalOptions="Fill"
-            VerticalOptions="Center">
-
+    <Border 
+        x:Name="MainBorder" 
+        BackgroundColor="{Binding ButtonBackgroundColor, Source={x:Reference root}}"
+        Stroke="{Binding BorderBrush, Source={x:Reference root}}"
+        StrokeThickness="{Binding BorderThickness, Source={x:Reference root}}"
+        Padding="{Binding ButtonPadding, Source={x:Reference root}}"
+        HorizontalOptions="Fill"
+        VerticalOptions="Center"
+    >
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="CommonStates">
                 <VisualState x:Name="Normal" />

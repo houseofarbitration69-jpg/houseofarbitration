@@ -6,6 +6,7 @@
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
     x:TypeArguments="vm:ServerSetupPopupViewModel"
     x:Class="House.Of.Arbitration.Views.ServerSetupPopup"
+    x:DataType="vm:ServerSetupPopupViewModel"
     BackgroundColor="#333333">
 
     <Border Stroke="White" StrokeThickness="2" BackgroundColor="#222222" Padding="20" WidthRequest="400" HorizontalOptions="Center" VerticalOptions="Center">

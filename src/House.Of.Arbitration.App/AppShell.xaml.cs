@@ -25,5 +25,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("Test", typeof(DragDropPage));
 
         Routing.RegisterRoute("Server", typeof(ServerPage));
+        Routing.RegisterRoute("RefereeDataPage", typeof(RefereeDataPage));
     }
 }
