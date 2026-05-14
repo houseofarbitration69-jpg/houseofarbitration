@@ -8,8 +8,6 @@ using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
-using System.IO.Compression;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 #endregion
@@ -19,7 +17,7 @@ namespace House.Of.Arbitration.ViewModels;
 [QueryProperty(nameof(CompetitionId), "CompetitionId")]
 public partial class ServerViewModel : BaseViewModel
 {
-    #region 
+    #region Services
     private readonly IAlertService _alertService;
     private readonly IBluetoothService _bluetoothService;
     private readonly IBluetoothServer _bluetoothServer;
@@ -40,9 +38,9 @@ public partial class ServerViewModel : BaseViewModel
 
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private bool _isTimerRunning;
+    private bool _isServerStarted;
     private IDispatcherTimer? _timer;
 
-    [ObservableProperty]
     private int _competitionId;
 
     private CompetitionModel? _currentCompetition;
@@ -95,11 +93,24 @@ public partial class ServerViewModel : BaseViewModel
         set => SetProperty(ref _isTimerRunning, value);
     }
 
+    public bool IsServerStarted
+    {
+        get => _isServerStarted;
+        set => SetProperty(ref _isServerStarted, value);
+    }
+
     public IDrawModel? CurrentDraw
     {
         get => _currentDraw;
         set => SetProperty(ref _currentDraw, value);
     }
+
+    public int CompetitionId
+    {
+        get => _competitionId;
+        set => SetProperty(ref _competitionId, value);
+    }
+
     #endregion
 
     #region Constructors
@@ -124,7 +135,6 @@ public partial class ServerViewModel : BaseViewModel
         _bluetoothServer = bluetoothServer;
 
         var serverId = _bluetoothServer.InstanceId.ToString().Substring(0, 8);
-        _alertService.ShowToast($"VM CREATED - ServerID:[{serverId}]");
 
         _competitionRepository = competitionRepository;
         _drawKnockoutService = drawKnockoutService;
@@ -150,7 +160,7 @@ public partial class ServerViewModel : BaseViewModel
                 else
                 {
                     StopTimer();
-                    await _bluetoothServer.SendToAllAsync("TIMER_STOP");
+                    await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_STOP);
                 }
             };
         }
@@ -160,42 +170,27 @@ public partial class ServerViewModel : BaseViewModel
     #region Event Handlers
     private async void OnDeviceConnected(object? sender, string clientId)
     {
-        var serverId = _bluetoothServer.InstanceId.ToString().Substring(0, 8);
-        await _alertService.ShowToast($"VM ServerID:[{serverId}] Connected Client:{clientId}");
+        //var serverId = _bluetoothServer.InstanceId.ToString().Substring(0, 8);
 
-        if (_currentCompetition != null)
-        {
-            try
-            {
-                var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
-                var compressedJson = CompressString(json);
-                await SendChunkedMessageAsync(clientId, "COMPETITION_DATA", compressedJson);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error sending competition data to client {ClientId}", clientId);
-            }
-        }
+        //if (_currentCompetition != null)
+        //{
+        //    try
+        //    {
+        //        var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
+        //        await _bluetoothServer.SendToClientAsync($"{Constants.Message.COMPETITION_DATA}{json}", clientId);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error sending competition data to client {ClientId}", clientId);
+        //    }
+        //}
 
-        // Send current timer state to the new client
-        await _bluetoothServer.SendToClientAsync($"TIMER_SET:{TimeLeftDisplay}", clientId);
-        if (IsTimerRunning)
-        {
-            await _bluetoothServer.SendToClientAsync("TIMER_START", clientId);
-        }
-    }
-
-    private string CompressString(string text)
-    {
-        byte[] buffer = Encoding.UTF8.GetBytes(text);
-        using var ms = new MemoryStream();
-        using (var zip = new GZipStream(ms, CompressionMode.Compress, true))
-        {
-            zip.Write(buffer, 0, buffer.Length);
-        }
-        ms.Position = 0;
-        byte[] compressed = ms.ToArray();
-        return Convert.ToBase64String(compressed);
+        //// Send current timer state to the new client
+        //await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", clientId);
+        //if (IsTimerRunning)
+        //{
+        //    await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, clientId);
+        //}
     }
 
     private void OnDeviceDisconnected(object? sender, string clientId)
@@ -212,13 +207,11 @@ public partial class ServerViewModel : BaseViewModel
 
     private async void OnMessageReceived(object? sender, (string ClientId, string Message) args)
     {
-        await _alertService.ShowToast($"OnMessageReceived => {args.Message}");
-
-        MainThread.BeginInvokeOnMainThread(() =>
+        MainThread.BeginInvokeOnMainThread(async () =>
         {
-            if (args.Message.StartsWith("JUDGE_POSITION:"))
+            if (args.Message.StartsWith(Constants.Message.JUDGE_POSITION))
             {
-                if (int.TryParse(args.Message.Substring("JUDGE_POSITION:".Length), out int position))
+                if (int.TryParse(args.Message.Substring(Constants.Message.JUDGE_POSITION.Length), out int position))
                 {
                     var judge = Judges.FirstOrDefault(j => j.Number == position);
                     if (judge != null)
@@ -238,6 +231,75 @@ public partial class ServerViewModel : BaseViewModel
 
                         judge.IsConnected = true;
                         _clientJudgeMapping[args.ClientId] = judge;
+
+                        // Envoie de la compétition
+                        if (_currentCompetition != null)
+                        {
+                            try
+                            {
+                                var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
+                                await _bluetoothServer.SendToClientAsync($"{Constants.Message.COMPETITION_DATA}{json}", args.ClientId);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error sending competition data to client {ClientId}", args.ClientId);
+                            }
+                        }
+
+                        // Envoi du match courant
+                        if (CurrentDraw != null)
+                        {
+                            try
+                            {
+                                var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
+                                
+                                await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
+
+                                await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error sending competition data to client {ClientId}", args.ClientId);
+                            }
+                        }
+                    }
+                }
+            }
+            else if(args.Message.StartsWith(Constants.Message.JUDGE_DISCONNECT))
+            {
+                if (_clientJudgeMapping.TryGetValue(args.ClientId, out var judge))
+                {
+                    judge.IsConnected = false;
+                    _clientJudgeMapping.Remove(args.ClientId);
+                }
+            }
+            else if(args.Message.StartsWith(Constants.Message.JUDGE_SCORE))
+            {
+                if (_clientJudgeMapping.TryGetValue(args.ClientId, out var judge))
+                {
+                    try
+                    {
+                        var json = args.Message.Substring(Constants.Message.JUDGE_SCORE.Length);
+                        var scoreData = JsonSerializer.Deserialize<TransfertScoreModel>(json, _jsonOptions);
+
+                        if (scoreData != null && CurrentDraw != null)
+                        {
+                            var competitor1 = GetCompetitor(CurrentDraw, true);
+                            var competitor2 = GetCompetitor(CurrentDraw, false);
+
+                            if (competitor1 != null && scoreData.CompetitorId == competitor1.Id)
+                            {
+                                judge.RedPoints += scoreData.Score;
+                            }
+                            else if (competitor2 != null && scoreData.CompetitorId == competitor2.Id)
+                            {
+                                judge.BluePoints += scoreData.Score;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error processing judge score from client {ClientId}", args.ClientId);
                     }
                 }
             }
@@ -260,14 +322,11 @@ public partial class ServerViewModel : BaseViewModel
                     currentDrawId = CurrentDraw.Id,
                     competitor1 = competitor1,
                     competitor2 = competitor2,
-                    //blueName = GetCompetitorName(CurrentDraw, false),
                     matchNumber = CurrentDraw.GlobalOrder
                 };
 
-                var json = JsonSerializer.Serialize(matchData, _jsonOptions);
-                //var json = JsonSerializer.Serialize(CurrentDraw, _jsonOptions);
-                await SendChunkedMessageAsync(null, "MATCH_INFO", json);
-                //await _bluetoothServer.SendToAllAsync($"MATCH_INFO:{json}");
+                var json = JsonSerializer.Serialize(new { Id = CurrentDraw.Id, Type = CurrentDraw.Type}, _jsonOptions);
+                await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{json}");
             }
             catch (Exception ex)
             {
@@ -302,17 +361,11 @@ public partial class ServerViewModel : BaseViewModel
 
         CheckBluetoothAvailabilityCommand.Execute(null);
 
-        // Auto-start disabled, now manual via popup
-        /*if (BluetoothAvailable)
-        {
-            await StartServer();
-        }*/
-
         if (CompetitionId > 0)
         {
-            _currentCompetition = await _competitionRepository.GetByIdAsync(CompetitionId, 
-                "Categories.AgeRange", 
-                "Categories.Competitors.Competitor.Country", 
+            _currentCompetition = await _competitionRepository.GetByIdAsync(CompetitionId,
+                "Categories.AgeRange",
+                "Categories.Competitors.Competitor.Country",
                 "Categories.Draw.DrawKnockouts.Competitor1.Country",
                 "Categories.Draw.DrawKnockouts.Competitor2.Country",
                 "Categories.Draw.DrawKnockouts.Winner",
@@ -331,7 +384,7 @@ public partial class ServerViewModel : BaseViewModel
         var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
 
         var allDraws = new List<IDrawModel>();
-        
+
         if (CompetitionId > 0)
         {
             if (knockouts != null) allDraws.AddRange(knockouts.Where(k => k.Draw?.Category?.CompetitionId == CompetitionId));
@@ -365,7 +418,7 @@ public partial class ServerViewModel : BaseViewModel
 
         Draws = new System.Collections.ObjectModel.ObservableCollection<object>(flattenedList);
 
-        await BroadcastMatchInfo();
+        //await BroadcastMatchInfo();
     }
 
     public override Task OnDisappearing()
@@ -378,34 +431,6 @@ public partial class ServerViewModel : BaseViewModel
     #endregion
 
     #region Private Methods
-    private async Task SendChunkedMessageAsync(string? clientId, string type, string message)
-    {
-        const int maxPayloadSize = 400; // Valeur sûre pour le BLE
-        int totalChunks = (int)Math.Ceiling((double)message.Length / maxPayloadSize);
-        string messageId = Guid.NewGuid().ToString().Substring(0, 4);
-
-        for (int i = 0; i < totalChunks; i++)
-        {
-            int start = i * maxPayloadSize;
-            int length = Math.Min(maxPayloadSize, message.Length - start);
-            string chunk = message.Substring(start, length);
-            
-            // Format: CHUNK:{id}:{index}:{total}:{type}:{payload}
-            string chunkMsg = $"CHUNK:{messageId}:{i}:{totalChunks}:{type}:{chunk}";
-            
-            if (string.IsNullOrEmpty(clientId))
-            {
-                await _bluetoothServer.SendToAllAsync(chunkMsg);
-            }
-            else
-            {
-                await _bluetoothServer.SendToClientAsync(chunkMsg, clientId);
-            }
-            
-            await Task.Delay(30); 
-        }
-    }
-
     private void StopTimer()
     {
         _timer?.Stop();
@@ -513,7 +538,7 @@ public partial class ServerViewModel : BaseViewModel
             // Reset timer and load next
             await ResetTimer();
             await OnAppearing();
-            await BroadcastMatchInfo();
+            //await BroadcastMatchInfo();
         }
     }
 
@@ -539,8 +564,19 @@ public partial class ServerViewModel : BaseViewModel
         {
             ServerName = result.Result.Name;
             Title = $"{ServerName} - {result.Result.Description}";
-            await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName);
+            if (await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName))
+            {
+                IsServerStarted = true;
+            }
         }
+    }
+
+    [RelayCommand]
+    private async Task StopServer()
+    {
+        await _bluetoothServer.StopAdvertising();
+        IsServerStarted = false;
+        Title = "SERVER";
     }
 
     [RelayCommand]
@@ -550,7 +586,7 @@ public partial class ServerViewModel : BaseViewModel
         {
             _timer?.Start();
             IsTimerRunning = true;
-            await _bluetoothServer.SendToAllAsync("TIMER_START");
+            await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_START);
         }
     }
 
@@ -558,7 +594,7 @@ public partial class ServerViewModel : BaseViewModel
     private async Task PauseTimer()
     {
         StopTimer();
-        await _bluetoothServer.SendToAllAsync("TIMER_PAUSE");
+        await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
     }
 
     [RelayCommand]
@@ -567,7 +603,7 @@ public partial class ServerViewModel : BaseViewModel
         StopTimer();
         _timeLeft = TimeSpan.FromMinutes(2); // Default reset
         OnPropertyChanged(nameof(TimeLeftDisplay));
-        await _bluetoothServer.SendToAllAsync($"TIMER_SET:{TimeLeftDisplay}");
+        await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
     }
 
     [RelayCommand]
@@ -581,7 +617,7 @@ public partial class ServerViewModel : BaseViewModel
             {
                 _timeLeft = newTime;
                 OnPropertyChanged(nameof(TimeLeftDisplay));
-                await _bluetoothServer.SendToAllAsync($"TIMER_SET:{TimeLeftDisplay}");
+                await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
             }
         }
     }

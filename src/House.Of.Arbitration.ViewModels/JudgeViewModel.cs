@@ -1,6 +1,5 @@
 #region Imports
 using CommunityToolkit.Maui;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
@@ -9,8 +8,6 @@ using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
-using System.IO.Compression;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 #endregion
@@ -24,40 +21,22 @@ public partial class JudgeViewModel : BaseViewModel
     private readonly IBluetoothClient _bluetoothClient;
     private readonly IBluetoothService _bluetoothService;
     private readonly IRepository<CompetitionModel> _competitionRepository;
+    private readonly IRepository<DrawKnockoutModel> _drawKnockoutService;
+    private readonly IRepository<DrawOrderModel> _drawOrderService;
+    private readonly IRepository<DrawPoolsModel> _drawPoolsService;
     #endregion
 
     #region Attributs
     private CompetitorModel? _competitor1;
     private CompetitorModel? _competitor2;
 
-    [ObservableProperty]
     private string _title;
-
-    [ObservableProperty]
     private bool _isScanning;
-
-    [ObservableProperty]
     private bool _isConnected;
-
-    [ObservableProperty]
     private JudgeModel? _selectedJudge;
-
-    [ObservableProperty]
     private string? _currentMatchInfo;
-
-    [ObservableProperty]
     private string? _categoryName;
-
-    [ObservableProperty]
-    private string? _redName;
-
-    [ObservableProperty]
-    private string? _blueName;
-
-    [ObservableProperty]
     private int _matchNumber;
-
-    [ObservableProperty]
     private string _timeLeftDisplay = "02:00";
 
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
@@ -72,9 +51,59 @@ public partial class JudgeViewModel : BaseViewModel
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
         PropertyNameCaseInsensitive = true
     };
+
+    private IDrawModel? _currentDraw;
     #endregion
 
     #region Properties
+    public string Title
+    {
+        get => _title;
+        set => SetProperty(ref _title, value);
+    }
+
+    public bool IsScanning
+    {
+        get => _isScanning;
+        set => SetProperty(ref _isScanning, value);
+    }
+
+    public bool IsConnected
+    {
+        get => _isConnected;
+        set => SetProperty(ref _isConnected, value);
+    }
+
+    public JudgeModel? SelectedJudge
+    {
+        get => _selectedJudge;
+        set => SetProperty(ref _selectedJudge, value);
+    }
+
+    public string? CurrentMatchInfo
+    {
+        get => _currentMatchInfo;
+        set => SetProperty(ref _currentMatchInfo, value);
+    }
+
+    public string? CategoryName
+    {
+        get => _categoryName;
+        set => SetProperty(ref _categoryName, value);
+    }
+
+    public int MatchNumber
+    {
+        get => _matchNumber;
+        set => SetProperty(ref _matchNumber, value);
+    }
+
+    public string TimeLeftDisplay
+    {
+        get => _timeLeftDisplay;
+        set => SetProperty(ref _timeLeftDisplay, value);
+    }
+
     public ObservableCollection<DiscoveredDeviceModel> DiscoveredDevices { get; } = new();
     public ObservableCollection<JudgeModel> JudgePositions { get; } = new();
 
@@ -89,6 +118,12 @@ public partial class JudgeViewModel : BaseViewModel
         get => _competitor2;
         set => SetProperty(ref _competitor2, value);
     }
+
+    public IDrawModel? CurrentDraw
+    {
+        get => _currentDraw;
+        set => SetProperty(ref _currentDraw, value);
+    }
     #endregion
 
     #region Constructors
@@ -99,13 +134,22 @@ public partial class JudgeViewModel : BaseViewModel
         IAlertService alertService,
         IBluetoothClient bluetoothClient,
         IBluetoothService bluetoothService,
-        IRepository<CompetitionModel> competitionRepository) : base(logger, resourceProvider, popupService)
+        IRepository<CompetitionModel> competitionRepository,
+        IRepository<DrawKnockoutModel> drawKnockoutService,
+        IRepository<DrawOrderModel> drawOrderService,
+        IRepository<DrawPoolsModel> drawPoolsService
+    ) : base(logger, resourceProvider, popupService)
     {
         _alertService = alertService;
 
         _bluetoothClient = bluetoothClient;
         _bluetoothService = bluetoothService;
+
         _competitionRepository = competitionRepository;
+        _drawKnockoutService = drawKnockoutService;
+        _drawOrderService = drawOrderService;
+        _drawPoolsService = drawPoolsService;
+
         _title = "JUDGE";
 
         for (int i = 1; i <= 5; i++)
@@ -146,11 +190,11 @@ public partial class JudgeViewModel : BaseViewModel
             }
             else
             {
-                DiscoveredDevices.Add(new DiscoveredDeviceModel 
-                { 
-                    DeviceId = device.DeviceId, 
-                    Name = device.Name, 
-                    Rssi = device.Rssi 
+                DiscoveredDevices.Add(new DiscoveredDeviceModel
+                {
+                    DeviceId = device.DeviceId,
+                    Name = device.Name,
+                    Rssi = device.Rssi
                 });
             }
         });
@@ -183,50 +227,19 @@ public partial class JudgeViewModel : BaseViewModel
         {
             try
             {
-                await _alertService.ShowToast($"OnMessageRecevied : {message}");
-
-                // Gestion du découpage (Chunking)
-                if (message.StartsWith("CHUNK:"))
-                {
-                    var parts = message.Split(':', 6);
-                    if (parts.Length < 6) return;
-
-                    string id = parts[1];
-                    int index = int.Parse(parts[2]);
-                    int total = int.Parse(parts[3]);
-                    string type = parts[4];
-                    string payload = parts[5];
-
-                    if (!_pendingChunks.ContainsKey(id))
-                    {
-                        _pendingChunks[id] = (type, new string?[total]);
-                    }
-
-                    var msgData = _pendingChunks[id];
-                    msgData.Chunks[index] = payload;
-
-                    if (msgData.Chunks.All(c => c != null))
-                    {
-                        string fullContent = string.Join("", msgData.Chunks);
-                        _pendingChunks.Remove(id);
-                        await ProcessMessageAsync(type, fullContent);
-                    }
-                    return;
-                }
-
-                if (message == "TIMER_START")
+                if (message == Constants.Message.TIMER_START)
                 {
                     _timer?.Start();
                     return;
                 }
-                
-                if (message == "TIMER_PAUSE")
+
+                if (message == Constants.Message.TIMER_PAUSE)
                 {
                     _timer?.Stop();
                     return;
                 }
 
-                if (message == "TIMER_STOP")
+                if (message == Constants.Message.TIMER_STOP)
                 {
                     _timer?.Stop();
                     _timeLeft = TimeSpan.Zero;
@@ -234,9 +247,9 @@ public partial class JudgeViewModel : BaseViewModel
                     return;
                 }
 
-                if (message.StartsWith("TIMER_SET:"))
+                if (message.StartsWith(Constants.Message.TIMER_SET))
                 {
-                    var timeStr = message.Substring("TIMER_SET:".Length);
+                    var timeStr = message.Substring(Constants.Message.TIMER_SET.Length);
                     if (TimeSpan.TryParseExact(timeStr, @"mm\:ss", null, out var newTime))
                     {
                         _timeLeft = newTime;
@@ -245,18 +258,46 @@ public partial class JudgeViewModel : BaseViewModel
                     return;
                 }
 
-                // Pour compatibilité ou messages simples
-                if (message.StartsWith("COMPETITION_DATA:"))
+                if (message.StartsWith(Constants.Message.COMPETITION_DATA))
                 {
-                    await ProcessMessageAsync("COMPETITION_DATA", message.Substring("COMPETITION_DATA:".Length));
+                    var content = message.Substring(Constants.Message.COMPETITION_DATA.Length);
+                    var competition = JsonSerializer.Deserialize<CompetitionModel>(content, _jsonOptions);
+                    if (competition != null)
+                    {
+                        // Clean the graph to avoid EF Core key/seed conflicts
+                        CleanCompetitionGraph(competition);
+
+                        var existing = await _competitionRepository.GetByIdAsync(competition.Id);
+                        if (existing != null)
+                            await _competitionRepository.UpdateAsync(competition);
+                        else
+                            await _competitionRepository.AddAsync(competition);
+
+                        await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
+                    }
                 }
-                else if (message.StartsWith("MATCH_INFO:"))
+                else if (message.StartsWith(Constants.Message.MATCH_INFO))
                 {
-                    await ProcessMessageAsync("MATCH_INFO", message.Substring("MATCH_INFO:".Length));
-                }
-                else
-                {
-                    CurrentMatchInfo = message;
+                    var content = message.Substring(Constants.Message.MATCH_INFO.Length);
+                    var matchData = JsonSerializer.Deserialize<MatchInfoData>(content, _jsonOptions);
+
+                    if (matchData != null)
+                    {
+                        switch (matchData.Type)
+                        {
+                            case RoundType.Knockouts:
+                                CurrentDraw = await _drawKnockoutService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser");
+                                break;
+                            case RoundType.Pools:
+                                CurrentDraw = await _drawPoolsService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser");
+
+                                CategoryName = CurrentDraw?.Draw?.Category?.Name;
+                                break;
+                            case RoundType.Order:
+                                CurrentDraw = await _drawOrderService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor.Country");
+                                break;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
@@ -266,64 +307,111 @@ public partial class JudgeViewModel : BaseViewModel
             }
         });
     }
+    #endregion
 
-    private async Task ProcessMessageAsync(string type, string content)
+    #region Private Methods
+    private void CleanCompetitionGraph(CompetitionModel competition)
     {
-        try
+        if (competition.Categories == null) return;
+
+        var competitorCache = new Dictionary<int, CompetitorModel>();
+        var categoryCache = new Dictionary<int, CategoryModel>();
+
+        // 1. First pass: Collect and deduplicate all categories and competitors
+        foreach (var category in competition.Categories.ToList())
         {
-            if (type == "COMPETITION_DATA")
+            if (category.Id > 0)
             {
-                string decompressedContent = DecompressString(content);
-                var competition = JsonSerializer.Deserialize<CompetitionModel>(decompressedContent, _jsonOptions);
-                if (competition != null)
+                if (categoryCache.TryGetValue(category.Id, out var existingCat))
                 {
-                    var existing = await _competitionRepository.GetByIdAsync(competition.Id);
-                    if (existing != null)
-                        await _competitionRepository.UpdateAsync(competition);
-                    else
-                        await _competitionRepository.AddAsync(competition);
-                    
-                    await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
+                    // If we already have this category instance, use it and skip
+                    int idx = competition.Categories.IndexOf(category);
+                    competition.Categories[idx] = existingCat;
+                    continue;
+                }
+                categoryCache[category.Id] = category;
+            }
+
+            category.Competition = null;
+            category.AgeRange = null; // Let EF use AgeRangeId
+
+            if (category.Competitors != null)
+            {
+                foreach (var compCat in category.Competitors)
+                {
+                    compCat.Category = null;
+                    if (compCat.Competitor != null && compCat.Competitor.Id > 0)
+                    {
+                        if (competitorCache.TryGetValue(compCat.Competitor.Id, out var existingComp))
+                        {
+                            compCat.Competitor = existingComp;
+                        }
+                        else
+                        {
+                            competitorCache[compCat.Competitor.Id] = compCat.Competitor;
+                            compCat.Competitor.Country = null; // Let EF use CountryIsoCode
+                            compCat.Competitor.Categories = null;
+                        }
+                    }
                 }
             }
-            else if (type == "MATCH_INFO")
-            {
-                var matchData = JsonSerializer.Deserialize<MatchInfoData>(content, _jsonOptions);
-                if (matchData != null)
-                {
-                    CategoryName = matchData.CategoryName;
-                    Competitor1 = matchData.Competitor1;
-                    Competitor2 = matchData.Competitor2;
 
-                    MatchNumber = matchData.MatchNumber;
-                    CurrentMatchInfo = $"{CategoryName} - Match #{MatchNumber}";
+            // Handle Draw and its competitors
+            if (category.Draw != null)
+            {
+                category.Draw.Category = null;
+
+                void CleanDrawCompetitor(CompetitorModel? competitor, Action<CompetitorModel?> setter)
+                {
+                    if (competitor != null && competitor.Id > 0)
+                    {
+                        if (competitorCache.TryGetValue(competitor.Id, out var existing))
+                        {
+                            setter(existing);
+                        }
+                        else
+                        {
+                            competitorCache[competitor.Id] = competitor;
+                            competitor.Country = null;
+                            competitor.Categories = null;
+                        }
+                    }
+                }
+
+                if (category.Draw.DrawKnockouts != null)
+                {
+                    foreach (var k in category.Draw.DrawKnockouts)
+                    {
+                        k.Draw = null;
+                        CleanDrawCompetitor(k.Competitor1, c => k.Competitor1 = c);
+                        CleanDrawCompetitor(k.Competitor2, c => k.Competitor2 = c);
+                        CleanDrawCompetitor(k.Winner, c => k.Winner = c);
+                        CleanDrawCompetitor(k.Looser, c => k.Looser = c);
+                    }
+                }
+
+                if (category.Draw.DrawPools != null)
+                {
+                    foreach (var p in category.Draw.DrawPools)
+                    {
+                        p.Draw = null;
+                        CleanDrawCompetitor(p.Competitor1, c => p.Competitor1 = c);
+                        CleanDrawCompetitor(p.Competitor2, c => p.Competitor2 = c);
+                        CleanDrawCompetitor(p.Winner, c => p.Winner = c);
+                        CleanDrawCompetitor(p.Looser, c => p.Looser = c);
+                    }
+                }
+
+                if (category.Draw.DrawOrders != null)
+                {
+                    foreach (var o in category.Draw.DrawOrders)
+                    {
+                        o.Draw = null;
+                        CleanDrawCompetitor(o.Competitor, c => o.Competitor = c);
+                    }
                 }
             }
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deserializing {Type}", type);
-            await _alertService.ShowToast($"Erreur de données : {type}");
-        }
-    }
-
-    private string DecompressString(string compressedText)
-    {
-        byte[] gZipBuffer = Convert.FromBase64String(compressedText);
-        using var ms = new MemoryStream(gZipBuffer);
-        using var zip = new GZipStream(ms, CompressionMode.Decompress);
-        using var reader = new StreamReader(zip, Encoding.UTF8);
-        return reader.ReadToEnd();
-    }
-
-    private class MatchInfoData
-    {
-        public string? CategoryName { get; set; }
-        public string? RedName { get; set; }
-        public string? BlueName { get; set; }
-        public int MatchNumber { get; set; }
-        public CompetitorModel? Competitor1 { get; set; }
-        public CompetitorModel? Competitor2 { get; set; }
     }
     #endregion
 
@@ -356,7 +444,18 @@ public partial class JudgeViewModel : BaseViewModel
         SelectedJudge = judge;
         if (IsConnected && _serverDeviceId != null)
         {
-            await _bluetoothClient.SendMessage(_serverDeviceId, $"JUDGE_POSITION:{judge.Number}");
+            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{judge.Number}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task AddScore(int competitorId)
+    {
+        var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = 1, CompetitorId = competitorId }, _jsonOptions);
+
+        if (IsConnected && _serverDeviceId != null)
+        {
+            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
         }
     }
     #endregion
@@ -364,9 +463,6 @@ public partial class JudgeViewModel : BaseViewModel
     #region Override Methods
     public override Task OnAppearing()
     {
-        var clientId = _bluetoothClient.InstanceId.ToString().Substring(0, 8);
-        _alertService.ShowToast($"Judge VM OnAppearing - ClientID:[{clientId}]");
-
         _bluetoothClient.DeviceDiscovered += OnDeviceDiscovered;
         _bluetoothClient.DeviceConnected += OnDeviceConnected;
         _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;
@@ -374,13 +470,19 @@ public partial class JudgeViewModel : BaseViewModel
         return base.OnAppearing();
     }
 
-    public override Task OnDisappearing()
+    public override async Task OnDisappearing()
     {
+        if (IsConnected && _serverDeviceId != null)
+        {
+            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_DISCONNECT}");
+        }
+
         _bluetoothClient.DeviceDiscovered -= OnDeviceDiscovered;
         _bluetoothClient.DeviceConnected -= OnDeviceConnected;
         _bluetoothClient.DeviceDisconnected -= OnDeviceDisconnected;
         _bluetoothClient.MessageReceived -= OnMessageReceived;
-        return base.OnDisappearing();
+
+        await base.OnDisappearing();
     }
     #endregion
 }

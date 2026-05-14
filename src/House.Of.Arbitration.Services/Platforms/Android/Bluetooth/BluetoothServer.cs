@@ -5,7 +5,6 @@ using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using House.Of.Arbitration.Services.Abstractions;
-using Microsoft.Maui.ApplicationModel;
 using System.Collections.ObjectModel;
 using System.Text;
 #endregion
@@ -42,6 +41,8 @@ public class BluetoothServer : IBluetoothServer
 
     private List<BluetoothDevice> _connectedDevices = new();
     private HashSet<string> _subscribedDevices = new();
+    private readonly BluetoothTransferManager _transferManager = new();
+    private readonly SemaphoreSlim _sendSemaphore = new(1, 1);
     #endregion
 
     #region Properties
@@ -104,7 +105,7 @@ public class BluetoothServer : IBluetoothServer
         service.AddCharacteristic(characteristic);
         _bluetoothGattServer?.AddService(service);
 
-        await _alertService.ShowToast("Bluetooth LE Server started advertising");
+        //await _alertService.ShowToast("Bluetooth LE Server started advertising");
 
         return true;
     }
@@ -114,7 +115,7 @@ public class BluetoothServer : IBluetoothServer
         _bluetoothLeAdvertiser?.StopAdvertising(_advertiseCallback);
         _bluetoothGattServer?.Close();
 
-        await _alertService.ShowToast("Bluetooth LE Server stopped advertising");
+        //await _alertService.ShowToast("Bluetooth LE Server stopped advertising");
     }
 
     public async Task SendMessage(string message)
@@ -124,60 +125,69 @@ public class BluetoothServer : IBluetoothServer
 
     public async Task SendToAllAsync(string message)
     {
-        await _alertService.ShowToast($"Attempting to send to all : '{message}'");
-
-        if (_connectedDevices.Any())
+        await _sendSemaphore.WaitAsync();
+        try
         {
-            var characteristic = _bluetoothGattServer?.GetService(ServiceUuid)?.GetCharacteristic(CharacteristicUuid);
-            characteristic?.SetValue(Encoding.UTF8.GetBytes(message));
-
-            await _alertService.ShowToast($"Sending to {_connectedDevices.Count} connected devices.");
-
-            foreach (var device in _connectedDevices)
+            if (_connectedDevices.Any())
             {
-                if (device != null && device.Address != null && _subscribedDevices.Contains(device!.Address))
-                {
-                    await _alertService.ShowToast($"Sending notification to subscribed device : {device.Address}");
+                var characteristic = _bluetoothGattServer?.GetService(ServiceUuid)?.GetCharacteristic(CharacteristicUuid);
+                if (characteristic == null) return;
 
-                    _bluetoothGattServer.NotifyCharacteristicChanged(device, characteristic, false);
-                }
-                else
+                foreach (var chunk in _transferManager.PrepareMessagesForSending(message))
                 {
-                    await _alertService.ShowToast($"Device not subscribed: {device?.Address}");
+                    characteristic.SetValue(Encoding.UTF8.GetBytes(chunk));
+
+                    foreach (var device in _connectedDevices)
+                    {
+                        if (device != null && device.Address != null && _subscribedDevices.Contains(device.Address))
+                        {
+                            _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
+                        }
+                    }
+
+                    if (chunk.Length > 0)
+                        await Task.Delay(30);
                 }
             }
+            else
+            {
+                await _alertService.ShowToast("No connected devices.");
+            }
         }
-        else
+        finally
         {
-            await _alertService.ShowToast("No connected devices.");
+            _sendSemaphore.Release();
         }
     }
 
     public async Task SendToClientAsync(string message, string clientId)
     {
-        await _alertService.ShowToast($"Attempting to send to client '{clientId}':'{message}'");
-
-        var device = _connectedDevices.FirstOrDefault(d => d.Address == clientId);
-
-        if (device != null && device.Address != null)
+        await _sendSemaphore.WaitAsync();
+        try
         {
-            if (_subscribedDevices.Contains(device.Address))
-            {
-                var characteristic = _bluetoothGattServer?.GetService(ServiceUuid)?.GetCharacteristic(CharacteristicUuid);
-                characteristic?.SetValue(Encoding.UTF8.GetBytes(message));
+            var device = _connectedDevices.FirstOrDefault(d => d.Address == clientId);
 
-                await _alertService.ShowToast($"Sending notification to subscribed device: {device.Address}");
-
-                _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
-            }
-            else
+            if (device != null && device.Address != null)
             {
-                await _alertService.ShowToast($"Device not subscribed: {device.Address}");
+                if (_subscribedDevices.Contains(device.Address))
+                {
+                    var characteristic = _bluetoothGattServer?.GetService(ServiceUuid)?.GetCharacteristic(CharacteristicUuid);
+                    if (characteristic == null) return;
+
+                    foreach (var chunk in _transferManager.PrepareMessagesForSending(message))
+                    {
+                        characteristic.SetValue(Encoding.UTF8.GetBytes(chunk));
+                        _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
+
+                        if (chunk.Length > 0)
+                            await Task.Delay(30);
+                    }
+                }
             }
         }
-        else
+        finally
         {
-            await _alertService.ShowToast($"Device not found: {clientId}");
+            _sendSemaphore.Release();
         }
     }
     #endregion
@@ -207,7 +217,7 @@ public class BluetoothServer : IBluetoothServer
         {
             base.OnStartSuccess(settingsInEffect);
 
-            await _alertService.ShowToast("Advertisement start succeeded.");
+            //await _alertService.ShowToast("Advertisement start succeeded.");
         }
 
         public override async void OnStartFailure([GeneratedEnum] AdvertiseFailure errorCode)
@@ -244,19 +254,22 @@ public class BluetoothServer : IBluetoothServer
 
             if (newState == ProfileState.Connected)
             {
-                await _alertService.ShowToast($"Device connected: {device?.Address}");
+                //await _alertService.ShowToast($"Device connected: {device?.Address}");
 
                 _parent.DeviceConnected?.Invoke(_parent, device?.Address ?? String.Empty);
 
-                if (device != null)
+                if (device != null && device.Address != null)
                 {
-                    _parent._connectedDevices.Add(device);
-                    MainThread.BeginInvokeOnMainThread(() => _parent.ConnectedClients.Add(device!.Address ?? String.Empty));
+                    if (!_parent._connectedDevices.Any(d => d.Address == device.Address))
+                    {
+                        _parent._connectedDevices.Add(device);
+                        MainThread.BeginInvokeOnMainThread(() => _parent.ConnectedClients.Add(device.Address!));
+                    }
                 }
             }
             else if (newState == ProfileState.Disconnected)
             {
-                await _alertService.ShowToast($"Device disconnected: {device?.Address ?? String.Empty}");
+                //await _alertService.ShowToast($"Device disconnected: {device?.Address ?? String.Empty}");
 
                 _parent.DeviceDisconnected?.Invoke(_parent, device?.Address ?? String.Empty);
 
@@ -276,7 +289,7 @@ public class BluetoothServer : IBluetoothServer
         {
             base.OnCharacteristicReadRequest(device, requestId, offset, characteristic);
 
-            await _alertService.ShowToast($"Characteristic read request from {device?.Address}");
+            //await _alertService.ShowToast($"Characteristic read request from {device?.Address}");
 
             if (characteristic != null && characteristic?.Uuid != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
             {
@@ -300,18 +313,18 @@ public class BluetoothServer : IBluetoothServer
         {
             base.OnCharacteristicWriteRequest(device, requestId, characteristic, preparedWrite, responseNeeded, offset, value);
 
-            await _alertService.ShowToast($"Characteristic write request from {device?.Address}:{Encoding.UTF8.GetString(value ?? new byte[0])}");
-
             if (characteristic != null && characteristic.Uuid != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
             {
-                var message = Encoding.UTF8.GetString(value ?? new byte[0]);
+                var data = Encoding.UTF8.GetString(value ?? new byte[0]);
+                var message = _parent._transferManager.ProcessReceivedData(data);
                 
-                await _alertService.ShowToast($"[{_parent.InstanceId.ToString().Substring(0,8)}] Invoking MessageReceived for {device?.Address}");
-
-                MainThread.BeginInvokeOnMainThread(() =>
+                if (message != null)
                 {
-                    _parent.MessageReceived?.Invoke(_parent, (device?.Address ?? string.Empty, message));
-                });
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        _parent.MessageReceived?.Invoke(_parent, (device?.Address ?? string.Empty, message));
+                    });
+                }
 
                 if (responseNeeded)
                 {
@@ -337,19 +350,19 @@ public class BluetoothServer : IBluetoothServer
         {
             base.OnDescriptorWriteRequest(device, requestId, descriptor, preparedWrite, responseNeeded, offset, value);
 
-            await _alertService.ShowToast($"OnDescriptorWriteRequest from {device?.Address}");
+            //await _alertService.ShowToast($"OnDescriptorWriteRequest from {device?.Address}");
 
             if (descriptor != null && descriptor.Uuid != null && descriptor.Uuid.Equals(_parent.CccdUuid))
             {
                 if (value != null && value.Length == 2 && value[0] == 1 && value[1] == 0)
                 {
-                    await _alertService.ShowToast($"Enabling notifications for {device?.Address}");
+                    //await _alertService.ShowToast($"Enabling notifications for {device?.Address}");
 
                     _parent._subscribedDevices.Add(device?.Address ?? String.Empty);
                 }
                 else if (value != null && value.Length == 2 && value[0] == 0 && value[1] == 0)
                 {
-                    await _alertService.ShowToast($"Disabling notifications for {device?.Address}");
+                    //await _alertService.ShowToast($"Disabling notifications for {device?.Address}");
 
                     _parent._subscribedDevices.Remove(device?.Address ?? String.Empty);
                 }
@@ -364,7 +377,7 @@ public class BluetoothServer : IBluetoothServer
             }
             else
             {
-                await _alertService.ShowToast($"Descriptor UUID not recognized:{descriptor?.Uuid}");
+                //await _alertService.ShowToast($"Descriptor UUID not recognized:{descriptor?.Uuid}");
 
                 if(responseNeeded)
                 {

@@ -323,6 +323,20 @@
                     HeightRequest="50"
                     WidthRequest="140"
                     Margin="0,0,0,0" 
+                    IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
+                />
+
+                <Button 
+                    Text="ARRETER" 
+                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=StopServerCommand}"
+                    BackgroundColor="Red"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="20"
+                    HeightRequest="50"
+                    WidthRequest="140"
+                    Margin="0,0,0,0" 
+                    IsVisible="{Binding IsServerStarted}"
                 />
 
                 <Button 

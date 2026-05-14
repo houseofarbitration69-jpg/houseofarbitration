@@ -10,6 +10,7 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">$(AndroidTarget)</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsTarget)</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsTarget)</TargetPlatformMinVersion>
+    <Configurations>Debug;Release;Debug - Server;Debug - Client</Configurations>
   </PropertyGroup>
 
 	<ItemGroup>

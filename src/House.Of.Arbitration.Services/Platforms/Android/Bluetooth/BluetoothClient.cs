@@ -39,6 +39,8 @@ public class BluetoothClient : IBluetoothClient
     private Dictionary<string, BluetoothDevice> _discoveredDevices = new Dictionary<string, BluetoothDevice>();
     private BluetoothGatt? _bluetoothGatt;
     private CustomGattClientCallback? _gattClientCallback;
+    private readonly BluetoothTransferManager _transferManager = new();
+    private readonly SemaphoreSlim _sendSemaphore = new(1, 1);
     #endregion
 
     #region Constructors
@@ -73,14 +75,14 @@ public class BluetoothClient : IBluetoothClient
             _bluetoothLeScanner?.StartScan(new List<ScanFilter> { filter }, settings, _scanCallback);
         }
 
-        await _alertService.ShowToast("Bluetooth LE Client started scanning.");
+        //await _alertService.ShowToast("Bluetooth LE Client started scanning.");
     }
 
     public async Task StopScan()
     {
         _bluetoothLeScanner?.StopScan(_scanCallback);
 
-        await _alertService.ShowToast("Bluetooth LE Client stopped scanning.");
+        //await _alertService.ShowToast("Bluetooth LE Client stopped scanning.");
     }
 
     public async Task ConnectToDevice(string deviceId)
@@ -103,8 +105,8 @@ public class BluetoothClient : IBluetoothClient
     public async Task DisconnectFromDevice(string deviceId)
     {
         _bluetoothGatt?.Disconnect();
-
-        await _alertService.ShowToast($"Disconnected from {deviceId}");
+        _transferManager.Clear();
+        //await _alertService.ShowToast($"Disconnected from {deviceId}");
     }
 
     public async Task SendMessage(string deviceId, string message)
@@ -129,11 +131,24 @@ public class BluetoothClient : IBluetoothClient
             return;
         }
 
-        characteristic?.SetValue(Encoding.UTF8.GetBytes(message ?? String.Empty));
+        await _sendSemaphore.WaitAsync();
+        try
+        {
+            foreach (var chunk in _transferManager.PrepareMessagesForSending(message))
+            {
+                characteristic?.SetValue(Encoding.UTF8.GetBytes(chunk ?? String.Empty));
+                _bluetoothGatt.WriteCharacteristic(characteristic);
 
-        _bluetoothGatt.WriteCharacteristic(characteristic);
+                if (chunk != null && chunk.Length > 0)
+                    await Task.Delay(30);
+            }
+        }
+        finally
+        {
+            _sendSemaphore.Release();
+        }
 
-        await _alertService.ShowToast($"Client sent : {message}");
+        //await _alertService.ShowToast($"Client sent : {message.Substring(0, Math.Min(20, message.Length))}...");
     }
     #endregion
 
@@ -167,7 +182,7 @@ public class BluetoothClient : IBluetoothClient
 
                 _parent.DeviceDiscovered?.Invoke(_parent, (result.Device.Address ?? String.Empty, result.Device.Name ?? "Unknown", result.Rssi));
 
-                await _alertService.ShowToast($"Discovered device:{result.Device.Name ?? "Unknown"} ({result.Device.Address}) - RSSI: {result.Rssi}");
+                //await _alertService.ShowToast($"Discovered device:{result.Device.Name ?? "Unknown"} ({result.Device.Address}) - RSSI: {result.Rssi}");
             }
         }
 
@@ -215,7 +230,7 @@ public class BluetoothClient : IBluetoothClient
 
             if (newState == ProfileState.Connected)
             {
-                await _alertService.ShowToast($"Connected to GATT server : {gatt?.Device?.Address}");
+                //await _alertService.ShowToast($"Connected to GATT server : {gatt?.Device?.Address}");
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -227,7 +242,7 @@ public class BluetoothClient : IBluetoothClient
             }
             else if (newState == ProfileState.Disconnected)
             {
-                await _alertService.ShowToast($"Disconnected from GATT server : {gatt?.Device?.Address}");
+                //await _alertService.ShowToast($"Disconnected from GATT server : {gatt?.Device?.Address}");
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -240,7 +255,7 @@ public class BluetoothClient : IBluetoothClient
         {
             base.OnMtuChanged(gatt, mtu, status);
             
-            await _alertService.ShowToast($"MTU changed to {mtu} (Status: {status})");
+            //await _alertService.ShowToast($"MTU changed to {mtu} (Status: {status})");
             
             // Proceed to service discovery after MTU is established
             gatt?.DiscoverServices();
@@ -252,7 +267,7 @@ public class BluetoothClient : IBluetoothClient
 
             if (status == GattStatus.Success)
             {
-                await _alertService.ShowToast("Services discovered");
+                //await _alertService.ShowToast("Services discovered");
 
                 var service = gatt?.GetService(_parent.ServiceUuid);
                 if (service != null)
@@ -267,18 +282,24 @@ public class BluetoothClient : IBluetoothClient
 
                         if (descriptor != null)
                         {
-                            descriptor?.SetValue(BluetoothGattDescriptor.EnableNotificationValue.ToArray());
+                            var value = BluetoothGattDescriptor.EnableNotificationValue.ToArray();
+                            if (Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu)
+                            {
+                                gatt?.WriteDescriptor(descriptor, value);
+                            }
+                            else
+                            {
+                                descriptor.SetValue(value);
+                                gatt?.WriteDescriptor(descriptor);
+                            }
 
-                            gatt?.WriteDescriptor(descriptor);
-
-                            await _alertService.ShowToast("Notifications enabled for characteristic.");
+                            //await _alertService.ShowToast("Notifications enabled for characteristic.");
                         }
                         else
                         {
                             await _alertService.ShowToast("CCCD descriptor not found.");
                         }
-                    }
-                    else
+                    }                    else
                     {
                         await _alertService.ShowToast("Characteristic not found.");
                     }
@@ -294,34 +315,32 @@ public class BluetoothClient : IBluetoothClient
             }
         }
 
-        public override async void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, [GeneratedEnum] GattStatus status)
+        public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, [GeneratedEnum] GattStatus status)
         {
             base.OnCharacteristicRead(gatt, characteristic, value, status);
 
             if(status == GattStatus.Success)
             {
-                var message = Encoding.UTF8.GetString(value ?? new byte[0]);
-
-                MainThread.BeginInvokeOnMainThread(() =>
+                var data = Encoding.UTF8.GetString(value ?? new byte[0]);
+                var message = _parent._transferManager.ProcessReceivedData(data);
+                
+                if (message != null)
                 {
-                    _parent.MessageReceived?.Invoke(_parent, message);
-                });
-
-                await _alertService.ShowToast($"Client received : {message}");
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        _parent.MessageReceived?.Invoke(_parent, message);
+                    });
+                }
             }
         }
 
-        public override async void OnCharacteristicWrite(BluetoothGatt? gatt, BluetoothGattCharacteristic? characteristic, [GeneratedEnum] GattStatus status)
+        public override void OnCharacteristicWrite(BluetoothGatt? gatt, BluetoothGattCharacteristic? characteristic, [GeneratedEnum] GattStatus status)
         {
             base.OnCharacteristicWrite(gatt, characteristic, status);
 
-            if(status == GattStatus.Success)
+            if(status != GattStatus.Success)
             {
-                await _alertService.ShowToast("Characteristic write successful.");
-            }
-            else
-            {
-                await _alertService.ShowToast($"Characteristic write failed : {status}");
+                //_alertService.ShowToast($"Characteristic write failed : {status}");
             }
         }
 
@@ -331,36 +350,40 @@ public class BluetoothClient : IBluetoothClient
 
             if (characteristic != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
             {
-                var message = value != null ? Encoding.UTF8.GetString(value) : string.Empty;
+                var data = value != null ? Encoding.UTF8.GetString(value) : string.Empty;
+                var message = _parent._transferManager.ProcessReceivedData(data);
 
-                _parent._alertService.ShowToast($"DEBUG: Raw bytes length: {value?.Length ?? 0}");
-
-                MainThread.BeginInvokeOnMainThread(() =>
+                if (message != null)
                 {
-                    _parent.MessageReceived?.Invoke(_parent, message);
-                });
-
-                _parent._alertService.ShowToast($"Client received notification: {message}");
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        _parent.MessageReceived?.Invoke(_parent, message);
+                    });
+                }
             }
         }
 
-        public override async void OnCharacteristicChanged(BluetoothGatt? gatt, BluetoothGattCharacteristic? characteristic)
+        public override void OnCharacteristicChanged(BluetoothGatt? gatt, BluetoothGattCharacteristic? characteristic)
         {
             base.OnCharacteristicChanged(gatt, characteristic);
+
+            // On Android 13 (API 33) and above, the version with the byte[] value parameter is called.
+            // We skip this one to avoid duplicate processing.
+            if (OperatingSystem.IsAndroidVersionAtLeast(33)) return;
 
             if (characteristic != null && characteristic.Uuid.Equals(_parent.CharacteristicUuid))
             {
                 var bytes = characteristic.GetValue();
-                var message = bytes != null ? Encoding.UTF8.GetString(bytes) : string.Empty;
+                var data = bytes != null ? Encoding.UTF8.GetString(bytes) : string.Empty;
+                var message = _parent._transferManager.ProcessReceivedData(data);
 
-                await _alertService.ShowToast($"DEBUG (Legacy): Raw bytes length: {bytes?.Length ?? 0}");
-
-                MainThread.BeginInvokeOnMainThread(() =>
+                if (message != null)
                 {
-                    _parent.MessageReceived?.Invoke(_parent, message);
-                });
-
-                await _alertService.ShowToast($"Client received notification (Legacy): {message}");
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        _parent.MessageReceived?.Invoke(_parent, message);
+                    });
+                }
             }
         }
         #endregion

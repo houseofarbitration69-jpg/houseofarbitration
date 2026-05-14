@@ -1,4 +1,10 @@
 <Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Debug - Client" />
+    <BuildType Name="Debug - Server" />
+    <BuildType Name="Release" />
+  </Configurations>
   <Folder Name="/00 - Configuration/">
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
@@ -6,7 +12,7 @@
   <Folder Name="/01 - Designer/" />
   <Folder Name="/02 - Application/">
     <Project Path="House.Of.Arbitration.App/House.Of.Arbitration.App.csproj">
-      <Deploy Solution="Release|*" />
+      <Deploy />
     </Project>
   </Folder>
   <Folder Name="/03 - Models/">
@@ -29,6 +35,11 @@
     <Project Path="House.Of.Arbitration.ViewModels/House.Of.Arbitration.ViewModels.csproj" />
   </Folder>
   <Folder Name="/07 - Tests/">
-    <Project Path="House.Of.Arbitration.Tests.Unit/House.Of.Arbitration.Tests.Unit.csproj" />
+    <Project Path="House.Of.Arbitration.Tests.Unit/House.Of.Arbitration.Tests.Unit.csproj">
+      <BuildType Solution="Debug - Client|*" Project="Debug" />
+      <BuildType Solution="Debug - Server|*" Project="Debug" />
+      <Build Solution="Debug - Client|*" Project="false" />
+      <Build Solution="Debug - Server|*" Project="false" />
+    </Project>
   </Folder>
 </Solution>
