@@ -29,7 +29,7 @@ public partial class BasePage<T> : ContentPage
         BindingContext = viewModel;
         _pageLoadStopwatch = new Stopwatch();
 
-        Shell.SetNavBarIsVisible(this, true);
+        Shell.SetNavBarIsVisible(this, false);
     }
     #endregion
 

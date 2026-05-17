@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
     <TargetFrameworks>$(NetVersion)-android</TargetFrameworks>
@@ -10,10 +10,10 @@
 		<SingleProject>true</SingleProject>
 
 		<!-- Display name -->
-		<ApplicationTitle>House.Of.Arbitration.App</ApplicationTitle>
+		<ApplicationTitle>H.O.A</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.house.of.arbitration.app</ApplicationId>
+		<ApplicationId>com.hoa</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -30,10 +30,18 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<MauiIcon 
+			Include="Resources\AppIcon\appicon.svg" 
+			ForegroundFile="Resources\Images\hoa.svg" 
+			Color="#808080" 
+		/>
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+		<MauiSplashScreen 
+			Include="Resources\Images\hoa_splash.svg" 
+			Color="#808080" 
+			BaseSize="128,128" 
+		/>
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\**\*" />

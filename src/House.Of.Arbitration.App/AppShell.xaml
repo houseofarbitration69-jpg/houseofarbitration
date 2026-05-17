@@ -5,7 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:House.Of.Arbitration.App"
     xmlns:views="clr-namespace:House.Of.Arbitration.Views;assembly=House.Of.Arbitration.Views"
-    Title="House.Of.Arbitration.App">
+    Title="House.Of.Arbitration.App"
+>
 
     <ShellContent
         Title="Home"
