@@ -33,6 +33,8 @@ public partial class JudgeViewModel : BaseViewModel
     private string _title;
     private bool _isScanning;
     private bool _isConnected;
+    private bool _isReceivingCompetition;
+    private bool _isReceivingMatch;
     private JudgeModel? _selectedJudge;
     private string? _currentMatchInfo;
     private string? _categoryName;
@@ -72,6 +74,18 @@ public partial class JudgeViewModel : BaseViewModel
     {
         get => _isConnected;
         set => SetProperty(ref _isConnected, value);
+    }
+
+    public bool IsReceivingCompetition
+    {
+        get => _isReceivingCompetition;
+        set => SetProperty(ref _isReceivingCompetition, value);
+    }
+
+    public bool IsReceivingMatch
+    {
+        get => _isReceivingMatch;
+        set => SetProperty(ref _isReceivingMatch, value);
     }
 
     public JudgeModel? SelectedJudge
@@ -275,6 +289,8 @@ public partial class JudgeViewModel : BaseViewModel
 
                         await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
                     }
+                    IsReceivingCompetition = false;
+                    IsReceivingMatch = true;
                 }
                 else if (message.StartsWith(Constants.Message.MATCH_INFO))
                 {
@@ -298,6 +314,7 @@ public partial class JudgeViewModel : BaseViewModel
                                 break;
                         }
                     }
+                    IsReceivingMatch = false;
                 }
             }
             catch (Exception ex)
@@ -444,6 +461,8 @@ public partial class JudgeViewModel : BaseViewModel
         SelectedJudge = judge;
         if (IsConnected && _serverDeviceId != null)
         {
+            IsReceivingCompetition = true;
+
             await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{judge.Number}");
         }
     }

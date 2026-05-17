@@ -38,9 +38,10 @@
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen 
-			Include="Resources\Images\hoa_splash.svg" 
+			Include="Resources\Images\hoa_splash_256.png" 
 			Color="#808080" 
-			BaseSize="128,128" 
+			BaseSize="512,512"
+			Resize="False"
 		/>
 
 		<!-- Images -->

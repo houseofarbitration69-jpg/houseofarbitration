@@ -129,8 +129,8 @@
 
                                                 <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
                                                     <!-- Slot 1 -->
-                                                    <Border Padding="10" 
-                                                            HeightRequest="40" 
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
                                                             BackgroundColor="#F5F5F5" 
                                                             Stroke="Gray"
                                                             StrokeThickness="1"
@@ -139,9 +139,23 @@
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
-                                                            <Label Text="{Binding Slot1.Competitor.LastName, FallbackValue='(BYE)'}" 
-                                                                   TextColor="Black" 
-                                                                   VerticalOptions="Center" />
+                                                            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                                <Label Text="{Binding Slot1.Competitor.Name, FallbackValue='(BYE)'}" 
+                                                                       TextColor="Black" 
+                                                                       FontAttributes="Bold"
+                                                                       FontSize="13"
+                                                                       LineBreakMode="TailTruncation" />
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <Label Text="{Binding Slot1.Competitor.Club}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           LineBreakMode="TailTruncation" />
+                                                                    <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
                                                             <Label Grid.Column="1" Text="➕" 
                                                                    IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
                                                                    FontSize="12" VerticalOptions="Center" Opacity="0.6" />
@@ -163,8 +177,8 @@
                                                     </Border>
 
                                                     <!-- Slot 2 -->
-                                                    <Border Padding="10" 
-                                                            HeightRequest="40" 
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
                                                             BackgroundColor="#F5F5F5" 
                                                             Stroke="Gray"
                                                             StrokeThickness="1"
@@ -173,9 +187,23 @@
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
-                                                            <Label Text="{Binding Slot2.Competitor.LastName, FallbackValue='(BYE)'}" 
-                                                                   TextColor="Black" 
-                                                                   VerticalOptions="Center" />
+                                                            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                                <Label Text="{Binding Slot2.Competitor.Name, FallbackValue='(BYE)'}" 
+                                                                       TextColor="Black" 
+                                                                       FontAttributes="Bold"
+                                                                       FontSize="13"
+                                                                       LineBreakMode="TailTruncation" />
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <Label Text="{Binding Slot2.Competitor.Club}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           LineBreakMode="TailTruncation" />
+                                                                    <Label Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
                                                             <Label Grid.Column="1" Text="➕" 
                                                                    IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
                                                                    FontSize="12" VerticalOptions="Center" Opacity="0.6" />
@@ -197,8 +225,8 @@
                                                     </Border>
 
                                                     <!-- Winner Slot -->
-                                                    <Border Padding="10" 
-                                                            HeightRequest="40" 
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
                                                             BackgroundColor="Gold" 
                                                             Stroke="Orange"
                                                             StrokeThickness="1"
@@ -206,11 +234,22 @@
                                                         <Border.StrokeShape>
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
-                                                        <Label Text="{Binding Slot1.Competitor.LastName, FallbackValue='WINNER'}" 
-                                                               TextColor="Black" 
-                                                               FontAttributes="Bold"
-                                                               HorizontalOptions="Center"
-                                                               VerticalOptions="Center" />
+                                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0">
+                                                            <Label Text="{Binding Slot1.Competitor.Name, FallbackValue='WINNER'}" 
+                                                                   TextColor="Black" 
+                                                                   FontAttributes="Bold"
+                                                                   FontSize="14"
+                                                                   HorizontalOptions="Center" />
+                                                            <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
+                                                                <Label Text="{Binding Slot1.Competitor.Club}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11" />
+                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                            </HorizontalStackLayout>
+                                                        </VerticalStackLayout>
                                                     </Border>
                                                 </VerticalStackLayout>
                                             </Grid>
@@ -241,7 +280,7 @@
                                     HorizontalOptions="Fill">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="vm:BracketMatchViewModel">
-                                            <Grid HeightRequest="100" WidthRequest="250" ColumnDefinitions="45, *" Margin="10">
+                                            <Grid HeightRequest="140" WidthRequest="250" ColumnDefinitions="45, *" Margin="10">
                                                 <!-- Match Order -->
                                                 <Grid Grid.Column="0" 
                                                       IsVisible="{Binding IsOrderVisible}"
@@ -301,8 +340,8 @@
 
                                                 <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
                                                     <!-- Slot 1 -->
-                                                    <Border Padding="10" 
-                                                            HeightRequest="40" 
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
                                                             BackgroundColor="#F5F5F5" 
                                                             Stroke="Gray"
                                                             StrokeThickness="1"
@@ -311,15 +350,29 @@
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
-                                                            <Label Text="{Binding Slot1.Competitor.LastName, FallbackValue='(BYE)'}" 
-                                                                   TextColor="Black" 
-                                                                   VerticalOptions="Center" />
+                                                            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                                <Label Text="{Binding Slot1.Competitor.Name, FallbackValue='(BYE)'}" 
+                                                                       TextColor="Black" 
+                                                                       FontAttributes="Bold"
+                                                                       FontSize="13"
+                                                                       LineBreakMode="TailTruncation" />
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <Label Text="{Binding Slot1.Competitor.Club}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           LineBreakMode="TailTruncation" />
+                                                                    <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
                                                         </Grid>
                                                     </Border>
 
                                                     <!-- Slot 2 -->
-                                                    <Border Padding="10" 
-                                                            HeightRequest="40" 
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
                                                             BackgroundColor="#F5F5F5" 
                                                             Stroke="Gray"
                                                             StrokeThickness="1"
@@ -328,15 +381,29 @@
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
-                                                            <Label Text="{Binding Slot2.Competitor.LastName, FallbackValue='(BYE)'}" 
-                                                                   TextColor="Black" 
-                                                                   VerticalOptions="Center" />
+                                                            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                                <Label Text="{Binding Slot2.Competitor.Name, FallbackValue='(BYE)'}" 
+                                                                       TextColor="Black" 
+                                                                       FontAttributes="Bold"
+                                                                       FontSize="13"
+                                                                       LineBreakMode="TailTruncation" />
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <Label Text="{Binding Slot2.Competitor.Club}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           LineBreakMode="TailTruncation" />
+                                                                    <Label Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
                                                         </Grid>
                                                     </Border>
 
                                                     <!-- Winner Slot -->
-                                                    <Border Padding="10" 
-                                                            HeightRequest="40" 
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
                                                             BackgroundColor="Gold" 
                                                             Stroke="Orange"
                                                             StrokeThickness="1"
@@ -344,11 +411,22 @@
                                                         <Border.StrokeShape>
                                                             <RoundRectangle CornerRadius="5"/>
                                                         </Border.StrokeShape>
-                                                        <Label Text="{Binding Slot1.Competitor.LastName, FallbackValue='WINNER'}" 
-                                                               TextColor="Black" 
-                                                               FontAttributes="Bold"
-                                                               HorizontalOptions="Center"
-                                                               VerticalOptions="Center" />
+                                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0">
+                                                            <Label Text="{Binding Slot1.Competitor.Name, FallbackValue='WINNER'}" 
+                                                                   TextColor="Black" 
+                                                                   FontAttributes="Bold"
+                                                                   FontSize="14"
+                                                                   HorizontalOptions="Center" />
+                                                            <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
+                                                                <Label Text="{Binding Slot1.Competitor.Club}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11" />
+                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                            </HorizontalStackLayout>
+                                                        </VerticalStackLayout>
                                                     </Border>
                                                 </VerticalStackLayout>
                                             </Grid>
@@ -380,7 +458,7 @@
                                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Matches}" HorizontalOptions="Center" Spacing="10">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="vm:BracketMatchViewModel">
-                                            <Grid HeightRequest="80" WidthRequest="300" ColumnDefinitions="45, *">
+                                            <Grid HeightRequest="100" WidthRequest="300" ColumnDefinitions="45, *">
                                                 <!-- Match Order Badge -->
                                                 <Grid Grid.Column="0" 
                                                       VerticalOptions="Center" 
@@ -439,8 +517,8 @@
 
                                                 <!-- Competitor Slot -->
                                                 <Border Grid.Column="1" 
-                                                        Padding="10" 
-                                                        HeightRequest="40" 
+                                                        Padding="10, 5" 
+                                                        HeightRequest="60" 
                                                         BackgroundColor="#F5F5F5" 
                                                         Stroke="Gray"
                                                         StrokeThickness="1"
@@ -449,9 +527,23 @@
                                                         <RoundRectangle CornerRadius="5"/>
                                                     </Border.StrokeShape>
                                                     <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
-                                                        <Label Text="{Binding Slot1.Competitor.LastName}" 
-                                                               TextColor="Black" 
-                                                               VerticalOptions="Center" />
+                                                        <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                            <Label Text="{Binding Slot1.Competitor.Name}" 
+                                                                   TextColor="Black" 
+                                                                   FontAttributes="Bold"
+                                                                   FontSize="13"
+                                                                   LineBreakMode="TailTruncation" />
+                                                            <HorizontalStackLayout Spacing="5">
+                                                                <Label Text="{Binding Slot1.Competitor.Club}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       LineBreakMode="TailTruncation" />
+                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                            </HorizontalStackLayout>
+                                                        </VerticalStackLayout>
                                                     </Grid>
                                                 </Border>
                                             </Grid>

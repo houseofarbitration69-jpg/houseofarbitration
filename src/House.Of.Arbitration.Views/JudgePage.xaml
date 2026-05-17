@@ -734,5 +734,20 @@
                 </Grid>
             </Grid>
         </Grid>
+
+        <!-- Data Reception Overlays -->
+        <Grid BackgroundColor="#AA000000" IsVisible="{Binding IsReceivingCompetition}">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="50" HeightRequest="50"/>
+                <Label Text="RÉCEPTION DE LA COMPÉTITION..." TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Grid>
+
+        <Grid BackgroundColor="#AA000000" IsVisible="{Binding IsReceivingMatch}">
+            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="50" HeightRequest="50"/>
+                <Label Text="RÉCEPTION DU MATCH..." TextColor="White" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+        </Grid>
     </Grid>
 </base:BasePage>

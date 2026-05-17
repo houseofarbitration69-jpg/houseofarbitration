@@ -409,7 +409,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                     match.GlobalOrder = globalMatchOrder++;
                 }
 
-                match.Height = 100;
+                match.Height = 140;
                 match.Margin = new Thickness(0, 10, 0, 10);
                 pouleRound.Matches.Add(match);
             }
@@ -450,7 +450,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                 match.Order = savedMatch.Order;
                 match.GlobalOrder = savedMatch.GlobalOrder;
                 match.Slot1 = slot;
-                match.Height = 80;
+                match.Height = 100;
                 match.Margin = new Thickness(0, 5, 0, 5);
                 orderRound.Matches.Add(match);
                 if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
@@ -467,7 +467,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                 match.Order = i + 1;
                 match.GlobalOrder = globalMatchOrder++;
                 match.Slot1 = slot;
-                match.Height = 80;
+                match.Height = 100;
                 match.Margin = new Thickness(0, 5, 0, 5);
                 orderRound.Matches.Add(match);
             }
@@ -479,7 +479,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
     private void CalculateMargins(ObservableCollection<BracketRoundViewModel> targetRounds)
     {
-        double matchHeight = 100;
+        double matchHeight = 140;
         double currentMargin = 0;
         double currentSpacing = 0;
         double previousRoundMargin = 0;
