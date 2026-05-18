@@ -367,6 +367,56 @@ LocalizationResourceManager.Instance.GetValue(nameof(HISTORICS));
     /// </summary>
     public string GENERATE_DATA =>
 LocalizationResourceManager.Instance.GetValue(nameof(GENERATE_DATA));
+    /// <summary>
+    /// Gets the translated "CONNECT_TO_SERVER" string.
+    /// </summary>
+    public string CONNECT_TO_SERVER =>
+LocalizationResourceManager.Instance.GetValue(nameof(CONNECT_TO_SERVER));
+    /// <summary>
+    /// Gets the translated "SCAN_SERVER" string.
+    /// </summary>
+    public string SCAN_SERVER =>
+LocalizationResourceManager.Instance.GetValue(nameof(SCAN_SERVER));
+    /// <summary>
+    /// Gets the translated "FIND_SERVERS" string.
+    /// </summary>
+    public string FIND_SERVERS =>
+LocalizationResourceManager.Instance.GetValue(nameof(FIND_SERVERS));
+    /// <summary>
+    /// Gets the translated "SELECT_POSITION" string.
+    /// </summary>
+    public string SELECT_POSITION =>
+LocalizationResourceManager.Instance.GetValue(nameof(SELECT_POSITION));
+    /// <summary>
+    /// Gets the translated "JUDGE_1" string.
+    /// </summary>
+    public string JUDGE_1 =>
+LocalizationResourceManager.Instance.GetValue(nameof(JUDGE_1));
+    /// <summary>
+    /// Gets the translated "JUDGE_2" string.
+    /// </summary>
+    public string JUDGE_2 =>
+LocalizationResourceManager.Instance.GetValue(nameof(JUDGE_2));
+    /// <summary>
+    /// Gets the translated "JUDGE_3" string.
+    /// </summary>
+    public string JUDGE_3 =>
+LocalizationResourceManager.Instance.GetValue(nameof(JUDGE_3));
+    /// <summary>
+    /// Gets the translated "JUDGE_4" string.
+    /// </summary>
+    public string JUDGE_4 =>
+LocalizationResourceManager.Instance.GetValue(nameof(JUDGE_4));
+    /// <summary>
+    /// Gets the translated "JUDGE_5" string.
+    /// </summary>
+    public string JUDGE_5 =>
+LocalizationResourceManager.Instance.GetValue(nameof(JUDGE_5));
+    /// <summary>
+    /// Gets the translated "RING" string.
+    /// </summary>
+    public string RING =>
+LocalizationResourceManager.Instance.GetValue(nameof(RING));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

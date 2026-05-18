@@ -214,6 +214,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [CONNECT TO SERVER].
+        /// </summary>
+        public static string CONNECT_TO_SERVER {
+            get {
+                return ResourceManager.GetString("CONNECT_TO_SERVER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [ARE YOU SURE YOU WANT TO DELETE THIS CATEGORY ?].
         /// </summary>
         public static string DELETE_CATEGORY_MESSAGE {
@@ -412,6 +421,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [FIND SERVERS].
+        /// </summary>
+        public static string FIND_SERVERS {
+            get {
+                return ResourceManager.GetString("FIND_SERVERS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [FIRST NAME].
         /// </summary>
         public static string FIRSTNAME {
@@ -462,6 +480,51 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string JUDGE {
             get {
                 return ResourceManager.GetString("JUDGE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [JUDGE 1].
+        /// </summary>
+        public static string JUDGE_1 {
+            get {
+                return ResourceManager.GetString("JUDGE_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [JUDGE 2].
+        /// </summary>
+        public static string JUDGE_2 {
+            get {
+                return ResourceManager.GetString("JUDGE_2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [JUDGE 3].
+        /// </summary>
+        public static string JUDGE_3 {
+            get {
+                return ResourceManager.GetString("JUDGE_3", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [JUDGE 4].
+        /// </summary>
+        public static string JUDGE_4 {
+            get {
+                return ResourceManager.GetString("JUDGE_4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [JUDGE 5].
+        /// </summary>
+        public static string JUDGE_5 {
+            get {
+                return ResourceManager.GetString("JUDGE_5", resourceCulture);
             }
         }
         
@@ -574,11 +637,38 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Recherche une chaîne localisée semblable à [RING].
+        /// </summary>
+        public static string RING {
+            get {
+                return ResourceManager.GetString("RING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Recherche une chaîne localisée semblable à [ROUND TYPE].
         /// </summary>
         public static string ROUND_TYPE {
             get {
                 return ResourceManager.GetString("ROUND_TYPE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [SCAN SERVER].
+        /// </summary>
+        public static string SCAN_SERVER {
+            get {
+                return ResourceManager.GetString("SCAN_SERVER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une chaîne localisée semblable à [SELECT POSITION].
+        /// </summary>
+        public static string SELECT_POSITION {
+            get {
+                return ResourceManager.GetString("SELECT_POSITION", resourceCulture);
             }
         }
         

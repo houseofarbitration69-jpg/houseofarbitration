@@ -92,8 +92,8 @@
                             />
                             <VerticalStackLayout Grid.Column="1">
                                 <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}">
-                                    <Label Text="{Binding Competitor1.LastName}" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Competitor1.FirstName}" FontAttributes="Bold"/>
+                                    <controls:ScrollingText Text="{Binding Competitor1.LastName}" FontAttributes="Bold" />
+                                    <controls:ScrollingText Text="{Binding Competitor1.FirstName}" FontAttributes="Bold" />
                                 </HorizontalStackLayout>
                                 <Label 
                                     Text="En attente" 
@@ -103,9 +103,11 @@
                                     FontSize="14"
                                     HorizontalOptions="Center"
                                 />
-                                <Label 
+                                <controls:ScrollingText 
                                     Text="{Binding Competitor1.Club}" 
-                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    FontSize="12"
+                                    TextColor="Gray"
+                                    WidthRequest="200"
                                     IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}"
                                 />
                             </VerticalStackLayout>
@@ -133,8 +135,8 @@
                             />
                             <VerticalStackLayout Grid.Column="1">
                                 <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}">
-                                    <Label Text="{Binding Competitor2.LastName}" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Competitor2.FirstName}" FontAttributes="Bold"/>
+                                    <controls:ScrollingText Text="{Binding Competitor2.LastName}" FontAttributes="Bold" WidthRequest="150" />
+                                    <controls:ScrollingText Text="{Binding Competitor2.FirstName}" FontAttributes="Bold" WidthRequest="150" />
                                 </HorizontalStackLayout>
                                 <Label 
                                     Text="En attente" 
@@ -145,9 +147,11 @@
                                     HorizontalOptions="Center"
                                 />
 
-                                <Label 
+                                <controls:ScrollingText 
                                     Text="{Binding Competitor2.Club}" 
-                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    FontSize="12"
+                                    TextColor="Gray"
+                                    WidthRequest="200"
                                     IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}"
                                 />
                             </VerticalStackLayout>
@@ -177,8 +181,8 @@
                             />
                             <VerticalStackLayout Grid.Column="1">
                                 <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}">
-                                    <Label Text="{Binding Competitor1.LastName}" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Competitor1.FirstName}" FontAttributes="Bold"/>
+                                    <controls:ScrollingText Text="{Binding Competitor1.LastName}" FontAttributes="Bold" WidthRequest="150" />
+                                    <controls:ScrollingText Text="{Binding Competitor1.FirstName}" FontAttributes="Bold" WidthRequest="150" />
                                 </HorizontalStackLayout>
                                 <Label 
                                     Text="En attente match précédent" 
@@ -188,9 +192,11 @@
                                     FontSize="14"
                                 />
 
-                                <Label 
+                                <controls:ScrollingText 
                                     Text="{Binding Competitor1.Club}" 
-                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    FontSize="12"
+                                    TextColor="Gray"
+                                    WidthRequest="200"
                                     IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}"
                                 />
                             </VerticalStackLayout>
@@ -218,8 +224,8 @@
                             />
                             <VerticalStackLayout Grid.Column="1">
                                 <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}">
-                                    <Label Text="{Binding Competitor2.LastName}" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Competitor2.FirstName}" FontAttributes="Bold"/>
+                                    <controls:ScrollingText Text="{Binding Competitor2.LastName}" FontAttributes="Bold" WidthRequest="150" />
+                                    <controls:ScrollingText Text="{Binding Competitor2.FirstName}" FontAttributes="Bold" WidthRequest="150" />
                                 </HorizontalStackLayout>
                                 <Label 
                                     Text="En attente match précédent" 
@@ -229,9 +235,11 @@
                                     FontSize="14"
                                 />
 
-                                <Label 
+                                <controls:ScrollingText 
                                     Text="{Binding Competitor2.Club}" 
-                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    FontSize="12"
+                                    TextColor="Gray"
+                                    WidthRequest="200"
                                     IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}"
                                 />
                             </VerticalStackLayout>
@@ -261,8 +269,8 @@
                             />
                             <VerticalStackLayout Grid.Column="1">
                                 <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor, Converter={StaticResource EmptyToBoolConverter}}">
-                                    <Label Text="{Binding Competitor.LastName}" FontAttributes="Bold"/>
-                                    <Label Text="{Binding Competitor.FirstName}" FontAttributes="Bold"/>
+                                    <controls:ScrollingText Text="{Binding Competitor.LastName}" FontAttributes="Bold" WidthRequest="150" />
+                                    <controls:ScrollingText Text="{Binding Competitor.FirstName}" FontAttributes="Bold" WidthRequest="150" />
                                 </HorizontalStackLayout>
                                 <Label 
                                     Text="En attente" 
@@ -272,9 +280,11 @@
                                     FontSize="14"
                                 />
 
-                                <Label 
+                                <controls:ScrollingText 
                                     Text="{Binding Competitor.Club}" 
-                                    Style="{StaticResource CompetitorInfoLabelStyle}"
+                                    FontSize="12"
+                                    TextColor="Gray"
+                                    WidthRequest="200"
                                     IsVisible="{Binding Competitor, Converter={StaticResource EmptyToBoolConverter}}"
                                 />
                             </VerticalStackLayout>
@@ -315,14 +325,39 @@
         <Grid>
             <!-- 1. Connection (Not Connected) -->
             <VerticalStackLayout Spacing="15" IsVisible="{Binding IsConnected, Converter={StaticResource InvertBoolConverter}}" VerticalOptions="Center" HorizontalOptions="Center">
-                <Label Text="CONNEXION AU SERVEUR" HorizontalOptions="Center" FontSize="32" FontAttributes="Bold" TextColor="White" Margin="0,0,0,20"/>
+                <Label 
+                    Text="{Binding Resources.CONNECT_TO_SERVER}" 
+                    HorizontalOptions="Center" 
+                    FontSize="32" 
+                    FontAttributes="Bold" 
+                    TextColor="White" 
+                    Margin="0,0,0,20"
+                />
 
-                <Button Text="SCANNER LES SERVEURS" Command="{Binding StartScanCommand}" 
-                        BackgroundColor="{DynamicResource ValidColor}" TextColor="Black" FontAttributes="Bold" CornerRadius="20" HeightRequest="60" WidthRequest="300"/>
+                <Button 
+                    Text="{Binding Resources.SCAN_SERVER}" 
+                    Command="{Binding StartScanCommand}" 
+                    BackgroundColor="{DynamicResource ValidColor}"
+                    TextColor="Black" 
+                    FontAttributes="Bold" 
+                    CornerRadius="20" 
+                    HeightRequest="60" 
+                    WidthRequest="300"
+                />
 
-                <ActivityIndicator IsRunning="{Binding IsScanning}" Color="White" HorizontalOptions="Center" Margin="0,20"/>
+                <ActivityIndicator 
+                    IsRunning="{Binding IsScanning}"
+                    Color="White" 
+                    HorizontalOptions="Center" 
+                    Margin="0,20"
+                />
 
-                <Label Text="Serveur trouvés :" TextColor="White" FontSize="18" IsVisible="{Binding DiscoveredDevices.Count, Converter={mct:IntToBoolConverter}}"/>
+                <Label 
+                    Text="{Binding Resources.FIND_SERVERS}" 
+                    TextColor="White" 
+                    FontSize="18" 
+                    IsVisible="{Binding DiscoveredDevices.Count, Converter={mct:IntToBoolConverter}}"
+                />
 
                 <CollectionView ItemsSource="{Binding DiscoveredDevices}" HeightRequest="300" WidthRequest="500" Margin="0,10">
                     <CollectionView.ItemTemplate>
@@ -368,12 +403,25 @@
             <Grid IsVisible="{Binding IsConnected}">
                 <!-- A. Position Selection (Connected but no judge selected) -->
                 <VerticalStackLayout Spacing="30" IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullOrEmptyConverter}}" VerticalOptions="Center" HorizontalOptions="Center">
-                    <Label Text="SÉLECTIONNEZ VOTRE POSITION" HorizontalOptions="Center" FontSize="32" FontAttributes="Bold" TextColor="White"/>
+                    <Label 
+                        Text="{Binding Resources.SELECT_POSITION}" 
+                        HorizontalOptions="Center" 
+                        FontSize="32" 
+                        FontAttributes="Bold" 
+                        TextColor="White"
+                    />
 
                     <Grid RowDefinitions="80,300,80" ColumnDefinitions="100,100,300,100,100" RowSpacing="10" ColumnSpacing="10">
                         <!-- JUGE 1 -->
                         <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="LightGray" WidthRequest="150" HeightRequest="80" StrokeShape="RoundRectangle 10">
-                            <Label Text="JUGE 1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" TextColor="Black"/>
+                            <Label 
+                                Text="{Binding Resources.JUDGE_1}" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                FontSize="24" 
+                                FontAttributes="Bold" 
+                                TextColor="Black"
+                            />
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[0]}"/>
                             </Border.GestureRecognizers>
@@ -381,7 +429,14 @@
 
                         <!-- JUGE 2 -->
                         <Border Grid.Row="0" Grid.Column="3" Grid.ColumnSpan="2" Background="LightGray" WidthRequest="150" HeightRequest="80" StrokeShape="RoundRectangle 10">
-                            <Label Text="JUGE 2" VerticalOptions="Center" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" TextColor="Black"/>
+                            <Label 
+                                Text="{Binding Resources.JUDGE_2}" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                FontSize="24" 
+                                FontAttributes="Bold" 
+                                TextColor="Black"
+                            />
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[1]}"/>
                             </Border.GestureRecognizers>
@@ -389,7 +444,14 @@
 
                         <!-- JUGE 5 -->
                         <Border Grid.Row="0" Grid.Column="2" Background="LightGray" WidthRequest="150" HeightRequest="80" StrokeShape="RoundRectangle 10" HorizontalOptions="Center">
-                            <Label Text="JUGE 5" VerticalOptions="Center" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" TextColor="Black"/>
+                            <Label 
+                                Text="{Binding Resources.JUDGE_5}" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                FontSize="24" 
+                                FontAttributes="Bold" 
+                                TextColor="Black"
+                            />
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[4]}"/>
                             </Border.GestureRecognizers>
@@ -397,12 +459,26 @@
 
                         <!-- RING -->
                         <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Background="#333" Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 15">
-                            <Label Text="RING" VerticalOptions="Center" HorizontalOptions="Center" FontSize="48" FontAttributes="Bold" TextColor="White"/>
+                            <Label 
+                                Text="{Binding Resources.RING}" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                FontSize="48" 
+                                FontAttributes="Bold" 
+                                TextColor="White"
+                            />
                         </Border>
 
                         <!-- JUGE 3 -->
                         <Border Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="2" Background="LightGray" WidthRequest="150" HeightRequest="80" StrokeShape="RoundRectangle 10">
-                            <Label Text="JUGE 3" VerticalOptions="Center" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" TextColor="Black"/>
+                            <Label 
+                                Text="{Binding Resources.JUDGE_3}" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                FontSize="24" 
+                                FontAttributes="Bold" 
+                                TextColor="Black"
+                            />
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[2]}"/>
                             </Border.GestureRecognizers>
@@ -410,7 +486,14 @@
 
                         <!-- JUGE 4 -->
                         <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Background="LightGray" WidthRequest="150" HeightRequest="80" StrokeShape="RoundRectangle 10">
-                            <Label Text="JUGE 4" VerticalOptions="Center" HorizontalOptions="Center" FontSize="24" FontAttributes="Bold" TextColor="Black"/>
+                            <Label 
+                                Text="{Binding Resources.JUDGE_4}" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                FontSize="24" 
+                                FontAttributes="Bold" 
+                                TextColor="Black"
+                            />
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[3]}"/>
                             </Border.GestureRecognizers>
@@ -421,8 +504,21 @@
                 <!-- B. Match Info & Timer (Connected and judge selected) -->
                 <Grid IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}" RowDefinitions="Auto, *, Auto" RowSpacing="20">
                     <!-- Category Name Header -->
-                    <Border Grid.Row="0" HorizontalOptions="Center" Padding="30,10" BackgroundColor="#333" Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 15">
-                        <Label Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE COMPÉTITION'}" TextColor="White" FontSize="36" FontAttributes="Bold"/>
+                    <Border 
+                        Grid.Row="0" 
+                        HorizontalOptions="Center" 
+                        Padding="10,10,10,10" 
+                        BackgroundColor="#333" 
+                        Stroke="White" 
+                        StrokeThickness="2" 
+                        StrokeShape="RoundRectangle 15"
+                    >
+                        <controls:ScrollingText 
+                            Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE COMPÉTITION'}" 
+                            TextColor="White" 
+                            FontSize="36" 
+                            FontAttributes="Bold" 
+                        />
                     </Border>
 
                     <!-- Main Match Display (The Ring) -->
@@ -516,14 +612,19 @@
                                     </Border>
 
                                      <!--Name on two lines--> 
-                                    <VerticalStackLayout HorizontalOptions="Center">
-                                        <Label Text="{Binding Competitor1.LastName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" />
-                                        <Label Text="{Binding Competitor1.FirstName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="32" Margin="0,-5,0,0" />
+                                    <VerticalStackLayout HorizontalOptions="Center" Padding="5,0,5,0">
+                                        <controls:ScrollingText Text="{Binding Competitor1.LastName}" TextColor="White" FontAttributes="Bold" FontSize="28" HorizontalOptions="Fill" WidthRequest="300" />
+                                        <controls:ScrollingText Text="{Binding Competitor1.FirstName}" TextColor="White" FontAttributes="Bold" FontSize="32" Margin="0,-5,0,0" HorizontalOptions="Fill" WidthRequest="300" />
                                     </VerticalStackLayout>
 
-                                     <!--Club & Country--> 
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label Text="{Binding Competitor1.Club}" Style="{StaticResource MainCompetitorClubStyle}" FontSize="18" />
+                                     <!--Club & Country-->
+                                    <VerticalStackLayout Spacing="2" Padding="5,0,5,0">
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor1.Club}" 
+                                            TextColor="White" 
+                                            FontSize="18" 
+                                            HorizontalOptions="Center" 
+                                        />
                                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
                                             <Image 
                                                 Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
@@ -531,7 +632,13 @@
                                                 HeightRequest="15" 
                                                 VerticalOptions="Center" 
                                             />
-                                            <Label Text="{Binding Competitor1.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
+                                            <Label 
+                                                Text="{Binding Competitor1.Country.Name}" 
+                                                TextColor="White" 
+                                                FontSize="16" 
+                                                FontAttributes="Italic" 
+                                                VerticalOptions="Center" 
+                                            />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
 
@@ -579,14 +686,32 @@
                                     </Border>
 
                                     <!--Name on two lines-->
-                                    <VerticalStackLayout HorizontalOptions="Center">
-                                        <Label Text="{Binding Competitor2.LastName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" />
-                                        <Label Text="{Binding Competitor2.FirstName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="32" Margin="0,-5,0,0" />
+                                    <VerticalStackLayout HorizontalOptions="Center" Padding="5,0,5,0">
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor2.LastName}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold" 
+                                            FontSize="28" 
+                                            HorizontalOptions="Center" 
+                                        />
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor2.FirstName}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold" 
+                                            FontSize="32" 
+                                            Margin="0,-5,0,0" 
+                                            HorizontalOptions="Center"
+                                        />
                                     </VerticalStackLayout>
 
                                     <!--Club & Country-->
-                                    <VerticalStackLayout Spacing="2">
-                                        <Label Text="{Binding Competitor2.Club}" Style="{StaticResource MainCompetitorClubStyle}" FontSize="18" />
+                                    <VerticalStackLayout Spacing="2" Padding="5,0,5,0">
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor2.Club}" 
+                                            TextColor="White" 
+                                            FontSize="18" 
+                                            HorizontalOptions="Fill"
+                                        />
                                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
                                             <Image 
                                                 Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
@@ -594,7 +719,14 @@
                                                 HeightRequest="15" 
                                                 VerticalOptions="Center" 
                                             />
-                                            <Label Text="{Binding Competitor2.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
+                                            <Label 
+                                                Text="{Binding Competitor2.Country.Name}"
+                                                TextColor="White" 
+                                                FontSize="16" 
+                                                FontAttributes="Italic" 
+                                                VerticalOptions="Center" 
+                                                HorizontalOptions="Fill" 
+                                            />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
 
@@ -650,14 +782,14 @@
                                     </Border>
 
                                      <!--Name on two lines--> 
-                                    <VerticalStackLayout HorizontalOptions="Center">
-                                        <Label Text="{Binding Competitor.LastName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="28" />
-                                        <Label Text="{Binding Competitor.FirstName}" Style="{StaticResource MainCompetitorNameStyle}" FontSize="32" Margin="0,-5,0,0" />
+                                    <VerticalStackLayout HorizontalOptions="Center" WidthRequest="400">
+                                        <controls:ScrollingText Text="{Binding Competitor.LastName}" TextColor="White" FontAttributes="Bold" FontSize="28" HorizontalOptions="Fill" WidthRequest="400" />
+                                        <controls:ScrollingText Text="{Binding Competitor.FirstName}" TextColor="White" FontAttributes="Bold" FontSize="32" Margin="0,-5,0,0" HorizontalOptions="Fill" WidthRequest="400" />
                                     </VerticalStackLayout>
 
                                      <!--Club & Country--> 
-                                    <VerticalStackLayout Spacing="5">
-                                        <Label Text="{Binding Competitor.Club}" Style="{StaticResource MainCompetitorClubStyle}" FontSize="18" />
+                                    <VerticalStackLayout Spacing="5" WidthRequest="400">
+                                        <controls:ScrollingText Text="{Binding Competitor.Club}" TextColor="White" FontSize="18" HorizontalOptions="Fill" WidthRequest="400" />
                                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
                                             <Image 
                                                 Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
@@ -665,7 +797,7 @@
                                                 HeightRequest="15" 
                                                 VerticalOptions="Center" 
                                             />
-                                            <Label Text="{Binding Competitor.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
+                                            <controls:ScrollingText Text="{Binding Competitor.Country.Name}" TextColor="White" FontSize="16" FontAttributes="Italic" VerticalOptions="Center" WidthRequest="200" />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>

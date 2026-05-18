@@ -58,7 +58,7 @@
                         <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                             <HorizontalStackLayout Grid.Column="0" Grid.Row="0" Spacing="10">
                                 <Label Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" TextColor="Black" VerticalOptions="Center" />
-                                <Label Text="{Binding Name}" TextColor="Black" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+                                <controls:ScrollingText Text="{Binding Name}" TextColor="Black" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" WidthRequest="400" />
                             </HorizontalStackLayout>
 
                             <HorizontalStackLayout Grid.Column="0" Grid.Row="1" Spacing="5" Margin="0,5,0,0">

@@ -306,13 +306,13 @@ public partial class JudgeViewModel : BaseViewModel
                                 break;
                             case RoundType.Pools:
                                 CurrentDraw = await _drawPoolsService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser");
-
-                                CategoryName = CurrentDraw?.Draw?.Category?.Name;
                                 break;
                             case RoundType.Order:
                                 CurrentDraw = await _drawOrderService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor.Country");
                                 break;
                         }
+
+                        CategoryName = CurrentDraw?.Draw?.Category?.Name;
                     }
                     IsReceivingMatch = false;
                 }

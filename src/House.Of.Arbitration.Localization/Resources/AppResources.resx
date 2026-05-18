@@ -324,4 +324,34 @@
   <data name="GENERATE_DATA" xml:space="preserve">
     <value>[GENERATE DATA]</value>
   </data>
+  <data name="CONNECT_TO_SERVER" xml:space="preserve">
+    <value>[CONNECT TO SERVER]</value>
+  </data>
+  <data name="SCAN_SERVER" xml:space="preserve">
+    <value>[SCAN SERVER]</value>
+  </data>
+  <data name="FIND_SERVERS" xml:space="preserve">
+    <value>[FIND SERVERS]</value>
+  </data>
+  <data name="SELECT_POSITION" xml:space="preserve">
+    <value>[SELECT POSITION]</value>
+  </data>
+  <data name="JUDGE_1" xml:space="preserve">
+    <value>[JUDGE 1]</value>
+  </data>
+  <data name="JUDGE_2" xml:space="preserve">
+    <value>[JUDGE 2]</value>
+  </data>
+  <data name="JUDGE_3" xml:space="preserve">
+    <value>[JUDGE 3]</value>
+  </data>
+  <data name="JUDGE_4" xml:space="preserve">
+    <value>[JUDGE 4]</value>
+  </data>
+  <data name="JUDGE_5" xml:space="preserve">
+    <value>[JUDGE 5]</value>
+  </data>
+  <data name="RING" xml:space="preserve">
+    <value>[RING]</value>
+  </data>
 </root>

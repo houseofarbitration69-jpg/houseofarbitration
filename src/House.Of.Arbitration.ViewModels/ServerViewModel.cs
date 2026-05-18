@@ -366,6 +366,21 @@ public partial class ServerViewModel : BaseViewModel
 
         CheckBluetoothAvailabilityCommand.Execute(null);
 
+        await Init();
+    }
+
+    public override Task OnDisappearing()
+    {
+        _bluetoothServer.DeviceConnected -= OnDeviceConnected;
+        _bluetoothServer.DeviceDisconnected -= OnDeviceDisconnected;
+        _bluetoothServer.MessageReceived -= OnMessageReceived;
+        return base.OnDisappearing();
+    }
+    #endregion
+
+    #region Private Methods
+    private async Task Init()
+    {
         if (CompetitionId > 0)
         {
             _currentCompetition = await _competitionRepository.GetByIdAsync(CompetitionId,
@@ -423,19 +438,9 @@ public partial class ServerViewModel : BaseViewModel
 
         Draws = new System.Collections.ObjectModel.ObservableCollection<object>(flattenedList);
 
-        //await BroadcastMatchInfo();
+        await BroadcastMatchInfo();
     }
 
-    public override Task OnDisappearing()
-    {
-        _bluetoothServer.DeviceConnected -= OnDeviceConnected;
-        _bluetoothServer.DeviceDisconnected -= OnDeviceDisconnected;
-        _bluetoothServer.MessageReceived -= OnMessageReceived;
-        return base.OnDisappearing();
-    }
-    #endregion
-
-    #region Private Methods
     private async Task SaveRefereeData(JudgeModel judge, CompetitorModel competitor, int score, bool isCorrection = false)
     {
         if (CurrentDraw == null) return;
@@ -562,8 +567,7 @@ public partial class ServerViewModel : BaseViewModel
 
             // Reset timer and load next
             await ResetTimer();
-            await OnAppearing();
-            //await BroadcastMatchInfo();
+            await Init();
         }
     }
 
