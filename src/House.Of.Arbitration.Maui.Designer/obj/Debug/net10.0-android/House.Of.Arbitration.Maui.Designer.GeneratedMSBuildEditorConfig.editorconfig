@@ -18,15 +18,16 @@ build_property.ProjectTypeGuids =
 build_property.InvariantGlobalization = false
 build_property.PlatformNeutralAssembly = 
 build_property.EnforceExtendedAnalyzerRules = 
+build_property.EntryPointFilePath = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = House.Of.Arbitration.Maui.Designer
-build_property.ProjectDir = C:\Works\KungFu\src\House.Of.Arbitration.Maui.Designer\
+build_property.ProjectDir = C:\Works\KungFu\houseofarbitration\src\House.Of.Arbitration.Maui.Designer\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 10.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/AddPage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/AddPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.AddPage.xaml
 build_metadata.AdditionalFiles.TargetPath = AddPage.xaml
@@ -36,7 +37,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/App.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/App.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.App.xaml
 build_metadata.AdditionalFiles.TargetPath = App.xaml
@@ -46,7 +47,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/AppShell.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/AppShell.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.AppShell.xaml
 build_metadata.AdditionalFiles.TargetPath = AppShell.xaml
@@ -56,7 +57,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/Controls/BottomMenuView.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Controls/BottomMenuView.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Controls.BottomMenuView.xaml
 build_metadata.AdditionalFiles.TargetPath = Controls\BottomMenuView.xaml
@@ -66,7 +67,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/MainPage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/MainPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.MainPage.xaml
 build_metadata.AdditionalFiles.TargetPath = MainPage.xaml
@@ -76,7 +77,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/NotificationsPage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/NotificationsPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.NotificationsPage.xaml
 build_metadata.AdditionalFiles.TargetPath = NotificationsPage.xaml
@@ -86,7 +87,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/ProfilePage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/ProfilePage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.ProfilePage.xaml
 build_metadata.AdditionalFiles.TargetPath = ProfilePage.xaml
@@ -96,7 +97,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/Resources/Styles/Colors.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Resources/Styles/Colors.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Resources.Styles.Colors.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Colors.xaml
@@ -106,7 +107,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/Resources/Styles/Styles.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Resources/Styles/Styles.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Resources.Styles.Styles.xaml
 build_metadata.AdditionalFiles.TargetPath = Resources\Styles\Styles.xaml
@@ -116,7 +117,7 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/src/House.Of.Arbitration.Maui.Designer/SearchPage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/SearchPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.SearchPage.xaml
 build_metadata.AdditionalFiles.TargetPath = SearchPage.xaml
