@@ -383,12 +383,27 @@
                 StrokeShape="RoundRectangle 15"
                 IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
             >
-                <Label 
-                    Text="{Binding CurrentDraw.Draw.Category.Name}"
-                    TextColor="White" 
-                    FontSize="32" 
-                    FontAttributes="Bold"
-                />
+                <HorizontalStackLayout Spacing="10">
+                    <Label 
+                        Text="{Binding CurrentDraw.Draw.Category.Name}"
+                        TextColor="White" 
+                        FontSize="32" 
+                        FontAttributes="Bold"
+                    />
+                    <Label 
+                        TextColor="Yellow" 
+                        FontSize="24" 
+                        FontAttributes="Bold"
+                        VerticalOptions="Center"
+                    >
+                        <Label.Text>
+                            <MultiBinding StringFormat="({0} / {1})">
+                                <Binding Path="CurrentMatchNumber" />
+                                <Binding Path="TotalMatches" />
+                            </MultiBinding>
+                        </Label.Text>
+                    </Label>
+                </HorizontalStackLayout>
             </Border>
 
             <!-- JUGE 1 -->

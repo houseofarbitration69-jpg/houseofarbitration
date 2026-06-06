@@ -43,6 +43,8 @@ public partial class ServerViewModel : BaseViewModel
     private IDispatcherTimer? _timer;
 
     private int _competitionId;
+    private int _totalMatches;
+    private int _currentMatchNumber;
 
     private CompetitionModel? _currentCompetition;
 
@@ -110,6 +112,18 @@ public partial class ServerViewModel : BaseViewModel
     {
         get => _competitionId;
         set => SetProperty(ref _competitionId, value);
+    }
+
+    public int TotalMatches
+    {
+        get => _totalMatches;
+        set => SetProperty(ref _totalMatches, value);
+    }
+
+    public int CurrentMatchNumber
+    {
+        get => _currentMatchNumber;
+        set => SetProperty(ref _currentMatchNumber, value);
     }
 
     #endregion
@@ -293,12 +307,12 @@ public partial class ServerViewModel : BaseViewModel
                             if (competitor1 != null && scoreData.CompetitorId == competitor1.Id)
                             {
                                 judge.RedPoints += scoreData.Score;
-                                await SaveRefereeData(judge, competitor1, scoreData.Score);
+                                await SaveRefereeData(judge, competitor1.Id, scoreData.Score);
                             }
                             else if (competitor2 != null && scoreData.CompetitorId == competitor2.Id)
                             {
                                 judge.BluePoints += scoreData.Score;
-                                await SaveRefereeData(judge, competitor2, scoreData.Score);
+                                await SaveRefereeData(judge, competitor2.Id, scoreData.Score);
                             }
                         }
                     }
@@ -318,18 +332,6 @@ public partial class ServerViewModel : BaseViewModel
         {
             try
             {
-                var competitor1 = GetCompetitor(CurrentDraw, true);
-                var competitor2 = GetCompetitor(CurrentDraw, false);
-
-                var matchData = new
-                {
-                    categoryName = CurrentDraw.Draw?.Category?.Name ?? "N/A",
-                    currentDrawId = CurrentDraw.Id,
-                    competitor1 = competitor1,
-                    competitor2 = competitor2,
-                    matchNumber = CurrentDraw.GlobalOrder
-                };
-
                 var json = JsonSerializer.Serialize(new { Id = CurrentDraw.Id, Type = CurrentDraw.Type}, _jsonOptions);
                 await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{json}");
             }
@@ -346,14 +348,6 @@ public partial class ServerViewModel : BaseViewModel
         if (draw is DrawPoolsModel p) return red ? p.Competitor1 : p.Competitor2;
         if (draw is DrawOrderModel o) return o.Competitor;
         return null;
-    }
-
-    private string GetCompetitorName(IDrawModel draw, bool red)
-    {
-        if (draw is DrawKnockoutModel k) return red ? $"{k.Competitor1?.LastName} {k.Competitor1?.FirstName}" : $"{k.Competitor2?.LastName} {k.Competitor2?.FirstName}";
-        if (draw is DrawPoolsModel p) return red ? $"{p.Competitor1?.LastName} {p.Competitor1?.FirstName}" : $"{p.Competitor2?.LastName} {p.Competitor2?.FirstName}";
-        if (draw is DrawOrderModel o) return o.Competitor?.LastName + " " + o.Competitor?.FirstName;
-        return "N/A";
     }
     #endregion
 
@@ -420,7 +414,14 @@ public partial class ServerViewModel : BaseViewModel
 
         var sortedDraws = allDraws.OrderBy(d => d.GlobalOrder).ToList();
 
-        CurrentDraw = sortedDraws.FirstOrDefault(d => !d.IsFinished);
+        TotalMatches = sortedDraws.Count;
+        var firstUnfinished = sortedDraws.FirstOrDefault(d => !d.IsFinished);
+        CurrentDraw = firstUnfinished;
+
+        if (CurrentDraw != null)
+        {
+            CurrentMatchNumber = sortedDraws.IndexOf(CurrentDraw) + 1;
+        }
 
         var flattenedList = new List<object>();
         string? lastCategoryName = null;
@@ -441,7 +442,7 @@ public partial class ServerViewModel : BaseViewModel
         await BroadcastMatchInfo();
     }
 
-    private async Task SaveRefereeData(JudgeModel judge, CompetitorModel competitor, int score, bool isCorrection = false)
+    private async Task SaveRefereeData(JudgeModel judge, int? competitorId, int score, bool isCorrection = false)
     {
         if (CurrentDraw == null) return;
 
@@ -451,7 +452,7 @@ public partial class ServerViewModel : BaseViewModel
             Referee = judge.Name,
             Data = score.ToString(),
             IsCorrection = isCorrection,
-            CompetitorId = competitor.Id
+            CompetitorId = competitorId
         };
 
         if (CurrentDraw is DrawKnockoutModel k) data.DrawKnockoutId = k.Id;
@@ -673,7 +674,7 @@ public partial class ServerViewModel : BaseViewModel
     {
         judge.RedPoints++;
         var competitor = GetCompetitor(CurrentDraw, true);
-        if (competitor != null) await SaveRefereeData(judge, competitor, 1, true);
+        if (competitor != null) await SaveRefereeData(judge, competitor.Id, 1, true);
     }
 
     [RelayCommand]
@@ -683,7 +684,7 @@ public partial class ServerViewModel : BaseViewModel
         {
             judge.RedPoints--;
             var competitor = GetCompetitor(CurrentDraw, true);
-            if (competitor != null) await SaveRefereeData(judge, competitor, -1, true);
+            if (competitor != null) await SaveRefereeData(judge, competitor.Id, -1, true);
         }
     }
 
@@ -692,7 +693,7 @@ public partial class ServerViewModel : BaseViewModel
     {
         judge.BluePoints++;
         var competitor = GetCompetitor(CurrentDraw, false);
-        if (competitor != null) await SaveRefereeData(judge, competitor, 1, true);
+        if (competitor != null) await SaveRefereeData(judge, competitor.Id, 1, true);
     }
 
     [RelayCommand]
@@ -702,7 +703,7 @@ public partial class ServerViewModel : BaseViewModel
         {
             judge.BluePoints--;
             var competitor = GetCompetitor(CurrentDraw, false);
-            if (competitor != null) await SaveRefereeData(judge, competitor, -1, true);
+            if (competitor != null) await SaveRefereeData(judge, competitor.Id, -1, true);
         }
     }
     #endregion
