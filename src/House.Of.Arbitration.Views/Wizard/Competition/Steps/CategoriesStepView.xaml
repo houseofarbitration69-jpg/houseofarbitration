@@ -10,33 +10,35 @@
     x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CategoriesStepView"
     x:DataType="vm:CategoriesStepViewModel"
     x:Name="this"
-    Shell.NavBarIsVisible="False">
-
-    <ContentView.Resources>
-    </ContentView.Resources>
-
+    Shell.NavBarIsVisible="False"
+>
     <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="20">
         <!-- Header -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
             <Label 
                 Grid.Column="0"
-                Text="{Binding Resources.CATEGORY_LIST}" 
-                FontSize="32" 
-                TextColor="{DynamicResource PageTitleColor}"
-                VerticalOptions="Center"
-                HorizontalOptions="Start"
+                Text="{Binding Resources.CATEGORY_LIST}"
+                Style="{StaticResource PageTitleStyle}"
             />
 
             <controls:IconButton 
                 Grid.Column="1"
                 Text="{Binding Resources.ADD_CATEGORY}"
-                ButtonBackgroundColor="{DynamicResource ValidColor}"
-                TextColor="Black"
+                Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding AddCategoryCommand}"
             >
                 <controls:IconButton.Icons>
-                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
-                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.ADD}" 
+                        Color="{StaticResource PrimaryTextColor}" 
+                        FontSize="16" 
+                    />
+                    
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
+                        Color="{StaticResource PrimaryTextColor}" 
+                        FontSize="24" 
+                    />
                 </controls:IconButton.Icons>
             </controls:IconButton>
         </Grid>
@@ -51,7 +53,8 @@
                     <controls:Card CardPadding="15" CardColor="White">
                         <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
                             <HorizontalStackLayout Grid.Row="0" Grid.Column="0" VerticalOptions="Center" Spacing="10">
-                                <Label Text="{x:Static helpers:FontCustomIcons.WARNING}" 
+                                <Label 
+                                    Text="{x:Static helpers:FontCustomIcons.WARNING}" 
                                     FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                     TextColor="{DynamicResource ErrorColor}"
                                     FontSize="24"
@@ -59,7 +62,8 @@
                                     IsVisible="{Binding ., Converter={StaticResource CategoryToWarningBoolConverter}}"
                                 />
 
-                                <Label Text="{x:Static helpers:FontCustomIcons.DRAWS}" 
+                                <Label 
+                                    Text="{x:Static helpers:FontCustomIcons.DRAWS}" 
                                     FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                     TextColor="{DynamicResource ErrorColor}"
                                     FontSize="24"
