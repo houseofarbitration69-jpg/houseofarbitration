@@ -80,16 +80,33 @@
                                     <Label 
                                         Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
                                         TextColor="Black"
+                                        FontAttributes="Bold"
                                         VerticalOptions="Center"
                                     />
                                     
-                                    <Label 
-                                        Text="{Binding Competitors.Count, Converter={StaticResource NbCompetitorConverter}}"
-                                        TextColor="Black"
-                                        VerticalOptions="Center"
-                                        FontAttributes="Italic"
-                                        FontSize="10"
-                                    />
+                                    <HorizontalStackLayout Spacing="10">
+                                        <Label 
+                                            Text="{Binding RoundType, Converter={StaticResource RoundTypeToStringConverter}}"
+                                            TextColor="Black"
+                                            VerticalOptions="Center"
+                                            FontSize="12"
+                                        />
+
+                                        <Label 
+                                            Text="|"
+                                            TextColor="Gray"
+                                            VerticalOptions="Center"
+                                            FontSize="12"
+                                        />
+
+                                        <Label 
+                                            Text="{Binding Competitors.Count, Converter={StaticResource NbCompetitorConverter}}"
+                                            TextColor="Black"
+                                            VerticalOptions="Center"
+                                            FontAttributes="Italic"
+                                            FontSize="12"
+                                        />
+                                    </HorizontalStackLayout>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
 

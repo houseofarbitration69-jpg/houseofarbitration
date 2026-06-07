@@ -24,6 +24,7 @@
     <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
     <converters:NbCompetitorsConverter x:Key="NbCompetitorConverter" />
     <converters:RoundTypeToBoolConverter x:Key="RoundTypeToBoolConverter" />
+    <converters:RoundTypeToStringConverter x:Key="RoundTypeToStringConverter" />
     <converters:SignalToColorConverter x:Key="SignalToColorConverter"/>
     <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
     <converters:WarningsToStringConverter x:Key="WarningsToStringConverter" />
