@@ -11,6 +11,7 @@
                    FontSize="{Binding FontSize, Source={x:Reference this}}"
                    TextColor="{Binding TextColor, Source={x:Reference this}}"
                    FontAttributes="{Binding FontAttributes, Source={x:Reference this}}"
+                   FontFamily="{Binding FontFamily, Source={x:Reference this}}"
                    VerticalOptions="Center"
                    LineBreakMode="NoWrap" />
             <Label x:Name="Label2" 
@@ -18,6 +19,7 @@
                    FontSize="{Binding FontSize, Source={x:Reference this}}"
                    TextColor="{Binding TextColor, Source={x:Reference this}}"
                    FontAttributes="{Binding FontAttributes, Source={x:Reference this}}"
+                   FontFamily="{Binding FontFamily, Source={x:Reference this}}"
                    VerticalOptions="Center"
                    IsVisible="False"
                    LineBreakMode="NoWrap" />

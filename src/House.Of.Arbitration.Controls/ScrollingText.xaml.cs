@@ -41,6 +41,15 @@ public partial class ScrollingText : ContentView
         set => SetValue(FontAttributesProperty, value);
     }
 
+    public static readonly BindableProperty FontFamilyProperty = BindableProperty.Create(
+        nameof(FontFamily), typeof(string), typeof(ScrollingText), string.Empty);
+
+    public string FontFamily
+    {
+        get => (string)GetValue(FontFamilyProperty);
+        set => SetValue(FontFamilyProperty, value);
+    }
+
     public ScrollingText()
     {
         InitializeComponent();

@@ -32,6 +32,7 @@
                 <Setter Property="FontSize" Value="14"/>
                 <Setter Property="TextColor" Value="Gray"/>
                 <Setter Property="HorizontalOptions" Value="Start"/>
+                <Setter Property="FontFamily" Value="OpenSansRegular"/>
             </Style>
 
             <Style x:Key="MainCompetitorNameStyle" TargetType="controls:ScrollingText">
@@ -39,6 +40,7 @@
                 <Setter Property="FontAttributes" Value="Bold"/>
                 <Setter Property="HorizontalOptions" Value="Start"/>
                 <Setter Property="FontSize" Value="36"/>
+                <Setter Property="FontFamily" Value="OpenSansSemibold"/>
             </Style>
 
             <Style x:Key="MainCompetitorClubStyle" TargetType="controls:ScrollingText">
@@ -46,6 +48,7 @@
                 <Setter Property="HorizontalOptions" Value="Start"/>
                 <Setter Property="FontSize" Value="24"/>
                 <Setter Property="Opacity" Value="0.9"/>
+                <Setter Property="FontFamily" Value="OpenSansRegular"/>
             </Style>
 
             <Style x:Key="MainCompetitorCountryStyle" TargetType="Label">
