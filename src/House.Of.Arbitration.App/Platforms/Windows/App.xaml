@@ -1,0 +1,17 @@
+﻿<maui:MauiWinUIApplication
+    x:Class="House.Of.Arbitration.App.WinUI.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:maui="using:Microsoft.Maui"
+    xmlns:local="using:House.Of.Arbitration.App.WinUI">
+
+    <maui:MauiWinUIApplication.Resources>
+        <Thickness x:Key="TextControlBorderThicknessFocused">0</Thickness>
+        <Thickness x:Key="TextControlBorderThickness">0</Thickness>
+        <Style TargetType="TextBox">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </maui:MauiWinUIApplication.Resources>
+
+</maui:MauiWinUIApplication>

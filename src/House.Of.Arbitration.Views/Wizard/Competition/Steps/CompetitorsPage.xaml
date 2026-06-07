@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:TypeArguments="vm:CompetitorsPageViewModel"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.CompetitorsPage"
+    x:Name="this"
+    x:DataType="vm:CompetitorsPageViewModel"
+    Shell.PresentationMode="ModalNotAnimated"
+    BackgroundColor="{DynamicResource PageBackgroundColor}"
+>
+    <base:BasePage.Resources>
+        <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
+        <converters:WarningsToStringConverter x:Key="WarningsToStringConverter" />
+        <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
+    </base:BasePage.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+            <VerticalStackLayout Grid.Column="0">
+                <Label 
+                    Text="{Binding Resources.COMPETITORS}" 
+                    TextColor="{DynamicResource PageTitleColor}"
+                    FontSize="28" 
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
+                <Label 
+                    Text="{Binding Category, Converter={StaticResource CategoryToNameConverter}}"
+                    FontSize="14"
+                    TextColor="White"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
+            </VerticalStackLayout>
+
+            <controls:IconButton 
+                Grid.Column="1"
+                Text="{Binding Resources.ADD_COMPETITOR}"
+                ButtonBackgroundColor="LightGreen"
+                TextColor="Black"
+                Command="{Binding AddCommand}"
+                VerticalOptions="Center"
+            >
+                <controls:IconButton.Icons>
+                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
+                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
+                </controls:IconButton.Icons>
+            </controls:IconButton>
+        </Grid>
+
+        <!-- Competitors List -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Competitors}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:CompetitorCategoryModel">
+                    <controls:Card CardPadding="15" CardColor="White">
+                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
+                            <!-- Flag -->
+                            <Image Grid.Column="0" Grid.RowSpan="2"
+                                   Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                   WidthRequest="32" 
+                                   HeightRequest="24" 
+                                   VerticalOptions="Center" 
+                                   Aspect="AspectFit"/>
+
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                <HorizontalStackLayout Spacing="9">
+                                    <Label Text="{Binding Competitor.LastName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label Text="{Binding Competitor.FirstName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                </HorizontalStackLayout>
+                                <Label Text="{Binding Competitor.Club}" FontSize="13" TextColor="Gray" />
+                                
+                                <!-- Warnings -->
+                                <Label Text="{Binding Warnings, Converter={StaticResource WarningsToStringConverter}}"
+                                       TextColor="{DynamicResource ErrorColor}"
+                                       FontSize="12"
+                                       Margin="0,5,0,0">
+                                </Label>
+                            </VerticalStackLayout>
+
+                            <HorizontalStackLayout Grid.Row="0" Grid.Column="2" Spacing="8">
+                                <controls:IconButton
+                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                            Icon="{x:Static helpers:FontCustomIcons.PEN}"
+                                            ButtonBackgroundColor="{DynamicResource EditColor}"
+                                            IconColor="Black"
+                                            Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=EditCommand}"
+                                            CommandParameter="{Binding}"
+                                        />
+                                <controls:IconButton
+                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                            Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                                            ButtonBackgroundColor="{DynamicResource ErrorColor}"
+                                            IconColor="Black"
+                                            Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=DeleteCommand}"
+                                            CommandParameter="{Binding}"
+                                        />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </controls:Card>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*" RowSpacing="10">
+                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
+                        <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
+                        <Label Text="{Binding Resources.NO_COMPETITORS}" FontAttributes="Italic" Opacity="0.6"  HorizontalOptions="Center" />
+                    </VerticalStackLayout>
+                </Grid>
+            </CollectionView.EmptyView>
+        </CollectionView>
+
+        <!-- Actions -->
+        <Grid Grid.Row="2" ColumnDefinitions="*, 200, *" ColumnSpacing="20">
+            <Button 
+                Grid.Column="1" 
+                Text="{Binding Resources.CLOSE_ACTION}" 
+                BackgroundColor="{DynamicResource ErrorColor}"
+                TextColor="White"
+                Command="{Binding CloseCommand}" 
+                Padding="15" 
+            />
+        </Grid>
+    </Grid>
+
+</base:BasePage>

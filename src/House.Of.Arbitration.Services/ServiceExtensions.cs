@@ -1,0 +1,48 @@
+﻿#region Imports
+using House.Of.Arbitration.Services.Abstractions;
+using House.Of.Arbitration.Services.Mock;
+
+#if ANDROID
+using House.Of.Arbitration.Services.Platforms.Android.Bluetooth;
+#elif WINDOWS
+using House.Of.Arbitration.Services.Platforms.Windows.Bluetooth;
+#endif
+
+#endregion
+
+namespace House.Of.Arbitration.Services;
+
+/// <summary>
+/// Extension methods for configuring localization services.
+/// </summary>
+public static class ServicesExtensions
+{
+    /// <summary>
+    /// Registers localization services with the dependency injection container.
+    /// </summary>
+    /// <param name="builder">The <see cref="MauiAppBuilder"/> to add the services to.</param>
+    /// <returns>The configured <see cref="MauiAppBuilder"/>.</returns>
+    public static MauiAppBuilder RegisterServices(this MauiAppBuilder builder)
+    {
+        builder.Services.AddScoped<IWarningService, WarningService>();
+        builder.Services.AddScoped<IAlertService, AlertService>();
+
+//#if DEBUG
+//        builder.Services.AddSingleton<IBluetoothService, MockBluetoothService>();
+//        builder.Services.AddSingleton<IBluetoothServer, MockBluetoothServer>();
+//        builder.Services.AddSingleton<IBluetoothClient, MockBluetoothClient>();
+//#else
+#if ANDROID
+        builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
+        builder.Services.AddSingleton<IBluetoothServer, BluetoothServer>();
+        builder.Services.AddSingleton<IBluetoothClient, BluetoothClient>();
+#elif WINDOWS
+        builder.Services.AddSingleton<IBluetoothService, BluetoothService>();
+        builder.Services.AddSingleton<IBluetoothServer, BluetoothServer>();
+        builder.Services.AddSingleton<IBluetoothClient, BluetoothClient>();
+#endif
+//#endif
+
+        return builder;
+    }
+}

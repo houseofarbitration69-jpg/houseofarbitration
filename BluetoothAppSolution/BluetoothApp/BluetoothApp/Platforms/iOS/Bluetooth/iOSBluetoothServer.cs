@@ -30,7 +30,7 @@ public class iOSBluetoothServer : CBPeripheralManagerDelegate, IBluetoothServer
         _peripheralManager = new CBPeripheralManager(this, DispatchQueue.MainQueue);
     }
 
-    public async Task<bool> StartAdvertising(string serviceUuid)
+    public async Task<bool> StartAdvertising(string serviceUuid, string deviceName)
     {
         if (((int)_peripheralManager.State) == ((int)CBManagerState.PoweredOn))
         {
@@ -47,13 +47,13 @@ public class iOSBluetoothServer : CBPeripheralManagerDelegate, IBluetoothServer
             _peripheralManager.AddService(_primaryService);
 
             var advertisementData = new NSDictionary(
-                CBAdvertisement.DataLocalNameKey, "BluetoothAppServer",
+                CBAdvertisement.DataLocalNameKey, deviceName ?? "BluetoothAppServer",
                 CBAdvertisement.DataServiceUUIDsKey, new CBUUID[] { ServiceUuid }
             );
 
             _peripheralManager.StartAdvertising(advertisementData);
             _isAdvertising = true;
-            Console.WriteLine("iOS Bluetooth LE Server started advertising.");
+            Console.WriteLine($"iOS Bluetooth LE Server started advertising as '{deviceName ?? "BluetoothAppServer"}'");
             return true;
         }
         else
@@ -101,7 +101,7 @@ public class iOSBluetoothServer : CBPeripheralManagerDelegate, IBluetoothServer
     }
 
     [Export("peripheralManagerDidUpdateState:")]
-public void DidUpdateState(CBPeripheralManager peripheral)
+    public void DidUpdateState(CBPeripheralManager peripheral)
     {
         Console.WriteLine($"Peripheral Manager State: {peripheral.State}");
         if (((int)peripheral.State) == ((int)CBManagerState.PoweredOn) && _primaryService != null && !_isAdvertising)
@@ -109,7 +109,7 @@ public void DidUpdateState(CBPeripheralManager peripheral)
             // If the manager was initialized but not advertising, start advertising.
             // This can happen if the manager initializes before permissions are granted.
             Console.WriteLine("Peripheral Manager powered on, restarting advertising.");
-            StartAdvertising(ServiceUuid.ToString());
+            StartAdvertising(ServiceUuid.ToString(), "BluetoothAppServer");
         }
     }
 

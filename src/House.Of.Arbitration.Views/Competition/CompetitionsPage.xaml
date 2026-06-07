@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Competition;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:TypeArguments="vm:CompetitionsViewModel"
+    x:Class="House.Of.Arbitration.Views.Competition.CompetitionsPage"
+    x:DataType="vm:CompetitionsViewModel"
+    x:Name="PageRoot">
+
+    <base:BasePage.Resources>
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+    </base:BasePage.Resources>
+
+    <Grid x:Name="MainContainer">
+        <!-- Utilisation d'un BindableLayout à la place de CollectionView pour tester les clics -->
+        <ScrollView Padding="20">
+            <VerticalStackLayout Spacing="24">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="Compétitions" Style="{DynamicResource Headline}" FontSize="32" />
+                    <Label Text="Liste de tous les événements enregistrés" Style="{DynamicResource SubHeadline}" FontSize="16" Opacity="0.7" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Competitions}" Spacing="16">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="models:CompetitionModel">
+                            <Border StrokeShape="RoundRectangle 8"
+                                    Stroke="{DynamicResource BorderColor}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="{DynamicResource SurfaceColor}"
+                                    Padding="16">
+                                <VerticalStackLayout Spacing="15">
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <Label Text="{Binding Name}" FontSize="20" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                        <Label Grid.Column="1" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" VerticalOptions="Center" Opacity="0.8" />
+                                    </Grid>
+
+                                    <Border BackgroundColor="{DynamicResource Tertiary}" Padding="10,5" HorizontalOptions="Start" StrokeThickness="0" StrokeShape="RoundRectangle 4">
+                                        <HorizontalStackLayout Spacing="10">
+                                            <Label Text="🥋" VerticalOptions="Center" />
+                                            <Label Text="{Binding Categories.Count, StringFormat='{0} catégories'}" FontSize="12" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+                                    </Border>
+
+                                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+                                        <Button Grid.Column="0" 
+                                                Text="DÉTAILS"
+                                                BackgroundColor="Transparent"
+                                                TextColor="{DynamicResource PrimaryTextColor}"
+                                                BorderColor="{DynamicResource BorderColor}"
+                                                BorderWidth="1"
+                                                Clicked="OnDetailsClicked"
+                                                CommandParameter="{Binding .}" />
+                                        
+                                        <Button Grid.Column="1" 
+                                                Text="DÉMARRER"
+                                                BackgroundColor="{DynamicResource MartialRed}"
+                                                TextColor="White"
+                                                Clicked="OnStartClicked"
+                                                CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Details Popup Overlay -->
+        <Grid BackgroundColor="#80000000" 
+              IsVisible="{Binding IsPopupVisible}"
+              Padding="20">
+            <Border VerticalOptions="Center"
+                    BackgroundColor="{DynamicResource PageBackgroundColor}"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="20"
+                    MaximumWidthRequest="500">
+                <VerticalStackLayout Spacing="20">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Label Text="Détails de la compétition" Style="{DynamicResource Headline}" FontSize="24" />
+                        <Button Grid.Column="1" Text="✕" BackgroundColor="Transparent" TextColor="{DynamicResource PrimaryTextColor}" Command="{Binding ClosePopupCommand}" />
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="10" x:DataType="vm:CompetitionsViewModel">
+                        <Label Text="{Binding SelectedCompetition.Name}" FontAttributes="Bold" FontSize="20" TextColor="{DynamicResource MartialRed}" />
+                        <Label Text="{Binding SelectedCompetition.Date, StringFormat='Date : {0:dd/MM/yyyy}'}" />
+                    </VerticalStackLayout>
+
+                    <Label Text="Catégories :" FontAttributes="Bold" FontSize="16" />
+                    <CollectionView ItemsSource="{Binding SelectedCompetition.Categories}" x:DataType="vm:CompetitionsViewModel">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:CategoryModel">
+                                <Label Text="{Binding Type, StringFormat='• {0}'}" Margin="0,2" />
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Button Text="Fermer" HorizontalOptions="End" Command="{Binding ClosePopupCommand}" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
+</base:BasePage>

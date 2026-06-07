@@ -1,0 +1,357 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="APPLICATION_NAME" xml:space="preserve">
+    <value>[APPLICATION NAME]</value>
+  </data>
+  <data name="ADD_COMPETITION" xml:space="preserve">
+    <value>[ADD COMPETITION]</value>
+  </data>
+  <data name="START_COMPETITION" xml:space="preserve">
+    <value>[START COMPETITION]</value>
+  </data>
+  <data name="MASTER" xml:space="preserve">
+    <value>[MASTER]</value>
+  </data>
+  <data name="SLAVE" xml:space="preserve">
+    <value>[SLAVE]</value>
+  </data>
+  <data name="COMPETITION_LIST" xml:space="preserve">
+    <value>[COMPETITION'S LIST]</value>
+  </data>
+  <data name="NO_COMPETITION" xml:space="preserve">
+    <value>[NO COMPETITION]</value>
+  </data>
+  <data name="PLACEHOLDER_COMPETITION_NAME" xml:space="preserve">
+    <value>[PLACEHOLDER COMPETITION NAME]</value>
+  </data>
+  <data name="NAME_REQUIRED" xml:space="preserve">
+    <value>[NAME REQUIRED]</value>
+  </data>
+  <data name="COMPETITION_NAME" xml:space="preserve">
+    <value>[COMPETITION NAME]</value>
+  </data>
+  <data name="COMPETITION_DATE" xml:space="preserve">
+    <value>[COMPETITION DATE]</value>
+  </data>
+  <data name="PREVIOUS" xml:space="preserve">
+    <value>[PREVIOUS]</value>
+  </data>
+  <data name="NEXT" xml:space="preserve">
+    <value>[NEXT]</value>
+  </data>
+  <data name="VALIDATE_ACTION" xml:space="preserve">
+    <value>[VALIDATE]</value>
+  </data>
+  <data name="CATEGORY_LIST" xml:space="preserve">
+    <value>[CATEGORIES LIST]</value>
+  </data>
+  <data name="ADD_CATEGORY" xml:space="preserve">
+    <value>[ADD CATEGORY]</value>
+  </data>
+  <data name="COMPETITION_SETTINGS" xml:space="preserve">
+    <value>[COMPETITION SETTINGS]</value>
+  </data>
+  <data name="NEW_CATEGORY" xml:space="preserve">
+    <value>[NEW CATEGORY]</value>
+  </data>
+  <data name="STYLE" xml:space="preserve">
+    <value>[STYLE]</value>
+  </data>
+  <data name="ROUND_TYPE" xml:space="preserve">
+    <value>[ROUND TYPE]</value>
+  </data>
+  <data name="GENRE" xml:space="preserve">
+    <value>[GENRE]</value>
+  </data>
+  <data name="OLD" xml:space="preserve">
+    <value>[OLD]</value>
+  </data>
+  <data name="WEIGHT_MIN" xml:space="preserve">
+    <value>[WEIGHT MIN]</value>
+  </data>
+  <data name="WEIGHT_MAX" xml:space="preserve">
+    <value>[WEIGHT MAX]</value>
+  </data>
+  <data name="CLOSE_ACTION" xml:space="preserve">
+    <value>[CLOSE]</value>
+  </data>
+  <data name="ENUM_CATEGORY_SANDA" xml:space="preserve">
+    <value>[ENUM CATEGORY SANDA]</value>
+  </data>
+  <data name="ENUM_CATEGORY_SANDALIGHT" xml:space="preserve">
+    <value>[ENUM CATEGORY SANDA LIGHT]</value>
+  </data>
+  <data name="ENUM_CATEGORY_NONE" xml:space="preserve">
+    <value>[ENUM CATEGORY NONE]</value>
+  </data>
+  <data name="ENUM_CATEGORY_TAOLU" xml:space="preserve">
+    <value>[ENUM CATEGORY TAOLU]</value>
+  </data>
+  <data name="ENUM_ROUND_KNOCKOUTS" xml:space="preserve">
+    <value>[ENUM ROUND KNOCKOUT]</value>
+  </data>
+  <data name="ENUM_ROUND_NONE" xml:space="preserve">
+    <value>[ENUM ROUND NONE]</value>
+  </data>
+  <data name="ENUM_ROUND_POOLS" xml:space="preserve">
+    <value>[ENUM ROUND POOLS]</value>
+  </data>
+  <data name="ENUM_GENRE_NONE" xml:space="preserve">
+    <value>[ENUM GENRE NONE]</value>
+  </data>
+  <data name="ENUM_GENRE_MEN" xml:space="preserve">
+    <value>[ENUM GENRE MEN]</value>
+  </data>
+  <data name="ENUM_GENRE_WOMEN" xml:space="preserve">
+    <value>[ENUM GENRE WOMEN]</value>
+  </data>
+  <data name="ENUM_AGE_NONE" xml:space="preserve">
+    <value>[ENUM AGE NONE]</value>
+  </data>
+  <data name="ENUM_AGE_CADETS" xml:space="preserve">
+    <value>[ENUM AGE CADETS]</value>
+  </data>
+  <data name="ENUM_AGE_JUNIORS" xml:space="preserve">
+    <value>[ENUM AGE JUNIORS]</value>
+  </data>
+  <data name="ENUM_AGE_SENIORS" xml:space="preserve">
+    <value>[ENUM AGE SENIORS]</value>
+  </data>
+  <data name="ENUM_AGE_ESPOIRS" xml:space="preserve">
+    <value>[ENUM AGE ESPOIRS]</value>
+  </data>
+  <data name="ENUM_AGE_VETERANS" xml:space="preserve">
+    <value>[ENUM AGE VETERANS]</value>
+  </data>
+  <data name="WEIGHT_UNIT" xml:space="preserve">
+    <value>[WEIGHT UNIT]</value>
+  </data>
+  <data name="COMPETITORS" xml:space="preserve">
+    <value>[COMPETITORS]</value>
+  </data>
+  <data name="ADD_COMPETITOR" xml:space="preserve">
+    <value>[ADD COMPETITOR]</value>
+  </data>
+  <data name="NO_COMPETITORS" xml:space="preserve">
+    <value>[NO COMPETITORS]</value>
+  </data>
+  <data name="COMPETITOR" xml:space="preserve">
+    <value>[COMPETITOR]</value>
+  </data>
+  <data name="FIRSTNAME" xml:space="preserve">
+    <value>[FIRST NAME]</value>
+  </data>
+  <data name="LASTNAME" xml:space="preserve">
+    <value>[LAST NAME]</value>
+  </data>
+  <data name="CLUB" xml:space="preserve">
+    <value>[CLUB]</value>
+  </data>
+  <data name="GRADE" xml:space="preserve">
+    <value>[GRADE]</value>
+  </data>
+  <data name="BIRTHDATE" xml:space="preserve">
+    <value>[BIRTH DATE]</value>
+  </data>
+  <data name="WEIGHT" xml:space="preserve">
+    <value>[WEIGHT]</value>
+  </data>
+  <data name="UPDATE_CATEGORY" xml:space="preserve">
+    <value>[UPDATE CATEGORY]</value>
+  </data>
+  <data name="YES" xml:space="preserve">
+    <value>[YES]</value>
+  </data>
+  <data name="NO" xml:space="preserve">
+    <value>[NO]</value>
+  </data>
+  <data name="CONFIRM_DELETE" xml:space="preserve">
+    <value>[CONFIRM DELETE]</value>
+  </data>
+  <data name="DELETE_CATEGORY_MESSAGE" xml:space="preserve">
+    <value>[ARE YOU SURE YOU WANT TO DELETE THIS CATEGORY ?]</value>
+  </data>
+  <data name="DELETE_COMPETITOR_MESSAGE" xml:space="preserve">
+    <value>[ARE YOU SURE YOU WANT TO DELETE THIS COMPETITOR ?]</value>
+  </data>
+  <data name="DELETE_COMPETITION_MESSAGE" xml:space="preserve">
+    <value>[DELETE COMPETITION MESSAGE]</value>
+  </data>
+  <data name="DRAW" xml:space="preserve">
+    <value>[DRAW]</value>
+  </data>
+  <data name="ENUM_ROUND_ORDER" xml:space="preserve">
+    <value>[ENUM ROUND ORDER]</value>
+  </data>
+  <data name="CATEGORIES" xml:space="preserve">
+    <value>[CATEGORIES]</value>
+  </data>
+  <data name="SETTINGS" xml:space="preserve">
+    <value>[SETTINGS]</value>
+  </data>
+  <data name="ENUM_GENRE_MIXTE" xml:space="preserve">
+    <value>[ENUM GENRE MIXTE]</value>
+  </data>
+  <data name="CHOOSE_AGE_RANGE" xml:space="preserve">
+    <value>Choose an age range</value>
+  </data>
+  <data name="NO_CATEGORIES" xml:space="preserve">
+    <value>[NO CATEGORIES]</value>
+  </data>
+  <data name="JUDGE" xml:space="preserve">
+    <value>JUDGE</value>
+  </data>
+  <data name="HISTORICS" xml:space="preserve">
+    <value>[HISTORICS]</value>
+  </data>
+  <data name="GENERATE_DATA" xml:space="preserve">
+    <value>[GENERATE DATA]</value>
+  </data>
+  <data name="CONNECT_TO_SERVER" xml:space="preserve">
+    <value>[CONNECT TO SERVER]</value>
+  </data>
+  <data name="SCAN_SERVER" xml:space="preserve">
+    <value>[SCAN SERVER]</value>
+  </data>
+  <data name="FIND_SERVERS" xml:space="preserve">
+    <value>[FIND SERVERS]</value>
+  </data>
+  <data name="SELECT_POSITION" xml:space="preserve">
+    <value>[SELECT POSITION]</value>
+  </data>
+  <data name="JUDGE_1" xml:space="preserve">
+    <value>[JUDGE 1]</value>
+  </data>
+  <data name="JUDGE_2" xml:space="preserve">
+    <value>[JUDGE 2]</value>
+  </data>
+  <data name="JUDGE_3" xml:space="preserve">
+    <value>[JUDGE 3]</value>
+  </data>
+  <data name="JUDGE_4" xml:space="preserve">
+    <value>[JUDGE 4]</value>
+  </data>
+  <data name="JUDGE_5" xml:space="preserve">
+    <value>[JUDGE 5]</value>
+  </data>
+  <data name="RING" xml:space="preserve">
+    <value>[RING]</value>
+  </data>
+</root>

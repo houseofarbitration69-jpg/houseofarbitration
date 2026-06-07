@@ -9,7 +9,7 @@ namespace BluetoothApp.Platforms.Android.Bluetooth;
 
 public class AndroidBluetoothService : IBluetoothService
 {
-    public bool IsBluetoothAvailable => BluetoothAdapter.DefaultAdapter != null;
+    public bool IsBluetoothAvailable => GetBluetoothAdapter() != null;
 
     public async Task<bool> RequestBluetoothPermissions()
     {
@@ -17,5 +17,11 @@ public class AndroidBluetoothService : IBluetoothService
         var locationStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
 
         return bluetoothStatus == PermissionStatus.Granted && locationStatus == PermissionStatus.Granted;
+    }
+
+    public BluetoothAdapter? GetBluetoothAdapter()
+    {
+        var bluetoothManager = MauiApplication.Current.GetSystemService("bluetooth") as BluetoothManager;
+        return bluetoothManager?.Adapter;
     }
 }

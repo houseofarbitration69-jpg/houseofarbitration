@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<local:BasePage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:House.Of.Arbitration.Maui.Designer"
+             xmlns:settings="clr-namespace:House.Of.Arbitration.Maui.Designer.Settings"
+             xmlns:views="clr-namespace:House.Of.Arbitration.Maui.Designer.Settings.Views"
+             x:Class="House.Of.Arbitration.Maui.Designer.Settings.WizardPage"
+             x:Name="ThisPage"
+             Title="Settings Wizard">
+
+    <local:BasePage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="CreateCompetitionStepTemplate">
+                <views:CreateCompetitionStepView />
+            </DataTemplate>
+
+            <DataTemplate x:Key="CategoriesStepTemplate">
+                <views:CategoriesStepView />
+            </DataTemplate>
+
+            <DataTemplate x:Key="UserStepTemplate">
+                <views:UserStepView />
+            </DataTemplate>
+
+            <DataTemplate x:Key="TermsStepTemplate">
+                <views:TermsStepView />
+            </DataTemplate>
+
+            <DataTemplate x:Key="SummaryStepTemplate">
+                <views:SummaryStepView />
+            </DataTemplate>
+
+            <settings:WizardStepTemplateSelector 
+                x:Key="WizardStepSelector"                                 
+                CreateCompetitionStepTemplate="{StaticResource CreateCompetitionStepTemplate}"
+                CategoriesStepTemplate="{StaticResource CategoriesStepTemplate}"
+                UserStepTemplate="{StaticResource UserStepTemplate}"
+                TermsStepTemplate="{StaticResource TermsStepTemplate}"
+                SummaryStepTemplate="{StaticResource SummaryStepTemplate}" 
+            />
+        </ResourceDictionary>
+    </local:BasePage.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="30">
+        <Label Grid.Row="0" 
+               Text="{Binding CurrentStep.Title}" 
+               FontSize="28" 
+               FontAttributes="Bold" 
+               HorizontalOptions="Center" 
+               Margin="0,0,0,30" />
+
+        <CarouselView Grid.Row="1"
+                      x:Name="WizardCarousel"
+                      ItemsSource="{Binding Steps}"
+                      IsSwipeEnabled="False"
+                      Loop="False"
+                      ItemTemplate="{StaticResource WizardStepSelector}"
+                      VerticalOptions="FillAndExpand" />
+
+        <Grid Grid.Row="2" ColumnDefinitions="*, *" ColumnSpacing="20" Margin="0,20,0,0">
+            <Button Grid.Column="0" 
+                    Text="Previous" 
+                    Command="{Binding PreviousCommand}"
+                    Padding="15" />
+            <Button Grid.Column="1" 
+                    Command="{Binding NextCommand}"
+                    Padding="15">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsLastStep}" Value="True">
+                        <Setter Property="Text" Value="Finish" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsLastStep}" Value="False">
+                        <Setter Property="Text" Value="Next" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+        </Grid>
+    </Grid>
+</local:BasePage>

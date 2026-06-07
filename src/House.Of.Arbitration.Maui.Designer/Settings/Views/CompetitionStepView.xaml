@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:settings="clr-namespace:House.Of.Arbitration.Maui.Designer.Settings"
+    x:Class="House.Of.Arbitration.Maui.Designer.Settings.Views.CompetitionStepView"
+    x:DataType="settings:CompetitionStepViewModel">
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="10">
+            <Label Text="Name : " FontSize="18" />
+            <Entry Text="{Binding Name, Mode=TwoWay}" 
+               Placeholder="Enter name" 
+               FontSize="20" 
+               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+
+            <Label Text="Date : " FontSize="18" />
+            <DatePicker Date="{Binding Date, Mode=TwoWay}" 
+               FontSize="20" 
+               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+
+            <Label Text="Place : " FontSize="18" />
+            <Entry Text="{Binding Place, Mode=TwoWay}" 
+               Placeholder="Enter place" 
+               FontSize="20" 
+               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

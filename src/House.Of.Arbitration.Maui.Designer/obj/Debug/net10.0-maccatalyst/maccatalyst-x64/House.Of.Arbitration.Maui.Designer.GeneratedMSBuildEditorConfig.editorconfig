@@ -57,6 +57,16 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/CompetitionsPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.CompetitionsPage.xaml
+build_metadata.AdditionalFiles.TargetPath = CompetitionsPage.xaml
+build_metadata.AdditionalFiles.RelativePath = CompetitionsPage.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
 [C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Controls/BottomMenuView.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
 build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Controls.BottomMenuView.xaml
@@ -67,31 +77,41 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/MainPage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Controls/CardView.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.MainPage.xaml
-build_metadata.AdditionalFiles.TargetPath = MainPage.xaml
-build_metadata.AdditionalFiles.RelativePath = MainPage.xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Controls.CardView.xaml
+build_metadata.AdditionalFiles.TargetPath = Controls\CardView.xaml
+build_metadata.AdditionalFiles.RelativePath = Controls\CardView.xaml
 build_metadata.AdditionalFiles.Inflator = Runtime
 build_metadata.AdditionalFiles.NoWarn = 
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/NotificationsPage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Controls/IconButton.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.NotificationsPage.xaml
-build_metadata.AdditionalFiles.TargetPath = NotificationsPage.xaml
-build_metadata.AdditionalFiles.RelativePath = NotificationsPage.xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Controls.IconButton.xaml
+build_metadata.AdditionalFiles.TargetPath = Controls\IconButton.xaml
+build_metadata.AdditionalFiles.RelativePath = Controls\IconButton.xaml
 build_metadata.AdditionalFiles.Inflator = Runtime
 build_metadata.AdditionalFiles.NoWarn = 
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/ProfilePage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Controls/SearchBarView.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.ProfilePage.xaml
-build_metadata.AdditionalFiles.TargetPath = ProfilePage.xaml
-build_metadata.AdditionalFiles.RelativePath = ProfilePage.xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Controls.SearchBarView.xaml
+build_metadata.AdditionalFiles.TargetPath = Controls\SearchBarView.xaml
+build_metadata.AdditionalFiles.RelativePath = Controls\SearchBarView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/HomePage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.HomePage.xaml
+build_metadata.AdditionalFiles.TargetPath = HomePage.xaml
+build_metadata.AdditionalFiles.RelativePath = HomePage.xaml
 build_metadata.AdditionalFiles.Inflator = Runtime
 build_metadata.AdditionalFiles.NoWarn = 
 build_metadata.AdditionalFiles.EnableDiagnostics = 
@@ -117,11 +137,111 @@ build_metadata.AdditionalFiles.NoWarn =
 build_metadata.AdditionalFiles.EnableDiagnostics = 
 build_metadata.AdditionalFiles.LineInfo = 
 
-[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/SearchPage.xaml]
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/SettingsPage.xaml]
 build_metadata.AdditionalFiles.GenKind = Xaml
-build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.SearchPage.xaml
-build_metadata.AdditionalFiles.TargetPath = SearchPage.xaml
-build_metadata.AdditionalFiles.RelativePath = SearchPage.xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.SettingsPage.xaml
+build_metadata.AdditionalFiles.TargetPath = SettingsPage.xaml
+build_metadata.AdditionalFiles.RelativePath = SettingsPage.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/CategoriesStepView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.CategoriesStepView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\CategoriesStepView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\CategoriesStepView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/CategoryView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.CategoryView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\CategoryView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\CategoryView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/CompetitionStepView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.CompetitionStepView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\CompetitionStepView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\CompetitionStepView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/CompetitorsStepView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.CompetitorsStepView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\CompetitorsStepView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\CompetitorsStepView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/CompetitorView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.CompetitorView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\CompetitorView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\CompetitorView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/CreateCompetitionStepView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.CreateCompetitionStepView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\CreateCompetitionStepView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\CreateCompetitionStepView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/SummaryStepView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.SummaryStepView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\SummaryStepView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\SummaryStepView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/TermsStepView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.TermsStepView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\TermsStepView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\TermsStepView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/Views/UserStepView.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.Views.UserStepView.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\Views\UserStepView.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\Views\UserStepView.xaml
+build_metadata.AdditionalFiles.Inflator = Runtime
+build_metadata.AdditionalFiles.NoWarn = 
+build_metadata.AdditionalFiles.EnableDiagnostics = 
+build_metadata.AdditionalFiles.LineInfo = 
+
+[C:/Works/KungFu/houseofarbitration/src/House.Of.Arbitration.Maui.Designer/Settings/WizardPage.xaml]
+build_metadata.AdditionalFiles.GenKind = Xaml
+build_metadata.AdditionalFiles.ManifestResourceName = House.Of.Arbitration.Maui.Designer.Settings.WizardPage.xaml
+build_metadata.AdditionalFiles.TargetPath = Settings\WizardPage.xaml
+build_metadata.AdditionalFiles.RelativePath = Settings\WizardPage.xaml
 build_metadata.AdditionalFiles.Inflator = Runtime
 build_metadata.AdditionalFiles.NoWarn = 
 build_metadata.AdditionalFiles.EnableDiagnostics = 

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="House.Of.Arbitration.Controls.ScrollingText"
+             IsClippedToBounds="True"
+             x:Name="this">
+    <Grid x:Name="Container" IsClippedToBounds="True" BackgroundColor="Transparent" HorizontalOptions="Fill" VerticalOptions="Fill">
+        <HorizontalStackLayout x:Name="ScrollLayout" Spacing="50" VerticalOptions="Center" HorizontalOptions="Center">
+            <Label x:Name="Label1" 
+                   Text="{Binding Text, Source={x:Reference this}}" 
+                   FontSize="{Binding FontSize, Source={x:Reference this}}"
+                   TextColor="{Binding TextColor, Source={x:Reference this}}"
+                   FontAttributes="{Binding FontAttributes, Source={x:Reference this}}"
+                   VerticalOptions="Center"
+                   LineBreakMode="NoWrap" />
+            <Label x:Name="Label2" 
+                   Text="{Binding Text, Source={x:Reference this}}" 
+                   FontSize="{Binding FontSize, Source={x:Reference this}}"
+                   TextColor="{Binding TextColor, Source={x:Reference this}}"
+                   FontAttributes="{Binding FontAttributes, Source={x:Reference this}}"
+                   VerticalOptions="Center"
+                   IsVisible="False"
+                   LineBreakMode="NoWrap" />
+        </HorizontalStackLayout>
+    </Grid>
+</ContentView>

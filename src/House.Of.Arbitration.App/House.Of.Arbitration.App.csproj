@@ -1,0 +1,90 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+    <TargetFrameworks>$(NetVersion)-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);$(NetVersion)-$(WindowsVersion)</TargetFrameworks>
+
+		<OutputType>Exe</OutputType>
+		<RootNamespace>House.Of.Arbitration.App</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+
+		<!-- Display name -->
+		<ApplicationTitle>H.O.A</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.hoa</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
+		<WindowsPackageType>None</WindowsPackageType>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">$(AndroidTarget)</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsTarget)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsTarget)</TargetPlatformMinVersion>
+    <Configurations>Debug;Release;Debug - Server;Debug - Client</Configurations>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon 
+			Include="Resources\AppIcon\appicon.svg" 
+			ForegroundFile="Resources\Images\hoa.svg" 
+			Color="#808080" 
+		/>
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen 
+			Include="Resources\Images\hoa_splash_256.png" 
+			Color="#808080" 
+			BaseSize="512,512"
+			Resize="False"
+		/>
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\**\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
+		
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="appsettings.Development.json" />
+	  <None Remove="appsettings.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="appsettings.Development.json" />
+	  <EmbeddedResource Include="appsettings.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="CommunityToolkit.Maui.Core" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+		<PackageReference Include="Microsoft.Maui.Controls" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+		<PackageReference Include="Microsoft.Maui.Core" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\House.Of.Arbitration.Data.Abstractions\House.Of.Arbitration.Data.Abstractions.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Data\House.Of.Arbitration.Data.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Localization\House.Of.Arbitration.Localization.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Models\House.Of.Arbitration.Models.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Services.Abstractions\House.Of.Arbitration.Services.Abstractions.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Services\House.Of.Arbitration.Services.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.ViewModels.Core\House.Of.Arbitration.ViewModels.Core.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.ViewModels\House.Of.Arbitration.ViewModels.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Views.Core\House.Of.Arbitration.Views.Core.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Views\House.Of.Arbitration.Views.csproj" />
+	  <ProjectReference Include="..\House.Of.Arbitration.Controls\House.Of.Arbitration.Controls.csproj" />
+	</ItemGroup>
+
+</Project>

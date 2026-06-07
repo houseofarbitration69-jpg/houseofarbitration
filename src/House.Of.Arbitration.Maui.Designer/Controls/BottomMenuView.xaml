@@ -1,64 +1,50 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="House.Of.Arbitration.Maui.Designer.Controls.BottomMenuView">
-    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}"
-           CornerRadius="20"
+             xmlns:models="clr-namespace:House.Of.Arbitration.Maui.Designer.Models"
+             x:Class="House.Of.Arbitration.Maui.Designer.Controls.BottomMenuView"
+             x:Name="ThisMenu">
+    <Frame BackgroundColor="{AppThemeBinding Light={StaticResource MartialSurface}, Dark={StaticResource MartialDark}}"
+           CornerRadius="0"
+           BorderColor="{StaticResource MartialGold}"
            Margin="10"
            Padding="0"
            HasShadow="True"
-           HeightRequest="70"
+           HeightRequest="75"
            VerticalOptions="End">
-        <Grid x:Name="MenuGrid" ColumnDefinitions="*,*,*,*,*" Padding="5">
-            <!-- Items will be added here or defined statically -->
-            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="2">
-                <Image Source="dotnet_bot.png" HeightRequest="24" WidthRequest="24" HorizontalOptions="Center"/>
-                <Label Text="Home" FontSize="10" HorizontalOptions="Center" />
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnMenuItemTapped" CommandParameter="0" />
-                </VerticalStackLayout.GestureRecognizers>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                <Image Source="dotnet_bot.png" HeightRequest="24" WidthRequest="24" HorizontalOptions="Center"/>
-                <Label Text="Search" FontSize="10" HorizontalOptions="Center" />
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnMenuItemTapped" CommandParameter="1" />
-                </VerticalStackLayout.GestureRecognizers>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" Spacing="2">
-                <Image Source="dotnet_bot.png" HeightRequest="24" WidthRequest="24" HorizontalOptions="Center"/>
-                <Label Text="Add" FontSize="10" HorizontalOptions="Center" />
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnMenuItemTapped" CommandParameter="2" />
-                </VerticalStackLayout.GestureRecognizers>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Grid.Column="3" VerticalOptions="Center" Spacing="2">
-                <Image Source="dotnet_bot.png" HeightRequest="24" WidthRequest="24" HorizontalOptions="Center"/>
-                <Label Text="Notifications" FontSize="10" HorizontalOptions="Center" />
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnMenuItemTapped" CommandParameter="3" />
-                </VerticalStackLayout.GestureRecognizers>
-            </VerticalStackLayout>
-
-            <VerticalStackLayout Grid.Column="4" VerticalOptions="Center" Spacing="2">
-                <Image Source="dotnet_bot.png" HeightRequest="24" WidthRequest="24" HorizontalOptions="Center"/>
-                <Label Text="Profile" FontSize="10" HorizontalOptions="Center" />
-                <VerticalStackLayout.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnMenuItemTapped" CommandParameter="4" />
-                </VerticalStackLayout.GestureRecognizers>
-            </VerticalStackLayout>
-
-            <!-- Selection Indicator for Transition -->
+        <Grid x:Name="ContainerGrid">
+            <!-- Dynamic Selection Indicator -->
             <BoxView x:Name="SelectionIndicator"
-                     Grid.Column="0"
                      BackgroundColor="{StaticResource Primary}"
                      HeightRequest="3"
                      VerticalOptions="End"
                      Margin="15,0,15,5"
-                     CornerRadius="2"/>
+                     CornerRadius="2"
+                     WidthRequest="50"
+                     HorizontalOptions="Start"/>
+
+            <!-- Bindable Layout for Menu Items -->
+            <Grid x:Name="MenuGrid" 
+                  BindableLayout.ItemsSource="{Binding MenuItems, Source={x:Reference ThisMenu}}"
+                  Padding="5">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:MenuNavItem">
+                        <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                            <Label Text="{Binding Icon}" 
+                                   FontFamily="FA-Solid"
+                                   FontSize="24"
+                                   HorizontalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
+                            <Label Text="{Binding Title}" 
+                                   FontSize="10" 
+                                   HorizontalOptions="Center" />
+                            <VerticalStackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnMenuItemTapped" CommandParameter="{Binding .}" />
+                            </VerticalStackLayout.GestureRecognizers>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </Grid>
         </Grid>
     </Frame>
 </ContentView>

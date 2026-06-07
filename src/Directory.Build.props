@@ -1,0 +1,22 @@
+<Project>
+  <PropertyGroup>
+    <NetVersion>net10.0</NetVersion>
+    <WindowsVersion>windows10.0.19041.0</WindowsVersion>
+    <AndroidTarget>23.0</AndroidTarget>
+    <iOSTarget>16.0</iOSTarget>
+    <WindowsTarget>10.0.19041.0</WindowsTarget>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- Fix CA1824: Mark assemblies with NeutralResourcesLanguageAttribute -->
+    <NeutralLanguage>en</NeutralLanguage>
+
+    <!-- Disable unwanted MAUI platforms to avoid unnecessary workload requirements -->
+    <UseMauiTizen>false</UseMauiTizen>
+    <UseMauiMacCatalyst>false</UseMauiMacCatalyst>
+    <!-- Enable XamlC binding with source compilation optimization -->
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
+
+    <NoWarn>$(NoWarn);MSB3774;WMC1006;XA0101;</NoWarn>
+  </PropertyGroup>
+</Project>

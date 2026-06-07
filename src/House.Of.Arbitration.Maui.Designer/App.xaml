@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:House.Of.Arbitration.Maui.Designer"
              xmlns:controls="clr-namespace:House.Of.Arbitration.Maui.Designer.Controls"
+             xmlns:converters="clr-namespace:House.Of.Arbitration.Maui.Designer.Converters"
              x:Class="House.Of.Arbitration.Maui.Designer.App">
     <Application.Resources>
         <ResourceDictionary>
@@ -11,9 +12,12 @@
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <ControlTemplate x:Key="MasterPageTemplate">
+            <converters:DoubleToCornerRadiusConverter x:Key="DoubleToCornerRadiusConverter" />
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+            
+            <!--<ControlTemplate x:Key="MasterPageTemplate">
                 <Grid RowDefinitions="Auto, *, Auto">
-                    <!-- Header with Back Arrow -->
+                    --><!-- Header with Back Arrow --><!--
                     <ContentView Grid.Row="0" 
                                  Padding="20,10" 
                                  IsVisible="{TemplateBinding IsBackButtonVisible}"
@@ -31,9 +35,10 @@
                     <ContentPresenter Grid.Row="1" Grid.RowSpan="2" />
                     
                     <controls:BottomMenuView Grid.Row="2" 
-                                            IsVisible="{TemplateBinding IsMenuVisible}" />
+                                            IsVisible="{TemplateBinding IsMenuVisible}"
+                                            MenuItems="{TemplateBinding MenuItems}" />
                 </Grid>
-            </ControlTemplate>
+            </ControlTemplate>-->
         </ResourceDictionary>
     </Application.Resources>
 </Application>

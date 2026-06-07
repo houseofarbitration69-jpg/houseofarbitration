@@ -1,0 +1,89 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(NetVersion)-android</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);$(NetVersion)-$(WindowsVersion)</TargetFrameworks>
+
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">$(AndroidTarget)</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsTarget)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsTarget)</TargetPlatformMinVersion>
+    <Configurations>Debug;Release;Debug - Server;Debug - Client</Configurations>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\House.Of.Arbitration.Controls\House.Of.Arbitration.Controls.csproj" />
+    <ProjectReference Include="..\House.Of.Arbitration.ViewModels\House.Of.Arbitration.ViewModels.csproj" />
+    <ProjectReference Include="..\House.Of.Arbitration.Views.Core\House.Of.Arbitration.Views.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Competition\CompetitionsPage.xaml.cs">
+      <DependentUpon>CompetitionsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="ServerPage.xaml.cs">
+      <DependentUpon>ServerPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="MasterPage.xaml.cs">
+      <DependentUpon>MasterPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="TestPage.xaml.cs">
+      <DependentUpon>TestPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Wizard\Competition\Steps\CategoryPopup.xaml.cs">
+      <DependentUpon>CategoryPopup.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Wizard\Competition\Steps\DragDropPage.xaml.cs">
+      <DependentUpon>DragDropPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Wizard\Competition\Steps\DrawPage.xaml.cs">
+      <DependentUpon>DrawPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Wizard\Competition\WizardPage.xaml.cs">
+      <DependentUpon>WizardPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Wizard\Competition\Steps\SettingsStepView.xaml.cs">
+      <DependentUpon>SettingsStepView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="Competition\CompetitionsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="HomePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="ServerPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="MasterPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="TestPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\Steps\CategoriesStepView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\Steps\DragDropPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\Steps\DrawPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\WizardPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Wizard\Competition\Steps\SettingsStepView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+  </ItemGroup>
+
+</Project>

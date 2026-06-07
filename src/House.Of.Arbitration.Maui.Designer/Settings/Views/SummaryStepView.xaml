@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:settings="clr-namespace:House.Of.Arbitration.Maui.Designer.Settings"
+             x:Class="House.Of.Arbitration.Maui.Designer.Settings.Views.SummaryStepView"
+             x:DataType="settings:SummaryStepViewModel">
+    <VerticalStackLayout Spacing="20" Padding="10">
+        <Label Text="Review your information:" FontSize="18" FontAttributes="Bold" />
+        <Border StrokeShape="RoundRectangle 10" Padding="15" BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+            <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto" ColumnSpacing="15" RowSpacing="10">
+                <Label Grid.Row="0" Grid.Column="0" Text="Name:" FontAttributes="Bold" />
+                <Label Grid.Row="0" Grid.Column="1" Text="{Binding UserName}" />
+                <Label Grid.Row="1" Grid.Column="0" Text="Terms:" FontAttributes="Bold" />
+                <Label Grid.Row="1" Grid.Column="1" Text="{Binding TermsAccepted}" />
+            </Grid>
+        </Border>
+        <Label Text="Click 'Finish' to complete the setup." FontSize="14" HorizontalOptions="Center" />
+    </VerticalStackLayout>
+</ContentView>

@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:TypeArguments="vm:DrawPageViewModel"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.DrawPage"
+    x:Name="this"
+    x:DataType="vm:DrawPageViewModel"
+    BackgroundColor="{DynamicResource PageBackgroundColor}">
+
+    <ContentPage.Resources>
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+        <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
+        <converters:EqualityToBoolConverter x:Key="EqualityToBoolConverter" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
+
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+            <VerticalStackLayout Grid.Column="0">
+                <Label 
+                    Text="{Binding Category, Converter={StaticResource CategoryToNameConverter}}" 
+                    TextColor="{DynamicResource PageTitleColor}"
+                    FontSize="28" 
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
+                <Label 
+                    Text="{Binding Resources.DRAW}"
+                    FontSize="14"
+                    TextColor="White"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- Competitors List / Bracket -->
+        <ScrollView Grid.Row="1" Orientation="Both" HorizontalScrollBarVisibility="Always" VerticalScrollBarVisibility="Always" HorizontalOptions="Fill">
+            <Grid VerticalOptions="Fill" HorizontalOptions="Fill">
+                <!-- Bracket View (Elimination) -->
+                <HorizontalStackLayout 
+                    IsVisible="{Binding IsKnockouts}"
+                    Spacing="40" 
+                    Padding="20"
+                    VerticalOptions="Start"
+                    HorizontalOptions="Start"
+                    BindableLayout.ItemsSource="{Binding Rounds}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BracketRoundViewModel">
+                            <VerticalStackLayout Spacing="0" VerticalOptions="Start">
+                                <Label Text="{Binding Name}" 
+                                       TextColor="White" 
+                                       FontSize="18" 
+                                       FontAttributes="Bold" 
+                                       HorizontalOptions="Center" 
+                                       Margin="0,0,0,20" />
+
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Matches}" VerticalOptions="Start">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:BracketMatchViewModel">
+                                            <Grid Margin="{Binding Margin}" HeightRequest="{Binding Height}" WidthRequest="250" ColumnDefinitions="45, *" VerticalOptions="Start">
+                                                <!-- Match Order -->
+                                                <Grid Grid.Column="0" 
+                                                      IsVisible="{Binding IsOrderVisible}"
+                                                      VerticalOptions="Center" 
+                                                      RowDefinitions="Auto, Auto, Auto"
+                                                      RowSpacing="0">
+                                                    <Label Text="▴" 
+                                                           TextColor="{DynamicResource Primary}" 
+                                                           HorizontalOptions="Center" 
+                                                           FontSize="20"
+                                                           Padding="0"
+                                                           Margin="0">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding IncrementOrderCommand}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                    <Border Grid.Row="1" 
+                                                            BackgroundColor="#333" 
+                                                            Stroke="Gray" 
+                                                            StrokeThickness="1" 
+                                                            HeightRequest="30" WidthRequest="35"
+                                                            HorizontalOptions="Center"
+                                                            Padding="0">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Grid>
+                                                            <!-- Using a Label for display to ensure perfect centering -->
+                                                            <Label Text="{Binding GlobalOrder}"
+                                                                   TextColor="White"
+                                                                   FontSize="12"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center" />
+                                                            <!-- Hidden Entry for keyboard input if tapped -->
+                                                            <Entry Text="{Binding GlobalOrder}"
+                                                                   Keyboard="Numeric"
+                                                                   Opacity="0"
+                                                                   HorizontalOptions="Fill"
+                                                                   VerticalOptions="Fill"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center"
+                                                                   MinimumHeightRequest="0"
+                                                                   MinimumWidthRequest="0" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <Label Grid.Row="2" Text="▾" 
+                                                           TextColor="{DynamicResource Primary}" 
+                                                           HorizontalOptions="Center" 
+                                                           FontSize="20"
+                                                           Padding="0"
+                                                           Margin="0">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding DecrementOrderCommand}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                </Grid>
+
+                                                <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
+                                                    <!-- Slot 1 -->
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
+                                                            BackgroundColor="#F5F5F5" 
+                                                            Stroke="Gray"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
+                                                            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                                <controls:ScrollingText Text="{Binding Slot1.Competitor.Name, FallbackValue='(BYE)'}" 
+                                                                       TextColor="Black" 
+                                                                       FontAttributes="Bold"
+                                                                       FontSize="13" />
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           WidthRequest="150" />
+                                                                    <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
+                                                            <Label Grid.Column="1" Text="➕" 
+                                                                   IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
+                                                                   FontSize="12" VerticalOptions="Center" Opacity="0.6" />
+                                                        </Grid>
+                                                        <Border.GestureRecognizers>
+                                                            <DragGestureRecognizer 
+                                                                CanDrag="{Binding x:DataType='vm:BracketRoundViewModel', Source={RelativeSource AncestorType={x:Type vm:BracketRoundViewModel}}, Path=Name, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter='Round 1'}" 
+                                                                DragStarting="OnDragStarting"
+                                                                DropCompleted="OnDragCompleted"
+                                                                DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
+                                                                DragStartingCommandParameter="{Binding Slot1}" />
+                                                            <DropGestureRecognizer 
+                                                                AllowDrop="{Binding x:DataType='vm:BracketRoundViewModel', Source={RelativeSource AncestorType={x:Type vm:BracketRoundViewModel}}, Path=Name, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter='Round 1'}" 
+                                                                DragOver="OnDragOver"
+                                                                DragLeave="OnDragLeave"
+                                                                Drop="OnDrop"
+                                                                DropCommandParameter="{Binding Slot1}" />
+                                                        </Border.GestureRecognizers>
+                                                    </Border>
+
+                                                    <!-- Slot 2 -->
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
+                                                            BackgroundColor="#F5F5F5" 
+                                                            Stroke="Gray"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
+                                                            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                                <controls:ScrollingText Text="{Binding Slot2.Competitor.Name, FallbackValue='(BYE)'}" 
+                                                                       TextColor="Black" 
+                                                                       FontAttributes="Bold"
+                                                                       FontSize="13" />
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <controls:ScrollingText Text="{Binding Slot2.Competitor.Club}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           WidthRequest="150" />
+                                                                    <Label Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
+                                                            <Label Grid.Column="1" Text="➕" 
+                                                                   IsVisible="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=IsDragging}"
+                                                                   FontSize="12" VerticalOptions="Center" Opacity="0.6" />
+                                                        </Grid>
+                                                        <Border.GestureRecognizers>
+                                                            <DragGestureRecognizer 
+                                                                CanDrag="{Binding x:DataType='vm:BracketRoundViewModel', Source={RelativeSource AncestorType={x:Type vm:BracketRoundViewModel}}, Path=Name, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter='Round 1'}" 
+                                                                DragStarting="OnDragStarting"
+                                                                DropCompleted="OnDragCompleted"
+                                                                DragStartingCommand="{Binding x:DataType='vm:DrawPageViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawPageViewModel}}, Path=DragStartingCommand}"
+                                                                DragStartingCommandParameter="{Binding Slot2}" />
+                                                            <DropGestureRecognizer 
+                                                                AllowDrop="{Binding x:DataType='vm:BracketRoundViewModel', Source={RelativeSource AncestorType={x:Type vm:BracketRoundViewModel}}, Path=Name, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter='Round 1'}" 
+                                                                DragOver="OnDragOver"
+                                                                DragLeave="OnDragLeave"
+                                                                Drop="OnDrop"
+                                                                DropCommandParameter="{Binding Slot2}" />
+                                                        </Border.GestureRecognizers>
+                                                    </Border>
+
+                                                    <!-- Winner Slot -->
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
+                                                            BackgroundColor="Gold" 
+                                                            Stroke="Orange"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0">
+                                                            <controls:ScrollingText Text="{Binding Slot1.Competitor.Name, FallbackValue='WINNER'}" 
+                                                                   TextColor="Black" 
+                                                                   FontAttributes="Bold"
+                                                                   FontSize="14"
+                                                                   HorizontalOptions="Center" />
+                                                            <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
+                                                                <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       WidthRequest="150" />
+                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                            </HorizontalStackLayout>
+                                                        </VerticalStackLayout>
+                                                    </Border>
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
+
+                <!-- Poule View (Group) -->
+                <Grid 
+                    IsVisible="{Binding IsPools}"
+                    Padding="20"
+                    VerticalOptions="Fill"
+                    HorizontalOptions="Fill"
+                    BindableLayout.ItemsSource="{Binding Rounds}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BracketRoundViewModel">
+                            <Grid ColumnDefinitions="*">
+                                <FlexLayout 
+                                    BindableLayout.ItemsSource="{Binding Matches}" 
+                                    Wrap="Wrap" 
+                                    JustifyContent="Start" 
+                                    AlignContent="Start" 
+                                    AlignItems="Start"
+                                    HorizontalOptions="Fill">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:BracketMatchViewModel">
+                                            <Grid HeightRequest="140" WidthRequest="250" ColumnDefinitions="45, *" Margin="10">
+                                                <!-- Match Order -->
+                                                <Grid Grid.Column="0" 
+                                                      IsVisible="{Binding IsOrderVisible}"
+                                                      VerticalOptions="Center" 
+                                                      RowDefinitions="Auto, Auto, Auto"
+                                                      RowSpacing="0">
+                                                    <Label Text="▴" 
+                                                           TextColor="{DynamicResource Primary}" 
+                                                           HorizontalOptions="Center" 
+                                                           FontSize="20"
+                                                           Padding="0"
+                                                           Margin="0">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding IncrementOrderCommand}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                    <Border Grid.Row="1" 
+                                                            BackgroundColor="#333" 
+                                                            Stroke="Gray" 
+                                                            StrokeThickness="1" 
+                                                            HeightRequest="30" WidthRequest="35"
+                                                            HorizontalOptions="Center"
+                                                            Padding="0">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Grid>
+                                                            <Label Text="{Binding GlobalOrder}"
+                                                                   TextColor="White"
+                                                                   FontSize="12"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center" />
+                                                            <Entry Text="{Binding GlobalOrder}"
+                                                                   Keyboard="Numeric"
+                                                                   Opacity="0"
+                                                                   HorizontalOptions="Fill"
+                                                                   VerticalOptions="Fill"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center"
+                                                                   MinimumHeightRequest="0"
+                                                                   MinimumWidthRequest="0" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <Label Grid.Row="2" Text="▾" 
+                                                           TextColor="{DynamicResource Primary}" 
+                                                           HorizontalOptions="Center" 
+                                                           FontSize="20"
+                                                           Padding="0"
+                                                           Margin="0">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding DecrementOrderCommand}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                </Grid>
+
+                                                <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Center">
+                                                    <!-- Slot 1 -->
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
+                                                            BackgroundColor="#F5F5F5" 
+                                                            Stroke="Gray"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
+                                                            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                                <controls:ScrollingText Text="{Binding Slot1.Competitor.Name, FallbackValue='(BYE)'}" 
+                                                                       TextColor="Black" 
+                                                                       FontAttributes="Bold"
+                                                                       FontSize="13" />
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           WidthRequest="150" />
+                                                                    <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Slot 2 -->
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
+                                                            BackgroundColor="#F5F5F5" 
+                                                            Stroke="Gray"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
+                                                            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                                <controls:ScrollingText Text="{Binding Slot2.Competitor.Name, FallbackValue='(BYE)'}" 
+                                                                       TextColor="Black" 
+                                                                       FontAttributes="Bold"
+                                                                       FontSize="13" />
+                                                                <HorizontalStackLayout Spacing="5">
+                                                                    <controls:ScrollingText Text="{Binding Slot2.Competitor.Club}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           WidthRequest="150" />
+                                                                    <Label Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                           TextColor="#444" 
+                                                                           FontSize="11"
+                                                                           IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                </HorizontalStackLayout>
+                                                            </VerticalStackLayout>
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <!-- Winner Slot -->
+                                                    <Border Padding="10, 5" 
+                                                            HeightRequest="60" 
+                                                            BackgroundColor="Gold" 
+                                                            Stroke="Orange"
+                                                            StrokeThickness="1"
+                                                            IsVisible="{Binding IsWinnerSlot}">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0">
+                                                            <controls:ScrollingText Text="{Binding Slot1.Competitor.Name, FallbackValue='WINNER'}" 
+                                                                   TextColor="Black" 
+                                                                   FontAttributes="Bold"
+                                                                   FontSize="14"
+                                                                   HorizontalOptions="Center" />
+                                                            <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
+                                                                <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       WidthRequest="150" />
+                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                            </HorizontalStackLayout>
+                                                        </VerticalStackLayout>
+                                                    </Border>
+                                                </VerticalStackLayout>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </FlexLayout>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </Grid>
+
+                <!-- Order View (Simple List) -->
+                <Grid 
+                    IsVisible="{Binding IsOrder}"
+                    Padding="20"
+                    VerticalOptions="Start"
+                    HorizontalOptions="Center"
+                    BindableLayout.ItemsSource="{Binding Rounds}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BracketRoundViewModel">
+                            <VerticalStackLayout Spacing="0">
+                                <Label Text="{Binding Name}" 
+                                       TextColor="White" 
+                                       FontSize="18" 
+                                       FontAttributes="Bold" 
+                                       HorizontalOptions="Center" 
+                                       Margin="0,0,0,20" />
+
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Matches}" HorizontalOptions="Center" Spacing="10">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:BracketMatchViewModel">
+                                            <Grid HeightRequest="100" WidthRequest="300" ColumnDefinitions="45, *">
+                                                <!-- Match Order Badge -->
+                                                <Grid Grid.Column="0" 
+                                                      VerticalOptions="Center" 
+                                                      RowDefinitions="Auto, Auto, Auto"
+                                                      RowSpacing="0">
+                                                    <Label Text="▴" 
+                                                           TextColor="{DynamicResource Primary}" 
+                                                           HorizontalOptions="Center" 
+                                                           FontSize="20"
+                                                           Padding="0"
+                                                           Margin="0">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding IncrementOrderCommand}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                    <Border Grid.Row="1" 
+                                                            BackgroundColor="#333" 
+                                                            Stroke="Gray" 
+                                                            StrokeThickness="1" 
+                                                            HeightRequest="30" WidthRequest="35"
+                                                            HorizontalOptions="Center"
+                                                            Padding="0">
+                                                        <Border.StrokeShape>
+                                                            <RoundRectangle CornerRadius="5"/>
+                                                        </Border.StrokeShape>
+                                                        <Grid>
+                                                            <Label Text="{Binding GlobalOrder}"
+                                                                   TextColor="White"
+                                                                   FontSize="12"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center" />
+                                                            <Entry Text="{Binding GlobalOrder}"
+                                                                   Keyboard="Numeric"
+                                                                   Opacity="0"
+                                                                   HorizontalOptions="Fill"
+                                                                   VerticalOptions="Fill"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center"
+                                                                   MinimumHeightRequest="0"
+                                                                   MinimumWidthRequest="0" />
+                                                        </Grid>
+                                                    </Border>
+                                                    <Label Grid.Row="2" Text="▾" 
+                                                           TextColor="{DynamicResource Primary}" 
+                                                           HorizontalOptions="Center" 
+                                                           FontSize="20"
+                                                           Padding="0"
+                                                           Margin="0">
+                                                        <Label.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding DecrementOrderCommand}" />
+                                                        </Label.GestureRecognizers>
+                                                    </Label>
+                                                </Grid>
+
+                                                <!-- Competitor Slot -->
+                                                <Border Grid.Column="1" 
+                                                        Padding="10, 5" 
+                                                        HeightRequest="60" 
+                                                        BackgroundColor="#F5F5F5" 
+                                                        Stroke="Gray"
+                                                        StrokeThickness="1"
+                                                        VerticalOptions="Center">
+                                                    <Border.StrokeShape>
+                                                        <RoundRectangle CornerRadius="5"/>
+                                                    </Border.StrokeShape>
+                                                    <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
+                                                        <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+                                                            <controls:ScrollingText Text="{Binding Slot1.Competitor.Name}" 
+                                                                   TextColor="Black" 
+                                                                   FontAttributes="Bold"
+                                                                   FontSize="13" />
+                                                            <HorizontalStackLayout Spacing="5">
+                                                                <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       WidthRequest="150" />
+                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                       TextColor="#444" 
+                                                                       FontSize="11"
+                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                            </HorizontalStackLayout>
+                                                        </VerticalStackLayout>
+                                                    </Grid>
+                                                </Border>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </Grid>
+
+                <!-- Unsupported View -->
+                <VerticalStackLayout IsVisible="{Binding Rounds.Count, Converter={StaticResource InvertBoolConverter}}"
+                                     HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                    <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
+                    <Label Text="Draw view not implemented for this category type." TextColor="Gray" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Grid>
+        </ScrollView>
+
+        <!-- Actions -->
+        <Grid Grid.Row="2" ColumnDefinitions="*, 200, 200, *" ColumnSpacing="20">
+            <Button 
+                Grid.Column="1" 
+                Text="{Binding Resources.CLOSE_ACTION}" 
+                BackgroundColor="{DynamicResource ErrorColor}"
+                TextColor="Black"
+                Command="{Binding CloseCommand}" 
+                Padding="15" 
+            />
+            <Button 
+                Grid.Column="2" 
+                Text="{Binding Resources.VALIDATE_ACTION}" 
+                BackgroundColor="{DynamicResource ValidColor}"
+                TextColor="Black"
+                Command="{Binding SaveCommand}" 
+                Padding="15" 
+            />
+        </Grid>
+    </Grid>
+
+</base:BasePage>

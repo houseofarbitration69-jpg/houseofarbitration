@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+
+    <!-- App Identifier -->
+    <ApplicationId>com.biocinov.neptune</ApplicationId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NSubstitute" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="CommunityToolkit.Maui" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="NSubstitute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\House.Of.Arbitration.ViewModels\House.Of.Arbitration.ViewModels.csproj" />
+    <ProjectReference Include="..\House.Of.Arbitration.Models\House.Of.Arbitration.Models.csproj" />
+    <ProjectReference Include="..\House.Of.Arbitration.Data.Abstractions\House.Of.Arbitration.Data.Abstractions.csproj" />
+    <ProjectReference Include="..\House.Of.Arbitration.Localization\House.Of.Arbitration.Localization.csproj" />
+  </ItemGroup>
+
+</Project>

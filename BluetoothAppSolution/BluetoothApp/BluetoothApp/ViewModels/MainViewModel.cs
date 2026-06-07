@@ -80,12 +80,15 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
+    [ObservableProperty]
+    string serverName = "MyBluetoothServer";
+
     [RelayCommand]
     async Task StartServer()
     {
-        // Use a generic UUID for demonstration
-        await _bluetoothServer.StartAdvertising("BluetoothAppService");
-        ServerStatus = "Server Advertising...";
+        // Use a generic UUID for demonstration, and provide the custom device name
+        await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName);
+        ServerStatus = $"Server Advertising as '{ServerName}'...";
     }
 
     [RelayCommand]

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls"
+    x:Class="House.Of.Arbitration.Controls.IconButton"
+    x:DataType="controls:IconButton"
+    x:Name="root">
+
+    <ContentView.Resources>
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <converters:DoubleToCornerRadiusConverter x:Key="DoubleToCornerRadiusConverter" />
+    </ContentView.Resources>
+
+    <Border 
+        x:Name="MainBorder" 
+        BackgroundColor="{Binding ButtonBackgroundColor, Source={x:Reference root}}"
+        Stroke="{Binding BorderBrush, Source={x:Reference root}}"
+        StrokeThickness="{Binding BorderThickness, Source={x:Reference root}}"
+        Padding="{Binding ButtonPadding, Source={x:Reference root}}"
+        HorizontalOptions="Fill"
+        VerticalOptions="Center"
+    >
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="Disabled">
+                    <VisualState.Setters>
+                        <Setter Property="Opacity" Value="0.5" />
+                        <!--<Setter TargetName="MainBorder" Property="BackgroundColor" Value="{StaticResource Gray200}" />-->
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Border.Triggers>
+            <DataTrigger TargetType="Border" Binding="{Binding IsFullWidth, Source={x:Reference root}}" Value="False">
+                <Setter Property="HorizontalOptions" Value="Center" />
+            </DataTrigger>
+        </Border.Triggers>
+
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="{Binding CornerRadius, Source={x:Reference root}, Converter={StaticResource DoubleToCornerRadiusConverter}}" />
+        </Border.StrokeShape>
+
+        <HorizontalStackLayout Spacing="10" 
+                               HorizontalOptions="Center" 
+                               VerticalOptions="Center">
+
+            <!-- Icône unique -->
+            <Label Text="{Binding Icon, Source={x:Reference root}}"
+                   FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
+                   FontSize="{Binding IconFontSize, Source={x:Reference root}}"
+                   TextColor="{Binding IconColor, Source={x:Reference root}}"
+                   VerticalOptions="Center"
+                   IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"/>
+
+            <!-- Liste d'icônes -->
+            <Grid BindableLayout.ItemsSource="{Binding InternalIcons, Source={x:Reference root}}"
+                                   IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="controls:IconInfo">
+                        <Label Text="{Binding Icon}"
+                               FontFamily="{Binding FontFamily}"
+                               TextColor="{Binding Color}"
+                               FontSize="{Binding FontSize}"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </Grid>
+
+            <!-- Texte -->
+            <Label x:Name="TextLabel"
+                   Text="{Binding Text, Source={x:Reference root}}"
+                   TextColor="{Binding TextColor, Source={x:Reference root}}"
+                   FontSize="{Binding TextFontSize, Source={x:Reference root}}"
+                   FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   IsVisible="{Binding Text, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"/>
+
+        </HorizontalStackLayout>
+
+        <Border.GestureRecognizers>
+            <TapGestureRecognizer Tapped="OnTapped" />
+        </Border.GestureRecognizers>
+    </Border>
+</ContentView>

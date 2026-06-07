@@ -1,6 +1,9 @@
 using Microsoft.Maui.Controls;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using House.Of.Arbitration.Maui.Designer.Models;
+using System.Collections;
 
 namespace House.Of.Arbitration.Maui.Designer.Controls;
 
@@ -8,7 +11,15 @@ public partial class BottomMenuView : ContentView
 {
     private static int _lastSelectedIndex = 0;
     private int _currentIndex = 0;
-    private static readonly string[] Routes = { "MainPage", "SearchPage", "AddPage", "NotificationsPage", "ProfilePage" };
+
+    public static readonly BindableProperty MenuItemsProperty =
+        BindableProperty.Create(nameof(MenuItems), typeof(IEnumerable), typeof(BottomMenuView), null, propertyChanged: OnMenuItemsChanged);
+
+    public IEnumerable MenuItems
+    {
+        get => (IEnumerable)GetValue(MenuItemsProperty);
+        set => SetValue(MenuItemsProperty, value);
+    }
 
     public BottomMenuView()
     {
@@ -16,64 +27,93 @@ public partial class BottomMenuView : ContentView
         this.Loaded += OnBottomMenuViewLoaded;
     }
 
-    private void OnBottomMenuViewLoaded(object sender, EventArgs e)
+    private static void OnMenuItemsChanged(BindableObject bindable, object oldValue, object newValue)
     {
+        if (bindable is BottomMenuView menu && newValue is IEnumerable items)
+        {
+            var itemList = items.Cast<object>().ToList();
+            menu.MenuGrid.ColumnDefinitions.Clear();
+            foreach (var _ in itemList)
+            {
+                menu.MenuGrid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            }
+
+            // Set Grid.Column for each child manually since BindableLayout doesn't do it for Grid automatically
+            menu.UpdateGridColumns();
+        }
+    }
+
+    private void UpdateGridColumns()
+    {
+        for (int i = 0; i < MenuGrid.Children.Count; i++)
+        {
+            Grid.SetColumn((BindableObject)MenuGrid.Children[i], i);
+        }
+    }
+
+    private void OnBottomMenuViewLoaded(object? sender, EventArgs e)
+    {
+        this.Loaded -= OnBottomMenuViewLoaded;
+        UpdateGridColumns();
         UpdateInitialPosition();
     }
 
     private async void UpdateInitialPosition()
     {
-        if (Shell.Current?.CurrentState?.Location == null) return;
+        if (Shell.Current?.CurrentState?.Location == null || MenuItems == null) return;
 
+        var items = MenuItems.Cast<MenuNavItem>().ToList();
         var location = Shell.Current.CurrentState.Location.OriginalString;
         var currentRoute = location.Split('/').LastOrDefault(s => !string.IsNullOrWhiteSpace(s));
         
-        int targetIndex = Array.IndexOf(Routes, currentRoute);
-        if (targetIndex < 0) targetIndex = 0; // Default to Home
+        int targetIndex = items.FindIndex(m => m.Route == currentRoute);
+        if (targetIndex < 0) targetIndex = 0;
+
+        // Set indicator width based on grid columns
+        SelectionIndicator.WidthRequest = (ContainerGrid.Width / items.Count) - 30;
 
         if (targetIndex != _lastSelectedIndex)
         {
-            // Start from the previous position to create a transition effect
-            Grid.SetColumn(SelectionIndicator, _lastSelectedIndex);
             _currentIndex = _lastSelectedIndex;
+            UpdateIndicatorPosition(_currentIndex);
 
-            // Wait a tiny bit for the layout to be ready
-            await Task.Delay(50);
+            await Task.Delay(100);
 
-            double itemWidth = MenuGrid.Width / 5;
+            double itemWidth = ContainerGrid.Width / items.Count;
             double targetTranslation = (targetIndex - _currentIndex) * itemWidth;
 
-            await SelectionIndicator.TranslateTo(targetTranslation, 0, 300, Easing.CubicInOut);
+            await SelectionIndicator.TranslateToAsync(targetTranslation, 0, 300, Easing.CubicInOut);
             
             SelectionIndicator.TranslationX = 0;
-            Grid.SetColumn(SelectionIndicator, targetIndex);
             _currentIndex = targetIndex;
             _lastSelectedIndex = targetIndex;
         }
-        else
-        {
-            _currentIndex = targetIndex;
-            Grid.SetColumn(SelectionIndicator, targetIndex);
-            _lastSelectedIndex = targetIndex;
-        }
+        
+        UpdateIndicatorPosition(targetIndex);
+        _lastSelectedIndex = targetIndex;
+    }
+
+    private void UpdateIndicatorPosition(int index)
+    {
+        if (MenuItems == null) return;
+        var items = MenuItems.Cast<object>().ToList();
+        if (items.Count == 0) return;
+
+        double itemWidth = ContainerGrid.Width / items.Count;
+        SelectionIndicator.TranslationX = 0;
+        SelectionIndicator.Margin = new Thickness((itemWidth * index) + 15, 0, 15, 5);
     }
 
     private async void OnMenuItemTapped(object sender, EventArgs e)
     {
-        if (sender is View view && view.GestureRecognizers[0] is TapGestureRecognizer tap && tap.CommandParameter is string indexStr)
+        if (sender is View view && view.GestureRecognizers[0] is TapGestureRecognizer tap && tap.CommandParameter is MenuNavItem item)
         {
-            int index = int.Parse(indexStr);
-            if (index == _currentIndex) return;
+            var items = MenuItems.Cast<MenuNavItem>().ToList();
+            int index = items.IndexOf(item);
+            if (index == _currentIndex || index < 0) return;
 
-            string route = Routes[index];
-            _lastSelectedIndex = _currentIndex; // Save current as last before navigating
-
-            // Navigate
-            await Shell.Current.GoToAsync($"///{route}");
-            
-            // Note: The animation for the "new" page will be handled by its own Loaded event
+            _lastSelectedIndex = _currentIndex;
+            await Shell.Current.GoToAsync($"///{item.Route}");
         }
     }
-
-    public event EventHandler<int> OnItemSelected;
 }

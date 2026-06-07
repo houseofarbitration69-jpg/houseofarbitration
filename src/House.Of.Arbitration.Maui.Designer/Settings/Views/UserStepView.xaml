@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:settings="clr-namespace:House.Of.Arbitration.Maui.Designer.Settings"
+             x:Class="House.Of.Arbitration.Maui.Designer.Settings.Views.UserStepView"
+             x:DataType="settings:UserStepViewModel">
+    <VerticalStackLayout Spacing="20" Padding="10">
+        <Label Text="Please enter your name (min 3 chars):" FontSize="18" />
+        <Entry Text="{Binding Name, Mode=TwoWay}" 
+               Placeholder="Enter name" 
+               FontSize="20" 
+               TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+    </VerticalStackLayout>
+</ContentView>

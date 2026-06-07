@@ -37,12 +37,18 @@ public class AndroidBluetoothServer : IBluetoothServer
         _bluetoothAdapter = _bluetoothManager.Adapter;
     }
 
-    public async Task<bool> StartAdvertising(string serviceUuid)
+    public async Task<bool> StartAdvertising(string serviceUuid, string deviceName)
     {
         if (!_bluetoothAdapter.IsMultipleAdvertisementSupported)
         {
             Console.WriteLine("Advertising not supported on this device.");
             return false;
+        }
+
+        // Set the device name if provided
+        if (!string.IsNullOrEmpty(deviceName))
+        {
+            _bluetoothAdapter.SetName(deviceName);
         }
 
         _bluetoothLeAdvertiser = _bluetoothAdapter.BluetoothLeAdvertiser;

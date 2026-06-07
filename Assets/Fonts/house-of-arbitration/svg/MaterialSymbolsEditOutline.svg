@@ -1,0 +1,30 @@
+<svg viewBox="0 0 24 24" width="32" height="32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <style>
+        :root, .palette0 {color: currentColor;
+            --color0: #191919;
+            --color1: #fff;
+            --color2: #ffbfc5;
+            --color3: #ff808c;
+            --color4: #fcc219;
+            --color5: #865c50;
+            --color6: #d1701c;
+            --color7: #ffefab;
+            --color8: #fffcfd;
+            --color9: #ffa828;
+            --color10: #fec417;
+            --color11: #f2cd8c;
+            --color12: #e9be79;
+            --color13: #502f1b;
+            --color14: #dea678;
+            --color15: #da9c69;
+            --color16: #bd2122;
+            --color17: #d9e9f0;
+            --color18: #462917;
+            --color19: #dbb26f;
+            --color20: #d2a75f;
+            --color21: #194794;
+        }
+    </style>
+    <!-- Icon from Material Symbols by Google - https://github.com/google/material-design-icons/blob/master/LICENSE -->
+    <path fill="currentColor" d="M5 19h1.425L16.2 9.225 14.775 7.8 5 17.575zM3 21v-4.25L16.2 3.575Q16.5 3.3 16.863 3.15T17.625 3 18.4 3.15 19.05 3.6L20.425 5q0.3 0.275 0.438 0.65T21 6.4q0 0.4-0.137 0.763t-0.438 0.662L7.25 21zM19 6.4 17.6 5zM15.475 8.525 14.775 7.8 16.2 9.225z" />
+</svg>

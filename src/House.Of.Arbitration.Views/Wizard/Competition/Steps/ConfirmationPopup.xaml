@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mct:Popup 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Core;assembly=House.Of.Arbitration.ViewModels.Core"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    x:Class="House.Of.Arbitration.Views.Wizard.Competition.Steps.ConfirmationPopup"
+    x:DataType="vm:ConfirmationPopupViewModel"
+    BackgroundColor="Transparent"
+    Padding="0"
+>
+    <Border 
+        VerticalOptions="Center"
+        BackgroundColor="{DynamicResource PageBackgroundColor}"
+        Padding="20"
+        MaximumWidthRequest="450"
+        WidthRequest="400"
+    >
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
+        </Border.StrokeShape>
+
+        <VerticalStackLayout Spacing="20">
+            <!-- Icon & Title -->
+            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
+                <Label 
+                    Text="⚠️" 
+                    FontSize="32" 
+                    VerticalOptions="Center"
+                />
+                <Label 
+                    Text="{Binding Title}" 
+                    Style="{DynamicResource Headline}" 
+                    FontSize="22" 
+                    VerticalOptions="Center"
+                    HorizontalOptions="Start"
+                    TextColor="White"
+                />
+            </HorizontalStackLayout>
+
+            <!-- Message -->
+            <Label 
+                Text="{Binding Message}" 
+                TextColor="White" 
+                FontSize="16" 
+                HorizontalTextAlignment="Center"
+                LineBreakMode="WordWrap"
+            />
+
+            <!-- Buttons -->
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+                <controls:IconButton
+                    Grid.Column="0" 
+                    Text="{Binding CancelText}"
+                    ButtonBackgroundColor="{DynamicResource ValidColor}"
+                    TextColor="Black"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
+                    IconColor="Black"
+                    Command="{Binding CancelCommand}"
+                />
+
+                <controls:IconButton
+                    Grid.Column="1"
+                    Text="{Binding AcceptText}"
+                    TextColor="Black"
+                    ButtonBackgroundColor="{DynamicResource ErrorColor}"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                    IconColor="Black"
+                    Command="{Binding AcceptCommand}"
+                />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</mct:Popup>
