@@ -17,6 +17,17 @@
     </Style>
     <!-- END HOME -->
     
+    <!-- MASTER PAGE -->
+    <Style x:Key="PageTitleStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="{DynamicResource PageTitleColor}"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontAttributes" Value="None"/>
+        <Setter Property="FontSize" Value="32"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+    <!-- END MASTER PAGE -->
+    
     <!-- BUTTONS -->
     <Style x:Key="PrimaryButtonStyle" TargetType="controls:IconButton">
         <Setter Property="TextFontSize" Value="14"/>
@@ -24,7 +35,61 @@
 
         <Setter Property="IconFontSize" Value="18"/>
         <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"/>
-        <Setter Property="IconColor" Value="Transparent"/>
+        <Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>
+
+        <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ValidColor}"/>
+        <Setter Property="ButtonPadding" Value="15,10,15,10"/>
+        <Setter Property="IsFullWidth" Value="True"/>
+
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0.0"/>
+        <Setter Property="CornerRadius" Value="10.0"/>
+    </Style>
+
+    <Style x:Key="ListActionEditButtonStyle" TargetType="controls:IconButton">
+        <Setter Property="TextFontSize" Value="14"/>
+        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+
+        <Setter Property="Icon" Value="{x:Static helpers:FontCustomIcons.PEN}"/>
+        <Setter Property="IconFontSize" Value="18"/>
+        <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.CUSTOM_NAME}"/>
+        <Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>
+
+        <Setter Property="ButtonBackgroundColor" Value="{DynamicResource EditColor}"/>
+        <Setter Property="ButtonPadding" Value="15,10,15,10"/>
+        <Setter Property="IsFullWidth" Value="True"/>
+
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0.0"/>
+        <Setter Property="CornerRadius" Value="10.0"/>
+    </Style>
+
+    <Style x:Key="ListActionDeleteButtonStyle" TargetType="controls:IconButton">
+        <Setter Property="TextFontSize" Value="14"/>
+        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+
+        <Setter Property="Icon" Value="{x:Static helpers:FontCustomIcons.TRASH}"/>
+        <Setter Property="IconFontSize" Value="18"/>
+        <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.CUSTOM_NAME}"/>
+        <Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>
+
+        <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ErrorColor}"/>
+        <Setter Property="ButtonPadding" Value="15,10,15,10"/>
+        <Setter Property="IsFullWidth" Value="True"/>
+
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0.0"/>
+        <Setter Property="CornerRadius" Value="10.0"/>
+    </Style>
+
+    <Style x:Key="ListActionPlayButtonStyle" TargetType="controls:IconButton">
+        <Setter Property="TextFontSize" Value="14"/>
+        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+
+        <Setter Property="Icon" Value="{x:Static helpers:FontCustomIcons.PLAY}"/>
+        <Setter Property="IconFontSize" Value="18"/>
+        <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.CUSTOM_NAME}"/>
+        <Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>
 
         <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ValidColor}"/>
         <Setter Property="ButtonPadding" Value="15,10,15,10"/>
