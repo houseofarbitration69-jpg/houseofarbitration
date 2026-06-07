@@ -1527,6 +1527,16 @@
                 />
 
                 <Button 
+                    Text="VOIR LES TIRAGES" 
+                    Command="{Binding GoToDrawsCommand}"
+                    BackgroundColor="{DynamicResource ValidColor}"
+                    TextColor="Black"
+                    FontAttributes="Bold"
+                    CornerRadius="20"
+                    HeightRequest="50"
+                />
+
+                <Button 
                     Text="FERMER" 
                     Command="{Binding CloseSideSheetCommand}"
                     BackgroundColor="Gray"

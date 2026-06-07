@@ -723,5 +723,12 @@ public partial class ServerViewModel : BaseViewModel
     {
         IsSideSheetOpen = false;
     }
+
+    [RelayCommand]
+    private async Task GoToDraws()
+    {
+        IsSideSheetOpen = false;
+        await Shell.Current.GoToAsync($"DrawsManagementPage?CompetitionId={CompetitionId}");
+    }
     #endregion
 }

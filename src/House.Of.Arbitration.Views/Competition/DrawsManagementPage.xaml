@@ -12,7 +12,8 @@
     x:TypeArguments="vm:DrawsManagementViewModel"
     x:Class="House.Of.Arbitration.Views.Competition.DrawsManagementPage"
     x:DataType="vm:DrawsManagementViewModel"
-    BackgroundColor="{DynamicResource PageBackgroundColor}">
+    BackgroundColor="{DynamicResource PageBackgroundColor}"
+    Shell.PresentationMode="ModalAnimated">
 
     <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20" RowSpacing="15">
 
