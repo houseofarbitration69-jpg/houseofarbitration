@@ -13,9 +13,9 @@ namespace House.Of.Arbitration.Maui.Designer
                 .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                    fonts.AddFont("Font Awesome 7 Free-Solid-900.otf", "FA-Solid");
+                    fonts.AddFont("opensans_regular.ttf", "OpenSansRegular");
+                    fonts.AddFont("opensans_semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont("fontawesome_solid.otf", "FA-Solid");
                 });
 
 #if DEBUG

@@ -2,7 +2,6 @@
   "profiles": {
     "Windows Machine": {
       "commandName": "Project",
-      "workingDirectory": "C:\\Temp\\House.Of.Arbitration",
       "nativeDebugging": false
     }
   }

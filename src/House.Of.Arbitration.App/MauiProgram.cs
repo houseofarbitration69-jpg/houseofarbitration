@@ -111,6 +111,8 @@ namespace House.Of.Arbitration.App
 
             var app = builder.Build();
 
+            app.SetDefaultCulture();
+
             return app;
         }
     }
