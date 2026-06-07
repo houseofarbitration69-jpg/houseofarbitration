@@ -92,6 +92,19 @@ public partial class MasterViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task Draws(CompetitionModel competition)
+    {
+        if (competition == null) return;
+
+        var navigationParameter = new Dictionary<string, object>
+        {
+            { "CompetitionId", competition.Id }
+        };
+
+        await Shell.Current.GoToAsync("DrawsManagementPage", navigationParameter);
+    }
+
+    [RelayCommand]
     private async Task StartCompetition(CompetitionModel competition)
     {
         if (competition == null) return;

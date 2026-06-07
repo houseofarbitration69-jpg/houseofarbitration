@@ -103,7 +103,14 @@
                                     Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=EditCompetitionCommand}"
                                     CommandParameter="{Binding}"
                                 />
-                                
+
+                                <controls:IconButton
+                                    Style="{StaticResource ListActionPlayButtonStyle}"
+                                    Icon="{x:Static helpers:FontCustomIcons.DRAWS}"
+                                    Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=DrawsCommand}"
+                                    CommandParameter="{Binding}"
+                                />
+
                                 <controls:IconButton
                                     Style="{StaticResource ListActionDeleteButtonStyle}"
                                     Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=DeleteCompetitionCommand}"

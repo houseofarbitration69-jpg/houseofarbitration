@@ -21,6 +21,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<ServerViewModel>();
         builder.Services.AddTransient<JudgeViewModel>();
         builder.Services.AddTransient<CompetitionsViewModel>();
+        builder.Services.AddTransient<DrawsManagementViewModel>();
 
         builder.Services.AddTransient<CompetitionWizardViewModel>();
         builder.Services.AddTransient<SettingsStepViewModel>();
