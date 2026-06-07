@@ -15,10 +15,6 @@
     BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <ContentPage.Resources>
-        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
-        <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
-        <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
-        <converters:EqualityToBoolConverter x:Key="EqualityToBoolConverter" />
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">

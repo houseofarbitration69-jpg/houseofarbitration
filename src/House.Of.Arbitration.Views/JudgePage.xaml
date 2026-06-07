@@ -17,61 +17,6 @@
 >
     <base:BasePage.Resources>
         <ResourceDictionary>
-            <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
-            <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />
-            <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
-            <converters:RoundTypeToBoolConverter x:Key="RoundTypeToBoolConverter" />
-            <converters:GenreToImageConverter x:Key="GenreToImageConverter" />
-            <converters:GenreToBoolConverter x:Key="GenreToBoolConverter" />
-            <converters:GenreToFontConverter x:Key="GenreToFontConverter" />
-            <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
-            <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter" />
-            <converters:SignalToColorConverter x:Key="SignalToColorConverter"/>
-
-            <Style x:Key="CompetitorInfoLabelStyle" TargetType="Label">
-                <Setter Property="FontSize" Value="12"/>
-                <Setter Property="TextColor" Value="Gray"/>
-            </Style>
-
-            <Style x:Key="MainCompetitorNameStyle" TargetType="Label">
-                <Setter Property="TextColor" Value="White"/>
-                <Setter Property="FontAttributes" Value="Bold"/>
-                <Setter Property="HorizontalOptions" Value="Center"/>
-                <Setter Property="FontSize" Value="36"/>
-                <Setter Property="CharacterSpacing" Value="2"/>
-            </Style>
-
-            <Style x:Key="MainCompetitorClubStyle" TargetType="Label">
-                <Setter Property="TextColor" Value="White"/>
-                <Setter Property="HorizontalOptions" Value="Center"/>
-                <Setter Property="FontSize" Value="24"/>
-                <Setter Property="Opacity" Value="0.9"/>
-            </Style>
-
-            <Style x:Key="MainCompetitorCountryStyle" TargetType="Label">
-                <Setter Property="TextColor" Value="White"/>
-                <Setter Property="HorizontalOptions" Value="Center"/>
-                <Setter Property="FontSize" Value="20"/>
-                <Setter Property="Opacity" Value="0.8"/>
-                <Setter Property="FontAttributes" Value="Italic"/>
-            </Style>
-
-            <Style x:Key="JudgePointsLabelStyle" TargetType="Label">
-                <Style.Triggers>
-                    <DataTrigger TargetType="Label" Binding="{Binding CurrentDraw.Draw.Category.RoundType, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                        <Setter Property="IsVisible" Value="False" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
-            <Style x:Key="JudgeButtonsGridStyle" TargetType="Grid">
-                <Style.Triggers>
-                    <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Draw.Category.RoundType, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                        <Setter Property="IsVisible" Value="False" />
-                    </DataTrigger>
-                </Style.Triggers>
-            </Style>
-
             <DataTemplate x:Key="KnockoutTemplate" x:DataType="models:DrawKnockoutModel">
                 <Border 
                     Padding="10,10,10,10" 

@@ -5,7 +5,7 @@ using System.Globalization;
 
 namespace House.Of.Arbitration.Controls.Converters;
 
-public class NbCompetitorConverter : IValueConverter
+public class NbCompetitorsConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

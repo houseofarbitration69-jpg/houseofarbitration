@@ -9,9 +9,13 @@ namespace House.Of.Arbitration.Controls;
 
 public partial class IconButton : ContentView
 {
-    #region Bindable Properties
+    #region Text Bindable Properties
     public static readonly BindableProperty TextProperty = BindableProperty.Create(
-        nameof(Text), typeof(string), typeof(IconButton), string.Empty);
+        nameof(Text), 
+        typeof(string), 
+        typeof(IconButton), 
+        string.Empty
+    );
 
     public string Text
     {
@@ -20,7 +24,11 @@ public partial class IconButton : ContentView
     }
 
     public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
-        nameof(TextFontSize), typeof(double), typeof(IconButton), 14.0);
+        nameof(TextFontSize), 
+        typeof(double), 
+        typeof(IconButton), 
+        14.0
+    );
 
     public double TextFontSize
     {
@@ -28,8 +36,27 @@ public partial class IconButton : ContentView
         set => SetValue(TextFontSizeProperty, value);
     }
 
+    public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
+        nameof(TextColor),
+        typeof(Color),
+        typeof(IconButton),
+        Colors.White
+    );
+
+    public Color TextColor
+    {
+        get => (Color)GetValue(TextColorProperty);
+        set => SetValue(TextColorProperty, value);
+    }
+    #endregion
+
+    #region Icon Bindable Properties
     public static readonly BindableProperty IconProperty = BindableProperty.Create(
-        nameof(Icon), typeof(string), typeof(IconButton), string.Empty);
+        nameof(Icon), 
+        typeof(string), 
+        typeof(IconButton), 
+        string.Empty
+    );
 
     public string Icon
     {
@@ -38,7 +65,11 @@ public partial class IconButton : ContentView
     }
 
     public static readonly BindableProperty IconFontSizeProperty = BindableProperty.Create(
-        nameof(IconFontSize), typeof(double), typeof(IconButton), 18.0);
+        nameof(IconFontSize), 
+        typeof(double), 
+        typeof(IconButton), 
+        18.0
+    );
 
     public double IconFontSize
     {
@@ -49,7 +80,12 @@ public partial class IconButton : ContentView
     public ObservableCollection<IconInfo> InternalIcons { get; } = new();
 
     public static readonly BindableProperty IconsProperty = BindableProperty.Create(
-        nameof(Icons), typeof(IList), typeof(IconButton), null, propertyChanged: OnIconsChanged);
+        nameof(Icons), 
+        typeof(IList), 
+        typeof(IconButton), 
+        null, 
+        propertyChanged: OnIconsChanged
+    );
 
     public IList Icons
     {
@@ -76,7 +112,11 @@ public partial class IconButton : ContentView
     }
 
     public static readonly BindableProperty IconFontFamilyProperty = BindableProperty.Create(
-        nameof(IconFontFamily), typeof(string), typeof(IconButton), FontHelper.FONTAWESOME_SOLID_NAME);
+        nameof(IconFontFamily), 
+        typeof(string), 
+        typeof(IconButton), 
+        FontHelper.FONTAWESOME_SOLID_NAME
+    );
 
     public string IconFontFamily
     {
@@ -84,58 +124,32 @@ public partial class IconButton : ContentView
         set => SetValue(IconFontFamilyProperty, value);
     }
 
-    public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
-        nameof(TextColor), typeof(Color), typeof(IconButton), Colors.White);
-
-    public Color TextColor
-    {
-        get => (Color)GetValue(TextColorProperty);
-        set => SetValue(TextColorProperty, value);
-    }
-
     public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
-        nameof(IconColor), typeof(Color), typeof(IconButton), Colors.White);
+        nameof(IconColor), 
+        typeof(Color), 
+        typeof(IconButton), 
+        Colors.White
+    );
 
     public Color IconColor
     {
         get => (Color)GetValue(IconColorProperty);
         set => SetValue(IconColorProperty, value);
     }
+    #endregion
 
+    #region Button Bindable Properties
     public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
-        nameof(ButtonBackgroundColor), typeof(Color), typeof(IconButton), Colors.Blue);
+        nameof(ButtonBackgroundColor), 
+        typeof(Color), 
+        typeof(IconButton), 
+        Colors.Blue
+    );
 
     public Color ButtonBackgroundColor
     {
         get => (Color)GetValue(ButtonBackgroundColorProperty);
         set => SetValue(ButtonBackgroundColorProperty, value);
-    }
-
-    public static readonly BindableProperty BorderBrushProperty = BindableProperty.Create(
-        nameof(BorderBrush), typeof(Brush), typeof(IconButton), Brush.Transparent);
-
-    public Brush BorderBrush
-    {
-        get => (Brush)GetValue(BorderBrushProperty);
-        set => SetValue(BorderBrushProperty, value);
-    }
-
-    public static readonly BindableProperty BorderThicknessProperty = BindableProperty.Create(
-        nameof(BorderThickness), typeof(double), typeof(IconButton), 0.0);
-
-    public double BorderThickness
-    {
-        get => (double)GetValue(BorderThicknessProperty);
-        set => SetValue(BorderThicknessProperty, value);
-    }
-
-    public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(
-        nameof(CornerRadius), typeof(double), typeof(IconButton), 10.0);
-
-    public double CornerRadius
-    {
-        get => (double)GetValue(CornerRadiusProperty);
-        set => SetValue(CornerRadiusProperty, value);
     }
 
     public static readonly BindableProperty ButtonPaddingProperty = BindableProperty.Create(
@@ -155,7 +169,50 @@ public partial class IconButton : ContentView
         get => (bool)GetValue(IsFullWidthProperty);
         set => SetValue(IsFullWidthProperty, value);
     }
+    #endregion
 
+    #region Border Bindable Properties
+    public static readonly BindableProperty BorderBrushProperty = BindableProperty.Create(
+        nameof(BorderBrush), 
+        typeof(Brush), 
+        typeof(IconButton), 
+        Brush.Transparent
+    );
+
+    public Brush BorderBrush
+    {
+        get => (Brush)GetValue(BorderBrushProperty);
+        set => SetValue(BorderBrushProperty, value);
+    }
+
+    public static readonly BindableProperty BorderThicknessProperty = BindableProperty.Create(
+        nameof(BorderThickness), 
+        typeof(double), 
+        typeof(IconButton), 
+        0.0
+    );
+
+    public double BorderThickness
+    {
+        get => (double)GetValue(BorderThicknessProperty);
+        set => SetValue(BorderThicknessProperty, value);
+    }
+
+    public static readonly BindableProperty CornerRadiusProperty = BindableProperty.Create(
+        nameof(CornerRadius), 
+        typeof(double), 
+        typeof(IconButton), 
+        10.0
+    );
+
+    public double CornerRadius
+    {
+        get => (double)GetValue(CornerRadiusProperty);
+        set => SetValue(CornerRadiusProperty, value);
+    }
+    #endregion
+
+    #region Commands
     public static readonly BindableProperty CommandProperty = BindableProperty.Create(
         nameof(Command), typeof(ICommand), typeof(IconButton), null, propertyChanged: OnCommandChanged);
 

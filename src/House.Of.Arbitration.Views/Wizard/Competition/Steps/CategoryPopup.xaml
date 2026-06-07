@@ -14,10 +14,6 @@
     Padding="0"
 >
     <ContentView.Resources>
-        <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
-        <converters:RoundTypeToBoolConverter x:Key="RoundTypeToBoolConverter" />
-        <converters:GenreToBoolConverter x:Key="GenreToBoolConverter" />
-        <converters:AgeRangeToBoolConverter x:Key="AgeRangeToBoolConverter" />
     </ContentView.Resources>
 
     <Border 

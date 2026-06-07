@@ -16,9 +16,6 @@
     BackgroundColor="{DynamicResource PageBackgroundColor}"
 >
     <base:BasePage.Resources>
-        <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
-        <converters:WarningsToStringConverter x:Key="WarningsToStringConverter" />
-        <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
     </base:BasePage.Resources>
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">

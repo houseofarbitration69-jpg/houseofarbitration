@@ -12,11 +12,6 @@
     Title="Notes des Arbitres">
     
     <base:BasePage.Resources>
-        <ResourceDictionary>
-            <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
-            <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
-            <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />
-        </ResourceDictionary>
     </base:BasePage.Resources>
 
     <Grid RowDefinitions="Auto, Auto, *" Margin="10" RowSpacing="15">

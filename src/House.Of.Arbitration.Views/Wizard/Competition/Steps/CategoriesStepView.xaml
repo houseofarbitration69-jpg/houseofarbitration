@@ -13,10 +13,6 @@
     Shell.NavBarIsVisible="False">
 
     <ContentView.Resources>
-        <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
-        <converters:NbCompetitorConverter x:Key="NbCompetitorConverter"/>
-        <converters:CategoryToWarningBoolConverter x:Key="CategoryToWarningBoolConverter" />
-        <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
     </ContentView.Resources>
 
     <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="20">

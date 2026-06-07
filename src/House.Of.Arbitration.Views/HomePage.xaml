@@ -23,43 +23,31 @@
             Grid.Row="0" 
             Grid.ColumnSpan="3" 
             Text="{Binding Resources.APPLICATION_NAME}" 
-            TextColor="{DynamicResource ApplicationNameColor}"
-            FontAttributes="Bold"
-            FontSize="50"
-            HorizontalOptions="Center"
-            VerticalOptions="Center"
+            Style="{StaticResource ApplicationNameStyle}"
         />
         
         <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
             <controls:IconButton 
                 Text="{Binding Resources.MASTER}"
-                IsFullWidth="True"
-                ButtonBackgroundColor="{DynamicResource ValidColor}"
-                TextColor="{DynamicResource PrimaryTextColor}"
+                Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="MasterPage"
             />
             <controls:IconButton 
                 Text="{Binding Resources.JUDGE}"
-                IsFullWidth="True"
-                ButtonBackgroundColor="{DynamicResource ValidColor}"
-                TextColor="{DynamicResource PrimaryTextColor}"
+                Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="JudgePage"
             />
             <controls:IconButton 
                 Text="{Binding Resources.HISTORICS}"
-                IsFullWidth="True"
-                ButtonBackgroundColor="{DynamicResource ValidColor}"
-                TextColor="{DynamicResource PrimaryTextColor}"
+                Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="RefereeDataPage"
             />
             <controls:IconButton 
                 Text="{Binding Resources.GENERATE_DATA}"
-                IsFullWidth="True"
-                ButtonBackgroundColor="{DynamicResource ValidColor}"
-                TextColor="{DynamicResource PrimaryTextColor}"
+                Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding SeedDataCommand}"
                 Margin="0,20,0,0"
             />

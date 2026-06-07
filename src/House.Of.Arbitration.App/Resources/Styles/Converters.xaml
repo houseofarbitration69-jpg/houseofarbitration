@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+
+    <converters:AgeRangeToBoolConverter x:Key="AgeRangeToBoolConverter" />
+    <converters:BirthDateToBoolConverter x:Key="BirthDateToBoolConverter" />
+    <converters:BirthdayToOldConverter x:Key="BirthdayToOldConverter" />
+    <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
+    <converters:CategoryToWarningBoolConverter x:Key="CategoryToWarningBoolConverter" />
+    <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
+    <converters:CompetitorToWarningsConverter x:Key="CompetitorToWarningsConverter" />
+    <converters:DoubleToCornerRadiusConverter x:Key="DoubleToCornerRadiusConverter" />
+    <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />
+    <converters:EqualityToBoolConverter x:Key="EqualityToBoolConverter" />
+    <converters:GenreToBoolConverter x:Key="GenreToBoolConverter" />
+    <converters:GenreToFontConverter x:Key="GenreToFontConverter" />
+    <converters:GenreToImageConverter x:Key="GenreToImageConverter" />
+    <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+    <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+    <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter" />
+    <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
+    <converters:NbCompetitorsConverter x:Key="NbCompetitorConverter" />
+    <converters:RoundTypeToBoolConverter x:Key="RoundTypeToBoolConverter" />
+    <converters:SignalToColorConverter x:Key="SignalToColorConverter"/>
+    <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+    <converters:WarningsToStringConverter x:Key="WarningsToStringConverter" />
+    
+    <mct:IntToBoolConverter x:Key="MctIntToBoolConverter" />
+
+</ResourceDictionary>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels">
+
+    <!-- HOME -->
+    <Style x:Key="ApplicationNameStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="{DynamicResource ApplicationNameColor}"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="FontSize" Value="50"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+    </Style>
+    <!-- END HOME -->
+    
+    <!-- BUTTONS -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="controls:IconButton">
+        <Setter Property="TextFontSize" Value="14"/>
+        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+
+        <Setter Property="IconFontSize" Value="18"/>
+        <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"/>
+        <Setter Property="IconColor" Value="Transparent"/>
+
+        <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ValidColor}"/>
+        <Setter Property="ButtonPadding" Value="15,10,15,10"/>
+        <Setter Property="IsFullWidth" Value="True"/>
+
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0.0"/>
+        <Setter Property="CornerRadius" Value="10.0"/>
+    </Style>
+    <!-- END BUTTONS -->
+    
+    <!-- Competitor Styles -->
+    <Style x:Key="CompetitorInfoLabelStyle" TargetType="controls:ScrollingText">
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="TextColor" Value="Gray"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+    </Style>
+
+    <Style x:Key="MainCompetitorNameStyle" TargetType="controls:ScrollingText">
+        <Setter Property="TextColor" Value="White"/>
+        <Setter Property="FontAttributes" Value="Bold"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="FontSize" Value="36"/>
+        <Setter Property="FontFamily" Value="OpenSansSemibold"/>
+    </Style>
+
+    <Style x:Key="MainCompetitorClubStyle" TargetType="controls:ScrollingText">
+        <Setter Property="TextColor" Value="White"/>
+        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="FontSize" Value="24"/>
+        <Setter Property="Opacity" Value="0.9"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+    </Style>
+
+    <Style x:Key="MainCompetitorCountryStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="White"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
+        <Setter Property="FontSize" Value="20"/>
+        <Setter Property="Opacity" Value="0.8"/>
+        <Setter Property="FontAttributes" Value="Italic"/>
+        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+    </Style>
+
+    <!-- Judge Styles -->
+    <Style x:Key="JudgePointsLabelStyle" TargetType="Label">
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding CurrentDraw.Draw.Category.RoundType, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                <Setter Property="IsVisible" Value="False" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="JudgeButtonsGridStyle" TargetType="Grid">
+        <Style.Triggers>
+            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Draw.Category.RoundType, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                <Setter Property="IsVisible" Value="False" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

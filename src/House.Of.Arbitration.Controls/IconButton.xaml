@@ -44,41 +44,50 @@
             <RoundRectangle CornerRadius="{Binding CornerRadius, Source={x:Reference root}, Converter={StaticResource DoubleToCornerRadiusConverter}}" />
         </Border.StrokeShape>
 
-        <HorizontalStackLayout Spacing="10" 
-                               HorizontalOptions="Center" 
-                               VerticalOptions="Center">
+        <HorizontalStackLayout 
+            Spacing="10" 
+            HorizontalOptions="Center" 
+            VerticalOptions="Center">
 
             <!-- Icône unique -->
-            <Label Text="{Binding Icon, Source={x:Reference root}}"
-                   FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
-                   FontSize="{Binding IconFontSize, Source={x:Reference root}}"
-                   TextColor="{Binding IconColor, Source={x:Reference root}}"
-                   VerticalOptions="Center"
-                   IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"/>
+            <Label 
+                Text="{Binding Icon, Source={x:Reference root}}"
+                FontFamily="{Binding IconFontFamily, Source={x:Reference root}}"
+                FontSize="{Binding IconFontSize, Source={x:Reference root}}"
+                TextColor="{Binding IconColor, Source={x:Reference root}}"
+                VerticalOptions="Center"
+                IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"
+            />
 
             <!-- Liste d'icônes -->
-            <Grid BindableLayout.ItemsSource="{Binding InternalIcons, Source={x:Reference root}}"
-                                   IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}">
+            <Grid 
+                BindableLayout.ItemsSource="{Binding InternalIcons, Source={x:Reference root}}"
+                IsVisible="{Binding Icon, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}"
+            >
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="controls:IconInfo">
-                        <Label Text="{Binding Icon}"
-                               FontFamily="{Binding FontFamily}"
-                               TextColor="{Binding Color}"
-                               FontSize="{Binding FontSize}"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center" />
+                        <Label 
+                            Text="{Binding Icon}"
+                            FontFamily="{Binding FontFamily}"
+                            TextColor="{Binding Color}"
+                            FontSize="{Binding FontSize}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" 
+                        />
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </Grid>
 
             <!-- Texte -->
-            <Label x:Name="TextLabel"
-                   Text="{Binding Text, Source={x:Reference root}}"
-                   TextColor="{Binding TextColor, Source={x:Reference root}}"
-                   FontSize="{Binding TextFontSize, Source={x:Reference root}}"
-                   FontAttributes="Bold"
-                   VerticalOptions="Center"
-                   IsVisible="{Binding Text, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"/>
+            <Label 
+                x:Name="TextLabel"
+                Text="{Binding Text, Source={x:Reference root}}"
+                TextColor="{Binding TextColor, Source={x:Reference root}}"
+                FontSize="{Binding TextFontSize, Source={x:Reference root}}"
+                FontAttributes="Bold"
+                VerticalOptions="Center"
+                IsVisible="{Binding Text, Source={x:Reference root}, Converter={StaticResource StringToBoolConverter}}"
+            />
 
         </HorizontalStackLayout>
 
