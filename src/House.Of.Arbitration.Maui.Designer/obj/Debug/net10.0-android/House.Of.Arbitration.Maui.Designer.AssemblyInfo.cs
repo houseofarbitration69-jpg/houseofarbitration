@@ -13,7 +13,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("House.Of.Arbitration.Maui.Designer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
+<<<<<<< HEAD
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+835375486d56f0b7344e1d1febe7ae6ec2a7c64c")]
+=======
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+d7a7b0bbf527ba81bfd875260867e032c0efdb25")]
+>>>>>>> 39c850cfe1e9ebcecf8674db1aaa62a38953c96f
 [assembly: System.Reflection.AssemblyProductAttribute("House.Of.Arbitration.Maui.Designer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("House.Of.Arbitration.Maui.Designer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
