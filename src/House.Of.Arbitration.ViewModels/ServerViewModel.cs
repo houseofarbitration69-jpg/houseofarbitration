@@ -707,4 +707,21 @@ public partial class ServerViewModel : BaseViewModel
         }
     }
     #endregion
+
+    #region SideSheet logic
+    [ObservableProperty]
+    private bool _isSideSheetOpen;
+
+    [RelayCommand]
+    private void ToggleSideSheet()
+    {
+        IsSideSheetOpen = !IsSideSheetOpen;
+    }
+
+    [RelayCommand]
+    private void CloseSideSheet()
+    {
+        IsSideSheetOpen = false;
+    }
+    #endregion
 }
