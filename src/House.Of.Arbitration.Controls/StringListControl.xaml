@@ -17,10 +17,9 @@
         <BindableLayout.ItemTemplate>
             <DataTemplate x:DataType="x:String">
                 <Label 
-                    x:DataType="{x:Null}"
                     Text="{Binding .}"
-                    FontFamily="{Binding FontFamily, Source={x:Reference root}}"
-                    TextColor="{Binding ItemColor, Source={x:Reference root}}"
+                    FontFamily="{Binding FontFamily, Source={x:Reference root}, x:DataType='controls:StringListControl'}"
+                    TextColor="{Binding ItemColor, Source={x:Reference root}, x:DataType='controls:StringListControl'}"
                     VerticalOptions="Center"
                 />
             </DataTemplate>

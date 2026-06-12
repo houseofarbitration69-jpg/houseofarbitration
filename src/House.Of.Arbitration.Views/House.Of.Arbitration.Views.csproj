@@ -14,6 +14,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Wizard\Competition\Steps\DragDropPage.xaml.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Remove="Wizard\Competition\Steps\DragDropPage.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" />
   </ItemGroup>
 
@@ -38,9 +46,6 @@
     </Compile>
     <Compile Update="Wizard\Competition\Steps\CategoryPopup.xaml.cs">
       <DependentUpon>CategoryPopup.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="Wizard\Competition\Steps\DragDropPage.xaml.cs">
-      <DependentUpon>DragDropPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Wizard\Competition\Steps\DrawPage.xaml.cs">
       <DependentUpon>DrawPage.xaml</DependentUpon>
@@ -70,9 +75,6 @@
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Wizard\Competition\Steps\CategoriesStepView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Wizard\Competition\Steps\DragDropPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Wizard\Competition\Steps\DrawPage.xaml">

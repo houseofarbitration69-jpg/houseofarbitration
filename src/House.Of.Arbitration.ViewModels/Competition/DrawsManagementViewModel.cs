@@ -151,6 +151,10 @@ public partial class DrawsManagementViewModel : BaseViewModel
         }
 
         IsBusy = true;
+        
+        // Give UI thread a chance to show the loading indicator
+        await Task.Yield();
+
         try
         {
             if (SelectedCategory.Type == CategoryType.Taolu)
@@ -158,13 +162,27 @@ public partial class DrawsManagementViewModel : BaseViewModel
                 SelectedCategory.RoundType = RoundType.Order;
             }
 
-            // Reload category with competitors and existing draw
             var categoryRepo = Application.Current?.Handler?.MauiContext?.Services.GetService<IRepository<CategoryModel>>();
             if (categoryRepo != null)
             {
-                var fullCategory = await categoryRepo.GetByIdAsync(SelectedCategory.Id, "Competitors.Competitor", "Draw.DrawKnockouts.Competitor1", "Draw.DrawKnockouts.Competitor2", "Draw.DrawPools.Competitor1", "Draw.DrawPools.Competitor2", "Draw.DrawOrders.Competitor");
+                // Optimization: Split the massive include query into smaller, targeted queries
+                // to avoid Cartesian Product performance hit.
+                
+                // 1. Basic category and competitors
+                var fullCategory = await categoryRepo.GetByIdAsync(SelectedCategory.Id, "Competitors.Competitor");
+                
                 if (fullCategory != null)
                 {
+                    // 2. Fetch Draw separately if it exists
+                    var drawRepo = Application.Current?.Handler?.MauiContext?.Services.GetService<IRepository<DrawModel>>();
+                    if (drawRepo != null)
+                    {
+                        var draw = (await drawRepo.GetAllAsync("DrawKnockouts.Competitor1", "DrawKnockouts.Competitor2", "DrawPools.Competitor1", "DrawPools.Competitor2", "DrawOrders.Competitor"))
+                                   ?.FirstOrDefault(d => d.CategoryId == SelectedCategory.Id);
+                        
+                        fullCategory.Draw = draw;
+                    }
+                    
                     _selectedCategory = fullCategory;
                 }
             }
@@ -176,7 +194,13 @@ public partial class DrawsManagementViewModel : BaseViewModel
             OnPropertyChanged(nameof(IsPools));
             OnPropertyChanged(nameof(IsOrder));
 
+            // Delay draw loading slightly to ensure UI is ready
+            await Task.Delay(50);
             await LoadDrawAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing category");
         }
         finally
         {
@@ -188,20 +212,26 @@ public partial class DrawsManagementViewModel : BaseViewModel
     {
         if (SelectedCategory == null) return;
 
-        var existingDraw = SelectedCategory.Draw;
+        // Ensure we are off the main thread for heavy calculations if needed
+        // but MAUI UI updates (setting Rounds) must eventually hit main thread.
+        
+        await Task.Run(() => 
+        {
+            var existingDraw = SelectedCategory.Draw;
 
-        if (IsKnockouts)
-        {
-            InitializeKnockout(existingDraw);
-        }
-        else if (IsPools)
-        {
-            InitializePools(existingDraw);
-        }
-        else if (IsOrder)
-        {
-            InitializeOrder(existingDraw);
-        }
+            if (IsKnockouts)
+            {
+                InitializeKnockout(existingDraw);
+            }
+            else if (IsPools)
+            {
+                InitializePools(existingDraw);
+            }
+            else if (IsOrder)
+            {
+                InitializeOrder(existingDraw);
+            }
+        });
 
         OnPropertyChanged(nameof(Rounds));
     }

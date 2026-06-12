@@ -97,6 +97,7 @@
                         </DataTrigger>
                     </Border.Triggers>
                     <Picker 
+                        x:DataType="models:RoundType"
                         ItemsSource="{Binding RoundTypes}"
                         SelectedItem="{Binding SelectedRoundType}"
                         ItemDisplayBinding="{Binding DisplayName}"
@@ -141,6 +142,7 @@
                         </DataTrigger>
                     </Border.Triggers>
                     <Picker 
+                        x:DataType="models:Genre"
                         ItemsSource="{Binding Genres}"
                         SelectedItem="{Binding SelectedGenre}"
                         ItemDisplayBinding="{Binding DisplayName}"
@@ -176,6 +178,7 @@
                         </DataTrigger>
                     </Border.Triggers>
                     <Picker 
+                        x:DataType="models:AgeRangeModel"
                         ItemsSource="{Binding AgeRanges}"
                         SelectedItem="{Binding SelectedAgeRange}"
                         ItemDisplayBinding="{Binding Label}"

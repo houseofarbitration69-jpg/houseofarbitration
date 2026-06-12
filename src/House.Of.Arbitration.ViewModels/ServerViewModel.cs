@@ -709,8 +709,14 @@ public partial class ServerViewModel : BaseViewModel
     #endregion
 
     #region SideSheet logic
-    [ObservableProperty]
     private bool _isSideSheetOpen;
+
+    
+    public bool IsSideSheetOpen
+    {
+        get => _isSideSheetOpen;
+        set => SetProperty(ref _isSideSheetOpen, value);
+    }
 
     [RelayCommand]
     private void ToggleSideSheet()

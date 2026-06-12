@@ -62,7 +62,11 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate>
                         <Grid Padding="10">
-                            <Label Text="{Binding .}" TextColor="Black" />
+                            <Label 
+                                x:DataType="x:String"
+                                Text="{Binding .}" 
+                                TextColor="Black" 
+                            />
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

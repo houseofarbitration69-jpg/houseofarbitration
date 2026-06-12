@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<base:BasePage 
+<base:BasePage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
@@ -9,13 +9,14 @@
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
     xmlns:selectors="clr-namespace:House.Of.Arbitration.Views.Selectors;assembly=House.Of.Arbitration.Views"
+    xmlns:local="clr-namespace:House.Of.Arbitration.Views"
     x:TypeArguments="vm:ServerViewModel"
     x:Class="House.Of.Arbitration.Views.ServerPage"
     x:DataType="vm:ServerViewModel"
     x:Name="this"
     Title="{Binding Title}"
     Shell.NavBarIsVisible="false"
-    >
+>
     <base:BasePage.Resources>
         <ResourceDictionary>
             <DataTemplate x:Key="KnockoutTemplate" x:DataType="models:DrawKnockoutModel">
@@ -36,7 +37,7 @@
                                 Margin="0,2,8,0"
                                 IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}"
                             />
-                            
+
                             <VerticalStackLayout Grid.Column="1">
                                 <HorizontalStackLayout Spacing="5" IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}">
                                     <controls:ScrollingText 
@@ -342,7 +343,7 @@
                     Stroke="White"
                     StrokeThickness="2"
                     StrokeShape="RoundRectangle 15"
-                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <HorizontalStackLayout Spacing="10">
                         <Label 
@@ -361,7 +362,7 @@
                     VerticalOptions="Start"
                     HorizontalOptions="Start"
                     Spacing="5"
-                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <Border 
                         Background="LightGray"
@@ -411,7 +412,7 @@
                             <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[0]}" />
                         </Border.GestureRecognizers>
                     </Border>
-                    
+
                     <Grid 
                         ColumnDefinitions="*,*,*,*" 
                         ColumnSpacing="5" 
@@ -490,7 +491,7 @@
                     VerticalOptions="Start"
                     HorizontalOptions="End"
                     Spacing="5"
-                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <Border
                         Background="LightGray"
@@ -614,7 +615,7 @@
                     VerticalOptions="Start" 
                     HorizontalOptions="Center" 
                     Spacing="5"
-                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <Border 
                         Background="LightGray"
@@ -662,7 +663,7 @@
                             <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[4]}" />
                         </Border.GestureRecognizers>
                     </Border>
-                    
+
                     <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
                         <Border
                             Grid.Column="0"
@@ -734,6 +735,7 @@
                     Grid.Row="2" 
                     Grid.Column="1" 
                     Grid.ColumnSpan="3"
+                    x:DataType="vm:ServerViewModel"
                 >
                     <!-- Fallback when no matches are remaining -->
                     <VerticalStackLayout 
@@ -748,12 +750,15 @@
 
                     <!-- Current Match Area -->
                     <Grid 
-                        x:DataType="{x:Null}"
                         BindingContext="{Binding CurrentDraw}"
-                        IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                        IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                     >
                         <!-- Background Layers (Red / Blue) -->
-                        <Grid RowDefinitions="*" ColumnDefinitions="*,*">
+                        <Grid 
+                            x:DataType="models:IDrawModel"
+                            RowDefinitions="*" 
+                            ColumnDefinitions="*,*"
+                        >
                             <Border 
                                 Grid.Column="0" 
                                 Background="Red" 
@@ -762,7 +767,7 @@
                                 StrokeShape="RoundRectangle 8,0,8,0"
                                 IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}"
                             />
-                            
+
                             <Border 
                                 Grid.Column="1" 
                                 Background="Blue" 
@@ -845,7 +850,7 @@
                                         Style="{StaticResource MainCompetitorClubStyle}" 
                                         FontSize="18" 
                                     />
-                                    
+
                                     <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
                                         <Image Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
                                                WidthRequest="25" HeightRequest="15" VerticalOptions="Center" />
@@ -856,7 +861,7 @@
                                 <!-- Winner Button -->
                                 <Button 
                                     Text="VAINQUEUR" 
-                                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
+                                    Command="{Binding BindingContext.SetWinnerCommand, Source={x:Reference this}}"
                                     CommandParameter="Red"
                                     BackgroundColor="DarkRed"
                                     TextColor="White"
@@ -911,7 +916,7 @@
                                         Style="{StaticResource MainCompetitorNameStyle}" 
                                         FontSize="28" 
                                     />
-                                    
+
                                     <controls:ScrollingText 
                                         Text="{Binding Competitor2.FirstName}" 
                                         Style="{StaticResource MainCompetitorNameStyle}" 
@@ -927,7 +932,7 @@
                                         Style="{StaticResource MainCompetitorClubStyle}" 
                                         FontSize="18" 
                                     />
-                                    
+
                                     <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
                                         <Image Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
                                                WidthRequest="25" HeightRequest="15" VerticalOptions="Center" />
@@ -938,7 +943,7 @@
                                 <!-- Winner Button -->
                                 <Button 
                                     Text="VAINQUEUR" 
-                                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
+                                    Command="{Binding BindingContext.SetWinnerCommand, Source={x:Reference this}}"
                                     CommandParameter="Blue"
                                     BackgroundColor="DarkBlue"
                                     TextColor="White"
@@ -1001,7 +1006,7 @@
                                         Style="{StaticResource MainCompetitorNameStyle}" 
                                         FontSize="28" 
                                     />
-                                    
+
                                     <controls:ScrollingText 
                                         Text="{Binding Competitor.FirstName}" 
                                         Style="{StaticResource MainCompetitorNameStyle}" 
@@ -1017,7 +1022,7 @@
                                         Style="{StaticResource MainCompetitorClubStyle}" 
                                         FontSize="18" 
                                     />
-                                    
+
                                     <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
                                         <Image Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
                                                WidthRequest="40" HeightRequest="15" VerticalOptions="Center" />
@@ -1027,7 +1032,7 @@
 
                                 <!-- Finish Button for Order mode -->
                                 <Button Text="VALIDER LE PASSAGE" 
-                                        Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
+                                        Command="{Binding BindingContext.SetWinnerCommand, Source={x:Reference this}}"
                                         CommandParameter="Finish"
                                         BackgroundColor="{DynamicResource ValidColor}"
                                         TextColor="Black"
@@ -1055,7 +1060,7 @@
                     VerticalOptions="End"
                     HorizontalOptions="End"
                     Spacing="5"
-                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{Binding BindingContext.CurrentDraw, Source={x:Reference this}, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <Border 
                         Background="LightGray"
@@ -1103,7 +1108,7 @@
                             <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[2]}" />
                         </Border.GestureRecognizers>
                     </Border>
-                    
+
                     <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
                         <Border
                             Grid.Column="0"
@@ -1178,7 +1183,7 @@
                     VerticalOptions="End"
                     HorizontalOptions="Start"
                     Spacing="5"
-                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{Binding BindingContext.CurrentDraw, Source={x:Reference this}, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <Border 
                         Background="LightGray"
@@ -1226,7 +1231,7 @@
                             <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[3]}" />
                         </Border.GestureRecognizers>
                     </Border>
-                    
+
                     <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
                         <Border
                             Grid.Column="0"
@@ -1292,7 +1297,7 @@
                         </Grid.Triggers>
                     </Grid>
                 </VerticalStackLayout>
-                
+
                 <!-- TABLE CENTRAL -->
                 <HorizontalStackLayout 
                     Grid.Row="3"
@@ -1300,7 +1305,7 @@
                     Spacing="10" 
                     HorizontalOptions="Center" 
                     VerticalOptions="End"
-                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{Binding BindingContext.CurrentDraw, Source={x:Reference this}, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <Border 
                         Grid.Column="0"
@@ -1348,10 +1353,10 @@
                     Stroke="White"
                     StrokeThickness="2"
                     StrokeShape="RoundRectangle 15"
-                    IsVisible="{Binding CurrentDraw, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{Binding BindingContext.CurrentDraw, Source={x:Reference this}, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding CurrentDraw.Type, Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                        <DataTrigger TargetType="Border" Binding="{Binding BindingContext.CurrentDraw.Type, Source={x:Reference this}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
                             <Setter Property="IsVisible" Value="False" />
                         </DataTrigger>
                     </Border.Triggers>
@@ -1443,109 +1448,68 @@
             </Grid>
         </Grid>
 
-        <!-- Side Sheet Overlay -->
-        <BoxView 
-            x:Name="Overlay" 
-            BackgroundColor="Black" 
-            Opacity="0" 
-            IsVisible="False"
-            InputTransparent="{Binding IsSideSheetOpen, Converter={StaticResource InvertBoolConverter}}"
+        <!-- Side Sheet Control -->
+        <controls:SideSheetControl 
+            IsOpen="{Binding IsSideSheetOpen}"
+            CloseCommand="{Binding CloseSideSheetCommand}"
         >
-            <BoxView.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding CloseSideSheetCommand}" />
-            </BoxView.GestureRecognizers>
-            <BoxView.Triggers>
-                <DataTrigger TargetType="BoxView" Binding="{Binding IsSideSheetOpen}" Value="True">
-                    <DataTrigger.EnterActions>
-                        <base:FadeAction Opacity="0.5" Duration="300" />
-                    </DataTrigger.EnterActions>
-                    <DataTrigger.ExitActions>
-                        <base:FadeAction Opacity="0" Duration="300" />
-                    </DataTrigger.ExitActions>
-                    <Setter Property="IsVisible" Value="True" />
-                </DataTrigger>
-            </BoxView.Triggers>
-        </BoxView>
+            <controls:SideSheetControl.SheetContent>
+                <VerticalStackLayout Spacing="20">
+                    <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
 
-        <!-- Side Sheet -->
-        <Border 
-            x:Name="SideSheet" 
-            WidthRequest="300" 
-            HorizontalOptions="Start" 
-            TranslationX="-300" 
-            IsVisible="False"
-            BackgroundColor="#222" 
-            Stroke="White" 
-            StrokeThickness="1"
-            StrokeShape="RoundRectangle 0,15,0,15"
-            Padding="20"
-        >
-            <Border.Triggers>
-                <DataTrigger TargetType="Border" Binding="{Binding IsSideSheetOpen}" Value="True">
-                    <DataTrigger.EnterActions>
-                        <base:TranslateAction X="0" Duration="300" Easing="CubicOut" />
-                    </DataTrigger.EnterActions>
-                    <DataTrigger.ExitActions>
-                        <base:TranslateAction X="-300" Duration="300" Easing="CubicIn" />
-                    </DataTrigger.ExitActions>
-                    <Setter Property="IsVisible" Value="True" />
-                </DataTrigger>
-            </Border.Triggers>
-            <VerticalStackLayout Spacing="20">
-                <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
-                
-                <Button 
-                    Text="DEMARRER" 
-                    Command="{Binding StartServerCommand}"
-                    BackgroundColor="{DynamicResource ValidColor}"
-                    TextColor="Black"
-                    FontAttributes="Bold"
-                    CornerRadius="20"
-                    HeightRequest="50"
-                    IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
-                />
+                    <Button 
+                        Text="DEMARRER" 
+                        Command="{Binding StartServerCommand}"
+                        BackgroundColor="{DynamicResource ValidColor}"
+                        TextColor="Black"
+                        FontAttributes="Bold"
+                        CornerRadius="20"
+                        HeightRequest="50"
+                        IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
+                    />
 
-                <Button 
-                    Text="ARRETER" 
-                    Command="{Binding StopServerCommand}"
-                    BackgroundColor="Red"
-                    TextColor="White"
-                    FontAttributes="Bold"
-                    CornerRadius="20"
-                    HeightRequest="50"
-                    IsVisible="{Binding IsServerStarted}"
-                />
+                    <Button 
+                        Text="ARRETER" 
+                        Command="{Binding StopServerCommand}"
+                        BackgroundColor="Red"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="20"
+                        HeightRequest="50"
+                        IsVisible="{Binding IsServerStarted}"
+                    />
 
-                <Button 
-                    Text="DIFFUSER" 
-                    Command="{Binding BroadcastMatchInfoCommand}"
-                    BackgroundColor="{DynamicResource ValidColor}"
-                    TextColor="Black"
-                    FontAttributes="Bold"
-                    CornerRadius="20"
-                    HeightRequest="50"
-                />
+                    <Button 
+                        Text="DIFFUSER" 
+                        Command="{Binding BroadcastMatchInfoCommand}"
+                        BackgroundColor="{DynamicResource ValidColor}"
+                        TextColor="Black"
+                        FontAttributes="Bold"
+                        CornerRadius="20"
+                        HeightRequest="50"
+                    />
 
-                <Button 
-                    Text="VOIR LES TIRAGES" 
-                    Command="{Binding GoToDrawsCommand}"
-                    BackgroundColor="{DynamicResource ValidColor}"
-                    TextColor="Black"
-                    FontAttributes="Bold"
-                    CornerRadius="20"
-                    HeightRequest="50"
-                />
+                    <Button 
+                        Text="VOIR LES TIRAGES" 
+                        Command="{Binding GoToDrawsCommand}"
+                        BackgroundColor="{DynamicResource ValidColor}"
+                        TextColor="Black"
+                        FontAttributes="Bold"
+                        CornerRadius="20"
+                        HeightRequest="50"
+                    />
 
-                <Button 
-                    Text="FERMER" 
-                    Command="{Binding CloseSideSheetCommand}"
-                    BackgroundColor="Gray"
-                    TextColor="White"
-                    CornerRadius="20"
-                    HeightRequest="40"
-                    Margin="0,20,0,0"
-                />
-            </VerticalStackLayout>
-        </Border>
+                    <Button 
+                        Text="FERMER" 
+                        Command="{Binding CloseSideSheetCommand}"
+                        BackgroundColor="Gray"
+                        TextColor="White"
+                        CornerRadius="20"
+                        HeightRequest="40"
+                        Margin="0,20,0,0"
+                    />
+                </VerticalStackLayout>
+            </controls:SideSheetControl.SheetContent>
+        </controls:SideSheetControl>
     </Grid>
 </base:BasePage>

@@ -269,7 +269,12 @@
         <!-- Main Content -->
         <Grid>
             <!-- 1. Connection (Not Connected) -->
-            <VerticalStackLayout Spacing="15" IsVisible="{Binding IsConnected, Converter={StaticResource InvertBoolConverter}}" VerticalOptions="Center" HorizontalOptions="Center">
+            <VerticalStackLayout 
+                Spacing="15" 
+                IsVisible="{Binding IsConnected, Converter={StaticResource InvertBoolConverter}}" 
+                VerticalOptions="Center" 
+                HorizontalOptions="Center"
+            >
                 <Label 
                     Text="{Binding Resources.CONNECT_TO_SERVER}" 
                     HorizontalOptions="Center" 
@@ -347,7 +352,12 @@
             <!-- 2. Connected Content -->
             <Grid IsVisible="{Binding IsConnected}">
                 <!-- A. Position Selection (Connected but no judge selected) -->
-                <VerticalStackLayout Spacing="30" IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullOrEmptyConverter}}" VerticalOptions="Center" HorizontalOptions="Center">
+                <VerticalStackLayout 
+                    Spacing="30" 
+                    IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullOrEmptyConverter}}" 
+                    VerticalOptions="Center" 
+                    HorizontalOptions="Center"
+                >
                     <Label 
                         Text="{Binding Resources.SELECT_POSITION}" 
                         HorizontalOptions="Center" 
@@ -447,7 +457,11 @@
                 </VerticalStackLayout>
 
                 <!-- B. Match Info & Timer (Connected and judge selected) -->
-                <Grid IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}" RowDefinitions="Auto, *, Auto" RowSpacing="20">
+                <Grid 
+                    IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}" 
+                    RowDefinitions="Auto, *, Auto" 
+                    RowSpacing="20"
+                >
                     <!-- Category Name Header -->
                     <Border 
                         Grid.Row="0" 
@@ -476,12 +490,15 @@
 
                         <!-- Active Match -->
                         <Grid 
-                            x:DataType="{x:Null}"
+                            x:DataType="vm:JudgeViewModel"
                             BindingContext="{Binding CurrentDraw}"
                             IsVisible="{Binding CurrentDraw, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}">
                             <!-- Background Colors -->
-                            <Grid ColumnDefinitions="*,*">
-                                <Border 
+                            <Grid 
+                                ColumnDefinitions="*,*"
+                                x:DataType="models:IDrawModel"
+                            >
+                                <Border
                                     Grid.Column="0" 
                                     Background="Red" 
                                     StrokeThickness="0" 
@@ -511,9 +528,14 @@
                             </Grid>
 
                             <!-- Knockout / Round Robin Mode -->
-                            <Grid ColumnDefinitions="*,*" IsVisible="False">
+                            <Grid 
+                                x:DataType="models:IDrawModel"
+                                ColumnDefinitions="*,*" 
+                                IsVisible="False"
+                            >
                                  <!--Competitor 1 (Red Side)--> 
                                 <VerticalStackLayout 
+                                    x:DataType="models:DrawKnockoutModel"
                                     Grid.Column="0" 
                                     VerticalOptions="Center" 
                                     HorizontalOptions="Center" 
@@ -558,8 +580,24 @@
 
                                      <!--Name on two lines--> 
                                     <VerticalStackLayout HorizontalOptions="Center" Padding="5,0,5,0">
-                                        <controls:ScrollingText Text="{Binding Competitor1.LastName}" TextColor="White" FontAttributes="Bold" FontSize="28" HorizontalOptions="Fill" WidthRequest="300" />
-                                        <controls:ScrollingText Text="{Binding Competitor1.FirstName}" TextColor="White" FontAttributes="Bold" FontSize="32" Margin="0,-5,0,0" HorizontalOptions="Fill" WidthRequest="300" />
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor1.LastName}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold" 
+                                            FontSize="28" 
+                                            HorizontalOptions="Fill" 
+                                            WidthRequest="300" 
+                                        />
+                                        
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor1.FirstName}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold" 
+                                            FontSize="32" 
+                                            Margin="0,-5,0,0" 
+                                            HorizontalOptions="Fill" 
+                                            WidthRequest="300" 
+                                        />
                                     </VerticalStackLayout>
 
                                      <!--Club & Country-->
@@ -593,7 +631,14 @@
                                 </VerticalStackLayout>
 
                                  <!--Competitor 2 (Blue Side) -->
-                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="0,5,0,0">
+                                <VerticalStackLayout 
+                                    x:DataType="models:DrawKnockoutModel"
+                                    Grid.Column="1" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center" 
+                                    Spacing="10" 
+                                    Padding="0,5,0,0"
+                                >
                                     <!--Circular Photo / Icon-->
                                     <Border 
                                         StrokeShape="RoundRectangle 50" 
@@ -612,6 +657,7 @@
                                     </Border>
 
                                     <Border 
+                                        x:DataType="models:DrawKnockoutModel"
                                         StrokeShape="RoundRectangle 50" 
                                         HeightRequest="100" 
                                         WidthRequest="100" 
@@ -631,7 +677,11 @@
                                     </Border>
 
                                     <!--Name on two lines-->
-                                    <VerticalStackLayout HorizontalOptions="Center" Padding="5,0,5,0">
+                                    <VerticalStackLayout 
+                                        x:DataType="models:DrawKnockoutModel"
+                                        HorizontalOptions="Center" 
+                                        Padding="5,0,5,0"
+                                    >
                                         <controls:ScrollingText 
                                             Text="{Binding Competitor2.LastName}" 
                                             TextColor="White" 
@@ -650,7 +700,11 @@
                                     </VerticalStackLayout>
 
                                     <!--Club & Country-->
-                                    <VerticalStackLayout Spacing="2" Padding="5,0,5,0">
+                                    <VerticalStackLayout 
+                                        x:DataType="models:DrawKnockoutModel"
+                                        Spacing="2" 
+                                        Padding="5,0,5,0"
+                                    >
                                         <controls:ScrollingText 
                                             Text="{Binding Competitor2.Club}" 
                                             TextColor="White" 
@@ -688,10 +742,14 @@
                             </Grid>
 
                             <!-- Order Mode (Taolu) -->
-                            <Grid IsVisible="False">
+                            <Grid 
+                                IsVisible="False"
+                                x:DataType="models:DrawOrderModel"
+                            >
                                 <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
                                      <!--Circular Photo / Icon--> 
                                     <Border 
+
                                         StrokeShape="RoundRectangle 50" 
                                         HeightRequest="100" 
                                         WidthRequest="100" 
@@ -728,13 +786,36 @@
 
                                      <!--Name on two lines--> 
                                     <VerticalStackLayout HorizontalOptions="Center" WidthRequest="400">
-                                        <controls:ScrollingText Text="{Binding Competitor.LastName}" TextColor="White" FontAttributes="Bold" FontSize="28" HorizontalOptions="Fill" WidthRequest="400" />
-                                        <controls:ScrollingText Text="{Binding Competitor.FirstName}" TextColor="White" FontAttributes="Bold" FontSize="32" Margin="0,-5,0,0" HorizontalOptions="Fill" WidthRequest="400" />
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor.LastName}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold" 
+                                            FontSize="28" 
+                                            HorizontalOptions="Fill" 
+                                            WidthRequest="400" 
+                                        />
+                                        
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor.FirstName}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold" 
+                                            FontSize="32" 
+                                            Margin="0,-5,0,0" 
+                                            HorizontalOptions="Fill" 
+                                            WidthRequest="400" 
+                                        />
                                     </VerticalStackLayout>
 
                                      <!--Club & Country--> 
                                     <VerticalStackLayout Spacing="5" WidthRequest="400">
-                                        <controls:ScrollingText Text="{Binding Competitor.Club}" TextColor="White" FontSize="18" HorizontalOptions="Fill" WidthRequest="400" />
+                                        <controls:ScrollingText 
+                                            Text="{Binding Competitor.Club}" 
+                                            TextColor="White" 
+                                            FontSize="18" 
+                                            HorizontalOptions="Fill" 
+                                            WidthRequest="400" 
+                                        />
+                                        
                                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
                                             <Image 
                                                 Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
@@ -742,7 +823,15 @@
                                                 HeightRequest="15" 
                                                 VerticalOptions="Center" 
                                             />
-                                            <controls:ScrollingText Text="{Binding Competitor.Country.Name}" TextColor="White" FontSize="16" FontAttributes="Italic" VerticalOptions="Center" WidthRequest="200" />
+                                            
+                                            <controls:ScrollingText 
+                                                Text="{Binding Competitor.Country.Name}" 
+                                                TextColor="White" 
+                                                FontSize="16" 
+                                                FontAttributes="Italic" 
+                                                VerticalOptions="Center"
+                                                WidthRequest="200" 
+                                            />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>

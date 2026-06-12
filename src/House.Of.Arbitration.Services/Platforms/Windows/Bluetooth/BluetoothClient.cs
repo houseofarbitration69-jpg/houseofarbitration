@@ -13,10 +13,12 @@ public class BluetoothClient : IBluetoothClient
     #endregion
 
     #region Events
+#pragma warning disable CS0067
     public event EventHandler<string>? MessageReceived;
     public event EventHandler<(string DeviceId, string Name, int Rssi)>? DeviceDiscovered;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
+#pragma warning restore CS0067
     #endregion
 
     #region Constructors

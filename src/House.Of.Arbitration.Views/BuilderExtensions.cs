@@ -25,7 +25,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<DrawsManagementPage>();
         builder.Services.AddTransient<CompetitorsPage>();
         builder.Services.AddTransient<DrawPage>();
-        builder.Services.AddTransient<DragDropPage>();
+        //builder.Services.AddTransient<DragDropPage>();
         builder.Services.AddTransient<ServerPage>();
         builder.Services.AddTransient<RefereeDataPage>();
 

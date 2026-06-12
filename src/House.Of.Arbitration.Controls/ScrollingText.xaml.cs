@@ -92,7 +92,7 @@ public partial class ScrollingText : ContentView
                 
                 if (duration < 1000) duration = 5000;
 
-                await ScrollLayout.TranslateTo(-(Label1.Width + ScrollLayout.Spacing), 0, duration, Easing.Linear);
+                await ScrollLayout.TranslateToAsync(-(Label1.Width + ScrollLayout.Spacing), 0, duration, Easing.Linear);
                 
                 // Small pause at the end of a loop
                 if (_isAnimating) await Task.Delay(500);

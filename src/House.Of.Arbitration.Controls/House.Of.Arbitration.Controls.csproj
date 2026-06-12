@@ -30,9 +30,13 @@
     <MauiXaml Update="Card.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="IconButton.xaml">
+    <MauiXaml Update="SuggestEntry.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-  </ItemGroup>
+    <MauiXaml Update="SideSheetControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    </ItemGroup>
+
 
 </Project>

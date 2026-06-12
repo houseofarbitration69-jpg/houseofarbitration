@@ -23,7 +23,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("DrawsManagementPage", typeof(DrawsManagementPage));
         Routing.RegisterRoute("CompetitorsPage", typeof(CompetitorsPage));
         Routing.RegisterRoute("DrawPage", typeof(DrawPage));
-        Routing.RegisterRoute("Test", typeof(DragDropPage));
+        //Routing.RegisterRoute("Test", typeof(DragDropPage));
 
         Routing.RegisterRoute("Server", typeof(ServerPage));
         Routing.RegisterRoute("RefereeDataPage", typeof(RefereeDataPage));

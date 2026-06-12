@@ -25,7 +25,6 @@
             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                 <Label Text="Compétition :" VerticalOptions="Center" FontAttributes="Bold" />
                 <Picker 
-                    x:DataType="models:CompetitionModel"
                     ItemsSource="{Binding Competitions}"
                     SelectedItem="{Binding SelectedCompetition}"
                     ItemDisplayBinding="{Binding Name}"
@@ -37,7 +36,6 @@
             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                 <Label Text="Catégorie :" VerticalOptions="Center" FontAttributes="Bold" />
                 <Picker 
-                    x:DataType="models:CategoryModel"
                     ItemsSource="{Binding Categories}"
                     SelectedItem="{Binding SelectedCategory}"
                     ItemDisplayBinding="{Binding Name}"

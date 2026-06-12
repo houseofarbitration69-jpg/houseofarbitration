@@ -15,8 +15,12 @@
     BackgroundColor="{DynamicResource PageBackgroundColor}"
     Shell.PresentationMode="ModalAnimated">
 
-    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="20" RowSpacing="15">
-
+    <Grid 
+        RowDefinitions="Auto, Auto, *, Auto" 
+        Padding="20" 
+        RowSpacing="15"
+        x:DataType="vm:DrawsManagementViewModel"
+    >
         <!-- Header -->
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
             <VerticalStackLayout Grid.Column="0">
@@ -38,27 +42,34 @@
         </Grid>
 
         <!-- Category Selector -->
-        <Border Grid.Row="1" 
-                Stroke="{DynamicResource BorderColor}" 
-                StrokeThickness="1" 
-                BackgroundColor="{DynamicResource EntryBackgroundColor}"
-                Padding="10, 5">
+        <Border 
+            Grid.Row="1" 
+            Stroke="{DynamicResource BorderColor}" 
+            StrokeThickness="1" 
+            BackgroundColor="{DynamicResource EntryBackgroundColor}"
+            Padding="10, 5"
+        >
             <Border.StrokeShape>
                 <RoundRectangle CornerRadius="8"/>
             </Border.StrokeShape>
             <Grid ColumnDefinitions="Auto, *">
-                <Label Text="SÉLECTIONNEZ UNE CATÉGORIE :" 
-                       VerticalOptions="Center" 
-                       TextColor="White" 
-                       FontSize="12" 
-                       FontAttributes="Bold"
-                       Margin="0,0,15,0"/>
-                <Picker Grid.Column="1"
-                        ItemsSource="{Binding Categories}"
-                        SelectedItem="{Binding SelectedCategory}"
-                        ItemDisplayBinding="{Binding Name, Mode=OneWay}"
-                        TextColor="Black"
-                        BackgroundColor="White"/>
+                <Label 
+                    Text="SÉLECTIONNEZ UNE CATÉGORIE :" 
+                    VerticalOptions="Center" 
+                    TextColor="White" 
+                    FontSize="12" 
+                    FontAttributes="Bold"
+                    Margin="0,0,15,0"
+                />
+                
+                <Picker 
+                    Grid.Column="1"
+                    ItemsSource="{Binding Categories}"
+                    SelectedItem="{Binding SelectedCategory}"
+                    ItemDisplayBinding="{Binding Name, Mode=OneWay}"
+                    TextColor="Black"
+                    BackgroundColor="White"
+                />
             </Grid>
         </Border>
 
