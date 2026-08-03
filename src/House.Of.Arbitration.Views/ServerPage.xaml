@@ -752,6 +752,7 @@
                     <Grid 
                         BindingContext="{Binding CurrentDraw}"
                         IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
+                        x:DataType="{x:Null}"
                     >
                         <!-- Background Layers (Red / Blue) -->
                         <Grid 

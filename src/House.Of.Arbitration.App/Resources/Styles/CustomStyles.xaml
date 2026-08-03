@@ -10,7 +10,7 @@
     <!-- HOME -->
     <Style x:Key="ApplicationNameStyle" TargetType="Label">
         <Setter Property="TextColor" Value="{DynamicResource ApplicationNameColor}"/>
-        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_REGULAR_NAME}"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="FontSize" Value="50"/>
         <Setter Property="HorizontalOptions" Value="Center"/>
@@ -21,7 +21,7 @@
     <!-- PAGE -->
     <Style x:Key="PageTitleStyle" TargetType="Label">
         <Setter Property="TextColor" Value="{DynamicResource PageTitleColor}"/>
-        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_REGULAR_NAME}"/>
         <Setter Property="FontAttributes" Value="None"/>
         <Setter Property="FontSize" Value="32"/>
         <Setter Property="HorizontalOptions" Value="Start"/>
@@ -137,7 +137,7 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="TextColor" Value="Gray"/>
         <Setter Property="HorizontalOptions" Value="Start"/>
-        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_REGULAR_NAME}"/>
     </Style>
 
     <Style x:Key="MainCompetitorNameStyle" TargetType="controls:ScrollingText">
@@ -145,7 +145,7 @@
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="HorizontalOptions" Value="Start"/>
         <Setter Property="FontSize" Value="36"/>
-        <Setter Property="FontFamily" Value="OpenSansSemibold"/>
+        <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_SEMIBOLD_NAME}"/>
     </Style>
 
     <Style x:Key="MainCompetitorClubStyle" TargetType="controls:ScrollingText">
@@ -153,7 +153,7 @@
         <Setter Property="HorizontalOptions" Value="Start"/>
         <Setter Property="FontSize" Value="24"/>
         <Setter Property="Opacity" Value="0.9"/>
-        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_REGULAR_NAME}"/>
     </Style>
 
     <Style x:Key="MainCompetitorCountryStyle" TargetType="Label">
@@ -162,7 +162,7 @@
         <Setter Property="FontSize" Value="20"/>
         <Setter Property="Opacity" Value="0.8"/>
         <Setter Property="FontAttributes" Value="Italic"/>
-        <Setter Property="FontFamily" Value="OpenSansRegular"/>
+        <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_REGULAR_NAME}"/>
     </Style>
 
     <!-- Judge Styles -->

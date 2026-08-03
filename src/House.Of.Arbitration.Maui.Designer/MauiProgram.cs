@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 
 namespace House.Of.Arbitration.Maui.Designer
@@ -13,9 +13,9 @@ namespace House.Of.Arbitration.Maui.Designer
                 .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
-                    fonts.AddFont("opensans_regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("opensans_semibold.ttf", "OpenSansSemibold");
-                    fonts.AddFont("fontawesome_solid.otf", "FA-Solid");
+                    fonts.AddFont("opensans_regular.ttf", "opensans_regular");
+                    fonts.AddFont("opensans_semibold.ttf", "opensans_semibold");
+                    fonts.AddFont("fontawesome_solid.otf", "fontawesome_solid");
                 });
 
 #if DEBUG
