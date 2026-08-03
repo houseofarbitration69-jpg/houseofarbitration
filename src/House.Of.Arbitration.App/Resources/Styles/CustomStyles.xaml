@@ -143,7 +143,7 @@
     <Style x:Key="MainCompetitorNameStyle" TargetType="controls:ScrollingText">
         <Setter Property="TextColor" Value="White"/>
         <Setter Property="FontAttributes" Value="Bold"/>
-        <Setter Property="HorizontalOptions" Value="Start"/>
+        <Setter Property="HorizontalOptions" Value="Center"/>
         <Setter Property="FontSize" Value="36"/>
         <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_SEMIBOLD_NAME}"/>
     </Style>

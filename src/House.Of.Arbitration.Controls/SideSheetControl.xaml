@@ -45,7 +45,7 @@
             StrokeShape="RoundRectangle 0,15,0,15"
             Padding="20"
         >
-            <!--<Border.Triggers>
+            <Border.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding IsOpen, Source={x:Reference this}}" Value="True">
                     <DataTrigger.EnterActions>
                         <local:TranslateAction X="0" Duration="300" Easing="CubicOut" />
@@ -55,7 +55,7 @@
                     </DataTrigger.ExitActions>
                     <Setter Property="IsVisible" Value="True" />
                 </DataTrigger>
-            </Border.Triggers>-->
+            </Border.Triggers>
             
             <ContentView Content="{Binding SheetContent, Source={x:Reference this}}" />
         </Border>

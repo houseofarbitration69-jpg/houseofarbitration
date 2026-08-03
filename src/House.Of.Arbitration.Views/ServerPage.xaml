@@ -823,9 +823,11 @@
                                     <Label 
                                         Text="{Binding Competitor1.Genre, Converter={StaticResource GenreToFontConverter}}" 
                                         FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                        FontSize="99" 
-                                        VerticalOptions="Center" 
+                                        FontSize="70" 
                                         HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        HorizontalTextAlignment="Center"
+                                        VerticalTextAlignment="Center"
                                     />
                                 </Border>
 
@@ -904,9 +906,11 @@
                                     <Label 
                                         Text="{Binding Competitor2.Genre, Converter={StaticResource GenreToFontConverter}}" 
                                         FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                        FontSize="99" 
-                                        VerticalOptions="Center" 
+                                        FontSize="70" 
                                         HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        HorizontalTextAlignment="Center"
+                                        VerticalTextAlignment="Center"
                                     />
                                 </Border>
 
@@ -994,9 +998,11 @@
                                     <Label 
                                         Text="{Binding Competitor.Genre, Converter={StaticResource GenreToFontConverter}}" 
                                         FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                        FontSize="99" 
-                                        VerticalOptions="Center" 
+                                        FontSize="70" 
                                         HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        HorizontalTextAlignment="Center"
+                                        VerticalTextAlignment="Center"
                                     />
                                 </Border>
 
