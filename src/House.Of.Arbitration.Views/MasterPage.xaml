@@ -14,10 +14,17 @@
     x:Name="this"
     Title="{Binding Title}"
 >
-    <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="20">
-
+    <Grid 
+        RowDefinitions="{OnIdiom Tablet='Auto,*', Phone='40,40,*'}" 
+        Padding="20" 
+        RowSpacing="20"
+    >
         <!-- Header -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+        <Grid 
+            Grid.Row="0" 
+            ColumnDefinitions="*,Auto"
+            IsVisible="{OnIdiom Tablet='true', Phone='false'}"
+        >
             <Label 
                 Grid.Column="0"
                 Text="{Binding Resources.COMPETITION_LIST}" 
@@ -45,9 +52,38 @@
             </controls:IconButton>
         </Grid>
 
+        <Label 
+            Grid.Row="0"
+            Text="{Binding Resources.COMPETITION_LIST}" 
+            Style="{StaticResource PageTitleStyle}"
+            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+            HorizontalOptions="Center"
+        />
+
+        <controls:IconButton 
+            Grid.Row="1"
+            Text="{Binding Resources.ADD_COMPETITION}"
+            Style="{StaticResource PrimaryButtonStyle}"
+            Command="{Binding CreateCommand}"
+            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+        >
+            <controls:IconButton.Icons>
+                <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.ADD}" 
+                        Color="{StaticResource PrimaryTextColor}" 
+                        FontSize="16" 
+                    />
+                <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
+                        Color="{StaticResource PrimaryTextColor}" 
+                        FontSize="24" 
+                    />
+            </controls:IconButton.Icons>
+        </controls:IconButton>
+
         <!-- Liste des Compétitions (BindableLayout) -->
         <CollectionView 
-            Grid.Row="1" 
+            Grid.Row="{OnIdiom Tablet='1', Phone='2'}" 
             ItemsSource="{Binding Competitions}"
         >
             <CollectionView.ItemsLayout>
@@ -58,19 +94,20 @@
                     <controls:Card CardPadding="15" CardColor="White">
                         <Grid 
                             ColumnDefinitions="*,Auto" 
-                            RowDefinitions="Auto,Auto"
+                            RowDefinitions="{OnIdiom Tablet='Auto, Auto', Phone='35,Auto,Auto'}"
                         >
                             <HorizontalStackLayout 
                                 Grid.Column="0" 
                                 Grid.Row="0" 
                                 Spacing="10"
+                                IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                             >
                                 <Label 
                                     Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
                                     TextColor="{DynamicResource PrimaryTextColor}" 
                                     VerticalOptions="Center" 
                                 />
-                                
+
                                 <controls:ScrollingText 
                                     Text="{Binding Name}" 
                                     TextColor="{DynamicResource PrimaryTextColor}" 
@@ -81,14 +118,20 @@
                                 />
                             </HorizontalStackLayout>
 
-                            <HorizontalStackLayout Grid.Column="0" Grid.Row="1" Spacing="5" Margin="0,5,0,0">
+                            <HorizontalStackLayout 
+                                Grid.Column="0" 
+                                Grid.Row="1" 
+                                Spacing="5" 
+                                Margin="0,5,0,0"
+                                IsVisible="{OnIdiom Tablet='true', Phone='false'}"
+                            >
                                 <Label 
                                     Text="{x:Static helpers:FontCustomIcons.CATEGORY}" 
                                     FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
                                     TextColor="{DynamicResource PrimaryTextColor}" 
                                     FontSize="18" 
                                 />
-                                
+
                                 <Label 
                                     Text="{Binding Categories.Count, StringFormat='{0} catégories'}" 
                                     FontSize="12" 
@@ -96,7 +139,45 @@
                                 />
                             </HorizontalStackLayout>
 
-                            <HorizontalStackLayout Grid.Column="1" Grid.RowSpan="2" Spacing="8" VerticalOptions="Center">
+                            <controls:ScrollingText 
+                                Grid.Row="0"
+                                Text="{Binding Name}" 
+                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                FontAttributes="Bold" 
+                                FontSize="18" 
+                                VerticalOptions="Center" 
+                                WidthRequest="400" 
+                                IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                            />
+
+                            <HorizontalStackLayout
+                                Grid.Row="1"
+                                IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                                Spacing="10"
+                                HorizontalOptions="Center"
+                            >
+                                <Label 
+                                    Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
+                                    TextColor="{DynamicResource PrimaryTextColor}" 
+                                    VerticalOptions="Center" 
+                                />
+
+                                <Label 
+                                    Text="{Binding Categories.Count, StringFormat='{0} catégories'}" 
+                                    TextColor="{DynamicResource PrimaryTextColor}" 
+                                />
+                            </HorizontalStackLayout>
+
+                            <HorizontalStackLayout 
+                                Grid.Column="{OnIdiom Tablet='1', Phone='0'}" 
+                                Grid.ColumnSpan="{OnIdiom Tablet='0', Phone='2'}"
+                                Grid.Row="{OnIdiom Tablet='0', Phone='2'}"
+                                Grid.RowSpan="{OnIdiom Tablet='2', Phone='0'}"
+                                Margin="{OnIdiom Tablet='0,0,0,0', Phone='0,10,0,0'}"
+                                Spacing="8" 
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                            >
                                 <!-- En BindableLayout, x:Reference sur la page racine fonctionne parfaitement -->
                                 <controls:IconButton
                                     Style="{StaticResource ListActionEditButtonStyle}"
@@ -116,7 +197,7 @@
                                     Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=DeleteCompetitionCommand}"
                                     CommandParameter="{Binding .}"
                                 />
-                                
+
                                 <controls:IconButton
                                     Style="{StaticResource ListActionPlayButtonStyle}"
                                     Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=StartCompetitionCommand}"
@@ -136,7 +217,7 @@
                             FontSize="48" 
                             HorizontalOptions="Center" 
                         />
-                        
+
                         <Label 
                             Text="{Binding Resources.NO_COMPETITION}" 
                             FontAttributes="Italic" 
