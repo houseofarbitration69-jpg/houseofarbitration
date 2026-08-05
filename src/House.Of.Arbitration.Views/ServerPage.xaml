@@ -354,14 +354,12 @@
                     StrokeShape="RoundRectangle 15"
                     IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                 >
-                    <HorizontalStackLayout Spacing="10">
-                        <controls:ScrollingText 
-                            Text="{Binding CurrentDraw.Draw.Category.Name}"
-                            TextColor="White" 
-                            FontSize="32" 
-                            FontAttributes="Bold"
-                        />
-                    </HorizontalStackLayout>
+                    <controls:ScrollingText 
+                        Text="{Binding CurrentDraw.Draw.Category.Name}"
+                        TextColor="White" 
+                        FontSize="32" 
+                        FontAttributes="Bold"
+                    />
                 </Border>
 
                 <!-- JUGE 1 -->

@@ -15,7 +15,7 @@
     Title="{Binding Title}"
 >
     <Grid 
-        RowDefinitions="{OnIdiom Tablet='Auto,*', Phone='40,40,*'}" 
+        RowDefinitions="{OnIdiom Tablet='Auto,*', Phone='40,60,*'}" 
         Padding="20" 
         RowSpacing="20"
     >
