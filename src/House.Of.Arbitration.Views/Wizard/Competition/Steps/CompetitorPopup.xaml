@@ -142,7 +142,6 @@
                                 </DataTrigger>
                             </Border.Triggers>
                             <Picker 
-                                x:DataType="models:Genre"
                                 ItemsSource="{Binding Genres}"
                                 SelectedItem="{Binding SelectedGenre}"
                                 ItemDisplayBinding="{Binding DisplayName}"

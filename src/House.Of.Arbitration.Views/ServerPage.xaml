@@ -1178,9 +1178,18 @@
                         </Grid>
 
                         <!-- Knockout / Round Robin Mode -->
-                        <Grid ColumnDefinitions="*,*" IsVisible="False">
+                        <Grid 
+                            ColumnDefinitions="*,*" 
+                            IsVisible="False"
+                        >
                             <!-- Competitor 1 (Red Side) -->
-                            <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="0,5,0,0">
+                            <VerticalStackLayout 
+                                Grid.Column="0" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                Spacing="10" 
+                                Padding="0,5,0,0"
+                            >
                                 <!-- Circular Photo / Icon -->
                                 <Border 
                                     StrokeShape="RoundRectangle 50" 

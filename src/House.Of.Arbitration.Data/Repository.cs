@@ -74,19 +74,39 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<bool> UpdateAsync(T entity)
     {
-        ClearTracker();
-        _context.Set<T>().Update(entity);
-        await _context.SaveChangesAsync();
-        return true;
+        try
+        {
+            ClearTracker();
+            _context.Set<T>().Update(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            foreach (var entry in ex.Entries)
+            {
+                // Recharge les données depuis la base de données pour mettre à jour l'entité
+                await entry.ReloadAsync();
+            }
+            ClearTracker();
+            return false;
+        }
     }
 
     public async Task<bool> DeleteAsync(T entity)
     {
-        // Nettoyage complet avant suppression pour éviter les conflits sur les enfants (Catégories, etc.)
-        ClearTracker();
-        
-        _context.Set<T>().Remove(entity);
-        await _context.SaveChangesAsync();
-        return true;
+        try
+        {
+            // Nettoyage complet avant suppression pour éviter les conflits sur les enfants (Catégories, etc.)
+            ClearTracker();
+            _context.Set<T>().Remove(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            ClearTracker();
+            return false;
+        }
     }
 }

@@ -7,8 +7,19 @@ public class CategoryTypeToBoolConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is RoundType type)
+        RoundType? roundType = null;
+        if (value is RoundType rt)
         {
+            roundType = rt;
+        }
+        else if (value is IDrawModel drawModel)
+        {
+            roundType = drawModel.Type;
+        }
+
+        if (roundType.HasValue)
+        {
+            var type = roundType.Value;
             if (parameter is string paramStr)
             {
                 if (paramStr == "Invert") return type == RoundType.None;

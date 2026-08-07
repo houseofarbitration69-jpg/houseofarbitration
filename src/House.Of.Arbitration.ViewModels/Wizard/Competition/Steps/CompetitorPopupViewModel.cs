@@ -7,6 +7,7 @@ using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
@@ -334,5 +335,29 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
 
         return result;
     }
+
+    //private void UpdateAvailableGenders(CategoryModel selectedCategory)
+    //{
+    //    if (selectedCategory == null)
+    //    {
+    //        return;
+    //    }
+
+    //    if (selectedCategory.Genre == Genre.Mixte)
+    //    {
+    //        AvailableGenders = new ObservableCollection<LocalizedEnum<Genre>>
+    //        {
+    //            new LocalizedEnum<Genre>(Genre.Men, LocalizationResourceManager.Instance.GetValue($"ENUM_GENRE_MEN")),
+    //            new LocalizedEnum<Genre>(Genre.Women, LocalizationResourceManager.Instance.GetValue($"ENUM_GENRE_WOMEN")),
+    //        };
+    //    }
+    //    else
+    //    {
+    //        AvailableGenders = new ObservableCollection<LocalizedEnum<Genre>>
+    //        {
+    //            new LocalizedEnum<Genre>(Genre.Men, LocalizationResourceManager.Instance.GetValue($"ENUM_GENRE_MEN")),
+    //        };
+    //    }
+    //}
     #endregion
 }

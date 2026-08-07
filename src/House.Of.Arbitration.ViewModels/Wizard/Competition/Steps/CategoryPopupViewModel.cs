@@ -157,12 +157,17 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
 
     public CategoryModel GetResult()
     {
+        if(SelectedRoundType == null || SelectedRoundType.Value == RoundType.None)
+        {
+            SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == RoundType.Order);
+        }
+
         return new CategoryModel
         {
             Id = Category?.Id ?? 0,
             Type = SelectedType?.Value ?? CategoryType.None,
-            RoundType = SelectedRoundType?.Value ?? RoundType.None,
-            Genre = SelectedGenre?.Value ?? Genre.None,
+            RoundType = SelectedRoundType?.Value ?? RoundType.Order,
+            Genre = SelectedGenre?.Value ?? Genre.Mixte,
             AgeRangeId = SelectedAgeRange?.Id,
             AgeRange = SelectedAgeRange,
             WeightMin = WeightMin ?? 0,
