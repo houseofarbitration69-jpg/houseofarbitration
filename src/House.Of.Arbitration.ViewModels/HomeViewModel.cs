@@ -20,6 +20,7 @@ public partial class HomeViewModel : BaseViewModel
     private readonly IRepository<DrawModel> _draws;
     private readonly IRepository<DrawPoolsModel> _drawPools;
     private readonly IRepository<DrawKnockoutModel> _drawKnockouts;
+    private readonly IRepository<DrawOrderModel> _drawOrders;
     #endregion
 
     #region Attributs
@@ -45,7 +46,8 @@ public partial class HomeViewModel : BaseViewModel
         IRepository<CompetitorCategoryModel> competitorsCategories,
         IRepository<DrawModel> draws,
         IRepository<DrawPoolsModel> drawPools,
-        IRepository<DrawKnockoutModel> drawKnockout
+        IRepository<DrawKnockoutModel> drawKnockout,
+        IRepository<DrawOrderModel> drawOrder
     ) : base(logger, resourceProvider, popupService)
     {
         Title = resourceProvider.APPLICATION_NAME;
@@ -57,6 +59,7 @@ public partial class HomeViewModel : BaseViewModel
         _draws = draws;
         _drawPools = drawPools;
         _drawKnockouts = drawKnockout;
+        _drawOrders = drawOrder;
     }
     #endregion
 
@@ -69,6 +72,7 @@ public partial class HomeViewModel : BaseViewModel
         DrawModel draw;
         DrawPoolsModel drawPool;
         DrawKnockoutModel drawKnockout;
+        DrawOrderModel drawOrder;
 
         var competition = new CompetitionModel()
         {
@@ -107,8 +111,8 @@ public partial class HomeViewModel : BaseViewModel
         draw = new DrawModel() { Id = 100, CategoryId = 100 };
         await _draws.AddAsync(draw);
 
-        drawPool = new DrawPoolsModel() { Id = 100, Order = 1, Competitor1Id = 100, DrawId = 100, GlobalOrder = 0 };
-        await _drawPools.AddAsync(drawPool);
+        drawOrder = new DrawOrderModel() { Id = 100, Order = 1, CompetitorId = 100, DrawId = 100, GlobalOrder = 0 };
+        await _drawOrders.AddAsync(drawOrder);
         #endregion
 
         #region Sanda Light / Masculin / Cadets / -65kg

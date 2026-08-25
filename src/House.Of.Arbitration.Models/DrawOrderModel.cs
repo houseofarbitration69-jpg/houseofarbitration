@@ -39,7 +39,7 @@ public partial class DrawOrderModel : ObservableObject, IDrawModel
     /// <summary>
     /// Obtient ou définit le tirage
     /// </summary>
-    public required DrawModel Draw { get; set; }
+    public DrawModel? Draw { get; set; }
 
     /// <summary>
     /// Obtient ou définit la liste des données des arbitres

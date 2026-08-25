@@ -424,7 +424,7 @@
                         <Border 
                             Grid.Row="0" 
                             Grid.Column="2" 
-                            MinimumWidthRequest="200"
+                            MinimumWidthRequest="{OnIdiom Tablet='200', Phone='100'}"
                             Background="LightGray" 
                             StrokeShape="RoundRectangle 10" 
                             HorizontalOptions="Center"

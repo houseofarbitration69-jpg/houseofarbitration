@@ -391,34 +391,32 @@
                             </Border.Triggers>
                             <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                                 <Label 
-                                Grid.Row="0"
-                                Grid.ColumnSpan="2"
-                                Text="{Binding Judges[0].Name}"
-                                FontAttributes="Bold"
-                                HorizontalOptions="Center"
-                                TextColor="Black"
-                                FontSize="18"
-                            />
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="2"
+                                    Text="{Binding Judges[0].Name}"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    TextColor="Black"
+                                    FontSize="18"
+                                />
 
                                 <Label
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Text="{Binding Judges[0].RedPoints}"
-                                FontSize="18"
-                                TextColor="Red"
-                                HorizontalOptions="Center"
-                                Style="{StaticResource JudgePointsLabelStyle}"
-                            />
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Text="{Binding Judges[0].RedPoints}"
+                                    FontSize="18"
+                                    TextColor="Red"
+                                    HorizontalOptions="Center"
+                                />
 
                                 <Label
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding Judges[0].BluePoints}"
-                                TextColor="Blue"
-                                FontSize="18"
-                                HorizontalOptions="Center"
-                                Style="{StaticResource JudgePointsLabelStyle}"
-                            />
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Text="{Binding Judges[0].BluePoints}"
+                                    TextColor="Blue"
+                                    FontSize="18"
+                                    HorizontalOptions="Center"
+                                />
                             </Grid>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[0]}" />
@@ -426,18 +424,18 @@
                         </Border>
 
                         <Grid 
-                        ColumnDefinitions="*,*,*,*" 
-                        ColumnSpacing="5" 
-                        IsVisible="True"
-                    >
-                            <Border
-                            Grid.Column="0"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="DarkRed"
-                            Stroke="DarkRed"
+                            ColumnDefinitions="*,*,*,*" 
+                            ColumnSpacing="5" 
+                            IsVisible="True"
                         >
+                            <Border
+                                Grid.Column="0"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="DarkRed"
+                                Stroke="DarkRed"
+                            >
                                 <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -445,13 +443,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="1"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="Red"
-                            Stroke="Red"
-                        >
+                                Grid.Column="1"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="Red"
+                                Stroke="Red"
+                            >
                                 <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -459,13 +457,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="2"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="DarkBlue"
-                            Stroke="DarkBlue"
-                        >
+                                Grid.Column="2"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="DarkBlue"
+                                Stroke="DarkBlue"
+                            >
                                 <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -473,13 +471,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="3"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="Blue"
-                            Stroke="Blue"
-                        >
+                                Grid.Column="3"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="Blue"
+                                Stroke="Blue"
+                            >
                                 <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -620,15 +618,15 @@
                 <!-- JUGE 2 -->
                 <Grid
                     Grid.Row="{OnIdiom Tablet='1', Phone='3'}" 
-                    Grid.Column="{OnIdiom Tablet='3', Phone='0'}"
                     Grid.ColumnSpan="{OnIdiom Tablet='2', Phone='0'}"
+                    Grid.Column="{OnIdiom Tablet='3', Phone='0'}"
                     ColumnDefinitions="{OnIdiom Tablet='*', Phone='*, 20, 20, 20, 170'}"
                     ColumnSpacing="10"
                     IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                 >
                     <VerticalStackLayout
                         VerticalOptions="Start"
-                        HorizontalOptions="Start"
+                        HorizontalOptions="End"
                         Spacing="5"
                         IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                     >
@@ -1384,26 +1382,31 @@
 
                         <!-- Order Mode (Taolu) -->
                         <Grid IsVisible="False">
-                            <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
+                            <VerticalStackLayout 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                Spacing="10"
+                                Padding="0,5,0,0"
+                            >
                                 <!-- Circular Photo / Icon -->
                                 <Border 
                                     StrokeShape="RoundRectangle 50" 
-                                    HeightRequest="100" 
-                                    WidthRequest="100" 
+                                    HeightRequest="{OnIdiom Tablet='100', Phone='50'}" 
+                                    WidthRequest="{OnIdiom Tablet='100', Phone='50'}" 
                                     HorizontalOptions="Center" 
                                     Stroke="White" 
                                     BackgroundColor="White"
                                     StrokeThickness="3"
                                     IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
                                 >
-                                    <Image Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
+                                    <Image Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=5}" 
                                            Aspect="AspectFill" />
                                 </Border>
 
                                 <Border 
                                     StrokeShape="RoundRectangle 50" 
-                                    HeightRequest="100" 
-                                    WidthRequest="100" 
+                                    HeightRequest="{OnIdiom Tablet='100', Phone='50'}" 
+                                    WidthRequest="{OnIdiom Tablet='100', Phone='50'}" 
                                     HorizontalOptions="Center" 
                                     Stroke="White" 
                                     StrokeThickness="3"
@@ -1413,7 +1416,7 @@
                                     <Label 
                                         Text="{Binding Competitor.Genre, Converter={StaticResource GenreToFontConverter}}" 
                                         FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                        FontSize="70" 
+                                        FontSize="{OnIdiom Tablet='90', Phone='45'}" 
                                         HorizontalOptions="Center"
                                         VerticalOptions="Center"
                                         HorizontalTextAlignment="Center"
@@ -1426,29 +1429,38 @@
                                     <controls:ScrollingText 
                                         Text="{Binding Competitor.LastName}" 
                                         Style="{StaticResource MainCompetitorNameStyle}" 
-                                        FontSize="28" 
+                                        FontSize="{OnIdiom Tablet='28', Phone='20'}" 
                                     />
 
                                     <controls:ScrollingText 
                                         Text="{Binding Competitor.FirstName}" 
                                         Style="{StaticResource MainCompetitorNameStyle}" 
-                                        FontSize="32" 
+                                        FontSize="{OnIdiom Tablet='32', Phone='20'}" 
                                         Margin="0,-5,0,0" 
                                     />
                                 </VerticalStackLayout>
 
                                 <!-- Club & Country -->
-                                <VerticalStackLayout Spacing="5">
+                                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
                                     <controls:ScrollingText 
                                         Text="{Binding Competitor.Club}" 
                                         Style="{StaticResource MainCompetitorClubStyle}" 
-                                        FontSize="18" 
+                                        FontSize="{OnIdiom Tablet='18', Phone='16'}" 
                                     />
 
-                                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
-                                        <Image Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                               WidthRequest="40" HeightRequest="15" VerticalOptions="Center" />
-                                        <Label Text="{Binding Competitor.Country.Name}" Style="{StaticResource MainCompetitorCountryStyle}" FontSize="16" VerticalOptions="Center" />
+                                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                                        <Image 
+                                            Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                            WidthRequest="25" 
+                                            HeightRequest="15" 
+                                            VerticalOptions="Center" 
+                                        />
+                                        <Label 
+                                            Text="{Binding Competitor.Country.Name}" 
+                                            Style="{StaticResource MainCompetitorCountryStyle}" 
+                                            FontSize="16" 
+                                            VerticalOptions="Center" 
+                                        />
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
 
