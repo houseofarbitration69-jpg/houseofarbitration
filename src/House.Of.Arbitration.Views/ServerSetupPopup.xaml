@@ -9,7 +9,15 @@
     x:DataType="vm:ServerSetupPopupViewModel"
     BackgroundColor="#333333">
 
-    <Border Stroke="White" StrokeThickness="2" BackgroundColor="#222222" Padding="20" WidthRequest="400" HorizontalOptions="Center" VerticalOptions="Center">
+    <Border 
+        Stroke="White" 
+        StrokeThickness="2" 
+        BackgroundColor="#222222" 
+        Padding="20" 
+        WidthRequest="{OnIdiom Tablet='400', Phone='300'}" 
+        HorizontalOptions="Center" 
+        VerticalOptions="Center"
+    >
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="15"/>
         </Border.StrokeShape>

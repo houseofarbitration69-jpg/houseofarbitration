@@ -93,30 +93,30 @@
                 <DataTemplate x:DataType="models:CompetitionModel">
                     <controls:Card CardPadding="15" CardColor="White">
                         <Grid 
-                            ColumnDefinitions="*,Auto" 
+                            ColumnDefinitions="{OnIdiom Tablet='150,*,20', Phone='*,Auto,Auto'}" 
                             RowDefinitions="{OnIdiom Tablet='Auto, Auto', Phone='35,Auto,Auto'}"
                         >
-                            <HorizontalStackLayout 
+                            <Label 
                                 Grid.Column="0" 
                                 Grid.Row="0" 
-                                Spacing="10"
+                                Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
+                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                VerticalOptions="Center" 
                                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
-                            >
-                                <Label 
-                                    Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
-                                    TextColor="{DynamicResource PrimaryTextColor}" 
-                                    VerticalOptions="Center" 
-                                />
+                            />
 
-                                <controls:ScrollingText 
-                                    Text="{Binding Name}" 
-                                    TextColor="{DynamicResource PrimaryTextColor}" 
-                                    FontAttributes="Bold" 
-                                    FontSize="18" 
-                                    VerticalOptions="Center" 
-                                    WidthRequest="400" 
-                                />
-                            </HorizontalStackLayout>
+                            <controls:ScrollingText 
+                                Grid.Column="1" 
+                                Grid.Row="0"
+                                Grid.RowSpan="2"
+                                Text="{Binding Name}" 
+                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                FontAttributes="Bold" 
+                                FontSize="18" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Start"
+                                IsVisible="{OnIdiom Tablet='true', Phone='false'}"
+                            />
 
                             <HorizontalStackLayout 
                                 Grid.Column="0" 
@@ -146,7 +146,7 @@
                                 FontAttributes="Bold" 
                                 FontSize="18" 
                                 VerticalOptions="Center" 
-                                WidthRequest="400" 
+                                HorizontalOptions="Start"
                                 IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                             />
 
@@ -154,7 +154,7 @@
                                 Grid.Row="1"
                                 IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                                 Spacing="10"
-                                HorizontalOptions="Center"
+                                HorizontalOptions="Start"
                             >
                                 <Label 
                                     Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
@@ -176,7 +176,7 @@
                                 Margin="{OnIdiom Tablet='0,0,0,0', Phone='0,10,0,0'}"
                                 Spacing="8" 
                                 VerticalOptions="Center"
-                                HorizontalOptions="Center"
+                                HorizontalOptions="End"
                             >
                                 <!-- En BindableLayout, x:Reference sur la page racine fonctionne parfaitement -->
                                 <controls:IconButton
