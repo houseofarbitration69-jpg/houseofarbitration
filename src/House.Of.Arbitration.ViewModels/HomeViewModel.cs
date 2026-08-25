@@ -78,6 +78,39 @@ public partial class HomeViewModel : BaseViewModel
         };
         await _competitions.AddAsync(competition);
 
+        #region Taolu
+        category = new CategoryModel()
+        {
+            Id = 100,
+            AgeRangeId = 1,
+            Genre = Genre.Men,
+            RoundType = RoundType.Order,
+            Type = CategoryType.Taolu,
+            CompetitionId = 1
+        };
+        await _categories.AddAsync(category);
+
+        competitor = new CompetitorModel()
+        {
+            Id = 100,
+            FirstName = "Firsname",
+            LastName = "Lastname",
+            Club = "Punch Team Sanda",
+            BirthDate = new DateTime(2013, 1, 20),
+            Genre = Genre.Men,
+            CountryIsoCode = "FR"
+        };
+        await _competitors.AddAsync(competitor);
+
+        await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 100 });
+
+        draw = new DrawModel() { Id = 100, CategoryId = 100 };
+        await _draws.AddAsync(draw);
+
+        drawPool = new DrawPoolsModel() { Id = 100, Order = 1, Competitor1Id = 100, DrawId = 100, GlobalOrder = 0 };
+        await _drawPools.AddAsync(drawPool);
+        #endregion
+
         #region Sanda Light / Masculin / Cadets / -65kg
         category = new CategoryModel()
         {
