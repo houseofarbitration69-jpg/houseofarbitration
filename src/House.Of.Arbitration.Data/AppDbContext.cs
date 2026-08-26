@@ -23,6 +23,9 @@ public class AppDbContext : DbContext
     public DbSet<RefereeDataModel> RefereeDatas { get; set; }
     public DbSet<WarningModel> Warnings { get; set; }
     public DbSet<CountryModel> Countries { get; set; }
+    public DbSet<MvtTypeModel> MvtTypes { get; set; }
+    public DbSet<MvtGroupModel> MvtGroupes { get; set; }
+    public DbSet<MvtCodeModel> MvtCodes { get; set; }
     #endregion
 
     #region Constructors
@@ -220,6 +223,28 @@ public class AppDbContext : DbContext
                 .WithMany(cc => cc.Warnings)
                 .HasForeignKey(i => i.CompetitorCategoryId);
         });
+
+        builder.Entity<MvtGroupModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+        });
+
+        builder.Entity<MvtTypeModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+        });
+
+        builder.Entity<MvtCodeModel>(item =>
+        {
+            item.HasKey(i => i.Id);
+            item.Property(i => i.Id).ValueGeneratedOnAdd();
+            item.HasOne(i => i.Group)
+                .WithMany(g => g.MvtCodes);
+            item.HasOne(i => i.Type)
+                .WithMany();
+        });
     }
     #endregion
 
@@ -249,65 +274,6 @@ public class AppDbContext : DbContext
         }
 
         return path;
-    }
-
-    /// <summary>
-    /// Remplit la base de données avec des données de test.
-    /// </summary>
-    private void SeedTestData()
-    {
-        Competitions.Add(new Models.CompetitionModel()
-        {
-            Id = 1,
-            Name = "Test",
-        });
-
-        // Cadet - Feminine - <= 52kg
-        Categories.Add(new CategoryModel()
-        {
-            Id = 1,
-            Type = CategoryType.Sanda,
-            RoundType = RoundType.Knockouts,
-            Genre = Genre.Women,
-            WeightMin = 40,
-            WeightMax = 52,
-            AgeRangeId = 1,
-            CompetitionId = 1
-        });
-
-        Competitors.Add(new CompetitorModel()
-        {
-            Id = 1,
-            LastName = "Gemmebascougnano",
-            FirstName = "Lola",
-            Club = "Ecole Tien Hoa Quyen",
-            BirthDate = new DateTime(2013, 1, 1),
-            Weight = 50
-        });
-
-        Competitors.Add(new CompetitorModel()
-        {
-            Id = 2,
-            LastName = "Riche",
-            FirstName = "Nolan",
-            Club = "Kung-Fu Vaulx-en-Velin",
-            BirthDate = new DateTime(2014, 2, 5),
-            Weight = 49
-        });
-
-        CompetitorCategories.Add(new CompetitorCategoryModel()
-        {
-            CategoryId = 1,
-            CompetitorId = 1
-        });
-
-        CompetitorCategories.Add(new CompetitorCategoryModel()
-        {
-            CategoryId = 1,
-            CompetitorId = 2
-        });
-
-        this.SaveChanges();
     }
     #endregion
 }

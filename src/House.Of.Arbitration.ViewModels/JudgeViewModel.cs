@@ -477,6 +477,12 @@ public partial class JudgeViewModel : BaseViewModel
             await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
         }
     }
+
+    [RelayCommand]
+    private async Task TypeNumber(string number)
+    {
+        var message = "test";
+    }
     #endregion
 
     #region Override Methods

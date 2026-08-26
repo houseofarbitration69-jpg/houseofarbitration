@@ -549,7 +549,7 @@
                                     StrokeShape="RoundRectangle 8,0,8,0"
                                     IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}"
                                 />
-                                
+
                                 <Border 
                                     Grid.Column="1" 
                                     Background="Blue" 
@@ -575,7 +575,7 @@
                                 ColumnDefinitions="*,*" 
                                 IsVisible="False"
                             >
-                                 <!--Competitor 1 (Red Side)--> 
+                                <!--Competitor 1 (Red Side)-->
                                 <VerticalStackLayout 
                                     Grid.Column="0" 
                                     VerticalOptions="Center" 
@@ -621,7 +621,7 @@
                                         />
                                     </Border>
 
-                                     <!--Name on two lines--> 
+                                    <!--Name on two lines-->
                                     <VerticalStackLayout 
                                         HorizontalOptions="Center" 
                                         Padding="5,0,5,0"
@@ -631,7 +631,7 @@
                                             Style="{StaticResource MainCompetitorNameStyle}" 
                                             FontSize="28" 
                                         />
-                                        
+
                                         <controls:ScrollingText 
                                             Text="{Binding Competitor1.FirstName}" 
                                             Style="{StaticResource MainCompetitorNameStyle}"
@@ -640,7 +640,7 @@
                                         />
                                     </VerticalStackLayout>
 
-                                     <!--Club & Country-->
+                                    <!--Club & Country-->
                                     <VerticalStackLayout 
                                         Spacing="2" 
                                         Padding="5,0,5,0"
@@ -673,7 +673,7 @@
                                     </VerticalStackLayout.GestureRecognizers>
                                 </VerticalStackLayout>
 
-                                 <!--Competitor 2 (Blue Side) -->
+                                <!--Competitor 2 (Blue Side) -->
                                 <VerticalStackLayout 
                                     Grid.Column="1" 
                                     VerticalOptions="Center" 
@@ -784,94 +784,195 @@
                                 x:DataType="models:DrawOrderModel"
                             >
                                 <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
-                                     <!--Circular Photo / Icon--> 
-                                    <Border 
+                                    <Grid ColumnDefinitions="*,Auto,Auto,*" ColumnSpacing="20">
+                                        <!--Circular Photo / Icon-->
+                                        <Border 
+                                            Grid.Column="1"
+                                            StrokeShape="RoundRectangle 50" 
+                                            HorizontalOptions="Center" 
+                                            Stroke="White" 
+                                            BackgroundColor="White"
+                                            StrokeThickness="3"
+                                            IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                                        >
+                                            <Image 
+                                                Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
+                                                Aspect="AspectFill" 
+                                            />
+                                        </Border>
 
-                                        StrokeShape="RoundRectangle 50" 
-                                        HeightRequest="100" 
-                                        WidthRequest="100" 
-                                        HorizontalOptions="Center" 
-                                        Stroke="White" 
-                                        BackgroundColor="White"
-                                        StrokeThickness="3"
-                                        IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
-                                    >
-                                        <Image 
-                                            Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
-                                            Aspect="AspectFill" 
-                                        />
-                                    </Border>
+                                        <Border 
+                                            Grid.Column="1"
+                                            StrokeShape="RoundRectangle 50" 
+                                            HorizontalOptions="Center" 
+                                            Stroke="White" 
+                                            StrokeThickness="3"
+                                            BackgroundColor="White"
+                                            IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
+                                        >
+                                            <Label 
+                                                Text="{Binding Competitor.Genre, Converter={StaticResource GenreToFontConverter}}" 
+                                                FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                                                FontSize="70" 
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center"
+                                                HorizontalTextAlignment="Center"
+                                                VerticalTextAlignment="Center"
+                                            />
+                                        </Border>
 
-                                    <Border 
-                                        StrokeShape="RoundRectangle 50" 
-                                        HeightRequest="100" 
-                                        WidthRequest="100" 
-                                        HorizontalOptions="Center" 
-                                        Stroke="White" 
-                                        StrokeThickness="3"
-                                        BackgroundColor="White"
-                                        IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
-                                    >
-                                        <Label 
-                                            Text="{Binding Competitor.Genre, Converter={StaticResource GenreToFontConverter}}" 
-                                            FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                            FontSize="70" 
-                                            HorizontalOptions="Center"
-                                            VerticalOptions="Center"
-                                            HorizontalTextAlignment="Center"
-                                            VerticalTextAlignment="Center"
-                                        />
-                                    </Border>
+                                        <!--Name on two lines-->
+                                        <VerticalStackLayout 
+                                            Grid.Column="2"
+                                            HorizontalOptions="Start" 
+                                        >
+                                            <controls:ScrollingText 
+                                                Text="{Binding Competitor.LastName}" 
+                                                TextColor="White" 
+                                                FontAttributes="Bold" 
+                                                FontSize="28" 
+                                                HorizontalOptions="Fill" 
+                                            />
 
-                                     <!--Name on two lines--> 
-                                    <VerticalStackLayout HorizontalOptions="Center" WidthRequest="400">
-                                        <controls:ScrollingText 
-                                            Text="{Binding Competitor.LastName}" 
-                                            TextColor="White" 
-                                            FontAttributes="Bold" 
-                                            FontSize="28" 
-                                            HorizontalOptions="Fill" 
-                                            WidthRequest="400" 
-                                        />
-                                        
-                                        <controls:ScrollingText 
-                                            Text="{Binding Competitor.FirstName}" 
-                                            TextColor="White" 
-                                            FontAttributes="Bold" 
-                                            FontSize="32" 
-                                            Margin="0,-5,0,0" 
-                                            HorizontalOptions="Fill" 
-                                            WidthRequest="400" 
-                                        />
-                                    </VerticalStackLayout>
+                                            <controls:ScrollingText 
+                                                Text="{Binding Competitor.FirstName}" 
+                                                TextColor="White" 
+                                                FontAttributes="Bold" 
+                                                FontSize="28" 
+                                                HorizontalOptions="Fill" 
+                                            />
+                                        </VerticalStackLayout>
+                                    </Grid>
 
-                                     <!--Club & Country--> 
-                                    <VerticalStackLayout Spacing="5" WidthRequest="400">
+                                    <!--Club & Country-->
+                                    <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
                                         <controls:ScrollingText 
                                             Text="{Binding Competitor.Club}" 
                                             TextColor="White" 
                                             FontSize="18" 
                                             HorizontalOptions="Fill" 
-                                            WidthRequest="400" 
                                         />
-                                        
-                                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="12">
+
+                                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
                                             <Image 
                                                 Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
                                                 WidthRequest="40" 
                                                 HeightRequest="15" 
                                                 VerticalOptions="Center" 
                                             />
-                                            
-                                            <controls:ScrollingText 
+
+                                            <Label 
                                                 Text="{Binding Competitor.Country.Name}" 
                                                 TextColor="White" 
                                                 FontSize="16" 
                                                 FontAttributes="Italic" 
                                                 VerticalOptions="Center"
-                                                WidthRequest="200" 
                                             />
                                         </HorizontalStackLayout>
+
+                                        <!-- Notes -->
+                                        <Grid 
+                                            RowDefinitions="70,70,70,70" 
+                                            ColumnDefinitions="100,100,100" 
+                                            HorizontalOptions="Center"
+                                            RowSpacing="10"
+                                            ColumnSpacing="10"
+                                            Margin="0,20,0,0"
+                                        >
+                                            <Button
+                                                Grid.Row="0"
+                                                Grid.Column="0"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="7"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="7"
+                                            />
+                                            <Button
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="8"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="8"
+                                            />
+                                            <Button
+                                                Grid.Row="0"
+                                                Grid.Column="2"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="9"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="9"
+                                            />
+
+                                            <Button
+                                                Grid.Row="1"
+                                                Grid.Column="0"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="4"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="4"
+                                            />
+                                            <Button
+                                                Grid.Row="1"
+                                                Grid.Column="1"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="5"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="5"
+                                            />
+                                            <Button
+                                                Grid.Row="1"
+                                                Grid.Column="2"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="6"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="6"
+                                            />
+
+                                            <Button
+                                                Grid.Row="2"
+                                                Grid.Column="0"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="1"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="1"
+                                            />
+                                            <Button
+                                                Grid.Row="2"
+                                                Grid.Column="1"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="2"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="2"
+                                            />
+                                            <Button
+                                                Grid.Row="2"
+                                                Grid.Column="2"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="3"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="3"
+                                            />
+
+                                            <Button
+                                                Grid.Row="3"
+                                                Grid.Column="1"
+                                                BackgroundColor="White"
+                                                CornerRadius="10"
+                                                Text="0"
+                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                                CommandParameter="0"
+                                            />
+                                        </Grid>
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>
 
@@ -892,6 +993,7 @@
                                 Stroke="White" 
                                 StrokeThickness="3" 
                                 StrokeShape="RoundRectangle 20"
+                                IsVisible="True"
                             >
                                 <Label 
                                     Text="{Binding TimeLeftDisplay, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" 
@@ -900,6 +1002,12 @@
                                     FontAttributes="Bold" 
                                     FontFamily="Monospace"
                                 />
+
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border" Binding="{Binding ., Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                        <Setter Property="IsVisible" Value="False"/>
+                                    </DataTrigger>
+                                </Border.Triggers>
                             </Border>
                         </Grid>
                     </Grid>
@@ -927,7 +1035,7 @@
                                 VerticalOptions="Center"
                             />
                         </HorizontalStackLayout>
-                        
+
                         <Label 
                             Text="{Binding SelectedJudge.Name, StringFormat='{0}'}" 
                             TextColor="White" 
