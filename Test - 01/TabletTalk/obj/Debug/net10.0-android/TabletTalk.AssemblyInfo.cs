@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TabletTalk")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+835375486d56f0b7344e1d1febe7ae6ec2a7c64c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0+e307c8d15c995ec609add51bcad7ee4b7f5eb7ea")]
 [assembly: System.Reflection.AssemblyProductAttribute("TabletTalk")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TabletTalk")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

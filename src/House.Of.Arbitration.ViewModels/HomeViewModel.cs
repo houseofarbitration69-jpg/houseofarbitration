@@ -21,6 +21,9 @@ public partial class HomeViewModel : BaseViewModel
     private readonly IRepository<DrawPoolsModel> _drawPools;
     private readonly IRepository<DrawKnockoutModel> _drawKnockouts;
     private readonly IRepository<DrawOrderModel> _drawOrders;
+    private readonly IRepository<MvtGroupModel> _mvtGroups;
+    private readonly IRepository<MvtTypeModel> _mvtTypes;
+    private readonly IRepository<MvtCodeModel> _mvtCodes;
     #endregion
 
     #region Attributs
@@ -47,7 +50,10 @@ public partial class HomeViewModel : BaseViewModel
         IRepository<DrawModel> draws,
         IRepository<DrawPoolsModel> drawPools,
         IRepository<DrawKnockoutModel> drawKnockout,
-        IRepository<DrawOrderModel> drawOrder
+        IRepository<DrawOrderModel> drawOrder,
+        IRepository<MvtGroupModel> mvtGroup,
+        IRepository<MvtTypeModel> mvtType,
+        IRepository<MvtCodeModel> mvtCode
     ) : base(logger, resourceProvider, popupService)
     {
         Title = resourceProvider.APPLICATION_NAME;
@@ -60,13 +66,643 @@ public partial class HomeViewModel : BaseViewModel
         _drawPools = drawPools;
         _drawKnockouts = drawKnockout;
         _drawOrders = drawOrder;
+
+        _mvtGroups = mvtGroup;
+        _mvtTypes = mvtType;
+        _mvtCodes = mvtCode;
     }
     #endregion
 
     #region Commands
+    private async Task DefaultData()
+    {
+        MvtTypeModel mvtType;
+        MvtGroupModel mvtGroup;
+        List<MvtCodeModel> mvtCodes;
+        MvtCodeModel mvtCode;
+
+        mvtType = new MvtTypeModel() { Label = "Mains" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "Techniques d'équilibre" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "Techniques de jambes" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "Techniques de sauts" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "Techniques de culbutes" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "Positions et déplacement" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "Techniques d'armes" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "Autres erreurs" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "Chroégraphie" };
+        await _mvtTypes.AddAsync(mvtType);
+        mvtType = new MvtTypeModel() { Label = "JiTi" };
+        await _mvtTypes.AddAsync(mvtType);
+
+        #region TEST
+        mvtCodes = new List<MvtCodeModel>();
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "01", MvtTypeId = 1, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "02", MvtTypeId = 1, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "03", MvtTypeId = 1, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "04", MvtTypeId = 1, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "10", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "11", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "12", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "13", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "14", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "15", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "16", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "17", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "18", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "19", MvtTypeId = 2, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "20", MvtTypeId = 3, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "21", MvtTypeId = 3, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "22", MvtTypeId = 3, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "23", MvtTypeId = 3, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "24", MvtTypeId = 3, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "25", MvtTypeId = 3, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "26", MvtTypeId = 3, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "27", MvtTypeId = 3, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "30", MvtTypeId = 4, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "31", MvtTypeId = 4, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "32", MvtTypeId = 4, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "33", MvtTypeId = 4, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "34", MvtTypeId = 4, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "50", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "51", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "52", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "53", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "54", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "55", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "56", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "57", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "58", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "59", MvtTypeId = 6, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "60", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "61", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "62", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "63", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "64", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "65", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "66", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "67", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "68", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "69", MvtTypeId = 7, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "70A", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "70B", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "71", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "72", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "73", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "74", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "75", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "76", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "77", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "78", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "79", MvtTypeId = 8, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "80", MvtTypeId = 9, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "81", MvtTypeId = 9, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "82", MvtTypeId = 9, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "83", MvtTypeId = 9, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "84", MvtTypeId = 9, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "85", MvtTypeId = 9, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "86", MvtTypeId = 9, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "90", MvtTypeId = 10, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "91", MvtTypeId = 10, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "92", MvtTypeId = 10, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "93", MvtTypeId = 10, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "94", MvtTypeId = 10, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "95", MvtTypeId = 10, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "96", MvtTypeId = 10, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+        mvtCode = new MvtCodeModel() { Category = "?", Code = "97", MvtTypeId = 10, Value = -0.1 };
+        mvtCodes.Add(mvtCode);
+
+        mvtGroup = new MvtGroupModel() { Label = "Chang Quan", MvtCodes = mvtCodes };
+        await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region CHANG QUAN
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Quan (Poing)", Code = "01", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Zhang (Paume)", Code = "02", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Gou Shou (Crochet)", Code = "03", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Jianzhi (Position de main de l'épée)", Code = "04", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Ban Tui Chao Tian/Ce Ti Bao Jiao Zhi Li (Equilibre avec une jambe portée vers le haut)", Code = "10", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Hou Tui Bao Jiao Shi Li (Coup de pied vers l'arrière et porter de la jambe derrière le dos)", Code = "11", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Yang Shen Ping Heng (Equilibre avec le corps horizontalement renversé)", Code = "12", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Shi Zhi Ping Heng (Equilibre de la croix)", Code = "13", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Kou Tui Ping Heng (Equilibre avec une jambe attachée au jarret du genou)", Code = "14", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ce Sheng Ping Heng (Coup de pied chassé en équilibre)\n\rTan Hai Ping Heng (Equilibre plonger au fond de l'océan)", Code = "15", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Wang Yue Ping Heng (Equilibre contemplation de la lune)", Code = "16", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Qian Sao Tui (Balayage vers l'avant)", Code = "20", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Hou Sao Tui (Balayage vers l'arrière)", Code = "21", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Die Chu Cha (Grand écart latéral)", Code = "22", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Tan Tui (Coup de pied direct pointé)\n\rDeng Tui (Coup de pied avec talon)\n\rChuai Tui (Coup de pied latéral)", Code = "23", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Zheng Ti Tui (Coup de pied frontal)\n\rCe Ti Tui (Coup de pied sur le côté)", Code = "24", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Li Hé Pai Jiao (Coup de pied vers l'intérieur)\n\rBai Lian Pai Jiao (Coup de pied vers l'extérieur)\n\rDan Pai Jiao (Coup de pied explosif en avant)", Code = "25", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ti Xi Du Li (Equilibre avec un genou levé)", Code = "26", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Teng Kong Fei Jiao (Coup de pied sauté en avant)\n\rXuang Feng Jiao (Tornade)\n\rTeng Kong Bai Lian (Lotus)", Code = "30", MvtTypeId = 4 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Teng Kong Zheng Ti Tui (Coup de pied sauté avec la pointe de pied touchant le front)", Code = "31", MvtTypeId = 4 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ce Kong Fan (Roue sans les mains)\n\rCe Kong Fan Zhuanti 360° (Roue sans les mains crillée)", Code = "32", MvtTypeId = 4 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xuan Zi (Saut papillon)\n\rXuan Zi Zhuan Ti (Saut vrillé)", Code = "33", MvtTypeId = 4 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Teng Kong Jian Tan (Saut coup de pied direct avec la pointe de pied)\n\rTeng kong Deng Dui (Saut coup de pied direct avec le talon)", Code = "34", MvtTypeId = 4 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gong Bu (Position d'arc)", Code = "50", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Mabu (Position cavalière)", Code = "51", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xubu (Position du pas vide)", Code = "52", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pubu (Position d'une jambe au ras du sol)", Code = "53", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xiebu (Position des jambes croisés)", Code = "54", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Zuoban (Position assise et jambes croisés)", Code = "58", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gua Jian (Faire des cercles verticaux avec l'épée de haut en bas et des deux côtés du corps)\n\rLiao Jian (Faire des cercles verticaux avec l'épée de bas en haut et des cercles des deux côtés du corps de l'épée)", Code = "60", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Wo Jian", Code = "61", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Chantou, Guo Nao", Code = "62", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Lan Qiang, Na Qiang, Zha Qiang (Mouvement circulaire du bout de lance vers la gauche et la droite et percer avec la lance)", Code = "63", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ping Lun Gun (Tourner le bâton en cercle à l'horizontal avec une main)", Code = "64", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Li Wu Hua Qiang Shuang Chou Ti Liao Hua Gun (Tourner la lance ou le bâton en cercle sur les deux côtés de façon vertical)", Code = "65", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Qi Xie Pao Jie (Lancer et attraper l'arme)", Code = "66", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Chang Quan", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region JIANGUN SHU SHU
+        //mvtGroup = new MvtGroupModel() { Label = "JianGun Shu Shu" };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region GUN SHU
+        //mvtGroup = new MvtGroupModel() { Label = "Gun Shu" };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region DAO SHU
+        //mvtGroup = new MvtGroupModel() { Label = "Dao Shu" };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region QIANG SHU
+        //mvtGroup = new MvtGroupModel() { Label = "Qiang Shu" };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region GUN SHU
+        //mvtGroup = new MvtGroupModel() { Label = "Gun Shu" };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region NAN QUAN
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Quan (Poing)", Code = "01", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Hu Zhao (Griffes de tigre)", Code = "02", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "He Zui (Bec de la Grue)", Code = "03", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Dan Zhi Zhang", Code = "04", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Heng Cai Tui (Coup de pied horizontal)\n\rDeng Tui (Coup de pied direct avec le talon)\n\rHu Wei (Coup de pied queue du tigre)", Code = "23", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Zhuan Shen Hou Bai Tui (Coup de pied retourné)", Code = "25", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Heng Ding Tui", Code = "27", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gong Bu", Code = "50", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Mabu", Code = "51", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xubu", Code = "52", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pubu", Code = "53", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Diebu (Position papillon)", Code = "55", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Guibu (Position avec un genou plié)", Code = "56", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Qi Long Bu (Position cavalière du dragon)", Code = "57", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Chan Tou (Enrouler le sabre vers la gauche)\n\rGuo Nao (Enrouler le sabre vers la droite)", Code = "62", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ding Gun (Pousser le bâton avec la pointe)", Code = "67", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Nan Quan", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region NAN DAO
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Quan (Poing)", Code = "01", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Hu Zhao (Griffes de tigre)", Code = "02", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "He Zui (Bec de la Grue)", Code = "03", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Dan Zhi Zhang", Code = "04", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Heng Cai Tui (Coup de pied horizontal)\n\rDeng Tui (Coup de pied direct avec le talon)\n\rHu Wei (Coup de pied queue du tigre)", Code = "23", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Zhuan Shen Hou Bai Tui (Coup de pied retourné)", Code = "25", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Heng Ding Tui", Code = "27", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gong Bu", Code = "50", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Mabu", Code = "51", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xubu", Code = "52", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pubu", Code = "53", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Diebu (Position papillon)", Code = "55", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Guibu (Position avec un genou plié)", Code = "56", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Qi Long Bu (Position cavalière du dragon)", Code = "57", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Chan Tou (Enrouler le sabre vers la gauche)\n\rGuo Nao (Enrouler le sabre vers la droite)", Code = "62", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ding Gun (Pousser le bâton avec la pointe)", Code = "67", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Nan Dao", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region NAN GUN
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Quan (Poing)", Code = "01", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Hu Zhao (Griffes de tigre)", Code = "02", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "He Zui (Bec de la Grue)", Code = "03", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Dan Zhi Zhang", Code = "04", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Heng Cai Tui (Coup de pied horizontal)\n\rDeng Tui (Coup de pied direct avec le talon)\n\rHu Wei (Coup de pied queue du tigre)", Code = "23", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Zhuan Shen Hou Bai Tui (Coup de pied retourné)", Code = "25", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Heng Ding Tui", Code = "27", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gong Bu", Code = "50", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Mabu", Code = "51", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xubu", Code = "52", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pubu", Code = "53", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Diebu (Position papillon)", Code = "55", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Guibu (Position avec un genou plié)", Code = "56", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Qi Long Bu (Position cavalière du dragon)", Code = "57", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Chan Tou (Enrouler le sabre vers la gauche)\n\rGuo Nao (Enrouler le sabre vers la droite)", Code = "62", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ding Gun (Pousser le bâton avec la pointe)", Code = "67", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Nan Gun", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region TAI JI QUAN
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Zhang", Code = "02", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Jian Zhi", Code = "04", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Formes de mains", Code = "05", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Dishi Qian Deng / Cai Jiao Ping Heng (Equilibre en position semi-accroupie avec une jambe éendue en horizontal dont le talon se tourne vers l'intérieur)", Code = "17", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Qian Ju Tui Di Shi Ping Heng (Equilibre en position semi-accroupie avec une jambe tendue vers l'avant)", Code = "18", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Hou Cha Tui Di Shi Ping Heng (Equilibre en position accroupie avec une jambe tendue derrière l'autre jambe)", Code = "19", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Die Cha (Position du lézard)", Code = "22", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Feng Jiao (Coup de pied avec la pointe de pied tendue)\n\rDeng Jiao (Coup de pied avecle talon)", Code = "23", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Bai Lian Pai Jiao (Coup de pied extérieur)\n\rDan Pai Jiao (Coup de pied explosif)", Code = "25", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ti Xi Du Li", Code = "26", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gong Bu", Code = "50", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ma Bu", Code = "51", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xu Bu", Code = "52", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pu Bu", Code = "53", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Shang Bu (Pas en avant)\n\rTui Bu (Pas en arrière)\n\rJin Bu (Pas d'attaque)\n\rGen Bu (Pas de poursuite)\n\rCe Xing Bu (Pas latéral)", Code = "59", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gua Jian/Shan (Faire des cercles verticaux avec l'épée/éventail de haut en bas et des deux côtés du corps)\n\rLiao Jian/Shan (Faire des cercles verticaux avec l'épée/éventail de base en haut et des deux côtés du corps.)", Code = "60", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Wo Jian (Tenue de l'épée)\n\rKai Shan (Ouverture de l'éventail)\n\rHe Shan (Fermeture de l'éventail)", Code = "61", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ci Shan (Piquer l'éventail)\n\rPi Shan (Fendre avec l'éventail)", Code = "63", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pao Jie Shan (Lancement et réception de l'éventail)", Code = "66", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Jiao Shan (Faire des cercles du poignet avec l'éventail)", Code = "68", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Dian Shan (Pointer l'éventail vers l'avant)", Code = "69", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Tai Ji Quan", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region TAI JI JIAN
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Zhang", Code = "02", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Jian Zhi", Code = "04", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Formes de mains", Code = "05", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Dishi Qian Deng / Cai Jiao Ping Heng (Equilibre en position semi-accroupie avec une jambe éendue en horizontal dont le talon se tourne vers l'intérieur)", Code = "17", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Qian Ju Tui Di Shi Ping Heng (Equilibre en position semi-accroupie avec une jambe tendue vers l'avant)", Code = "18", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Hou Cha Tui Di Shi Ping Heng (Equilibre en position accroupie avec une jambe tendue derrière l'autre jambe)", Code = "19", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Die Cha (Position du lézard)", Code = "22", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Feng Jiao (Coup de pied avec la pointe de pied tendue)\n\rDeng Jiao (Coup de pied avecle talon)", Code = "23", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Bai Lian Pai Jiao (Coup de pied extérieur)\n\rDan Pai Jiao (Coup de pied explosif)", Code = "25", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ti Xi Du Li", Code = "26", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gong Bu", Code = "50", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ma Bu", Code = "51", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xu Bu", Code = "52", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pu Bu", Code = "53", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Shang Bu (Pas en avant)\n\rTui Bu (Pas en arrière)\n\rJin Bu (Pas d'attaque)\n\rGen Bu (Pas de poursuite)\n\rCe Xing Bu (Pas latéral)", Code = "59", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gua Jian/Shan (Faire des cercles verticaux avec l'épée/éventail de haut en bas et des deux côtés du corps)\n\rLiao Jian/Shan (Faire des cercles verticaux avec l'épée/éventail de base en haut et des deux côtés du corps.)", Code = "60", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Wo Jian (Tenue de l'épée)\n\rKai Shan (Ouverture de l'éventail)\n\rHe Shan (Fermeture de l'éventail)", Code = "61", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ci Shan (Piquer l'éventail)\n\rPi Shan (Fendre avec l'éventail)", Code = "63", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pao Jie Shan (Lancement et réception de l'éventail)", Code = "66", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Jiao Shan (Faire des cercles du poignet avec l'éventail)", Code = "68", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Dian Shan (Pointer l'éventail vers l'avant)", Code = "69", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Tai Ji Jian", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region TAI JI SHAN
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Zhang", Code = "02", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Jian Zhi", Code = "04", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Formes de mains", Code = "05", MvtTypeId = 1 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Dishi Qian Deng / Cai Jiao Ping Heng (Equilibre en position semi-accroupie avec une jambe éendue en horizontal dont le talon se tourne vers l'intérieur)", Code = "17", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Qian Ju Tui Di Shi Ping Heng (Equilibre en position semi-accroupie avec une jambe tendue vers l'avant)", Code = "18", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Hou Cha Tui Di Shi Ping Heng (Equilibre en position accroupie avec une jambe tendue derrière l'autre jambe)", Code = "19", MvtTypeId = 2 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Die Cha (Position du lézard)", Code = "22", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Feng Jiao (Coup de pied avec la pointe de pied tendue)\n\rDeng Jiao (Coup de pied avecle talon)", Code = "23", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Bai Lian Pai Jiao (Coup de pied extérieur)\n\rDan Pai Jiao (Coup de pied explosif)", Code = "25", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ti Xi Du Li", Code = "26", MvtTypeId = 3 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gong Bu", Code = "50", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ma Bu", Code = "51", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Xu Bu", Code = "52", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pu Bu", Code = "53", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Shang Bu (Pas en avant)\n\rTui Bu (Pas en arrière)\n\rJin Bu (Pas d'attaque)\n\rGen Bu (Pas de poursuite)\n\rCe Xing Bu (Pas latéral)", Code = "59", MvtTypeId = 6 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtCode = new MvtCodeModel() { Category = "Gua Jian/Shan (Faire des cercles verticaux avec l'épée/éventail de haut en bas et des deux côtés du corps)\n\rLiao Jian/Shan (Faire des cercles verticaux avec l'épée/éventail de base en haut et des deux côtés du corps.)", Code = "60", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Wo Jian (Tenue de l'épée)\n\rKai Shan (Ouverture de l'éventail)\n\rHe Shan (Fermeture de l'éventail)", Code = "61", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Ci Shan (Piquer l'éventail)\n\rPi Shan (Fendre avec l'éventail)", Code = "63", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Pao Jie Shan (Lancement et réception de l'éventail)", Code = "66", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Jiao Shan (Faire des cercles du poignet avec l'éventail)", Code = "68", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Dian Shan (Pointer l'éventail vers l'avant)", Code = "69", MvtTypeId = 7 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Tai Ji Shan", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region DUI LIAN
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Le mouvement d'attaque est loin de la cible", Code = "90", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "La durée de la posture statique dépasse la norme réglementaire de 3s", Code = "91", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "La durée du moment sans mouvements d'attaque ou de défense dépasse 3s", Code = "92", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Le mouvement d'attaque ou de défense est raté pendant l'éxécution", Code = "93", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Attente du mouvement d'attaque du partenaire", Code = "94", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Touche ou blessure accidentelle", Code = "95", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Dui Lian", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+
+        #region JI TI
+        //mvtCodes = new List<MvtCodeModel>();
+        //mvtCode = new MvtCodeModel() { Category = "Technique de sauts et techniques de culbutes ne respectent pas les exigences", Code = "91", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Les techniques des armes ne respectent pas les exigences", Code = "92", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Le mouvement d'attaque ou de défense est raté", Code = "93", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Attente du mouvement d'attaque du partenaire", Code = "94", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Touche ou blessure accidentelle", Code = "95", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Technique individuelle exécutée de manière non synchronisée", Code = "96", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+        //mvtCode = new MvtCodeModel() { Category = "Le groupe n'est pas synchronnisé", Code = "97", MvtTypeId = 10 };
+        //mvtCodes.Add(mvtCode);
+
+        //mvtGroup = new MvtGroupModel() { Label = "Ji Ti", MvtCodes = mvtCodes };
+        //await _mvtGroups.AddAsync(mvtGroup);
+        #endregion
+    }
+
     [RelayCommand]
     private async Task SeedData()
     {
+        //await DefaultData();
+
         CategoryModel category;
         CompetitorModel competitor;
         DrawModel draw;

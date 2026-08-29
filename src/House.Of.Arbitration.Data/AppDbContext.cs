@@ -73,7 +73,7 @@ public class AppDbContext : DbContext
         builder.Entity<CountryModel>(item =>
         {
             item.HasKey(i => i.IsoCode);
-            item.HasData(CountryModel.DefaultCountries);
+            //item.HasData(CountryModel.DefaultCountries);
         });
 
         builder.Entity<CategoryModel>(item =>
@@ -101,7 +101,7 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
-            item.HasData(AgeRangeModel.DefaultRanges);
+            //item.HasData(AgeRangeModel.DefaultRanges);
         });
 
         builder.Entity<DrawKnockoutModel>(item =>
@@ -245,6 +245,19 @@ public class AppDbContext : DbContext
             item.HasOne(i => i.Type)
                 .WithMany();
         });
+
+        SeedData(builder);
+    }
+    #endregion
+
+    #region Private Methods
+    private void SeedData(ModelBuilder builder)
+    {
+        builder.Entity<CountryModel>().HasData(CountryModel.DefaultCountries);
+        builder.Entity<AgeRangeModel>().HasData(AgeRangeModel.DefaultRanges);
+        builder.Entity<MvtGroupModel>().HasData(MvtGroupModel.DefaultGroups);
+        builder.Entity<MvtTypeModel>().HasData(MvtTypeModel.DefaultTypes);
+        builder.Entity<MvtCodeModel>().HasData(MvtCodeModel.DefaultCodes);
     }
     #endregion
 
