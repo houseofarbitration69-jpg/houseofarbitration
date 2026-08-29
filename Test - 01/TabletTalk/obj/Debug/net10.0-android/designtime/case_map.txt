@@ -1,2 +1,0 @@
-animation\enterfromleft;animation\enterfromleft
-animation\enterfromri

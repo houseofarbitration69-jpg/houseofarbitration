@@ -1,1 +1,0 @@
-int anim abc_fade_in 0x7f010000
