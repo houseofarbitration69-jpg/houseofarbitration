@@ -12,6 +12,7 @@
     xmlns:selectors="clr-namespace:House.Of.Arbitration.Views.Selectors;assembly=House.Of.Arbitration.Views"
     x:TypeArguments="vm:JudgeViewModel"
     x:Class="House.Of.Arbitration.Views.JudgePage"
+    x:Name="this"
     x:DataType="vm:JudgeViewModel"
     Title="{Binding Title}"
 >
@@ -782,7 +783,132 @@
                             <Grid 
                                 IsVisible="False"
                                 x:DataType="models:DrawOrderModel"
+                                ColumnDefinitions="*,*,*"
                             >
+                                <!-- Competitor / Timer -->
+                                
+                                <!-- CODE -->
+                                <Grid 
+                                    Grid.Column="1"
+                                    RowDefinitions="50,70,70,70,70" 
+                                    ColumnDefinitions="100,100,100" 
+                                    HorizontalOptions="Center"
+                                    RowSpacing="10"
+                                    ColumnSpacing="10"
+                                    Margin="0,20,0,0"
+                                >
+                                    <Border
+                                        Grid.Row="0" 
+                                        Grid.ColumnSpan="3" 
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="White"
+                                    >
+                                        <Label 
+                                            Text="{Binding BindingContext.Code, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
+                                            TextColor="Black"
+                                            HorizontalOptions="Center"
+                                            VerticalOptions="Center"
+                                            FontSize="18"
+                                            FontAttributes="Bold"
+                                        />
+                                    </Border>
+                                    <Button
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="7"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="7"
+                                    />
+                                    <Button
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="8"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="8"
+                                    />
+                                    <Button
+                                        Grid.Row="1"
+                                        Grid.Column="2"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="9"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="9"
+                                    />
+
+                                    <Button
+                                        Grid.Row="2"
+                                        Grid.Column="0"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="4"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="4"
+                                    />
+                                    <Button
+                                        Grid.Row="2"
+                                        Grid.Column="1"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="5"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="5"
+                                    />
+                                    <Button
+                                        Grid.Row="2"
+                                        Grid.Column="2"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="6"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="6"
+                                    />
+
+                                    <Button
+                                        Grid.Row="3"
+                                        Grid.Column="0"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="1"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="1"
+                                    />
+                                    <Button
+                                        Grid.Row="3"
+                                        Grid.Column="1"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="2"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="2"
+                                    />
+                                    <Button
+                                        Grid.Row="3"
+                                        Grid.Column="2"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="3"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="3"
+                                    />
+
+                                    <Button
+                                        Grid.Row="4"
+                                        Grid.Column="1"
+                                        BackgroundColor="White"
+                                        CornerRadius="10"
+                                        Text="0"
+                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="0"
+                                    />
+                                </Grid>
+
+                                <!-- Liste des codes saisies 
+                                -->
                                 <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="15">
                                     <Grid ColumnDefinitions="*,Auto,Auto,*" ColumnSpacing="20">
                                         <!--Circular Photo / Icon-->
@@ -870,109 +996,6 @@
                                             />
                                         </HorizontalStackLayout>
 
-                                        <!-- Notes -->
-                                        <Grid 
-                                            RowDefinitions="70,70,70,70" 
-                                            ColumnDefinitions="100,100,100" 
-                                            HorizontalOptions="Center"
-                                            RowSpacing="10"
-                                            ColumnSpacing="10"
-                                            Margin="0,20,0,0"
-                                        >
-                                            <Button
-                                                Grid.Row="0"
-                                                Grid.Column="0"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="7"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="7"
-                                            />
-                                            <Button
-                                                Grid.Row="0"
-                                                Grid.Column="1"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="8"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="8"
-                                            />
-                                            <Button
-                                                Grid.Row="0"
-                                                Grid.Column="2"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="9"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="9"
-                                            />
-
-                                            <Button
-                                                Grid.Row="1"
-                                                Grid.Column="0"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="4"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="4"
-                                            />
-                                            <Button
-                                                Grid.Row="1"
-                                                Grid.Column="1"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="5"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="5"
-                                            />
-                                            <Button
-                                                Grid.Row="1"
-                                                Grid.Column="2"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="6"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="6"
-                                            />
-
-                                            <Button
-                                                Grid.Row="2"
-                                                Grid.Column="0"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="1"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="1"
-                                            />
-                                            <Button
-                                                Grid.Row="2"
-                                                Grid.Column="1"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="2"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="2"
-                                            />
-                                            <Button
-                                                Grid.Row="2"
-                                                Grid.Column="2"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="3"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="3"
-                                            />
-
-                                            <Button
-                                                Grid.Row="3"
-                                                Grid.Column="1"
-                                                BackgroundColor="White"
-                                                CornerRadius="10"
-                                                Text="0"
-                                                Command="{Binding TypeNumberCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                                CommandParameter="0"
-                                            />
-                                        </Grid>
                                     </VerticalStackLayout>
                                 </VerticalStackLayout>
 

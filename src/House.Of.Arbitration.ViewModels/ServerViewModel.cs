@@ -250,6 +250,23 @@ public partial class ServerViewModel : BaseViewModel
                         _clientJudgeMapping[args.ClientId] = judge;
 
                         // Envoie de la compétition
+                        if (_currentCompetition == null && CompetitionId > 0)
+                        {
+                            _currentCompetition = await LoadCompetitionDataAsync(CompetitionId);
+                        }
+                        if (_currentCompetition == null && CurrentDraw?.Draw?.Category?.CompetitionId > 0)
+                        {
+                            _currentCompetition = await LoadCompetitionDataAsync(CurrentDraw.Draw.Category.CompetitionId.Value);
+                        }
+                        if (_currentCompetition == null)
+                        {
+                            var firstComp = (await _competitionRepository.GetAllAsync())?.FirstOrDefault();
+                            if (firstComp != null)
+                            {
+                                _currentCompetition = await LoadCompetitionDataAsync(firstComp.Id);
+                            }
+                        }
+
                         if (_currentCompetition != null)
                         {
                             try
@@ -373,22 +390,27 @@ public partial class ServerViewModel : BaseViewModel
     #endregion
 
     #region Private Methods
+    private Task<CompetitionModel?> LoadCompetitionDataAsync(int competitionId)
+    {
+        return _competitionRepository.GetByIdAsync(competitionId,
+            "Categories.AgeRange",
+            "Categories.Competitors.Competitor.Country",
+            "Categories.Draw.DrawKnockouts.Competitor1.Country",
+            "Categories.Draw.DrawKnockouts.Competitor2.Country",
+            "Categories.Draw.DrawKnockouts.Winner",
+            "Categories.Draw.DrawKnockouts.Looser",
+            "Categories.Draw.DrawOrders.Competitor.Country",
+            "Categories.Draw.DrawPools.Competitor1.Country",
+            "Categories.Draw.DrawPools.Competitor2.Country",
+            "Categories.Draw.DrawPools.Winner",
+            "Categories.Draw.DrawPools.Looser");
+    }
+
     private async Task Init()
     {
         if (CompetitionId > 0)
         {
-            _currentCompetition = await _competitionRepository.GetByIdAsync(CompetitionId,
-                "Categories.AgeRange",
-                "Categories.Competitors.Competitor.Country",
-                "Categories.Draw.DrawKnockouts.Competitor1.Country",
-                "Categories.Draw.DrawKnockouts.Competitor2.Country",
-                "Categories.Draw.DrawKnockouts.Winner",
-                "Categories.Draw.DrawKnockouts.Looser",
-                "Categories.Draw.DrawOrders.Competitor.Country",
-                "Categories.Draw.DrawPools.Competitor1.Country",
-                "Categories.Draw.DrawPools.Competitor2.Country",
-                "Categories.Draw.DrawPools.Winner",
-                "Categories.Draw.DrawPools.Looser");
+            _currentCompetition = await LoadCompetitionDataAsync(CompetitionId);
         }
 
         var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();

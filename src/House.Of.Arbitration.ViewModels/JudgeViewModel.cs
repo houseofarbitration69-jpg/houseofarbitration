@@ -41,6 +41,9 @@ public partial class JudgeViewModel : BaseViewModel
     private int _matchNumber;
     private string _timeLeftDisplay = "02:00";
 
+    private string _code = "01";
+    private CancellationTokenSource? _typeNumberCts;
+
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private IDispatcherTimer? _timer;
 
@@ -137,6 +140,12 @@ public partial class JudgeViewModel : BaseViewModel
     {
         get => _currentDraw;
         set => SetProperty(ref _currentDraw, value);
+    }
+
+    public string Code
+    {
+        get => _code;
+        set => SetProperty(ref _code, value);
     }
     #endregion
 
@@ -479,9 +488,43 @@ public partial class JudgeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task TypeNumber(string number)
+    private async Task TypeNumber(object? val)
     {
-        var message = "test";
+        if (val != null)
+        {
+            string number = val.ToString() ?? String.Empty;
+
+            _typeNumberCts?.Cancel();
+            _typeNumberCts?.Dispose();
+            _typeNumberCts = new CancellationTokenSource();
+            var token = _typeNumberCts.Token;
+
+            Code += number;
+
+            try
+            {
+                await Task.Delay(1000, token);
+
+                if (!token.IsCancellationRequested && !string.IsNullOrEmpty(Code))
+                {
+                    var fullCode = Code;
+                    Code = string.Empty;
+                    await ProcessTypedCode(fullCode);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                // Le délai a été annulé par une nouvelle frappe
+            }
+        }
+    }
+
+    private async Task ProcessTypedCode(string code)
+    {
+        if (IsConnected && _serverDeviceId != null)
+        {
+            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{code}");
+        }
     }
     #endregion
 
@@ -501,6 +544,10 @@ public partial class JudgeViewModel : BaseViewModel
         {
             await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_DISCONNECT}");
         }
+
+        _typeNumberCts?.Cancel();
+        _typeNumberCts?.Dispose();
+        _typeNumberCts = null;
 
         _bluetoothClient.DeviceDiscovered -= OnDeviceDiscovered;
         _bluetoothClient.DeviceConnected -= OnDeviceConnected;
