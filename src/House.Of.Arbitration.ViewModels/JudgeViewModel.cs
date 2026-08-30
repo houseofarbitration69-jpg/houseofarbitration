@@ -24,6 +24,7 @@ public partial class JudgeViewModel : BaseViewModel
     private readonly IRepository<DrawKnockoutModel> _drawKnockoutService;
     private readonly IRepository<DrawOrderModel> _drawOrderService;
     private readonly IRepository<DrawPoolsModel> _drawPoolsService;
+    private readonly IRepository<MvtCodeModel> _mvtCodesService;
     #endregion
 
     #region Attributs
@@ -40,9 +41,11 @@ public partial class JudgeViewModel : BaseViewModel
     private string? _categoryName;
     private int _matchNumber;
     private string _timeLeftDisplay = "02:00";
+    private List<MvtCodeModel> _codes = new List<MvtCodeModel>();
 
-    private string _code = "01";
+    private string _code = "";
     private CancellationTokenSource? _typeNumberCts;
+    private IDispatcherTimer? _typeTimer;
 
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private IDispatcherTimer? _timer;
@@ -147,6 +150,12 @@ public partial class JudgeViewModel : BaseViewModel
         get => _code;
         set => SetProperty(ref _code, value);
     }
+
+    public List<MvtCodeModel> Codes
+    {
+        get => _codes;
+        set => SetProperty(ref _codes, value);
+    }
     #endregion
 
     #region Constructors
@@ -160,7 +169,8 @@ public partial class JudgeViewModel : BaseViewModel
         IRepository<CompetitionModel> competitionRepository,
         IRepository<DrawKnockoutModel> drawKnockoutService,
         IRepository<DrawOrderModel> drawOrderService,
-        IRepository<DrawPoolsModel> drawPoolsService
+        IRepository<DrawPoolsModel> drawPoolsService,
+        IRepository<MvtCodeModel> mvtCodesService
     ) : base(logger, resourceProvider, popupService)
     {
         _alertService = alertService;
@@ -172,6 +182,7 @@ public partial class JudgeViewModel : BaseViewModel
         _drawKnockoutService = drawKnockoutService;
         _drawOrderService = drawOrderService;
         _drawPoolsService = drawPoolsService;
+        _mvtCodesService = mvtCodesService;
 
         _title = "JUDGE";
 
@@ -492,29 +503,38 @@ public partial class JudgeViewModel : BaseViewModel
     {
         if (val != null)
         {
-            string number = val.ToString() ?? String.Empty;
-
-            _typeNumberCts?.Cancel();
-            _typeNumberCts?.Dispose();
-            _typeNumberCts = new CancellationTokenSource();
-            var token = _typeNumberCts.Token;
-
-            Code += number;
-
             try
             {
-                await Task.Delay(1000, token);
+                string number = val?.ToString() ?? String.Empty;
 
-                if (!token.IsCancellationRequested && !string.IsNullOrEmpty(Code))
+                // Append digit to current code
+                Code += number;
+
+                // Initialize timer if needed
+                if (_typeTimer == null)
                 {
-                    var fullCode = Code;
-                    Code = string.Empty;
-                    await ProcessTypedCode(fullCode);
+                    _typeTimer = Application.Current?.Dispatcher.CreateTimer();
+                    if (_typeTimer != null)
+                    {
+                        _typeTimer.Interval = TimeSpan.FromSeconds(2);
+                        _typeTimer.Tick += async (s, e) =>
+                        {
+                            _typeTimer.Stop();
+                            if (!string.IsNullOrEmpty(Code))
+                            {
+                                var fullCode = Code;
+                                Code = string.Empty;
+                                await ProcessTypedCode(fullCode);
+                            }
+                        };
+                    }
                 }
+                // Restart timer on each new digit
+                _typeTimer?.Start();
             }
-            catch (TaskCanceledException)
+            catch (Exception ex)
             {
-                // Le délai a été annulé par une nouvelle frappe
+                _logger.LogError(ex, "Error in TypeNumber command");
             }
         }
     }
@@ -523,19 +543,34 @@ public partial class JudgeViewModel : BaseViewModel
     {
         if (IsConnected && _serverDeviceId != null)
         {
-            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{code}");
+            if (!String.IsNullOrEmpty(code))
+            {
+                var findCode = (await _mvtCodesService.GetAllAsync())?.FirstOrDefault(c => c.Code == code);
+
+                if (findCode == null)
+                {
+                    // Pas de code correspondant
+                }
+                else
+                {
+                    Codes.Add(findCode);
+                }
+            }
+
+            //await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{code}");
         }
     }
     #endregion
 
     #region Override Methods
-    public override Task OnAppearing()
+    public override async Task OnAppearing()
     {
         _bluetoothClient.DeviceDiscovered += OnDeviceDiscovered;
         _bluetoothClient.DeviceConnected += OnDeviceConnected;
         _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;
         _bluetoothClient.MessageReceived += OnMessageReceived;
-        return base.OnAppearing();
+
+        await base.OnAppearing();
     }
 
     public override async Task OnDisappearing()
