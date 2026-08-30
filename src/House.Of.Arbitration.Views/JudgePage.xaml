@@ -782,7 +782,6 @@
                             <!-- Order Mode (Taolu) -->
                             <Grid 
                                 IsVisible="False"
-                                x:DataType="models:DrawOrderModel"
                                 ColumnDefinitions="*,*,*"
                             >
                                 <!-- Competitor / Timer -->
@@ -796,6 +795,8 @@
                                     RowSpacing="10"
                                     ColumnSpacing="10"
                                     Margin="0,20,0,0"
+                                    BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                    x:DataType="vm:JudgeViewModel"
                                 >
                                     <Border
                                         Grid.Row="0" 
@@ -804,7 +805,7 @@
                                         BackgroundColor="White"
                                     >
                                         <Label 
-                                            Text="{Binding BindingContext.Code, Source={RelativeSource AncestorType={x:Type ContentPage}}}" 
+                                            Text="{Binding Code}" 
                                             TextColor="Black"
                                             HorizontalOptions="Center"
                                             VerticalOptions="Center"
@@ -818,7 +819,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="7"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="7"
                                     />
                                     <Button
@@ -827,7 +828,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="8"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="8"
                                     />
                                     <Button
@@ -836,7 +837,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="9"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="9"
                                     />
 
@@ -846,7 +847,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="4"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="4"
                                     />
                                     <Button
@@ -855,7 +856,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="5"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="5"
                                     />
                                     <Button
@@ -864,7 +865,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="6"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="6"
                                     />
 
@@ -874,7 +875,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="1"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="1"
                                     />
                                     <Button
@@ -883,7 +884,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="2"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="2"
                                     />
                                     <Button
@@ -892,7 +893,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="3"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="3"
                                     />
 
@@ -902,7 +903,7 @@
                                         BackgroundColor="White"
                                         CornerRadius="10"
                                         Text="0"
-                                        Command="{Binding BindingContext.TypeNumberCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        Command="{Binding TypeNumberCommand}"
                                         CommandParameter="0"
                                     />
                                 </Grid>
