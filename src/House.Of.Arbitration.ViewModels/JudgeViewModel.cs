@@ -534,6 +534,12 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand]
+    private async Task DeleteCode(MvtTimeCodeModel code)
+    {
+        Codes.Remove(code);
+    }
+
     private async Task ProcessTypedCode(string code)
     {
         if (IsConnected && _serverDeviceId != null)

@@ -1098,26 +1098,42 @@
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:MvtTimeCodeModel">
                                             <Border
-                                                Padding="5,5,5,5"
+                                                Padding="5,10,5,10"
                                                 StrokeShape="RoundRectangle 5"
+                                                BackgroundColor="White"
                                             >
-                                                <HorizontalStackLayout Spacing="10">
+                                                <Grid ColumnDefinitions="68,3,*,Auto" ColumnSpacing="10">
                                                     <Label
+                                                        Grid.Column="0"
                                                         Text="{Binding Date, StringFormat='{0:HH:mm:ss}'}"
-                                                        TextColor="White"
+                                                        TextColor="Black"
                                                         FontSize="16"
+                                                        VerticalOptions="Center"
                                                     />
+                                                    
                                                     <Label 
-                                                        Text=" : "
-                                                        TextColor="White"
+                                                        Grid.Column="1"
+                                                        Text=":"
+                                                        TextColor="Black"
                                                         FontSize="16"
+                                                        VerticalOptions="Center"
                                                     />
+
                                                     <Label 
+                                                        Grid.Column="2"
                                                         Text="{Binding Code.Description}"
-                                                        TextColor="White"
+                                                        TextColor="Black"
                                                         FontSize="16"
+                                                        VerticalOptions="Center"
                                                     />
-                                                </HorizontalStackLayout>
+
+                                                    <controls:IconButton
+                                                        Grid.Column="33"
+                                                        Style="{StaticResource ListActionDeleteButtonStyle}"
+                                                        Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=DeleteCodeCommand}"
+                                                        CommandParameter="{Binding .}"
+                                                    />
+                                                </Grid>
                                             </Border>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
