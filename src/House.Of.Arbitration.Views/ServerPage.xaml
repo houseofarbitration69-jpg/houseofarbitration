@@ -522,28 +522,61 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <Label
+                    <Grid
                         Grid.Column="1"
-                        Text="{Binding Judges[0].RedPoints}"
-                        FontSize="18"
-                        TextColor="Red"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[0].RedPoints}"
+                            FontSize="18"
+                            TextColor="Red"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
-                    <Label
+                    <Grid
                         Grid.Column="2"
-                        Text="{Binding Judges[0].BluePoints}"
-                        TextColor="Blue"
-                        FontSize="18"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[0].BluePoints}"
+                            TextColor="Blue"
+                            FontSize="18"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
+                    <Grid
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        IsVisible="False"
+                    >
+                        <Label 
+                            Text="{Binding Judges[0].Score}"
+                            FontSize="18"
+                            VerticalOptions="Center"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
+                    
                     <Grid 
                         Grid.Column="4"
                         ColumnDefinitions="*,*,*,*" 
@@ -631,11 +664,11 @@
                         IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                     >
                         <Border
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        StrokeShape="RoundRectangle 5"
-                    >
+                            Background="LightGray"
+                            WidthRequest="100"
+                            HeightRequest="60"
+                            StrokeShape="RoundRectangle 5"
+                        >
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border" Binding="{Binding Judges[1].IsConnected}" Value="True">
                                     <Setter Property="Background" Value="Green" />
@@ -645,32 +678,32 @@
                             </Border.Triggers>
                             <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                                 <Label 
-                                Grid.Row="0"
-                                Grid.ColumnSpan="2"
-                                Text="{Binding Judges[1].Name}"
-                                FontAttributes="Bold"
-                                HorizontalOptions="Center"
-                                TextColor="Black"
-                                FontSize="18"
-                            />
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="2"
+                                    Text="{Binding Judges[1].Name}"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    TextColor="Black"
+                                    FontSize="18"
+                                />
 
                                 <Label
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Text="{Binding Judges[1].RedPoints}"
-                                FontSize="18"
-                                TextColor="Red"
-                                HorizontalOptions="Center"
-                            />
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Text="{Binding Judges[1].RedPoints}"
+                                    FontSize="18"
+                                    TextColor="Red"
+                                    HorizontalOptions="Center"
+                                />
 
                                 <Label
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding Judges[1].BluePoints}"
-                                TextColor="Blue"
-                                FontSize="18"
-                                HorizontalOptions="Center"
-                            />
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Text="{Binding Judges[1].BluePoints}"
+                                    TextColor="Blue"
+                                    FontSize="18"
+                                    HorizontalOptions="Center"
+                                />
                             </Grid>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[1]}" />
@@ -678,16 +711,16 @@
                         </Border>
 
                         <Grid 
-                        ColumnDefinitions="*,*,*,*" 
-                        ColumnSpacing="2">
+                            ColumnDefinitions="*,*,*,*" 
+                            ColumnSpacing="2">
                             <Border
-                            Grid.Column="0"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="DarkRed"
-                            Stroke="DarkRed"
-                        >
+                                Grid.Column="0"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="DarkRed"
+                                Stroke="DarkRed"
+                            >
                                 <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -695,13 +728,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="1"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="Red"
-                            Stroke="Red"
-                        >
+                                Grid.Column="1"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="Red"
+                                Stroke="Red"
+                            >
                                 <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -709,13 +742,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="2"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="DarkBlue"
-                            Stroke="DarkBlue"
-                        >
+                                Grid.Column="2"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="DarkBlue"
+                                Stroke="DarkBlue"
+                            >
                                 <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -723,13 +756,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="3"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="Blue"
-                            Stroke="Blue"
-                        >
+                                Grid.Column="3"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="Blue"
+                                Stroke="Blue"
+                            >
                                 <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -774,27 +807,60 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <Label
+                    <Grid
                         Grid.Column="1"
-                        Text="{Binding Judges[1].RedPoints}"
-                        FontSize="18"
-                        TextColor="Red"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[1].RedPoints}"
+                            FontSize="18"
+                            TextColor="Red"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
-                    <Label
+                    <Grid
                         Grid.Column="2"
-                        Text="{Binding Judges[1].BluePoints}"
-                        TextColor="Blue"
-                        FontSize="18"
-                        HorizontalOptions="Start"
+                    >
+                        <Label
+                            Text="{Binding Judges[1].BluePoints}"
+                            TextColor="Blue"
+                            FontSize="18"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
+
+                    <Grid
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        IsVisible="False"
                         VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label 
+                            Text="{Binding Judges[1].Score}"
+                            FontSize="18"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
                     <Grid 
                         Grid.Column="4"
@@ -1023,27 +1089,60 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <Label
+                    <Grid
                         Grid.Column="1"
-                        Text="{Binding Judges[4].RedPoints}"
-                        FontSize="18"
-                        TextColor="Red"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[4].RedPoints}"
+                            FontSize="18"
+                            TextColor="Red"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
-                    <Label
+                    <Grid
                         Grid.Column="2"
-                        Text="{Binding Judges[4].BluePoints}"
-                        TextColor="Blue"
-                        FontSize="18"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[4].BluePoints}"
+                            TextColor="Blue"
+                            FontSize="18"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
+
+                    <Grid
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        IsVisible="False"
+                    >
+                        <Label 
+                            Text="{Binding Judges[4].Score}"
+                            FontSize="18"
+                            VerticalOptions="Center"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
                     <Grid 
                         Grid.Column="4"
@@ -1503,52 +1602,56 @@
                     >
                         <Border 
                             Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        StrokeShape="RoundRectangle 5"
+                            WidthRequest="100"
+                            HeightRequest="60"
+                            StrokeShape="RoundRectangle 5"
+                        >
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding Judges[2].IsConnected}" Value="True">
+                                    <Setter Property="Background" Value="Green" />
+                                    <Setter Property="Stroke" Value="Lime" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
+                                <Label 
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="2"
+                                    Text="{Binding Judges[2].Name}"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    TextColor="Black"
+                                    FontSize="18"
+                                />
+
+                                <Label
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Text="{Binding Judges[2].RedPoints}"
+                                    FontSize="18"
+                                    TextColor="Red"
+                                    HorizontalOptions="Center"
+                                />
+    
+                                <Label
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Text="{Binding Judges[2].BluePoints}"
+                                    TextColor="Blue"
+                                    FontSize="18"
+                                    HorizontalOptions="Center"
+                                />
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[2]}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                    <Grid 
+                        ColumnDefinitions="*,*,*,*" 
+                        ColumnSpacing="5" 
+                        IsVisible="True"
                     >
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding Judges[2].IsConnected}" Value="True">
-                                <Setter Property="Background" Value="Green" />
-                                <Setter Property="Stroke" Value="Lime" />
-                                <Setter Property="StrokeThickness" Value="2" />
-                            </DataTrigger>
-                        </Border.Triggers>
-                        <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
-                            <Label 
-                                Grid.Row="0"
-                                Grid.ColumnSpan="2"
-                                Text="{Binding Judges[2].Name}"
-                                FontAttributes="Bold"
-                                HorizontalOptions="Center"
-                                TextColor="Black"
-                                FontSize="18"
-                            />
-
-                            <Label
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Text="{Binding Judges[2].RedPoints}"
-                                FontSize="18"
-                                TextColor="Red"
-                                HorizontalOptions="Center"
-                            />
-
-                            <Label
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding Judges[2].BluePoints}"
-                                TextColor="Blue"
-                                FontSize="18"
-                                HorizontalOptions="Center"
-                            />
-                        </Grid>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[2]}" />
-                        </Border.GestureRecognizers>
-                    </Border>
-
-                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
                         <Border
                             Grid.Column="0"
                             StrokeShape="RoundRectangle 50"
@@ -1643,27 +1746,60 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <Label
+                    <Grid
                         Grid.Column="1"
-                        Text="{Binding Judges[2].RedPoints}"
-                        FontSize="18"
-                        TextColor="Red"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[2].RedPoints}"
+                            FontSize="18"
+                            TextColor="Red"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
-                    <Label
+                    <Grid
                         Grid.Column="2"
-                        Text="{Binding Judges[2].BluePoints}"
-                        TextColor="Blue"
-                        FontSize="18"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[2].BluePoints}"
+                            TextColor="Blue"
+                            FontSize="18"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
+
+                    <Grid
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        IsVisible="False"
+                    >
+                        <Label 
+                            Text="{Binding Judges[2].Score}"
+                            FontSize="18"
+                            VerticalOptions="Center"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
                     <Grid 
                         Grid.Column="4"
@@ -1797,7 +1933,11 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
+                    <Grid 
+                        ColumnDefinitions="*,*,*,*" 
+                        ColumnSpacing="5" 
+                        IsVisible="True"
+                    >
                         <Border
                             Grid.Column="0"
                             StrokeShape="RoundRectangle 50"
@@ -1892,27 +2032,60 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <Label
+                    <Grid
                         Grid.Column="1"
-                        Text="{Binding Judges[3].RedPoints}"
-                        FontSize="18"
-                        TextColor="Red"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[3].RedPoints}"
+                            FontSize="18"
+                            TextColor="Red"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
-                    <Label
+                    <Grid
                         Grid.Column="2"
-                        Text="{Binding Judges[3].BluePoints}"
-                        TextColor="Blue"
-                        FontSize="18"
-                        HorizontalOptions="Start"
-                        VerticalOptions="Center"
-                        Style="{StaticResource JudgePointsLabelStyle}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    />
+                    >
+                        <Label
+                            Text="{Binding Judges[3].BluePoints}"
+                            TextColor="Blue"
+                            FontSize="18"
+                            HorizontalOptions="Start"
+                            VerticalOptions="Center"
+                            Style="{StaticResource JudgePointsLabelStyle}"
+                            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
+
+                    <Grid
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2"
+                        IsVisible="False"
+                    >
+                        <Label 
+                            Text="{Binding Judges[3].Score}"
+                            FontSize="18"
+                            VerticalOptions="Center"
+                        />
+                        <Grid.Triggers>
+                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="True"/>
+                            </DataTrigger>
+                        </Grid.Triggers>
+                    </Grid>
 
                     <Grid 
                         Grid.Column="4"

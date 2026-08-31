@@ -7,8 +7,9 @@ namespace House.Of.Arbitration.Models;
 public partial class JudgeModel : ObservableObject
 {
     #region Attributs
-    private int _redPoints;
-    private int _bluePoints;
+    private double _redPoints;
+    private double _bluePoints;
+    private double _score;
     private bool _isConnected;
     private string _name = string.Empty;
     private int _number;
@@ -18,7 +19,7 @@ public partial class JudgeModel : ObservableObject
     /// <summary>
     /// Obtient ou définit les points rouge
     /// </summary>
-    public int RedPoints
+    public double RedPoints
     {
         get => _redPoints;
         set => SetProperty(ref _redPoints, value);
@@ -27,7 +28,7 @@ public partial class JudgeModel : ObservableObject
     /// <summary>
     /// Obtient ou définit les points bleu
     /// </summary>
-    public int BluePoints
+    public double BluePoints
     {
         get => _bluePoints;
         set => SetProperty(ref _bluePoints, value);
@@ -58,6 +59,12 @@ public partial class JudgeModel : ObservableObject
     {
         get => _number;
         set => SetProperty(ref _number, value);
+    }
+
+    public double Score
+    {
+        get => _score;
+        set => SetProperty(ref _score, value);
     }
     #endregion
 }

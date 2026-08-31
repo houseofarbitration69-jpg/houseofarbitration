@@ -22,6 +22,11 @@ public partial class RefereeDataModel : ObservableObject
     public required DateTime Date { get; set; }
 
     /// <summary>
+    /// 
+    /// </summary>
+    public double Score { get; set; } = 0;
+
+    /// <summary>
     /// Obtient ou définit la donnée
     /// </summary>
     public string Data { get; set; } = String.Empty;

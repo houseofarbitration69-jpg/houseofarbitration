@@ -907,7 +907,7 @@
                                         />
                                         <Label
                                             Grid.Column="3"
-                                            Text="7"
+                                            Text="{Binding Score, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
                                             FontSize="40"
                                             TextColor="White"
                                             HorizontalOptions="Start"

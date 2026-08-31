@@ -6,7 +6,9 @@ namespace House.Of.Arbitration.Models;
 
 public partial class TransfertScoreModel : ObservableObject
 {
-    public int Score { get; set; } = 0;
+    public double Score { get; set; } = 0.0;
 
     public int? CompetitorId { get; set; }
+
+    public MvtTimeCodeModel? Code { get; set; }
 }

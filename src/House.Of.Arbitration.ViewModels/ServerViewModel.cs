@@ -1,6 +1,5 @@
 #region Imports
 using CommunityToolkit.Maui;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
@@ -286,7 +285,7 @@ public partial class ServerViewModel : BaseViewModel
                             try
                             {
                                 var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
-                                
+
                                 await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
 
                                 await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
@@ -299,7 +298,7 @@ public partial class ServerViewModel : BaseViewModel
                     }
                 }
             }
-            else if(args.Message.StartsWith(Constants.Message.JUDGE_DISCONNECT))
+            else if (args.Message.StartsWith(Constants.Message.JUDGE_DISCONNECT))
             {
                 if (_clientJudgeMapping.TryGetValue(args.ClientId, out var judge))
                 {
@@ -307,7 +306,7 @@ public partial class ServerViewModel : BaseViewModel
                     _clientJudgeMapping.Remove(args.ClientId);
                 }
             }
-            else if(args.Message.StartsWith(Constants.Message.JUDGE_SCORE))
+            else if (args.Message.StartsWith(Constants.Message.JUDGE_SCORE))
             {
                 if (_clientJudgeMapping.TryGetValue(args.ClientId, out var judge))
                 {
@@ -316,7 +315,7 @@ public partial class ServerViewModel : BaseViewModel
                         var json = args.Message.Substring(Constants.Message.JUDGE_SCORE.Length);
                         var scoreData = JsonSerializer.Deserialize<TransfertScoreModel>(json, _jsonOptions);
 
-                        if (scoreData != null && CurrentDraw != null)
+                        if (scoreData != null && CurrentDraw != null && CurrentDraw.Type != RoundType.Order)
                         {
                             var competitor1 = GetCompetitor(CurrentDraw, true);
                             var competitor2 = GetCompetitor(CurrentDraw, false);
@@ -330,6 +329,16 @@ public partial class ServerViewModel : BaseViewModel
                             {
                                 judge.BluePoints += scoreData.Score;
                                 await SaveRefereeData(judge, competitor2.Id, scoreData.Score);
+                            }
+                        }
+                        else if (scoreData != null && CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                        {
+                            judge.Score = scoreData.Score;
+                            var competitor = GetCompetitor(CurrentDraw, true);
+
+                            if (competitor != null)
+                            {
+                                await SaveRefereeData(judge, competitor.Id, scoreData.Score, false, scoreData.Code);
                             }
                         }
                     }
@@ -349,7 +358,7 @@ public partial class ServerViewModel : BaseViewModel
         {
             try
             {
-                var json = JsonSerializer.Serialize(new { Id = CurrentDraw.Id, Type = CurrentDraw.Type}, _jsonOptions);
+                var json = JsonSerializer.Serialize(new { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
                 await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{json}");
             }
             catch (Exception ex)
@@ -464,15 +473,21 @@ public partial class ServerViewModel : BaseViewModel
         await BroadcastMatchInfo();
     }
 
-    private async Task SaveRefereeData(JudgeModel judge, int? competitorId, int score, bool isCorrection = false)
+    private async Task SaveRefereeData(JudgeModel judge, int? competitorId, double score, bool isCorrection = false, MvtTimeCodeModel? code = null)
     {
         if (CurrentDraw == null) return;
+
+        if (code != null)
+        {
+            code.Score = score;
+        }
 
         var data = new RefereeDataModel
         {
             Date = DateTime.Now,
             Referee = judge.Name,
-            Data = score.ToString(),
+            Score = score,
+            Data = (code != null) ? JsonSerializer.Serialize(code) : String.Empty,
             IsCorrection = isCorrection,
             CompetitorId = competitorId
         };
@@ -733,7 +748,7 @@ public partial class ServerViewModel : BaseViewModel
     #region SideSheet logic
     private bool _isSideSheetOpen;
 
-    
+
     public bool IsSideSheetOpen
     {
         get => _isSideSheetOpen;

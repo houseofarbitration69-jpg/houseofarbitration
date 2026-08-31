@@ -42,6 +42,7 @@ public partial class JudgeViewModel : BaseViewModel
     private int _matchNumber;
     private string _timeLeftDisplay = "02:00";
 
+    private double _score = 7.0;
 
     private string _code = "";
     private CancellationTokenSource? _typeNumberCts;
@@ -150,6 +151,12 @@ public partial class JudgeViewModel : BaseViewModel
     {
         get => _code;
         set => SetProperty(ref _code, value);
+    }
+
+    public double Score
+    {
+        get => _score;
+        set => SetProperty(ref _score, value);
     }
     #endregion
 
@@ -485,7 +492,7 @@ public partial class JudgeViewModel : BaseViewModel
     [RelayCommand]
     private async Task AddScore(int competitorId)
     {
-        var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = 1, CompetitorId = competitorId }, _jsonOptions);
+        var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId }, _jsonOptions);
 
         if (IsConnected && _serverDeviceId != null)
         {
@@ -551,14 +558,25 @@ public partial class JudgeViewModel : BaseViewModel
                 if (findCode == null)
                 {
                     // Pas de code correspondant
+                    await _alertService.ShowToast("Code inconnu");
                 }
                 else
                 {
-                     Codes.Insert(0, new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode });
+                    Score -= findCode.Value;
+                    int? competitorId = null;
+
+                    if(CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                    {
+                        competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
+                    }
+
+                    var data = new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode };
+                    Codes.Insert(0, data);
+
+                    var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data }, _jsonOptions);
+                    await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
                 }
             }
-
-            //await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{code}");
         }
     }
     #endregion

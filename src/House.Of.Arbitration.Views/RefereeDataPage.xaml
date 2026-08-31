@@ -10,7 +10,7 @@
     x:Class="House.Of.Arbitration.Views.RefereeDataPage"
     x:DataType="vm:RefereeDataViewModel"
     Title="Notes des Arbitres">
-    
+
     <base:BasePage.Resources>
     </base:BasePage.Resources>
 
@@ -21,7 +21,7 @@
         </Border>
 
         <!-- Filters -->
-        <HorizontalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center">
+        <HorizontalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center" IsVisible="{OnIdiom Tablet=True, Phone=False}">
             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                 <Label Text="Compétition :" VerticalOptions="Center" FontAttributes="Bold" />
                 <Picker 
@@ -53,24 +53,78 @@
                     HeightRequest="40" />
         </HorizontalStackLayout>
 
+        <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center" IsVisible="{OnIdiom Tablet=False, Phone=True}">
+            <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                <Label Text="Compétition :" VerticalOptions="Center" FontAttributes="Bold" />
+                <Picker 
+                    ItemsSource="{Binding Competitions}"
+                    SelectedItem="{Binding SelectedCompetition}"
+                    ItemDisplayBinding="{Binding Name}"
+                    WidthRequest="250"
+                    Title="Toutes" 
+                />
+            </HorizontalStackLayout>
+
+            <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                <Label Text="Catégorie :" VerticalOptions="Center" FontAttributes="Bold" />
+                <Picker 
+                    ItemsSource="{Binding Categories}"
+                    SelectedItem="{Binding SelectedCategory}"
+                    ItemDisplayBinding="{Binding Name}"
+                    WidthRequest="250"
+                    Title="Toutes" 
+                />
+            </HorizontalStackLayout>
+
+            <Button Text="Réinitialiser" 
+                    Command="{Binding ResetFilterCommand}" 
+                    BackgroundColor="Gray" 
+                    TextColor="White" 
+                    CornerRadius="5" 
+                    Padding="15,0" 
+                    HeightRequest="40" />
+        </VerticalStackLayout>
+
+
         <!-- List -->
         <CollectionView Grid.Row="2" ItemsSource="{Binding RefereeDatas}">
             <CollectionView.Header>
                 <Border Padding="10" BackgroundColor="#444" StrokeShape="RoundRectangle 5" Margin="0,0,0,10">
-                    <Grid ColumnDefinitions="120, 100, 150, 60, *, 60">
-                        <Label Grid.Column="0" Text="DATE" TextColor="White" FontAttributes="Bold" />
-                        <Label Grid.Column="1" Text="ARBITRE" TextColor="White" FontAttributes="Bold" />
-                        <Label Grid.Column="2" Text="COMPÉTITEUR" TextColor="White" FontAttributes="Bold" />
-                        <Label Grid.Column="3" Text="VALEUR" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" />
-                        <Label Grid.Column="4" Text="MATCH" TextColor="White" FontAttributes="Bold" />
-                        <Label Grid.Column="5" Text="CORR." TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Grid>
+                        <Grid 
+                            ColumnDefinitions="120, 100, 150, 60, *, 60"
+                            IsVisible="{OnIdiom Tablet=True, Phone=False}"
+                        >
+                            <Label Grid.Column="0" Text="DATE" TextColor="White" FontAttributes="Bold" />
+                            <Label Grid.Column="1" Text="ARBITRE" TextColor="White" FontAttributes="Bold" />
+                            <Label Grid.Column="2" Text="COMPÉTITEUR" TextColor="White" FontAttributes="Bold" />
+                            <Label Grid.Column="3" Text="VALEUR" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Grid.Column="4" Text="MATCH" TextColor="White" FontAttributes="Bold" />
+                            <Label Grid.Column="5" Text="CORR." TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" />
+                        </Grid>
+
+                        <Grid 
+                            ColumnDefinitions="50, 56, 95, 55, *"
+                            ColumnSpacing="5"
+                            IsVisible="{OnIdiom Tablet=False, Phone=True}"
+                        >
+                            <Label Grid.Column="0" Text="DATE" TextColor="White" FontAttributes="Bold" />
+                            <Label Grid.Column="1" Text="ARBITRE" TextColor="White" FontAttributes="Bold" />
+                            <Label Grid.Column="2" Text="COMPÉTITEUR" TextColor="White" FontAttributes="Bold" />
+                            <Label Grid.Column="3" Text="VALEUR" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Grid.Column="4" Text="CATEGORIE" TextColor="White" FontAttributes="Bold" />
+                        </Grid>
                     </Grid>
                 </Border>
             </CollectionView.Header>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:RefereeDataModel">
                     <Border Padding="10" Margin="0,2" BackgroundColor="#EEEEEE" StrokeShape="RoundRectangle 5">
-                        <Grid ColumnDefinitions="120, 100, 150, 60, *, 60">
+                        <Grid>
+                        <Grid 
+                            ColumnDefinitions="120, 100, 150, 60, *, 60"
+                            IsVisible="{OnIdiom Tablet=True, Phone=False}"
+                        >
                             <Label Grid.Column="0" Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" VerticalOptions="Center" FontSize="12" />
                             <Label Grid.Column="1" Text="{Binding Referee}" VerticalOptions="Center" FontAttributes="Bold" />
                             <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
@@ -83,7 +137,7 @@
                                 <Label Text="{Binding DrawKnockoutModel.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="#333" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
                                 <Label Text="{Binding DrawOrder.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="#333" IsVisible="{Binding DrawOrderId, Converter={StaticResource EmptyToBoolConverter}}" />
                                 <Label Text="{Binding DrawPools.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="#333" IsVisible="{Binding DrawPoolsId, Converter={StaticResource EmptyToBoolConverter}}" />
-                                
+
                                 <HorizontalStackLayout Spacing="5">
                                     <Label Text="ID:" FontAttributes="Bold" FontSize="11" />
                                     <Label Text="{Binding DrawKnockoutId}" FontSize="11" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
@@ -101,6 +155,71 @@
                                 </Label>
                             </VerticalStackLayout>
                             <CheckBox Grid.Column="5" IsChecked="{Binding IsCorrection}" IsEnabled="False" HorizontalOptions="Center" VerticalOptions="Center" Color="Red" />
+                        </Grid>
+
+                            <Grid 
+                                ColumnDefinitions="50, 56, 95, 55, *"
+                                ColumnSpacing="5"
+                                IsVisible="{OnIdiom Tablet=False, Phone=True}"
+                            >
+                                <Label 
+                                    Grid.Column="0" 
+                                    Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" 
+                                    VerticalOptions="Center" 
+                                    FontSize="12" 
+                                    TextColor="Black"
+                                />
+                                <Label 
+                                    Grid.Column="1" 
+                                    Text="{Binding Referee}" 
+                                    VerticalOptions="Center" 
+                                    FontAttributes="Bold" 
+                                    FontSize="12" 
+                                    TextColor="Black"
+                                />
+                                <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Competitor.LastName}" 
+                                        FontAttributes="Bold" 
+                                        FontSize="12" 
+                                        TextColor="Black"
+                                    />
+                                    <Label
+                                        Text="{Binding Competitor.FirstName}" 
+                                        FontSize="12" 
+                                        TextColor="Black"
+                                    />
+                                </VerticalStackLayout>
+                                <Label 
+                                    Grid.Column="3" 
+                                    Text="{Binding Score}" 
+                                    HorizontalOptions="Center" 
+                                    VerticalOptions="Center" 
+                                    FontAttributes="Bold" 
+                                    TextColor="Black" 
+                                />
+                                <VerticalStackLayout Grid.Column="4" VerticalOptions="Center">
+                                    <Label Text="{Binding DrawKnockoutModel.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="#333" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    <Label Text="{Binding DrawOrder.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="#333" IsVisible="{Binding DrawOrderId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    <Label Text="{Binding DrawPools.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="#333" IsVisible="{Binding DrawPoolsId, Converter={StaticResource EmptyToBoolConverter}}" />
+
+                                    <HorizontalStackLayout Spacing="5">
+                                        <Label Text="ID:" FontAttributes="Bold" FontSize="11" />
+                                        <Label Text="{Binding DrawKnockoutId}" FontSize="11" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                        <Label Text="{Binding DrawOrderId}" FontSize="11" IsVisible="{Binding DrawOrderId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                        <Label Text="{Binding DrawPoolsId}" FontSize="11" IsVisible="{Binding DrawPoolsId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    </HorizontalStackLayout>
+                                    <Label FontSize="12" FontAttributes="Italic">
+                                        <Label.Text>
+                                            <MultiBinding StringFormat="Ordre global: {0}{1}{2}">
+                                                <Binding Path="DrawKnockoutModel.GlobalOrder" />
+                                                <Binding Path="DrawOrder.GlobalOrder" />
+                                                <Binding Path="DrawPools.GlobalOrder" />
+                                            </MultiBinding>
+                                        </Label.Text>
+                                    </Label>
+                                </VerticalStackLayout>
+                            </Grid>
                         </Grid>
                     </Border>
                 </DataTemplate>
