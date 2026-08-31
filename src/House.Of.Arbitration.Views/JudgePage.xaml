@@ -10,6 +10,7 @@
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
     xmlns:selectors="clr-namespace:House.Of.Arbitration.Views.Selectors;assembly=House.Of.Arbitration.Views"
+    xmlns:behaviors="clr-namespace:House.Of.Arbitration.Views.Behaviors;assembly=House.Of.Arbitration.Views"
     x:TypeArguments="vm:JudgeViewModel"
     x:Class="House.Of.Arbitration.Views.JudgePage"
     x:Name="this"
@@ -782,18 +783,22 @@
                             <!-- Order Mode (Taolu) -->
                             <Grid 
                                 IsVisible="False"
-                                ColumnDefinitions="*,*,*"
+                                ColumnDefinitions="400,*,400"
+                                ColumnSpacing="10"
                             >
                                 <!-- Info -->
-                                <VerticalStackLayout 
+                                <Grid 
                                     Grid.Column="0" 
-                                    VerticalOptions="Start" 
-                                    HorizontalOptions="Center" 
-                                    Spacing="10" 
-                                    Padding="0,20,0,0"
+                                    RowDefinitions="*,Auto"
+                                    Padding="10,20,10,20"
                                 >
-                                    <!--Circular Photo / Icon-->
-                                    <Border 
+                                    <VerticalStackLayout 
+                                        HorizontalOptions="Fill" 
+                                        VerticalOptions="Fill"
+                                        Spacing="10" 
+                                    >
+                                        <!--Circular Photo / Icon-->
+                                        <Border 
                                         StrokeShape="RoundRectangle 50" 
                                         HeightRequest="100" 
                                         WidthRequest="100" 
@@ -808,8 +813,8 @@
                                             Aspect="AspectFill" 
                                         />
                                     </Border>
-
-                                    <Border 
+    
+                                        <Border 
                                         StrokeShape="RoundRectangle 50" 
                                         HeightRequest="100" 
                                         WidthRequest="100" 
@@ -829,9 +834,9 @@
                                             VerticalTextAlignment="Center"
                                         />
                                     </Border>
-
-                                    <!--Name on two lines-->
-                                    <VerticalStackLayout 
+    
+                                        <!--Name on two lines-->
+                                        <VerticalStackLayout 
                                         HorizontalOptions="Center" 
                                         Padding="5,0,5,0"
                                     >
@@ -847,9 +852,9 @@
                                             Margin="0,-5,0,0" 
                                         />
                                     </VerticalStackLayout>
-
-                                    <!--Club & Country-->
-                                    <VerticalStackLayout 
+    
+                                        <!--Club & Country-->
+                                        <VerticalStackLayout 
                                         Spacing="2" 
                                         Padding="5,0,5,0"
                                     >
@@ -876,21 +881,50 @@
                                             />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
+    
+                                        <VerticalStackLayout.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding AddScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" CommandParameter="{Binding Competitor2.Id}"/>
+                                        </VerticalStackLayout.GestureRecognizers>
+                                    </VerticalStackLayout>
 
-                                    <VerticalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding AddScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" CommandParameter="{Binding Competitor2.Id}"/>
-                                    </VerticalStackLayout.GestureRecognizers>
-                                </VerticalStackLayout>
+                                    <!-- SCORE -->
+                                    <Grid 
+                                        Grid.Row="1"
+                                        ColumnDefinitions="*,115,10,Auto,*"
+                                        ColumnSpacing="10"
+                                    >
+                                        <Label 
+                                            Grid.Column="1"
+                                            Text="Score"
+                                            FontSize="40"
+                                            TextColor="White"
+                                        />
+                                        <Label 
+                                            Grid.Column="2"
+                                            Text=":"
+                                            FontSize="40"
+                                            TextColor="White"
+                                        />
+                                        <Label
+                                            Grid.Column="3"
+                                            Text="7"
+                                            FontSize="40"
+                                            TextColor="White"
+                                            HorizontalOptions="Start"
+                                        />
+                                    </Grid>
+                                </Grid>
 
                                 <!-- Code -->
                                 <Grid 
                                     Grid.Column="1"
-                                    RowDefinitions="50,80,80,80,80" 
-                                    ColumnDefinitions="120,120,120" 
-                                    HorizontalOptions="Center"
+                                    RowDefinitions="60,*,*,*,*" 
+                                    ColumnDefinitions="*,*,*" 
+                                    HorizontalOptions="Fill" 
+                                    VerticalOptions="Fill"
                                     RowSpacing="10"
                                     ColumnSpacing="10"
-                                    Margin="0,20,0,0"
+                                    Margin="0,20,0,20"
                                     BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                     x:DataType="vm:JudgeViewModel"
                                 >
@@ -905,7 +939,7 @@
                                             TextColor="Black"
                                             HorizontalOptions="Center"
                                             VerticalOptions="Center"
-                                            FontSize="18"
+                                            FontSize="22"
                                             FontAttributes="Bold"
                                         />
                                     </Border>
@@ -1047,16 +1081,44 @@
                                 </Grid>
 
                                 <!-- Codes -->
-                                <CollectionView 
+                                <CollectionView
                                     Grid.Column="2"
+                                    BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                     ItemsSource="{Binding Codes}"
+                                    HorizontalOptions="Fill"
+                                    VerticalOptions="Fill"
+                                    Margin="5,20,5,20"
                                 >
+                                    <CollectionView.Behaviors>
+                                        <behaviors:ScrollOnNewItemBehavior/>
+                                    </CollectionView.Behaviors>
                                     <CollectionView.ItemsLayout>
-                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
+                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
                                     </CollectionView.ItemsLayout>
                                     <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:MvtCodeModel">
-                                            <Label Text="{Binding Description}" BackgroundColor="White" TextColor="Black"/>
+                                        <DataTemplate x:DataType="models:MvtTimeCodeModel">
+                                            <Border
+                                                Padding="5,5,5,5"
+                                                StrokeShape="RoundRectangle 5"
+                                            >
+                                                <HorizontalStackLayout Spacing="10">
+                                                    <Label
+                                                        Text="{Binding Date, StringFormat='{0:HH:mm:ss}'}"
+                                                        TextColor="White"
+                                                        FontSize="16"
+                                                    />
+                                                    <Label 
+                                                        Text=" : "
+                                                        TextColor="White"
+                                                        FontSize="16"
+                                                    />
+                                                    <Label 
+                                                        Text="{Binding Code.Description}"
+                                                        TextColor="White"
+                                                        FontSize="16"
+                                                    />
+                                                </HorizontalStackLayout>
+                                            </Border>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
                                 </CollectionView>

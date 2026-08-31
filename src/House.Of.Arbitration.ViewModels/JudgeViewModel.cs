@@ -41,7 +41,7 @@ public partial class JudgeViewModel : BaseViewModel
     private string? _categoryName;
     private int _matchNumber;
     private string _timeLeftDisplay = "02:00";
-    private List<MvtCodeModel> _codes = new List<MvtCodeModel>();
+
 
     private string _code = "";
     private CancellationTokenSource? _typeNumberCts;
@@ -125,6 +125,7 @@ public partial class JudgeViewModel : BaseViewModel
     }
 
     public ObservableCollection<DiscoveredDeviceModel> DiscoveredDevices { get; } = new();
+    public ObservableCollection<MvtTimeCodeModel> Codes { get; } = new ObservableCollection<MvtTimeCodeModel>();
     public ObservableCollection<JudgeModel> JudgePositions { get; } = new();
 
     public CompetitorModel? Competitor1
@@ -149,12 +150,6 @@ public partial class JudgeViewModel : BaseViewModel
     {
         get => _code;
         set => SetProperty(ref _code, value);
-    }
-
-    public List<MvtCodeModel> Codes
-    {
-        get => _codes;
-        set => SetProperty(ref _codes, value);
     }
     #endregion
 
@@ -553,7 +548,7 @@ public partial class JudgeViewModel : BaseViewModel
                 }
                 else
                 {
-                    Codes.Add(findCode);
+                     Codes.Insert(0, new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode });
                 }
             }
 
