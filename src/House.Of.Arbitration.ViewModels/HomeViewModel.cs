@@ -13,6 +13,7 @@ namespace House.Of.Arbitration.ViewModels;
 public partial class HomeViewModel : BaseViewModel
 {
     #region Services
+    private readonly IDatabaseService _databaseService;
     private readonly IRepository<CompetitionModel> _competitions;
     private readonly IRepository<CompetitorModel> _competitors;
     private readonly IRepository<CategoryModel> _categories;
@@ -43,6 +44,7 @@ public partial class HomeViewModel : BaseViewModel
         ILogger<HomeViewModel> logger,
         ResourceProvider resourceProvider,
         IPopupService popupService,
+        IDatabaseService databaseService,
         IRepository<CompetitionModel> competitions,
         IRepository<CategoryModel> categories,
         IRepository<CompetitorModel> competitors,
@@ -58,6 +60,7 @@ public partial class HomeViewModel : BaseViewModel
     {
         Title = resourceProvider.APPLICATION_NAME;
 
+        _databaseService = databaseService;
         _competitions = competitions;
         _categories = categories;
         _competitors = competitors;
@@ -74,6 +77,33 @@ public partial class HomeViewModel : BaseViewModel
     #endregion
 
     #region Commands
+    [RelayCommand]
+    private async Task ClearData()
+    {
+        bool confirm = await DisplayConfirmation(
+            Resources.CONFIRM_DELETE,
+            Resources.CONFIRM_CLEAR_DATA_MESSAGE,
+            Resources.YES,
+            Resources.NO);
+
+        if (!confirm) return;
+
+        try
+        {
+            IsBusy = true;
+            await _databaseService.ResetUserDataAsync();
+            await Shell.Current.DisplayAlertAsync(Resources.APPLICATION_NAME, Resources.DATA_CLEARED, "OK");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors de la suppression des données.");
+            await Shell.Current.DisplayAlertAsync(Resources.APPLICATION_NAME, ex.Message, "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
     private async Task DefaultData()
     {
         MvtTypeModel mvtType;
@@ -701,57 +731,61 @@ public partial class HomeViewModel : BaseViewModel
     [RelayCommand]
     private async Task SeedData()
     {
-        //await DefaultData();
-
-        CategoryModel category;
-        CompetitorModel competitor;
-        DrawModel draw;
-        DrawPoolsModel drawPool;
-        DrawKnockoutModel drawKnockout;
-        DrawOrderModel drawOrder;
-
-        var competition = new CompetitionModel()
+        try
         {
-            Id = 1,
-            Date = new DateTime(2026, 2, 14),
-            Name = "Championnat de France 2025-2026",
-        };
-        await _competitions.AddAsync(competition);
+            IsBusy = true;
 
-        #region Taolu
-        category = new CategoryModel()
-        {
-            Id = 100,
-            AgeRangeId = 1,
-            Genre = Genre.Men,
-            RoundType = RoundType.Order,
-            Type = CategoryType.Taolu,
-            CompetitionId = 1
-        };
-        await _categories.AddAsync(category);
+            //await DefaultData();
 
-        competitor = new CompetitorModel()
-        {
-            Id = 100,
-            FirstName = "Firsname",
-            LastName = "Lastname",
-            Club = "Punch Team Sanda",
-            BirthDate = new DateTime(2013, 1, 20),
-            Genre = Genre.Men,
-            CountryIsoCode = "FR"
-        };
-        await _competitors.AddAsync(competitor);
+            CategoryModel category;
+            CompetitorModel competitor;
+            DrawModel draw;
+            DrawPoolsModel drawPool;
+            DrawKnockoutModel drawKnockout;
+            DrawOrderModel drawOrder;
 
-        await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 100 });
+            var competition = new CompetitionModel()
+            {
+                Id = 1,
+                Date = new DateTime(2026, 2, 14),
+                Name = "Championnat de France 2025-2026",
+            };
+            await _competitions.AddAsync(competition);
 
-        draw = new DrawModel() { Id = 100, CategoryId = 100 };
-        await _draws.AddAsync(draw);
+            #region Taolu
+            category = new CategoryModel()
+            {
+                Id = 100,
+                AgeRangeId = 1,
+                Genre = Genre.Men,
+                RoundType = RoundType.Order,
+                Type = CategoryType.Taolu,
+                CompetitionId = 1
+            };
+            await _categories.AddAsync(category);
 
-        drawOrder = new DrawOrderModel() { Id = 100, Order = 1, CompetitorId = 100, DrawId = 100, GlobalOrder = 0 };
-        await _drawOrders.AddAsync(drawOrder);
-        #endregion
+            competitor = new CompetitorModel()
+            {
+                Id = 102,
+                FirstName = "Firsname",
+                LastName = "Lastname",
+                Club = "Punch Team Sanda",
+                BirthDate = new DateTime(2013, 1, 20),
+                Genre = Genre.Men,
+                CountryIsoCode = "FR"
+            };
+            await _competitors.AddAsync(competitor);
 
-        #region Sanda Light / Masculin / Cadets / -65kg
+            await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 102 });
+
+            draw = new DrawModel() { Id = 100, CategoryId = 100 };
+            await _draws.AddAsync(draw);
+
+            drawOrder = new DrawOrderModel() { Id = 100, Order = 1, CompetitorId = 102, DrawId = 100, GlobalOrder = 0 };
+            await _drawOrders.AddAsync(drawOrder);
+            #endregion
+
+            #region Sanda Light / Masculin / Cadets / -65kg
         category = new CategoryModel()
         {
             Id = 1,
@@ -3019,6 +3053,18 @@ public partial class HomeViewModel : BaseViewModel
         drawKnockout = new DrawKnockoutModel() { Id = 82, Order = 1, Competitor1Id = 100, Competitor2Id = 101, DrawId = 30, GlobalOrder = 75 };
         await _drawKnockouts.AddAsync(drawKnockout);
         #endregion
+
+        await Shell.Current.DisplayAlertAsync(Resources.APPLICATION_NAME, Resources.DATA_GENERATED, "OK");
     }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Erreur lors de la génération des données.");
+        await Shell.Current.DisplayAlertAsync(Resources.APPLICATION_NAME, ex.Message, "OK");
+    }
+    finally
+    {
+        IsBusy = false;
+    }
+}
     #endregion
 }

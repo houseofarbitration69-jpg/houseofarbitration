@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -353,5 +353,17 @@
   </data>
   <data name="RING" xml:space="preserve">
     <value>Ring</value>
+  </data>
+  <data name="CLEAR_DATA" xml:space="preserve">
+    <value>Vider la base de données</value>
+  </data>
+  <data name="CONFIRM_CLEAR_DATA_MESSAGE" xml:space="preserve">
+    <value>Êtes-vous sûr de vouloir vider la base de données des données insérées après l'installation ?</value>
+  </data>
+  <data name="DATA_CLEARED" xml:space="preserve">
+    <value>La base de données a été réinitialisée avec succès.</value>
+  </data>
+  <data name="DATA_GENERATED" xml:space="preserve">
+    <value>Les données de démonstration ont été générées avec succès.</value>
   </data>
 </root>

@@ -1,4 +1,4 @@
-﻿using House.Of.Arbitration.Data.Abstractions;
+using House.Of.Arbitration.Data.Abstractions;
 
 namespace House.Of.Arbitration.Data;
 
@@ -13,6 +13,7 @@ public static class BuilderExtensions
     {
         builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+        builder.Services.AddScoped<IDatabaseService, DatabaseService>();
 
         return builder;
     }

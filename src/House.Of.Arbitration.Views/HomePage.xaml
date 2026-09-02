@@ -51,6 +51,11 @@
                 Command="{Binding SeedDataCommand}"
                 Margin="0,20,0,0"
             />
+            <controls:IconButton 
+                Text="{Binding Resources.CLEAR_DATA}"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding ClearDataCommand}"
+            />
         </VerticalStackLayout>
     </Grid>
 </base:BasePage>

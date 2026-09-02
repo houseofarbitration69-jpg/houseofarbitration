@@ -569,10 +569,12 @@
                             Text="{Binding Judges[0].Score}"
                             FontSize="18"
                             VerticalOptions="Center"
+                            TextColor="Green"
+                            FontAttributes="Bold"
                         />
                         <Grid.Triggers>
                             <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="True"/>
+                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
                             </DataTrigger>
                         </Grid.Triggers>
                     </Grid>
@@ -857,7 +859,7 @@
                         />
                         <Grid.Triggers>
                             <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="True"/>
+                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
                             </DataTrigger>
                         </Grid.Triggers>
                     </Grid>
@@ -1139,7 +1141,7 @@
                         />
                         <Grid.Triggers>
                             <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="True"/>
+                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
                             </DataTrigger>
                         </Grid.Triggers>
                     </Grid>
@@ -1796,7 +1798,7 @@
                         />
                         <Grid.Triggers>
                             <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="True"/>
+                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
                             </DataTrigger>
                         </Grid.Triggers>
                     </Grid>
@@ -2082,7 +2084,7 @@
                         />
                         <Grid.Triggers>
                             <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="True"/>
+                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
                             </DataTrigger>
                         </Grid.Triggers>
                     </Grid>

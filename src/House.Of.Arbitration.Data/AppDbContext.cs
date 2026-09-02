@@ -250,6 +250,50 @@ public class AppDbContext : DbContext
     }
     #endregion
 
+    #region Public Methods
+    /// <summary>
+    /// Vider la base de données des données insérées après l'installation tout en conservant les données par défaut.
+    /// </summary>
+    public async Task ResetUserDataAsync()
+    {
+        ChangeTracker.Clear();
+
+        RefereeDatas.RemoveRange(RefereeDatas);
+        Warnings.RemoveRange(Warnings);
+        DrawsPools.RemoveRange(DrawsPools);
+        DrawsKnockouts.RemoveRange(DrawsKnockouts);
+        DrawsOrders.RemoveRange(DrawsOrders);
+        Draws.RemoveRange(Draws);
+        CompetitorCategories.RemoveRange(CompetitorCategories);
+        Competitors.RemoveRange(Competitors);
+        Categories.RemoveRange(Categories);
+        Competitions.RemoveRange(Competitions);
+
+        var defaultCountryCodes = CountryModel.DefaultCountries.Select(c => c.IsoCode).ToList();
+        var customCountries = Countries.Where(c => !defaultCountryCodes.Contains(c.IsoCode));
+        Countries.RemoveRange(customCountries);
+
+        var defaultAgeRangeIds = AgeRangeModel.DefaultRanges.Select(a => a.Id).ToList();
+        var customAgeRanges = AgeRanges.Where(a => !defaultAgeRangeIds.Contains(a.Id));
+        AgeRanges.RemoveRange(customAgeRanges);
+
+        var defaultGroupIds = MvtGroupModel.DefaultGroups.Select(g => g.Id).ToList();
+        var customGroups = MvtGroupes.Where(g => !defaultGroupIds.Contains(g.Id));
+        MvtGroupes.RemoveRange(customGroups);
+
+        var defaultTypeIds = MvtTypeModel.DefaultTypes.Select(t => t.Id).ToList();
+        var customTypes = MvtTypes.Where(t => !defaultTypeIds.Contains(t.Id));
+        MvtTypes.RemoveRange(customTypes);
+
+        var defaultCodeIds = MvtCodeModel.DefaultCodes.Select(c => c.Id).ToList();
+        var customCodes = MvtCodes.Where(c => !defaultCodeIds.Contains(c.Id));
+        MvtCodes.RemoveRange(customCodes);
+
+        await SaveChangesAsync();
+        ChangeTracker.Clear();
+    }
+    #endregion
+
     #region Private Methods
     private void SeedData(ModelBuilder builder)
     {

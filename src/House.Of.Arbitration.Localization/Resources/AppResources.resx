@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -353,5 +353,17 @@
   </data>
   <data name="RING" xml:space="preserve">
     <value>[RING]</value>
+  </data>
+  <data name="CLEAR_DATA" xml:space="preserve">
+    <value>[CLEAR DATA]</value>
+  </data>
+  <data name="CONFIRM_CLEAR_DATA_MESSAGE" xml:space="preserve">
+    <value>[ARE YOU SURE YOU WANT TO CLEAR ALL DATA INSERTED AFTER INSTALLATION ?]</value>
+  </data>
+  <data name="DATA_CLEARED" xml:space="preserve">
+    <value>[DATA CLEARED]</value>
+  </data>
+  <data name="DATA_GENERATED" xml:space="preserve">
+    <value>[DATA GENERATED]</value>
   </data>
 </root>
