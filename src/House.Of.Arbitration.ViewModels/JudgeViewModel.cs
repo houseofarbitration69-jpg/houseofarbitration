@@ -210,6 +210,7 @@ public partial class JudgeViewModel : BaseViewModel
                 }
             };
         }
+        Codes.CollectionChanged += (s, e) => UpdateCodesCanDelete();
     }
     #endregion
 
@@ -518,7 +519,7 @@ public partial class JudgeViewModel : BaseViewModel
                     _typeTimer = Application.Current?.Dispatcher.CreateTimer();
                     if (_typeTimer != null)
                     {
-                        _typeTimer.Interval = TimeSpan.FromSeconds(2);
+                        _typeTimer.Interval = TimeSpan.FromMilliseconds(500);
                         _typeTimer.Tick += async (s, e) =>
                         {
                             _typeTimer.Stop();
@@ -547,6 +548,14 @@ public partial class JudgeViewModel : BaseViewModel
         Codes.Remove(code);
     }
 
+    private void UpdateCodesCanDelete()
+    {
+        for (int i = 0; i < Codes.Count; i++)
+        {
+            Codes[i].CanDelete = (i == 0);
+        }
+    }
+
     private async Task ProcessTypedCode(string code)
     {
         if (IsConnected && _serverDeviceId != null)
@@ -562,7 +571,7 @@ public partial class JudgeViewModel : BaseViewModel
                 }
                 else
                 {
-                    Score -= findCode.Value;
+                    Score = Math.Round(Score - findCode.Value, 1);
                     int? competitorId = null;
 
                     if(CurrentDraw != null && CurrentDraw.Type == RoundType.Order)

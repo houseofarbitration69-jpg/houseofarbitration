@@ -515,6 +515,7 @@
                         Stroke="White" 
                         StrokeThickness="2" 
                         StrokeShape="RoundRectangle 15"
+                        IsVisible="{Binding IsReceivingCompetition, Converter={StaticResource InvertBoolConverter}}"
                     >
                         <controls:ScrollingText 
                             Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE COMPÉTITION'}" 
@@ -525,7 +526,10 @@
                     </Border>
 
                     <!-- Main Match Display (The Ring) -->
-                    <Grid Grid.Row="1">
+                    <Grid 
+                        Grid.Row="1"
+                        IsVisible="{Binding IsReceivingCompetition, Converter={StaticResource InvertBoolConverter}}"
+                    >
                         <!-- Empty State -->
                         <!--<VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20" IsVisible="{Binding CurrentMatchInfo, Converter={StaticResource IsNullOrEmptyConverter}}">
                             <Label Text="EN ATTENTE DU PROCHAIN MATCH..." TextColor="Yellow" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
@@ -1128,8 +1132,9 @@
                                                     />
 
                                                     <controls:IconButton
-                                                        Grid.Column="33"
+                                                        Grid.Column="3"
                                                         Style="{StaticResource ListActionDeleteButtonStyle}"
+                                                        IsVisible="{Binding CanDelete}"
                                                         Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=DeleteCodeCommand}"
                                                         CommandParameter="{Binding .}"
                                                     />
