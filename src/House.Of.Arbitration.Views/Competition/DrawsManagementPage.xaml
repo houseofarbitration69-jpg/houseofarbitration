@@ -396,7 +396,7 @@
                     <Button 
                         Text="⏮ Début (1)" 
                         Command="{Binding ScrollToTargetOrderCommand}" 
-                        CommandParameter="{x:Int32 1}" 
+                        CommandParameter="1" 
                         BackgroundColor="#2A2A2A" 
                         BorderColor="#444444" 
                         BorderWidth="1"
