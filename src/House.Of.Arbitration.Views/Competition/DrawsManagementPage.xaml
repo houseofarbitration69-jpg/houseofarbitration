@@ -74,73 +74,89 @@
             <!-- Match Card Template -->
             <DataTemplate x:Key="MatchTemplate" x:DataType="vm:DrawMatchItemViewModel">
                 <Border 
-                    Margin="0, 4" 
+                    Margin="0, 3" 
                     Padding="10, 8" 
                     BackgroundColor="#1E1E1E"
                     Stroke="#383838"
-                    StrokeThickness="1">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="8"/>
-                    </Border.StrokeShape>
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 8">
                     <Grid ColumnDefinitions="50, *" ColumnSpacing="12">
                         <!-- Order Controls (Left) -->
-                        <Grid Grid.Column="0" RowDefinitions="30, 36, 30" RowSpacing="3" VerticalOptions="Center" HorizontalOptions="Center">
+                        <Grid Grid.Column="0" RowDefinitions="28, 34, 28" RowSpacing="3" VerticalOptions="Center" HorizontalOptions="Center">
                             <!-- Move Up Button -->
-                            <Button 
+                            <Border 
                                 Grid.Row="0"
-                                Text="▲" 
-                                TextColor="{DynamicResource Primary}" 
                                 BackgroundColor="#2D2D2D" 
-                                BorderColor="#555555" 
-                                BorderWidth="1" 
-                                CornerRadius="6"
-                                FontSize="14" 
-                                FontAttributes="Bold"
-                                HeightRequest="30" 
+                                Stroke="#555555" 
+                                StrokeThickness="1" 
+                                StrokeShape="RoundRectangle 6"
+                                HeightRequest="28" 
                                 WidthRequest="46"
-                                Padding="0"
-                                MinimumHeightRequest="30"
-                                MinimumWidthRequest="46"
-                                Command="{Binding MoveUpCommand}"
-                            />
+                                Padding="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding MoveUpCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label 
+                                    Text="▲" 
+                                    TextColor="{DynamicResource Primary}" 
+                                    FontSize="13" 
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center" 
+                                    VerticalOptions="Center" 
+                                    HorizontalTextAlignment="Center" 
+                                    VerticalTextAlignment="Center"
+                                />
+                            </Border>
 
                             <!-- Global Order Number Badge / Button (Click to edit order via popup) -->
-                            <Button 
+                            <Border 
                                 Grid.Row="1" 
-                                Text="{Binding GlobalOrder}" 
-                                TextColor="White" 
                                 BackgroundColor="{DynamicResource Primary}" 
-                                BorderColor="{DynamicResource PrimaryDark}" 
-                                BorderWidth="1" 
-                                CornerRadius="6"
-                                FontSize="15" 
-                                FontAttributes="Bold"
-                                HeightRequest="36" 
+                                Stroke="{DynamicResource PrimaryDark}" 
+                                StrokeThickness="1" 
+                                StrokeShape="RoundRectangle 6"
+                                HeightRequest="34" 
                                 WidthRequest="46"
-                                Padding="0"
-                                MinimumHeightRequest="36"
-                                MinimumWidthRequest="46"
-                                Command="{Binding EditOrderCommand}"
-                            />
+                                Padding="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding EditOrderCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label 
+                                    Text="{Binding GlobalOrder}" 
+                                    TextColor="White" 
+                                    FontSize="15" 
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center" 
+                                    VerticalOptions="Center" 
+                                    HorizontalTextAlignment="Center" 
+                                    VerticalTextAlignment="Center"
+                                />
+                            </Border>
 
                             <!-- Move Down Button -->
-                            <Button 
+                            <Border 
                                 Grid.Row="2"
-                                Text="▼" 
-                                TextColor="{DynamicResource Primary}" 
                                 BackgroundColor="#2D2D2D" 
-                                BorderColor="#555555" 
-                                BorderWidth="1" 
-                                CornerRadius="6"
-                                FontSize="14" 
-                                FontAttributes="Bold"
-                                HeightRequest="30" 
+                                Stroke="#555555" 
+                                StrokeThickness="1" 
+                                StrokeShape="RoundRectangle 6"
+                                HeightRequest="28" 
                                 WidthRequest="46"
-                                Padding="0"
-                                MinimumHeightRequest="30"
-                                MinimumWidthRequest="46"
-                                Command="{Binding MoveDownCommand}"
-                            />
+                                Padding="0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding MoveDownCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label 
+                                    Text="▼" 
+                                    TextColor="{DynamicResource Primary}" 
+                                    FontSize="13" 
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center" 
+                                    VerticalOptions="Center" 
+                                    HorizontalTextAlignment="Center" 
+                                    VerticalTextAlignment="Center"
+                                />
+                            </Border>
                         </Grid>
 
                         <!-- Match Content (Center) -->
@@ -156,17 +172,14 @@
                             <!-- Duel View (Knockouts / Pools) -->
                             <Grid IsVisible="{Binding IsDuel}" ColumnDefinitions="*, Auto, *" ColumnSpacing="8" VerticalOptions="Center">
                                 <!-- Red Slot / Competitor 1 -->
-                                <Border Grid.Column="0" BackgroundColor="#262626" Stroke="#D32F2F" StrokeThickness="1.5" Padding="8, 6">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="6"/>
-                                    </Border.StrokeShape>
+                                <Border Grid.Column="0" BackgroundColor="#262626" Stroke="#D32F2F" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
                                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
                                         <Image 
                                             Grid.Column="0" 
                                             Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
                                             WidthRequest="22" 
                                             HeightRequest="15" 
-                                            VerticalOptions="Center"
+                                            VerticalOptions="Center" 
                                             IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}" 
                                         />
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
@@ -200,10 +213,7 @@
                                 />
 
                                 <!-- Blue Slot / Competitor 2 -->
-                                <Border Grid.Column="2" BackgroundColor="#262626" Stroke="#1976D2" StrokeThickness="1.5" Padding="8, 6">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="6"/>
-                                    </Border.StrokeShape>
+                                <Border Grid.Column="2" BackgroundColor="#262626" Stroke="#1976D2" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
                                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
                                         <Image 
                                             Grid.Column="0" 
@@ -235,10 +245,7 @@
 
                             <!-- Single View (Taolu / Order) -->
                             <Grid IsVisible="{Binding IsSingle}" ColumnDefinitions="*" VerticalOptions="Center">
-                                <Border BackgroundColor="#262626" Stroke="{DynamicResource Secondary}" StrokeThickness="1.5" Padding="8, 6">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="6"/>
-                                    </Border.StrokeShape>
+                                <Border BackgroundColor="#262626" Stroke="{DynamicResource Secondary}" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
                                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
                                         <Image 
                                             Grid.Column="0" 
