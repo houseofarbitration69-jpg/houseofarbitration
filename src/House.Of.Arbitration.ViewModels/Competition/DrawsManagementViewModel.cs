@@ -388,30 +388,101 @@ public partial class DrawsManagementViewModel : BaseViewModel
     }
     #endregion
 
+    #region Scroll Support
+    public event Action<object>? ScrollToItemRequested;
+    public event Action<int>? ScrollToRequested;
+
+    [RelayCommand]
+    private async Task ScrollToOrder()
+    {
+        if (_allMatches.Count == 0) return;
+
+        string? result = await Shell.Current.DisplayPromptAsync(
+            "Accéder à un ordre",
+            $"Entrez le numéro d'ordre de passage (1 à {_allMatches.Count}) :",
+            "Atteindre",
+            "Annuler",
+            placeholder: "1",
+            keyboard: Keyboard.Numeric);
+
+        if (!string.IsNullOrWhiteSpace(result) && int.TryParse(result, out int targetOrder))
+        {
+            ScrollToTargetOrder(targetOrder);
+        }
+    }
+
+    [RelayCommand]
+    private void ScrollToTargetOrder(object? param)
+    {
+        if (param == null || _allMatches.Count == 0) return;
+
+        int targetOrder = 1;
+        if (param is int i)
+        {
+            targetOrder = i;
+        }
+        else if (int.TryParse(param.ToString(), out int parsed))
+        {
+            targetOrder = parsed;
+        }
+
+        int clampedOrder = Math.Clamp(targetOrder, 1, _allMatches.Count);
+        // Find corresponding match item in DisplayItems
+        var targetMatch = _allMatches.FirstOrDefault(m => m.GlobalOrder == clampedOrder);
+        if (targetMatch != null)
+        {
+            int displayIndex = DisplayItems.IndexOf(targetMatch);
+            if (displayIndex >= 0)
+            {
+                ScrollToRequested?.Invoke(displayIndex);
+            }
+            ScrollToItemRequested?.Invoke(targetMatch);
+        }
+    }
+    #endregion
+
     #region Commands
     [RelayCommand]
-    private void MoveUp(DrawMatchItemViewModel match)
+    private async Task MoveUp(DrawMatchItemViewModel match)
     {
         if (match == null) return;
         int index = _allMatches.IndexOf(match);
         if (index > 0)
         {
-            _allMatches.RemoveAt(index);
-            _allMatches.Insert(index - 1, match);
-            RefreshDisplayList();
+            IsBusy = true;
+            await Task.Yield();
+            try
+            {
+                _allMatches.RemoveAt(index);
+                _allMatches.Insert(index - 1, match);
+                RefreshDisplayList();
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
     }
 
     [RelayCommand]
-    private void MoveDown(DrawMatchItemViewModel match)
+    private async Task MoveDown(DrawMatchItemViewModel match)
     {
         if (match == null) return;
         int index = _allMatches.IndexOf(match);
         if (index >= 0 && index < _allMatches.Count - 1)
         {
-            _allMatches.RemoveAt(index);
-            _allMatches.Insert(index + 1, match);
-            RefreshDisplayList();
+            IsBusy = true;
+            await Task.Yield();
+            try
+            {
+                _allMatches.RemoveAt(index);
+                _allMatches.Insert(index + 1, match);
+                RefreshDisplayList();
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
     }
 
@@ -420,28 +491,44 @@ public partial class DrawsManagementViewModel : BaseViewModel
     {
         if (match == null || _allMatches.Count == 0) return;
 
-        string? result = await Shell.Current.DisplayPromptAsync(
-            "Ordre de passage",
-            $"Entrez le nouveau numéro d'ordre (1 à {_allMatches.Count}) :",
-            "Valider",
-            "Annuler",
-            placeholder: "1",
-            initialValue: match.GlobalOrder.ToString(),
-            maxLength: 4,
-            keyboard: Keyboard.Numeric);
-
-        if (!string.IsNullOrWhiteSpace(result) && int.TryParse(result, out int newOrder))
+        try
         {
-            int currentIndex = _allMatches.IndexOf(match);
-            if (currentIndex < 0) return;
-
-            int targetIndex = Math.Clamp(newOrder - 1, 0, _allMatches.Count - 1);
-            if (targetIndex != currentIndex)
+            var parameters = new Dictionary<string, object>
             {
-                _allMatches.RemoveAt(currentIndex);
-                _allMatches.Insert(targetIndex, match);
-                RefreshDisplayList();
+                { "Match", match },
+                { "TotalMatches", _allMatches.Count }
+            };
+
+            var popupResult = await _popupService.ShowPopupAsync<ChangeOrderPopupViewModel, int?>(Shell.Current, shellParameters: parameters);
+
+            if (popupResult != null && popupResult.Result.HasValue)
+            {
+                int newOrder = popupResult.Result.Value;
+                int currentIndex = _allMatches.IndexOf(match);
+                if (currentIndex < 0) return;
+
+                int targetIndex = Math.Clamp(newOrder - 1, 0, _allMatches.Count - 1);
+                if (targetIndex != currentIndex)
+                {
+                    IsBusy = true;
+                    await Task.Yield();
+                    try
+                    {
+                        _allMatches.RemoveAt(currentIndex);
+                        _allMatches.Insert(targetIndex, match);
+                        RefreshDisplayList();
+                        ScrollToTargetOrder(match.GlobalOrder);
+                    }
+                    finally
+                    {
+                        IsBusy = false;
+                    }
+                }
             }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors de l'affichage de la popup de changement d'ordre");
         }
     }
 
@@ -607,15 +694,27 @@ public partial class DrawMatchItemViewModel : ObservableObject
         }
     }
 
-    public Action<DrawMatchItemViewModel>? OnMoveUp { get; set; }
-    public Action<DrawMatchItemViewModel>? OnMoveDown { get; set; }
+    public Func<DrawMatchItemViewModel, Task>? OnMoveUp { get; set; }
+    public Func<DrawMatchItemViewModel, Task>? OnMoveDown { get; set; }
     public Func<DrawMatchItemViewModel, Task>? OnEditOrder { get; set; }
 
     [RelayCommand]
-    private void MoveUp() => OnMoveUp?.Invoke(this);
+    private async Task MoveUp()
+    {
+        if (OnMoveUp != null)
+        {
+            await OnMoveUp.Invoke(this);
+        }
+    }
 
     [RelayCommand]
-    private void MoveDown() => OnMoveDown?.Invoke(this);
+    private async Task MoveDown()
+    {
+        if (OnMoveDown != null)
+        {
+            await OnMoveDown.Invoke(this);
+        }
+    }
 
     [RelayCommand]
     private async Task EditOrder()

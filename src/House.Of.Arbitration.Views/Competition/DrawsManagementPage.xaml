@@ -316,6 +316,7 @@
         <!-- Main Matches & Headers List -->
         <Grid Grid.Row="1">
             <CollectionView 
+                x:Name="MatchesCollectionView"
                 ItemsSource="{Binding DisplayItems}"
                 ItemTemplate="{StaticResource DrawsManagementTemplateSelector}"
                 IsVisible="{Binding HasMatches}"
@@ -330,27 +331,113 @@
                 <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
                 <Label Text="Aucune rencontre ou catégorie configurée pour cette compétition." TextColor="Gray" FontSize="14" HorizontalOptions="Center" />
             </VerticalStackLayout>
+
+            <!-- Loading Indicator Overlay during operations / reordering -->
+            <Border 
+                IsVisible="{Binding IsBusy}" 
+                BackgroundColor="#80000000" 
+                StrokeThickness="0"
+                HorizontalOptions="Fill" 
+                VerticalOptions="Fill"
+                InputTransparent="False">
+                <Border 
+                    BackgroundColor="#1E1E1E" 
+                    Stroke="{DynamicResource Primary}" 
+                    StrokeThickness="2" 
+                    StrokeShape="RoundRectangle 16"
+                    Padding="24, 20" 
+                    HorizontalOptions="Center" 
+                    VerticalOptions="Center">
+                    <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+                        <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
+                        <Label Text="Mise à jour de l'ordre..." TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    </VerticalStackLayout>
+                </Border>
+            </Border>
         </Grid>
 
-        <!-- Bottom Actions -->
-        <Grid Grid.Row="2" ColumnDefinitions="*, 200, 200, *" ColumnSpacing="20">
+        <!-- Bottom Actions & Direct Order Navigation Bar -->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="14" VerticalOptions="Center">
+            <!-- Direct Order Navigation Button (Left) -->
+            <Border 
+                Grid.Column="0" 
+                BackgroundColor="#222222" 
+                Stroke="#3E3E3E" 
+                StrokeThickness="1" 
+                StrokeShape="RoundRectangle 10" 
+                Padding="6, 4" 
+                VerticalOptions="Center"
+                IsVisible="{Binding HasMatches}">
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Button 
+                        Text="🔍 Aller au passage..." 
+                        Command="{Binding ScrollToOrderCommand}" 
+                        BackgroundColor="#333333" 
+                        TextColor="White" 
+                        FontSize="13" 
+                        FontAttributes="Bold" 
+                        HeightRequest="42" 
+                        Padding="14, 0" 
+                        CornerRadius="8"
+                    />
+                    <Button 
+                        Text="⏮ Début (1)" 
+                        Command="{Binding ScrollToTargetOrderCommand}" 
+                        CommandParameter="{x:Int32 1}" 
+                        BackgroundColor="#2A2A2A" 
+                        BorderColor="#444444" 
+                        BorderWidth="1"
+                        TextColor="LightGray" 
+                        FontSize="11" 
+                        HeightRequest="36" 
+                        Padding="10, 0" 
+                        CornerRadius="6"
+                    />
+                    <Button 
+                        Text="Dernier ⏭" 
+                        Command="{Binding ScrollToTargetOrderCommand}" 
+                        CommandParameter="{Binding TotalMatchesCount}" 
+                        BackgroundColor="#2A2A2A" 
+                        BorderColor="#444444" 
+                        BorderWidth="1"
+                        TextColor="LightGray" 
+                        FontSize="11" 
+                        HeightRequest="36" 
+                        Padding="10, 0" 
+                        CornerRadius="6"
+                    />
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Spacer -->
+            <Grid Grid.Column="1" />
+
+            <!-- Close Action Button -->
             <Button 
-                Grid.Column="1" 
+                Grid.Column="2" 
                 Text="{Binding Resources.CLOSE_ACTION}" 
                 BackgroundColor="{DynamicResource ErrorColor}"
                 TextColor="Black"
                 FontAttributes="Bold"
                 Command="{Binding CloseCommand}" 
-                Padding="15" 
+                WidthRequest="160"
+                HeightRequest="46"
+                CornerRadius="10"
+                Padding="0"
             />
+
+            <!-- Validate Action Button -->
             <Button 
-                Grid.Column="2" 
+                Grid.Column="3" 
                 Text="{Binding Resources.VALIDATE_ACTION}" 
                 BackgroundColor="{DynamicResource ValidColor}"
                 TextColor="Black"
                 FontAttributes="Bold"
                 Command="{Binding SaveCommand}" 
-                Padding="15" 
+                WidthRequest="160"
+                HeightRequest="46"
+                CornerRadius="10"
+                Padding="0"
             />
         </Grid>
     </Grid>

@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mct:Popup 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Competition;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    x:Class="House.Of.Arbitration.Views.ChangeOrderPopup"
+    x:DataType="vm:ChangeOrderPopupViewModel"
+    BackgroundColor="Transparent"
+    Padding="0">
+
+    <ContentView.Resources>
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+        <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />
+        <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
+    </ContentView.Resources>
+
+    <Border 
+        StrokeShape="RoundRectangle 16" 
+        BackgroundColor="#1E1E1E" 
+        Stroke="{DynamicResource Primary}"
+        StrokeThickness="2"
+        Padding="18" 
+        HorizontalOptions="Center"
+        VerticalOptions="Center"
+        WidthRequest="{OnIdiom Tablet='420', Phone='340'}"
+        MaximumWidthRequest="450">
+        
+        <VerticalStackLayout Spacing="16">
+            <!-- Header with Badge & Title -->
+            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="12" VerticalOptions="Center">
+                <Border 
+                    Grid.Column="0" 
+                    BackgroundColor="#292929" 
+                    Stroke="{DynamicResource Primary}" 
+                    StrokeThickness="1" 
+                    Padding="8" 
+                    StrokeShape="RoundRectangle 10"
+                    VerticalOptions="Center">
+                    <Label Text="🥊" FontSize="22" HorizontalOptions="Center" VerticalOptions="Center"/>
+                </Border>
+                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                    <Label 
+                        Text="MODIFIER L'ORDRE" 
+                        FontSize="16" 
+                        FontAttributes="Bold" 
+                        TextColor="White"
+                    />
+                    <Label 
+                        Text="{Binding Match.CategoryName, FallbackValue='Catégorie'}" 
+                        FontSize="12" 
+                        TextColor="#B0B0B0"
+                        LineBreakMode="TailTruncation"
+                    />
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Match Summary Card -->
+            <Border 
+                BackgroundColor="#262626" 
+                Stroke="#383838" 
+                StrokeThickness="1" 
+                Padding="12, 10" 
+                StrokeShape="RoundRectangle 10">
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <Border Grid.Column="0" HorizontalOptions="Start" BackgroundColor="#333333" Padding="8, 3" StrokeShape="RoundRectangle 6">
+                            <Label Text="{Binding Match.MatchTitle}" TextColor="White" FontSize="11" FontAttributes="Bold"/>
+                        </Border>
+                        <Border Grid.Column="1" BackgroundColor="#2D2200" Stroke="{DynamicResource Secondary}" StrokeThickness="1" Padding="8, 3" StrokeShape="RoundRectangle 6">
+                            <Label Text="{Binding Match.GlobalOrder, StringFormat='Position #{0}'}" TextColor="{DynamicResource Secondary}" FontSize="11" FontAttributes="Bold" VerticalOptions="Center"/>
+                        </Border>
+                    </Grid>
+
+                    <!-- Duel info -->
+                    <Grid IsVisible="{Binding Match.IsDuel}" ColumnDefinitions="*, Auto, *" ColumnSpacing="6" VerticalOptions="Center">
+                        <!-- Red Competitor -->
+                        <Border Grid.Column="0" BackgroundColor="#2B1A1A" Stroke="#D32F2F" StrokeThickness="1.5" Padding="6, 5" StrokeShape="RoundRectangle 8">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="6">
+                                <Image 
+                                    Grid.Column="0" 
+                                    Source="{Binding Match.Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                    WidthRequest="18" 
+                                    HeightRequest="13" 
+                                    VerticalOptions="Center" 
+                                    IsVisible="{Binding Match.Competitor1, Converter={StaticResource EmptyToBoolConverter}}" 
+                                />
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                    <Label Text="{Binding Match.Competitor1.Name, FallbackValue='(BYE)'}" TextColor="White" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation"/>
+                                    <Label Text="{Binding Match.Competitor1.Club}" TextColor="#AAAAAA" FontSize="9" LineBreakMode="TailTruncation" IsVisible="{Binding Match.Competitor1.Club, Converter={StaticResource StringToBoolConverter}}"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+
+                        <Label Grid.Column="1" Text="VS" TextColor="{DynamicResource Secondary}" FontAttributes="Bold" FontSize="10" VerticalOptions="Center" HorizontalOptions="Center"/>
+
+                        <!-- Blue Competitor -->
+                        <Border Grid.Column="2" BackgroundColor="#1A222B" Stroke="#1976D2" StrokeThickness="1.5" Padding="6, 5" StrokeShape="RoundRectangle 8">
+                            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="6">
+                                <Image 
+                                    Grid.Column="0" 
+                                    Source="{Binding Match.Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                    WidthRequest="18" 
+                                    HeightRequest="13" 
+                                    VerticalOptions="Center" 
+                                    IsVisible="{Binding Match.Competitor2, Converter={StaticResource EmptyToBoolConverter}}" 
+                                />
+                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                    <Label Text="{Binding Match.Competitor2.Name, FallbackValue='(BYE)'}" TextColor="White" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation"/>
+                                    <Label Text="{Binding Match.Competitor2.Club}" TextColor="#AAAAAA" FontSize="9" LineBreakMode="TailTruncation" IsVisible="{Binding Match.Competitor2.Club, Converter={StaticResource StringToBoolConverter}}"/>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <!-- Single info (Taolu / Order) -->
+                    <Border IsVisible="{Binding Match.IsSingle}" BackgroundColor="#222222" Stroke="{DynamicResource Secondary}" StrokeThickness="1.5" Padding="8, 6" StrokeShape="RoundRectangle 8">
+                        <Grid ColumnDefinitions="Auto, *" ColumnSpacing="6">
+                            <Image 
+                                Grid.Column="0" 
+                                Source="{Binding Match.Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                WidthRequest="20" 
+                                HeightRequest="14" 
+                                VerticalOptions="Center" 
+                                IsVisible="{Binding Match.Competitor, Converter={StaticResource EmptyToBoolConverter}}" 
+                            />
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                <Label Text="{Binding Match.Competitor.Name, FallbackValue='(En attente)'}" TextColor="White" FontAttributes="Bold" FontSize="12" LineBreakMode="TailTruncation"/>
+                                <Label Text="{Binding Match.Competitor.Club}" TextColor="#AAAAAA" FontSize="10" LineBreakMode="TailTruncation" IsVisible="{Binding Match.Competitor.Club, Converter={StaticResource StringToBoolConverter}}"/>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Order Stepper & Input Section -->
+            <Border 
+                BackgroundColor="#262626" 
+                Stroke="#333333" 
+                StrokeThickness="1" 
+                Padding="14, 12" 
+                StrokeShape="RoundRectangle 10">
+                <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Label Text="NOUVELLE POSITION D'ORDRE" TextColor="#D0D0D0" FontSize="11" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    
+                    <Grid ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="12" HorizontalOptions="Center" VerticalOptions="Center">
+                        <!-- Decrement Button -->
+                        <Button 
+                            Grid.Column="0" 
+                            Text="−" 
+                            Command="{Binding DecrementOrderCommand}" 
+                            BackgroundColor="#2F2F2F" 
+                            BorderColor="#444444"
+                            BorderWidth="1"
+                            TextColor="White"
+                            FontSize="22" 
+                            FontAttributes="Bold" 
+                            WidthRequest="46" 
+                            HeightRequest="46" 
+                            CornerRadius="23"
+                            Padding="0"
+                        />
+
+                        <!-- Order Input Box -->
+                        <Border 
+                            Grid.Column="1" 
+                            BackgroundColor="#141414" 
+                            Stroke="{DynamicResource Primary}" 
+                            StrokeThickness="2" 
+                            WidthRequest="90" 
+                            HeightRequest="46" 
+                            StrokeShape="RoundRectangle 10"
+                            Padding="4">
+                            <Entry 
+                                Text="{Binding TargetOrderString, Mode=TwoWay}" 
+                                Keyboard="Numeric" 
+                                TextColor="{DynamicResource Secondary}" 
+                                FontSize="20" 
+                                FontAttributes="Bold" 
+                                HorizontalTextAlignment="Center" 
+                                VerticalOptions="Center"
+                                MaxLength="4"
+                            />
+                        </Border>
+
+                        <!-- Increment Button -->
+                        <Button 
+                            Grid.Column="2" 
+                            Text="+" 
+                            Command="{Binding IncrementOrderCommand}" 
+                            BackgroundColor="{DynamicResource Primary}" 
+                            BorderColor="{DynamicResource PrimaryDark}"
+                            BorderWidth="1"
+                            TextColor="White"
+                            FontSize="22" 
+                            FontAttributes="Bold" 
+                            WidthRequest="46" 
+                            HeightRequest="46" 
+                            CornerRadius="23"
+                            Padding="0"
+                        />
+                    </Grid>
+
+                    <Label 
+                        Text="{Binding TotalMatches, StringFormat='Position possible de 1 à {0}'}" 
+                        TextColor="#888888" 
+                        FontSize="11" 
+                        HorizontalOptions="Center" 
+                    />
+
+                    <!-- Quick presets -->
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" Margin="0, 2, 0, 0">
+                        <Button 
+                            Text="⏮ Début (1)" 
+                            Command="{Binding SetFirstCommand}" 
+                            BackgroundColor="#2D2D2D" 
+                            BorderColor="#444444"
+                            BorderWidth="1"
+                            TextColor="White" 
+                            FontSize="11" 
+                            HeightRequest="32"
+                            Padding="10, 0"
+                            CornerRadius="6"
+                        />
+                        <Button 
+                            Text="{Binding TotalMatches, StringFormat='Fin ({0}) ⏭'}" 
+                            Command="{Binding SetLastCommand}" 
+                            BackgroundColor="#2D2D2D" 
+                            BorderColor="#444444"
+                            BorderWidth="1"
+                            TextColor="White" 
+                            FontSize="11" 
+                            HeightRequest="32"
+                            Padding="10, 0"
+                            CornerRadius="6"
+                        />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Actions -->
+            <Grid ColumnDefinitions="*, *" ColumnSpacing="12" Margin="0, 2, 0, 0">
+                <controls:IconButton
+                    Grid.Column="0" 
+                    Text="{Binding Resources.CLOSE_ACTION, FallbackValue='Annuler'}"
+                    ButtonBackgroundColor="{DynamicResource ErrorColor}"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
+                    IconColor="{DynamicResource PrimaryTextColor}"
+                    Command="{Binding CancelCommand}"
+                    HeightRequest="42"
+                />
+                <controls:IconButton
+                    Grid.Column="1" 
+                    Text="{Binding Resources.VALIDATE_ACTION, FallbackValue='Valider'}"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    ButtonBackgroundColor="{DynamicResource ValidColor}"
+                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                    Icon="{x:Static helpers:FontCustomIcons.CHECK}"
+                    IconColor="{DynamicResource PrimaryTextColor}"
+                    Command="{Binding ValidateCommand}"
+                    HeightRequest="42"
+                />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</mct:Popup>

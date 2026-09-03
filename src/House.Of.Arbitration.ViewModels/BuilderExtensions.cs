@@ -1,4 +1,4 @@
-﻿#region Imports
+#region Imports
 using House.Of.Arbitration.ViewModels.Wizard.Competition;
 using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using House.Of.Arbitration.ViewModels.Competition;
@@ -22,6 +22,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<JudgeViewModel>();
         builder.Services.AddTransient<CompetitionsViewModel>();
         builder.Services.AddTransient<DrawsManagementViewModel>();
+        builder.Services.AddTransient<ChangeOrderPopupViewModel>();
 
         builder.Services.AddTransient<CompetitionWizardViewModel>();
         builder.Services.AddTransient<SettingsStepViewModel>();
