@@ -23,7 +23,7 @@
                     Margin="0, 16, 0, 6" 
                     Padding="14, 10" 
                     BackgroundColor="#222222"
-                    Stroke="{DynamicResource Primary}"
+                    Stroke="White"
                     StrokeThickness="2">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8"/>
@@ -53,7 +53,7 @@
                         <Border 
                             Grid.Column="2" 
                             BackgroundColor="#333333" 
-                            Stroke="{DynamicResource PrimaryDark}" 
+                            Stroke="White" 
                             StrokeThickness="1" 
                             Padding="8, 4" 
                             VerticalOptions="Center">
@@ -62,7 +62,7 @@
                             </Border.StrokeShape>
                             <Label 
                                 Text="Catégorie" 
-                                TextColor="{DynamicResource Primary}" 
+                                TextColor="White" 
                                 FontSize="11" 
                                 FontAttributes="Bold" 
                             />
@@ -170,16 +170,18 @@
                                             IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}}" 
                                         />
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                            <controls:ScrollingText 
+                                            <Label 
                                                 Text="{Binding Competitor1.Name, FallbackValue='(BYE / En attente)'}" 
                                                 TextColor="White" 
                                                 FontAttributes="Bold" 
                                                 FontSize="12" 
+                                                LineBreakMode="TailTruncation"
                                             />
-                                            <controls:ScrollingText 
+                                            <Label 
                                                 Text="{Binding Competitor1.Club}" 
                                                 TextColor="#999999" 
                                                 FontSize="11"
+                                                LineBreakMode="TailTruncation"
                                                 IsVisible="{Binding Competitor1.Club, Converter={StaticResource StringToBoolConverter}}" 
                                             />
                                         </VerticalStackLayout>
@@ -208,20 +210,22 @@
                                             Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
                                             WidthRequest="22" 
                                             HeightRequest="15" 
-                                            VerticalOptions="Center"
+                                            VerticalOptions="Center" 
                                             IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}}" 
                                         />
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                            <controls:ScrollingText 
+                                            <Label 
                                                 Text="{Binding Competitor2.Name, FallbackValue='(BYE / En attente)'}" 
                                                 TextColor="White" 
                                                 FontAttributes="Bold" 
                                                 FontSize="12" 
+                                                LineBreakMode="TailTruncation"
                                             />
-                                            <controls:ScrollingText 
+                                            <Label 
                                                 Text="{Binding Competitor2.Club}" 
                                                 TextColor="#999999" 
                                                 FontSize="11"
+                                                LineBreakMode="TailTruncation"
                                                 IsVisible="{Binding Competitor2.Club, Converter={StaticResource StringToBoolConverter}}" 
                                             />
                                         </VerticalStackLayout>
@@ -241,20 +245,22 @@
                                             Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
                                             WidthRequest="22" 
                                             HeightRequest="15" 
-                                            VerticalOptions="Center"
+                                            VerticalOptions="Center" 
                                             IsVisible="{Binding Competitor, Converter={StaticResource EmptyToBoolConverter}}" 
                                         />
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                            <controls:ScrollingText 
+                                            <Label 
                                                 Text="{Binding Competitor.Name, FallbackValue='(En attente)'}" 
                                                 TextColor="White" 
                                                 FontAttributes="Bold" 
                                                 FontSize="12" 
+                                                LineBreakMode="TailTruncation"
                                             />
-                                            <controls:ScrollingText 
+                                            <Label 
                                                 Text="{Binding Competitor.Club}" 
                                                 TextColor="#999999" 
                                                 FontSize="11"
+                                                LineBreakMode="TailTruncation"
                                                 IsVisible="{Binding Competitor.Club, Converter={StaticResource StringToBoolConverter}}" 
                                             />
                                         </VerticalStackLayout>

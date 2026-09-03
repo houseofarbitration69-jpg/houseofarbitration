@@ -171,18 +171,21 @@
                             Stroke="{DynamicResource Primary}" 
                             StrokeThickness="2" 
                             WidthRequest="90" 
-                            HeightRequest="46" 
+                            HeightRequest="48" 
                             StrokeShape="RoundRectangle 10"
-                            Padding="4">
+                            Padding="0,0,0,0">
                             <Entry 
+                                HeightRequest="48" 
                                 Text="{Binding TargetOrderString, Mode=TwoWay}" 
                                 Keyboard="Numeric" 
                                 TextColor="{DynamicResource Secondary}" 
                                 FontSize="20" 
                                 FontAttributes="Bold" 
                                 HorizontalTextAlignment="Center" 
+                                VerticalTextAlignment="Center"
                                 VerticalOptions="Center"
-                                MaxLength="4"
+                                Margin="0,0,0,0"
+                                MaxLength="3"
                             />
                         </Border>
 
