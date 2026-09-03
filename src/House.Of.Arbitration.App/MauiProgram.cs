@@ -1,4 +1,4 @@
-﻿#region Imports
+#region Imports
 using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using House.Of.Arbitration.Data;
@@ -29,12 +29,16 @@ namespace House.Of.Arbitration.App
                 {
                     fonts.AddFont(FontHelper.OPENSANS_REGULAR_FILENAME, FontHelper.OPENSANS_REGULAR_NAME);
                     fonts.AddFont(FontHelper.OPENSANS_SEMIBOLD_FILENAME, FontHelper.OPENSANS_SEMIBOLD_NAME);
+                    fonts.AddFont("opensans_regular.ttf", "OpenSansRegular");
+                    fonts.AddFont("opensans_semibold.ttf", "OpenSansSemibold");
 
                     // Register FontAwesome
                     fonts.AddFont(FontHelper.FONTAWESOME_SOLID_FILENAME, FontHelper.FONTAWESOME_SOLID_NAME);
+                    fonts.AddFont("fontawesome_solid.otf", "FontAwesomeSolid");
 
-                    // Register Cutom
+                    // Register Custom
                     fonts.AddFont(FontHelper.CUSTOM_FILENAME, FontHelper.CUSTOM_NAME);
+                    fonts.AddFont("custom.otf", "Custom");
                 });
 
 #if DEBUG

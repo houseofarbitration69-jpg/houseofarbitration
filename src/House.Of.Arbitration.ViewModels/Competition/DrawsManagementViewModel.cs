@@ -7,7 +7,6 @@ using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Core;
-using House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
 #endregion
@@ -25,14 +24,11 @@ public partial class DrawsManagementViewModel : BaseViewModel
     #region Attributs
     private int _competitionId;
     private CompetitionModel? _competition;
-    private ObservableCollection<CategoryModel> _categories = new();
-    private CategoryModel? _selectedCategory;
-    
-    private ObservableCollection<CompetitorModel?> _competitors = new();
-    private ObservableCollection<BracketRoundViewModel> _rounds = new();
-    private List<BracketSlotViewModel> _pouleSlots = new();
-    private BracketSlotViewModel? _draggedSlot;
-    private bool _isDragging;
+    private List<CategoryModel> _categories = new();
+    private List<DrawMatchItemViewModel> _allMatches = new();
+    private ObservableCollection<object> _displayItems = new();
+    private int _totalMatchesCount;
+    private int _totalCategoriesCount;
     #endregion
 
     #region Properties
@@ -54,51 +50,25 @@ public partial class DrawsManagementViewModel : BaseViewModel
         set => SetProperty(ref _competition, value);
     }
 
-    public ObservableCollection<CategoryModel> Categories
+    public ObservableCollection<object> DisplayItems
     {
-        get => _categories;
-        set => SetProperty(ref _categories, value);
+        get => _displayItems;
+        set => SetProperty(ref _displayItems, value);
     }
 
-    public CategoryModel? SelectedCategory
+    public int TotalMatchesCount
     {
-        get => _selectedCategory;
-        set
-        {
-            if (SetProperty(ref _selectedCategory, value))
-            {
-                OnCategoryChanged();
-            }
-        }
+        get => _totalMatchesCount;
+        set => SetProperty(ref _totalMatchesCount, value);
     }
 
-    public BracketSlotViewModel? DraggedSlot
+    public int TotalCategoriesCount
     {
-        get => _draggedSlot;
-        set => SetProperty(ref _draggedSlot, value);
+        get => _totalCategoriesCount;
+        set => SetProperty(ref _totalCategoriesCount, value);
     }
 
-    public bool IsDragging
-    {
-        get => _isDragging;
-        set => SetProperty(ref _isDragging, value);
-    }
-
-    public ObservableCollection<CompetitorModel?> Competitors
-    {
-        get => _competitors;
-        set => SetProperty(ref _competitors, value);
-    }
-
-    public ObservableCollection<BracketRoundViewModel> Rounds
-    {
-        get => _rounds;
-        set => SetProperty(ref _rounds, value);
-    }
-
-    public bool IsKnockouts => SelectedCategory?.RoundType == RoundType.Knockouts;
-    public bool IsPools => SelectedCategory?.RoundType == RoundType.Pools;
-    public bool IsOrder => SelectedCategory?.RoundType == RoundType.Order;
+    public bool HasMatches => TotalMatchesCount > 0;
     #endregion
 
     #region Constructors
@@ -121,614 +91,458 @@ public partial class DrawsManagementViewModel : BaseViewModel
         IsBusy = true;
         try
         {
-            Competition = await _competitionRepository.GetByIdAsync(CompetitionId, c => c.Categories);
-            if (Competition != null && Competition.Categories != null)
+            Competition = await _competitionRepository.GetByIdAsync(CompetitionId, 
+                "Categories.AgeRange", 
+                "Categories.Competitors.Competitor.Country");
+
+            if (Competition == null || Competition.Categories == null) return;
+            _categories = Competition.Categories.ToList();
+
+            var allDraws = (await _drawRepository.GetAllAsync(
+                "DrawKnockouts.Competitor1.Country",
+                "DrawKnockouts.Competitor2.Country",
+                "DrawKnockouts.Winner",
+                "DrawKnockouts.Looser",
+                "DrawPools.Competitor1.Country",
+                "DrawPools.Competitor2.Country",
+                "DrawPools.Winner",
+                "DrawPools.Looser",
+                "DrawOrders.Competitor.Country"))?.Where(d => _categories.Any(c => c.Id == d.CategoryId)).ToList();
+
+            _allMatches.Clear();
+
+            foreach (var category in _categories)
             {
-                Categories = new ObservableCollection<CategoryModel>(Competition.Categories);
-                if (Categories.Count > 0)
+                if (category.Type == CategoryType.Taolu)
                 {
-                    SelectedCategory = Categories[0];
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading competition {Id}", CompetitionId);
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private async void OnCategoryChanged()
-    {
-        if (SelectedCategory == null)
-        {
-            Rounds.Clear();
-            Competitors.Clear();
-            return;
-        }
-
-        IsBusy = true;
-        
-        // Give UI thread a chance to show the loading indicator
-        await Task.Yield();
-
-        try
-        {
-            if (SelectedCategory.Type == CategoryType.Taolu)
-            {
-                SelectedCategory.RoundType = RoundType.Order;
-            }
-
-            var categoryRepo = Application.Current?.Handler?.MauiContext?.Services.GetService<IRepository<CategoryModel>>();
-            if (categoryRepo != null)
-            {
-                // Optimization: Split the massive include query into smaller, targeted queries
-                // to avoid Cartesian Product performance hit.
-                
-                // 1. Basic category and competitors
-                var fullCategory = await categoryRepo.GetByIdAsync(SelectedCategory.Id, "Competitors.Competitor");
-                
-                if (fullCategory != null)
-                {
-                    // 2. Fetch Draw separately if it exists
-                    var drawRepo = Application.Current?.Handler?.MauiContext?.Services.GetService<IRepository<DrawModel>>();
-                    if (drawRepo != null)
-                    {
-                        var draw = (await drawRepo.GetAllAsync("DrawKnockouts.Competitor1", "DrawKnockouts.Competitor2", "DrawPools.Competitor1", "DrawPools.Competitor2", "DrawOrders.Competitor"))
-                                   ?.FirstOrDefault(d => d.CategoryId == SelectedCategory.Id);
-                        
-                        fullCategory.Draw = draw;
-                    }
-                    
-                    _selectedCategory = fullCategory;
-                }
-            }
-
-            var competitorModels = SelectedCategory.Competitors?.Select(cc => cc.Competitor).ToList() ?? new();
-            Competitors = new ObservableCollection<CompetitorModel?>(competitorModels);
-
-            OnPropertyChanged(nameof(IsKnockouts));
-            OnPropertyChanged(nameof(IsPools));
-            OnPropertyChanged(nameof(IsOrder));
-
-            // Delay draw loading slightly to ensure UI is ready
-            await Task.Delay(50);
-            await LoadDrawAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error changing category");
-        }
-        finally
-        {
-            IsBusy = false;
-        }
-    }
-
-    private async Task LoadDrawAsync()
-    {
-        if (SelectedCategory == null) return;
-
-        // Ensure we are off the main thread for heavy calculations if needed
-        // but MAUI UI updates (setting Rounds) must eventually hit main thread.
-        
-        await Task.Run(() => 
-        {
-            var existingDraw = SelectedCategory.Draw;
-
-            if (IsKnockouts)
-            {
-                InitializeKnockout(existingDraw);
-            }
-            else if (IsPools)
-            {
-                InitializePools(existingDraw);
-            }
-            else if (IsOrder)
-            {
-                InitializeOrder(existingDraw);
-            }
-        });
-
-        OnPropertyChanged(nameof(Rounds));
-    }
-
-    private void InitializeKnockout(DrawModel? existingDraw = null)
-    {
-        if (SelectedCategory == null) return;
-
-        var newRounds = new ObservableCollection<BracketRoundViewModel>();
-
-        int n = SelectedCategory.Competitors.Count;
-        int m = 1;
-        while (m < n) m *= 2;
-        if (m < 2) m = 2;
-
-        int globalMatchOrder = 1;
-        var round1 = new BracketRoundViewModel { Name = "Round 1" };
-        var matchesInRound = m / 2;
-
-        for (int i = 0; i < matchesInRound; i++)
-        {
-            var match = new BracketMatchViewModel();
-            match.Order = i + 1;
-
-            if (existingDraw != null && existingDraw.DrawKnockouts != null)
-            {
-                var savedMatch = existingDraw.DrawKnockouts.FirstOrDefault(ms => ms.Order == match.Order);
-                if (savedMatch != null)
-                {
-                    match.Slot1.Competitor = savedMatch.Competitor1;
-                    match.Slot2.Competitor = savedMatch.Competitor2;
-                    match.GlobalOrder = savedMatch.GlobalOrder;
-                    if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
-                }
-            }
-            else
-            {
-                match.Slot1.Competitor = (i * 2 < n) ? SelectedCategory.Competitors[i * 2].Competitor : null;
-                match.Slot2.Competitor = (i * 2 + 1 < n) ? SelectedCategory.Competitors[i * 2 + 1].Competitor : null;
-            }
-            round1.Matches.Add(match);
-        }
-        newRounds.Add(round1);
-
-        int currentMatches = matchesInRound;
-        int roundIndex = 2;
-        int matchOffset = matchesInRound;
-        while (currentMatches > 1)
-        {
-            currentMatches /= 2;
-            var nextRound = new BracketRoundViewModel { Name = $"Round {roundIndex++}" };
-            for (int i = 0; i < currentMatches; i++)
-            {
-                var match = new BracketMatchViewModel();
-                match.Order = matchOffset + i + 1;
-
-                if (existingDraw != null && existingDraw.DrawKnockouts != null)
-                {
-                    var savedMatch = existingDraw.DrawKnockouts.FirstOrDefault(ms => ms.Order == match.Order);
-                    if (savedMatch != null)
-                    {
-                        match.Slot1.Competitor = savedMatch.Competitor1;
-                        match.Slot2.Competitor = savedMatch.Competitor2;
-                        match.GlobalOrder = savedMatch.GlobalOrder;
-                        if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
-                    }
+                    category.RoundType = RoundType.Order;
                 }
 
-                nextRound.Matches.Add(match);
-            }
-            matchOffset += currentMatches;
-            newRounds.Add(nextRound);
-        }
+                var existingDraw = allDraws?.FirstOrDefault(d => d.CategoryId == category.Id);
 
-        var winnerRound = new BracketRoundViewModel { Name = "Winner" };
-        winnerRound.Matches.Add(new BracketMatchViewModel { IsWinnerSlot = true });
-        newRounds.Add(winnerRound);
-
-        CalculateMargins(newRounds);
-        Rounds = newRounds;
-
-        if (existingDraw == null)
-        {
-            RefreshAdvancements();
-        }
-        else
-        {
-            UpdateByeFlags();
-        }
-    }
-
-    private void UpdateByeFlags()
-    {
-        if (Rounds.Count == 0) return;
-        var round1 = Rounds[0];
-        foreach (var match in round1.Matches)
-        {
-            int count = (match.Slot1.Competitor != null ? 1 : 0) + (match.Slot2.Competitor != null ? 1 : 0);
-            match.IsBye = count < 2;
-        }
-        for (int r = 1; r < Rounds.Count; r++)
-        {
-            foreach (var match in Rounds[r].Matches)
-            {
-                match.IsBye = false;
-            }
-        }
-    }
-
-    private void RefreshAdvancements()
-    {
-        if (Rounds.Count < 2 || (!IsKnockouts && !IsPools)) return;
-
-        if (IsKnockouts)
-        {
-            for (int r = 1; r < Rounds.Count; r++)
-            {
-                foreach (var match in Rounds[r].Matches)
+                if (existingDraw != null)
                 {
-                    match.Slot1.Competitor = null;
-                    match.Slot2.Competitor = null;
-                    match.IsBye = false;
-                }
-            }
-
-            int globalMatchOrder = 1;
-
-            for (int r = 0; r < Rounds.Count - 1; r++)
-            {
-                var currentRound = Rounds[r];
-                var nextRound = Rounds[r + 1];
-
-                for (int i = 0; i < currentRound.Matches.Count; i++)
-                {
-                    var match = currentRound.Matches[i];
-                    if (match.IsWinnerSlot) continue;
-
-                    int competitorsCount = (match.Slot1.Competitor != null ? 1 : 0) + (match.Slot2.Competitor != null ? 1 : 0);
-                    CompetitorModel? winner = match.Slot1.Competitor ?? match.Slot2.Competitor;
-
-                    if (r == 0)
+                    if (category.RoundType == RoundType.Knockouts && existingDraw.DrawKnockouts != null && existingDraw.DrawKnockouts.Count > 0)
                     {
-                        match.IsBye = (competitorsCount < 2);
-                    }
-                    else
-                    {
-                        match.IsBye = false;
-                    }
-
-                    if (r == 0)
-                    {
-                        if (competitorsCount > 0)
-                            match.GlobalOrder = globalMatchOrder++;
-                        else
-                            match.GlobalOrder = 0;
-                    }
-                    else
-                    {
-                        match.GlobalOrder = globalMatchOrder++;
-                    }
-
-                    if (competitorsCount == 1)
-                    {
-                        if (nextRound.Matches.Count > 0)
+                        foreach (var k in existingDraw.DrawKnockouts.OrderBy(x => x.Order))
                         {
-                            var nextMatch = nextRound.Matches[0];
-                            if (!nextMatch.IsWinnerSlot)
+                            _allMatches.Add(new DrawMatchItemViewModel
                             {
-                                int nextMatchIndex = i / 2;
-                                if (nextMatchIndex < nextRound.Matches.Count)
-                                {
-                                    nextMatch = nextRound.Matches[nextMatchIndex];
-                                    if (i % 2 == 0)
-                                        nextMatch.Slot1.Competitor = winner;
-                                    else
-                                        nextMatch.Slot2.Competitor = winner;
-                                }
-                            }
-                            else
-                            {
-                                if (SelectedCategory?.Competitors.Count == 1)
-                                {
-                                    nextMatch.Slot1.Competitor = winner;
-                                }
-                                else
-                                {
-                                    nextMatch.Slot1.Competitor = null;
-                                }
-                            }
+                                DrawModel = k,
+                                CategoryId = category.Id,
+                                CategoryName = category.Name,
+                                Category = category,
+                                RoundType = RoundType.Knockouts,
+                                Order = k.Order,
+                                GlobalOrder = k.GlobalOrder,
+                                Competitor1 = k.Competitor1,
+                                Competitor2 = k.Competitor2,
+                                IsFinished = k.IsFinished
+                            });
                         }
                     }
-                }
-            }
-        }
-    }
-
-    private void InitializePools(DrawModel? existingDraw = null)
-    {
-        if (SelectedCategory == null) return;
-
-        var newRounds = new ObservableCollection<BracketRoundViewModel>();
-        var pouleRound = new BracketRoundViewModel { Name = "Matchs de Poule" };
-
-        var competitors = SelectedCategory.Competitors;
-        int n = competitors.Count;
-        int matchOrder = 1;
-        int globalMatchOrder = 1;
-
-        _pouleSlots = new List<BracketSlotViewModel>();
-        for (int i = 0; i < n; i++)
-        {
-            _pouleSlots.Add(new BracketSlotViewModel { Competitor = competitors[i].Competitor });
-        }
-
-        for (int i = 0; i < n; i++)
-        {
-            for (int j = i + 1; j < n; j++)
-            {
-                var match = new BracketMatchViewModel();
-                match.Order = matchOrder;
-
-                if (existingDraw != null && existingDraw.DrawPools != null)
-                {
-                    var savedMatch = existingDraw.DrawPools.FirstOrDefault(ms => ms.Order == match.Order);
-                    if (savedMatch != null)
+                    else if (category.RoundType == RoundType.Pools && existingDraw.DrawPools != null && existingDraw.DrawPools.Count > 0)
                     {
-                        match.Slot1 = new BracketSlotViewModel { Competitor = savedMatch.Competitor1 };
-                        match.Slot2 = new BracketSlotViewModel { Competitor = savedMatch.Competitor2 };
-                        match.Order = savedMatch.Order;
-                        match.GlobalOrder = savedMatch.GlobalOrder;
-                        if (match.Order >= matchOrder) matchOrder = match.Order + 1;
-                        if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
+                        foreach (var p in existingDraw.DrawPools.OrderBy(x => x.Order))
+                        {
+                            _allMatches.Add(new DrawMatchItemViewModel
+                            {
+                                DrawModel = p,
+                                CategoryId = category.Id,
+                                CategoryName = category.Name,
+                                Category = category,
+                                RoundType = RoundType.Pools,
+                                Order = p.Order,
+                                GlobalOrder = p.GlobalOrder,
+                                Competitor1 = p.Competitor1,
+                                Competitor2 = p.Competitor2,
+                                IsFinished = p.IsFinished
+                            });
+                        }
+                    }
+                    else if (category.RoundType == RoundType.Order && existingDraw.DrawOrders != null && existingDraw.DrawOrders.Count > 0)
+                    {
+                        foreach (var o in existingDraw.DrawOrders.OrderBy(x => x.Order))
+                        {
+                            _allMatches.Add(new DrawMatchItemViewModel
+                            {
+                                DrawModel = o,
+                                CategoryId = category.Id,
+                                CategoryName = category.Name,
+                                Category = category,
+                                RoundType = RoundType.Order,
+                                Order = o.Order,
+                                GlobalOrder = o.GlobalOrder,
+                                Competitor = o.Competitor,
+                                IsFinished = o.IsFinished
+                            });
+                        }
                     }
                     else
                     {
-                        match.Slot1 = _pouleSlots[i];
-                        match.Slot2 = _pouleSlots[j];
-                        match.Order = matchOrder++;
-                        match.GlobalOrder = globalMatchOrder++;
+                        GenerateMatchesForCategory(category);
                     }
                 }
                 else
                 {
-                    match.Slot1 = _pouleSlots[i];
-                    match.Slot2 = _pouleSlots[j];
-                    match.Order = matchOrder++;
-                    match.GlobalOrder = globalMatchOrder++;
+                    GenerateMatchesForCategory(category);
                 }
-
-                match.Height = 140;
-                match.Margin = new Thickness(0, 10, 0, 10);
-                pouleRound.Matches.Add(match);
             }
-        }
 
-        newRounds.Add(pouleRound);
-        Rounds = newRounds;
+            // Sort matches: preserve existing GlobalOrder > 0, then by Category and local Order
+            _allMatches = _allMatches
+                .OrderBy(m => m.GlobalOrder > 0 ? 0 : 1)
+                .ThenBy(m => m.GlobalOrder > 0 ? m.GlobalOrder : 0)
+                .ThenBy(m => m.CategoryId)
+                .ThenBy(m => m.Order)
+                .ToList();
+
+            RefreshDisplayList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading competition draws for competition {Id}", CompetitionId);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
-    private void InitializeOrder(DrawModel? existingDraw = null)
+    private void GenerateMatchesForCategory(CategoryModel category)
     {
-        if (SelectedCategory == null) return;
+        if (category.Competitors == null || category.Competitors.Count == 0) return;
 
-        var newRounds = new ObservableCollection<BracketRoundViewModel>();
-        var orderRound = new BracketRoundViewModel { Name = "Ordre de passage" };
-
-        var competitors = SelectedCategory.Competitors;
-        int n = competitors.Count;
-        int globalMatchOrder = 1;
-
-        _pouleSlots = new List<BracketSlotViewModel>();
-
-        if (existingDraw != null && existingDraw.DrawOrders != null)
+        if (category.RoundType == RoundType.Knockouts)
         {
-            var sortedMatches = existingDraw.DrawOrders.OrderBy(ms => ms.Order).ToList();
-            foreach (var savedMatch in sortedMatches)
-            {
-                var slot = new BracketSlotViewModel { Competitor = savedMatch.Competitor };
-                _pouleSlots.Add(slot);
+            int n = category.Competitors.Count;
+            int m = 1;
+            while (m < n) m *= 2;
+            if (m < 2) m = 2;
 
-                var match = new BracketMatchViewModel();
-                match.Order = savedMatch.Order;
-                match.GlobalOrder = savedMatch.GlobalOrder;
-                match.Slot1 = slot;
-                match.Height = 100;
-                match.Margin = new Thickness(0, 5, 0, 5);
-                orderRound.Matches.Add(match);
-                if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
+            int matchesInRound = m / 2;
+            int matchOffset = 0;
+            int currentMatches = matchesInRound;
+
+            // Round 1
+            for (int i = 0; i < matchesInRound; i++)
+            {
+                var comp1 = (i * 2 < n) ? category.Competitors[i * 2].Competitor : null;
+                var comp2 = (i * 2 + 1 < n) ? category.Competitors[i * 2 + 1].Competitor : null;
+                int compCount = (comp1 != null ? 1 : 0) + (comp2 != null ? 1 : 0);
+
+                var k = new DrawKnockoutModel
+                {
+                    Order = i + 1,
+                    GlobalOrder = 0,
+                    Competitor1 = comp1,
+                    Competitor2 = comp2,
+                    Competitor1Id = comp1?.Id,
+                    Competitor2Id = comp2?.Id
+                };
+
+                _allMatches.Add(new DrawMatchItemViewModel
+                {
+                    DrawModel = k,
+                    CategoryId = category.Id,
+                    CategoryName = category.Name,
+                    Category = category,
+                    RoundType = RoundType.Knockouts,
+                    Order = k.Order,
+                    GlobalOrder = 0,
+                    Competitor1 = comp1,
+                    Competitor2 = comp2,
+                    IsBye = (compCount == 1)
+                });
+            }
+
+            matchOffset += matchesInRound;
+            while (currentMatches > 1)
+            {
+                currentMatches /= 2;
+                for (int i = 0; i < currentMatches; i++)
+                {
+                    var k = new DrawKnockoutModel
+                    {
+                        Order = matchOffset + i + 1,
+                        GlobalOrder = 0
+                    };
+
+                    _allMatches.Add(new DrawMatchItemViewModel
+                    {
+                        DrawModel = k,
+                        CategoryId = category.Id,
+                        CategoryName = category.Name,
+                        Category = category,
+                        RoundType = RoundType.Knockouts,
+                        Order = k.Order,
+                        GlobalOrder = 0
+                    });
+                }
+                matchOffset += currentMatches;
             }
         }
-        else
+        else if (category.RoundType == RoundType.Pools)
         {
+            int n = category.Competitors.Count;
+            int matchOrder = 1;
             for (int i = 0; i < n; i++)
             {
-                var slot = new BracketSlotViewModel { Competitor = competitors[i].Competitor };
-                _pouleSlots.Add(slot);
+                for (int j = i + 1; j < n; j++)
+                {
+                    var comp1 = category.Competitors[i].Competitor;
+                    var comp2 = category.Competitors[j].Competitor;
+                    var p = new DrawPoolsModel
+                    {
+                        Order = matchOrder++,
+                        GlobalOrder = 0,
+                        Competitor1 = comp1,
+                        Competitor2 = comp2,
+                        Competitor1Id = comp1?.Id,
+                        Competitor2Id = comp2?.Id
+                    };
 
-                var match = new BracketMatchViewModel();
-                match.Order = i + 1;
-                match.GlobalOrder = globalMatchOrder++;
-                match.Slot1 = slot;
-                match.Height = 100;
-                match.Margin = new Thickness(0, 5, 0, 5);
-                orderRound.Matches.Add(match);
+                    _allMatches.Add(new DrawMatchItemViewModel
+                    {
+                        DrawModel = p,
+                        CategoryId = category.Id,
+                        CategoryName = category.Name,
+                        Category = category,
+                        RoundType = RoundType.Pools,
+                        Order = p.Order,
+                        GlobalOrder = 0,
+                        Competitor1 = comp1,
+                        Competitor2 = comp2
+                    });
+                }
             }
         }
+        else if (category.RoundType == RoundType.Order)
+        {
+            int n = category.Competitors.Count;
+            for (int i = 0; i < n; i++)
+            {
+                var comp = category.Competitors[i].Competitor;
+                var o = new DrawOrderModel
+                {
+                    Order = i + 1,
+                    GlobalOrder = 0,
+                    Competitor = comp,
+                    CompetitorId = comp?.Id
+                };
 
-        newRounds.Add(orderRound);
-        Rounds = newRounds;
+                _allMatches.Add(new DrawMatchItemViewModel
+                {
+                    DrawModel = o,
+                    CategoryId = category.Id,
+                    CategoryName = category.Name,
+                    Category = category,
+                    RoundType = RoundType.Order,
+                    Order = o.Order,
+                    GlobalOrder = 0,
+                    Competitor = comp
+                });
+            }
+        }
     }
 
-    private void CalculateMargins(ObservableCollection<BracketRoundViewModel> targetRounds)
+    private void RefreshDisplayList()
     {
-        double matchHeight = 140;
-        double currentMargin = 0;
-        double currentSpacing = 0;
-        double previousRoundMargin = 0;
-
-        for (int i = 0; i < targetRounds.Count; i++)
+        // Re-index all matches sequentially: 1, 2, 3, ..., N and wire commands
+        for (int i = 0; i < _allMatches.Count; i++)
         {
-            var round = targetRounds[i];
-            if (round.Name == "Winner")
-            {
-                foreach (var match in round.Matches)
-                {
-                    match.Height = matchHeight;
-                    match.Margin = new Thickness(0, previousRoundMargin, 0, 0);
-                }
-                break;
-            }
-
-            foreach (var match in round.Matches)
-            {
-                match.Height = matchHeight;
-                if (match == round.Matches[0])
-                    match.Margin = new Thickness(0, currentMargin, 0, 0);
-                else
-                    match.Margin = new Thickness(0, currentSpacing, 0, 0);
-            }
-
-            previousRoundMargin = currentMargin;
-            currentMargin = (currentMargin * 2) + (matchHeight / 2);
-            currentSpacing = (currentSpacing * 2) + matchHeight;
-        }
-    }
-
-    private void UpdateCategoryCompetitors()
-    {
-        if (SelectedCategory == null) return;
-
-        var newLinks = new List<CompetitorCategoryModel>();
-
-        if (IsKnockouts && Rounds.Count > 0)
-        {
-            var round1 = Rounds[0];
-            foreach (var match in round1.Matches)
-            {
-                if (match.Slot1.Competitor != null)
-                {
-                    newLinks.Add(new CompetitorCategoryModel 
-                    { 
-                        CompetitorId = match.Slot1.Competitor.Id, 
-                        Competitor = match.Slot1.Competitor,
-                        CategoryId = SelectedCategory.Id, 
-                        Category = SelectedCategory 
-                    });
-                }
-                if (match.Slot2.Competitor != null)
-                {
-                    newLinks.Add(new CompetitorCategoryModel 
-                    { 
-                        CompetitorId = match.Slot2.Competitor.Id, 
-                        Competitor = match.Slot2.Competitor,
-                        CategoryId = SelectedCategory.Id, 
-                        Category = SelectedCategory 
-                    });
-                }
-            }
-        }
-        else if (IsPools || IsOrder)
-        {
-            foreach (var slot in _pouleSlots)
-            {
-                if (slot.Competitor != null)
-                {
-                    newLinks.Add(new CompetitorCategoryModel 
-                    { 
-                        CompetitorId = slot.Competitor.Id, 
-                        Competitor = slot.Competitor,
-                        CategoryId = SelectedCategory.Id, 
-                        Category = SelectedCategory 
-                    });
-                }
-            }
+            var match = _allMatches[i];
+            match.GlobalOrder = i + 1;
+            match.DrawModel.GlobalOrder = i + 1;
+            match.OnMoveUp = MoveUp;
+            match.OnMoveDown = MoveDown;
+            match.OnEditOrder = EditOrder;
         }
 
-        SelectedCategory.Competitors = newLinks;
+        var items = new List<object>();
+        int lastCategoryId = -1;
+
+        foreach (var match in _allMatches)
+        {
+            if (match.CategoryId != lastCategoryId)
+            {
+                items.Add(new DrawCategoryHeaderItem
+                {
+                    CategoryId = match.CategoryId,
+                    CategoryName = match.CategoryName,
+                    Category = match.Category,
+                    Details = $"{match.Category?.Type} • {match.Category?.AgeRange?.Label} • {match.Category?.Genre}"
+                });
+                lastCategoryId = match.CategoryId;
+            }
+            items.Add(match);
+        }
+
+        DisplayItems = new ObservableCollection<object>(items);
+
+        TotalMatchesCount = _allMatches.Count;
+        TotalCategoriesCount = _categories.Count;
+        OnPropertyChanged(nameof(TotalMatchesCount));
+        OnPropertyChanged(nameof(TotalCategoriesCount));
+        OnPropertyChanged(nameof(HasMatches));
     }
     #endregion
 
     #region Commands
     [RelayCommand]
+    private void MoveUp(DrawMatchItemViewModel match)
+    {
+        if (match == null) return;
+        int index = _allMatches.IndexOf(match);
+        if (index > 0)
+        {
+            _allMatches.RemoveAt(index);
+            _allMatches.Insert(index - 1, match);
+            RefreshDisplayList();
+        }
+    }
+
+    [RelayCommand]
+    private void MoveDown(DrawMatchItemViewModel match)
+    {
+        if (match == null) return;
+        int index = _allMatches.IndexOf(match);
+        if (index >= 0 && index < _allMatches.Count - 1)
+        {
+            _allMatches.RemoveAt(index);
+            _allMatches.Insert(index + 1, match);
+            RefreshDisplayList();
+        }
+    }
+
+    [RelayCommand]
+    private async Task EditOrder(DrawMatchItemViewModel match)
+    {
+        if (match == null || _allMatches.Count == 0) return;
+
+        string? result = await Shell.Current.DisplayPromptAsync(
+            "Ordre de passage",
+            $"Entrez le nouveau numéro d'ordre (1 à {_allMatches.Count}) :",
+            "Valider",
+            "Annuler",
+            placeholder: "1",
+            initialValue: match.GlobalOrder.ToString(),
+            maxLength: 4,
+            keyboard: Keyboard.Numeric);
+
+        if (!string.IsNullOrWhiteSpace(result) && int.TryParse(result, out int newOrder))
+        {
+            int currentIndex = _allMatches.IndexOf(match);
+            if (currentIndex < 0) return;
+
+            int targetIndex = Math.Clamp(newOrder - 1, 0, _allMatches.Count - 1);
+            if (targetIndex != currentIndex)
+            {
+                _allMatches.RemoveAt(currentIndex);
+                _allMatches.Insert(targetIndex, match);
+                RefreshDisplayList();
+            }
+        }
+    }
+
+    [RelayCommand]
     private async Task Save()
     {
-        if (SelectedCategory == null) return;
-
+        IsBusy = true;
         try
         {
             _drawRepository.ClearTracker();
 
-            var existingDraws = await _drawRepository.GetAllAsync();
+            var existingDraws = (await _drawRepository.GetAllAsync())?.Where(d => _categories.Any(c => c.Id == d.CategoryId)).ToList();
             if (existingDraws != null)
             {
-                foreach (var existingDraw in existingDraws.Where(d => d.CategoryId == SelectedCategory.Id).ToList())
+                foreach (var ed in existingDraws)
                 {
-                    existingDraw.Category = null;
-                    existingDraw.DrawKnockouts = null;
-                    existingDraw.DrawPools = null;
-                    existingDraw.DrawOrders = null;
-                    await _drawRepository.DeleteAsync(existingDraw);
+                    ed.Category = null;
+                    ed.DrawKnockouts = null;
+                    ed.DrawPools = null;
+                    ed.DrawOrders = null;
+                    await _drawRepository.DeleteAsync(ed);
                 }
             }
 
-            UpdateCategoryCompetitors();
-
-            var draw = new DrawModel
+            foreach (var category in _categories)
             {
-                CategoryId = SelectedCategory.Id,
-                DrawKnockouts = new List<DrawKnockoutModel>(),
-                DrawPools = new List<DrawPoolsModel>(),
-                DrawOrders = new List<DrawOrderModel>()
-            };
+                var categoryMatches = _allMatches.Where(m => m.CategoryId == category.Id).ToList();
+                if (categoryMatches.Count == 0) continue;
 
-            foreach (var round in Rounds)
-            {
-                foreach (var match in round.Matches)
+                var draw = new DrawModel
                 {
-                    if (match.IsWinnerSlot || match.GlobalOrder == 0) continue;
+                    CategoryId = category.Id,
+                    DrawKnockouts = new List<DrawKnockoutModel>(),
+                    DrawPools = new List<DrawPoolsModel>(),
+                    DrawOrders = new List<DrawOrderModel>()
+                };
 
-                    if (SelectedCategory.RoundType == RoundType.Knockouts)
+                foreach (var match in categoryMatches)
+                {
+                    if (match.RoundType == RoundType.Knockouts)
                     {
-                        var knockoutMatch = new DrawKnockoutModel
+                        var k = new DrawKnockoutModel
                         {
                             Draw = draw,
                             Order = match.Order,
                             GlobalOrder = match.GlobalOrder,
-                            Competitor1Id = match.Slot1.Competitor?.Id,
-                            Competitor2Id = match.Slot2.Competitor?.Id,
+                            Competitor1Id = match.Competitor1?.Id,
+                            Competitor2Id = match.Competitor2?.Id,
+                            IsFinished = match.IsFinished
                         };
-
-                        bool isRound1 = round == Rounds.FirstOrDefault();
-                        int compCount = (match.Slot1.Competitor != null ? 1 : 0) + (match.Slot2.Competitor != null ? 1 : 0);
-
-                        if (isRound1 && compCount == 1)
+                        if (match.IsBye)
                         {
-                            knockoutMatch.WinnerId = match.Slot1.Competitor?.Id ?? match.Slot2.Competitor?.Id;
-                            knockoutMatch.IsFinished = true;
+                            k.WinnerId = match.Competitor1?.Id ?? match.Competitor2?.Id;
+                            k.IsFinished = true;
                         }
-
-                        draw.DrawKnockouts.Add(knockoutMatch);
+                        draw.DrawKnockouts.Add(k);
                     }
-                    else if (SelectedCategory.RoundType == RoundType.Pools)
+                    else if (match.RoundType == RoundType.Pools)
                     {
                         draw.DrawPools.Add(new DrawPoolsModel
                         {
                             Draw = draw,
                             Order = match.Order,
                             GlobalOrder = match.GlobalOrder,
-                            Competitor1Id = match.Slot1.Competitor?.Id,
-                            Competitor2Id = match.Slot2.Competitor?.Id,
+                            Competitor1Id = match.Competitor1?.Id,
+                            Competitor2Id = match.Competitor2?.Id,
+                            IsFinished = match.IsFinished
                         });
                     }
-                    else if (SelectedCategory.RoundType == RoundType.Order)
+                    else if (match.RoundType == RoundType.Order)
                     {
                         draw.DrawOrders.Add(new DrawOrderModel
                         {
                             Draw = draw,
                             Order = match.Order,
                             GlobalOrder = match.GlobalOrder,
-                            CompetitorId = match.Slot1.Competitor?.Id,
+                            CompetitorId = match.Competitor?.Id,
+                            IsFinished = match.IsFinished
                         });
                     }
                 }
-            }
 
-            _drawRepository.ClearTracker();
-            await _drawRepository.AddAsync(draw);
+                _drawRepository.ClearTracker();
+                await _drawRepository.AddAsync(draw);
+            }
 
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                await Snackbar.Make("Le tirage a été sauvegardé.").Show();
+                await Snackbar.Make("L'ordre des passages et les tirages ont été enregistrés avec succès.").Show();
             });
+
+            await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erreur lors de la sauvegarde du tirage");
-            await Shell.Current.DisplayAlertAsync("Erreur", "Impossible de sauvegarder le tirage.", "OK");
+            _logger.LogError(ex, "Erreur lors de la sauvegarde des tirages");
+            await Shell.Current.DisplayAlertAsync("Erreur", "Impossible d'enregistrer l'ordre des combats.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
@@ -737,37 +551,78 @@ public partial class DrawsManagementViewModel : BaseViewModel
     {
         await Shell.Current.GoToAsync("..");
     }
-
-    [RelayCommand]
-    private void DragStarting(BracketSlotViewModel slot)
-    {
-        DraggedSlot = slot;
-        IsDragging = true;
-    }
-
-    [RelayCommand]
-    private void Drop(BracketSlotViewModel targetSlot)
-    {
-        IsDragging = false;
-        if (DraggedSlot == null || targetSlot == null || DraggedSlot == targetSlot)
-        {
-            DraggedSlot = null;
-            return;
-        }
-
-        var temp = targetSlot.Competitor;
-        targetSlot.Competitor = DraggedSlot.Competitor;
-        DraggedSlot.Competitor = temp;
-
-        UpdateCategoryCompetitors();
-
-        if (IsKnockouts || IsPools)
-        {
-            RefreshAdvancements();
-        }
-
-        DraggedSlot = null;
-        OnPropertyChanged(nameof(Rounds));
-    }
     #endregion
+}
+
+public class DrawCategoryHeaderItem
+{
+    public int CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public string Details { get; set; } = string.Empty;
+    public CategoryModel? Category { get; set; }
+}
+
+public partial class DrawMatchItemViewModel : ObservableObject
+{
+    private int _globalOrder;
+    private bool _isFinished;
+
+    public IDrawModel DrawModel { get; set; } = null!;
+    public int CategoryId { get; set; }
+    public string CategoryName { get; set; } = string.Empty;
+    public CategoryModel? Category { get; set; }
+    public RoundType RoundType { get; set; }
+    public int Order { get; set; }
+
+    public int GlobalOrder
+    {
+        get => _globalOrder;
+        set => SetProperty(ref _globalOrder, value);
+    }
+
+    public bool IsFinished
+    {
+        get => _isFinished;
+        set => SetProperty(ref _isFinished, value);
+    }
+
+    public bool IsBye { get; set; }
+
+    public CompetitorModel? Competitor1 { get; set; }
+    public CompetitorModel? Competitor2 { get; set; }
+    public CompetitorModel? Competitor { get; set; }
+
+    public bool IsDuel => RoundType != RoundType.Order;
+    public bool IsSingle => RoundType == RoundType.Order;
+
+    public string MatchTitle
+    {
+        get
+        {
+            if (RoundType == RoundType.Order)
+                return $"Passage #{Order}";
+            if (RoundType == RoundType.Pools)
+                return $"Poule - Match #{Order}";
+            return $"Combat #{Order}";
+        }
+    }
+
+    public Action<DrawMatchItemViewModel>? OnMoveUp { get; set; }
+    public Action<DrawMatchItemViewModel>? OnMoveDown { get; set; }
+    public Func<DrawMatchItemViewModel, Task>? OnEditOrder { get; set; }
+
+    [RelayCommand]
+    private void MoveUp() => OnMoveUp?.Invoke(this);
+
+    [RelayCommand]
+    private void MoveDown() => OnMoveDown?.Invoke(this);
+
+    [RelayCommand]
+    private async Task EditOrder()
+    {
+        if (OnEditOrder != null)
+        {
+            await OnEditOrder.Invoke(this);
+        }
+    }
 }
