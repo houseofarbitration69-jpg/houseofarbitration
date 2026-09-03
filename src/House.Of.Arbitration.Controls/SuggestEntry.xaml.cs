@@ -126,12 +126,10 @@ public partial class SuggestEntry : ContentView
         FilterSuggestions(e.NewTextValue);
     }
 
-    private void OnEntryFocused(object sender, FocusEventArgs e)
+    private async void OnEntryFocused(object sender, FocusEventArgs e)
     {
-        if (!string.IsNullOrEmpty(Text))
-        {
-            FilterSuggestions(Text);
-        }
+        FilterSuggestions(Text);
+        await ScrollIntoViewAsync();
     }
 
     private async void OnEntryUnfocused(object sender, FocusEventArgs e)
@@ -158,6 +156,8 @@ public partial class SuggestEntry : ContentView
             {
                 cv.SelectedItem = null;
             }
+
+            EntryField?.Unfocus();
         }
     }
 
@@ -187,7 +187,7 @@ public partial class SuggestEntry : ContentView
         }
     }
 
-    private void FilterSuggestions(string searchText)
+    private async void FilterSuggestions(string? searchText)
     {
         // Ensure we don't show suggestions if the entry is not focused (e.g. programmatic text change)
         if (EntryField == null || !EntryField.IsFocused)
@@ -196,13 +196,13 @@ public partial class SuggestEntry : ContentView
             return;
         }
 
-        if (ItemsSource == null || string.IsNullOrWhiteSpace(searchText))
+        if (ItemsSource == null)
         {
             IsSuggestionsVisible = false;
             return;
         }
 
-        var lowerText = searchText.ToLowerInvariant();
+        var lowerText = (searchText ?? string.Empty).Trim().ToLowerInvariant();
         var filtered = new List<object>();
 
         foreach (var item in ItemsSource)
@@ -211,7 +211,7 @@ public partial class SuggestEntry : ContentView
             var itemString = item.ToString();
             if (string.IsNullOrEmpty(itemString)) continue;
 
-            if (itemString.ToLowerInvariant().Contains(lowerText))
+            if (string.IsNullOrEmpty(lowerText) || itemString.ToLowerInvariant().Contains(lowerText))
             {
                 filtered.Add(item);
             }
@@ -224,5 +224,32 @@ public partial class SuggestEntry : ContentView
         }
 
         IsSuggestionsVisible = Suggestions.Count > 0;
+
+        if (IsSuggestionsVisible)
+        {
+            await ScrollIntoViewAsync();
+        }
+    }
+
+    private async Task ScrollIntoViewAsync()
+    {
+        try
+        {
+            Element? current = this.Parent;
+            while (current != null && !(current is ScrollView))
+            {
+                current = current.Parent;
+            }
+
+            if (current is ScrollView scrollView)
+            {
+                await Task.Delay(100);
+                await scrollView.ScrollToAsync(this, ScrollToPosition.Start, true);
+            }
+        }
+        catch
+        {
+            // Ignore if scroll animation fails
+        }
     }
 }

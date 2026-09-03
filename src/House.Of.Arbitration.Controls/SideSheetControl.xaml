@@ -48,10 +48,10 @@
             <Border.Triggers>
                 <DataTrigger TargetType="Border" Binding="{Binding IsOpen, Source={x:Reference this}}" Value="True">
                     <DataTrigger.EnterActions>
-                        <local:TranslateAction X="0" Duration="300" Easing="CubicOut" />
+                        <local:TranslateAction X="0" Duration="300" Easing="{x:Static Easing.CubicOut}" />
                     </DataTrigger.EnterActions>
                     <DataTrigger.ExitActions>
-                        <local:TranslateAction X="-300" Duration="300" Easing="CubicIn" />
+                        <local:TranslateAction X="-300" Duration="300" Easing="{x:Static Easing.CubicIn}" />
                     </DataTrigger.ExitActions>
                     <Setter Property="IsVisible" Value="True" />
                 </DataTrigger>

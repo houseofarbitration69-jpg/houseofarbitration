@@ -23,6 +23,7 @@
     </ContentView.Resources>
 
     <Border 
+        x:Name="PopupBorder"
         VerticalOptions="Center"
         BackgroundColor="{DynamicResource PageBackgroundColor}"
         Padding="15"
