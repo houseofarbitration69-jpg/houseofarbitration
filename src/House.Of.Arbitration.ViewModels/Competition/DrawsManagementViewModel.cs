@@ -124,7 +124,7 @@ public partial class DrawsManagementViewModel : BaseViewModel
                 {
                     if (category.RoundType == RoundType.Knockouts && existingDraw.DrawKnockouts != null && existingDraw.DrawKnockouts.Count > 0)
                     {
-                        foreach (var k in existingDraw.DrawKnockouts.OrderBy(x => x.Order))
+                        foreach (var k in existingDraw.DrawKnockouts.Where(x => !x.IsFinished).OrderBy(x => x.Order))
                         {
                             _allMatches.Add(new DrawMatchItemViewModel
                             {
@@ -143,7 +143,7 @@ public partial class DrawsManagementViewModel : BaseViewModel
                     }
                     else if (category.RoundType == RoundType.Pools && existingDraw.DrawPools != null && existingDraw.DrawPools.Count > 0)
                     {
-                        foreach (var p in existingDraw.DrawPools.OrderBy(x => x.Order))
+                        foreach (var p in existingDraw.DrawPools.Where(x => !x.IsFinished).OrderBy(x => x.Order))
                         {
                             _allMatches.Add(new DrawMatchItemViewModel
                             {
@@ -162,7 +162,7 @@ public partial class DrawsManagementViewModel : BaseViewModel
                     }
                     else if (category.RoundType == RoundType.Order && existingDraw.DrawOrders != null && existingDraw.DrawOrders.Count > 0)
                     {
-                        foreach (var o in existingDraw.DrawOrders.OrderBy(x => x.Order))
+                        foreach (var o in existingDraw.DrawOrders.Where(x => !x.IsFinished).OrderBy(x => x.Order))
                         {
                             _allMatches.Add(new DrawMatchItemViewModel
                             {
@@ -540,7 +540,11 @@ public partial class DrawsManagementViewModel : BaseViewModel
         {
             _drawRepository.ClearTracker();
 
-            var existingDraws = (await _drawRepository.GetAllAsync())?.Where(d => _categories.Any(c => c.Id == d.CategoryId)).ToList();
+            var existingDraws = (await _drawRepository.GetAllAsync(
+                "DrawKnockouts",
+                "DrawPools",
+                "DrawOrders"))?.Where(d => _categories.Any(c => c.Id == d.CategoryId)).ToList();
+
             if (existingDraws != null)
             {
                 foreach (var ed in existingDraws)
@@ -556,7 +560,13 @@ public partial class DrawsManagementViewModel : BaseViewModel
             foreach (var category in _categories)
             {
                 var categoryMatches = _allMatches.Where(m => m.CategoryId == category.Id).ToList();
-                if (categoryMatches.Count == 0) continue;
+                var existingDraw = existingDraws?.FirstOrDefault(d => d.CategoryId == category.Id);
+
+                var finishedKnockouts = existingDraw?.DrawKnockouts?.Where(k => k.IsFinished).ToList() ?? new List<DrawKnockoutModel>();
+                var finishedPools = existingDraw?.DrawPools?.Where(p => p.IsFinished).ToList() ?? new List<DrawPoolsModel>();
+                var finishedOrders = existingDraw?.DrawOrders?.Where(o => o.IsFinished).ToList() ?? new List<DrawOrderModel>();
+
+                if (categoryMatches.Count == 0 && finishedKnockouts.Count == 0 && finishedPools.Count == 0 && finishedOrders.Count == 0) continue;
 
                 var draw = new DrawModel
                 {
@@ -566,6 +576,50 @@ public partial class DrawsManagementViewModel : BaseViewModel
                     DrawOrders = new List<DrawOrderModel>()
                 };
 
+                // Add finished matches back so they are not deleted/lost
+                foreach (var k in finishedKnockouts)
+                {
+                    draw.DrawKnockouts.Add(new DrawKnockoutModel
+                    {
+                        Draw = draw,
+                        Order = k.Order,
+                        GlobalOrder = k.GlobalOrder,
+                        Competitor1Id = k.Competitor1Id,
+                        Competitor2Id = k.Competitor2Id,
+                        WinnerId = k.WinnerId,
+                        LooserId = k.LooserId,
+                        IsFinished = true
+                    });
+                }
+
+                foreach (var p in finishedPools)
+                {
+                    draw.DrawPools.Add(new DrawPoolsModel
+                    {
+                        Draw = draw,
+                        Order = p.Order,
+                        GlobalOrder = p.GlobalOrder,
+                        Competitor1Id = p.Competitor1Id,
+                        Competitor2Id = p.Competitor2Id,
+                        WinnerId = p.WinnerId,
+                        LooserId = p.LooserId,
+                        IsFinished = true
+                    });
+                }
+
+                foreach (var o in finishedOrders)
+                {
+                    draw.DrawOrders.Add(new DrawOrderModel
+                    {
+                        Draw = draw,
+                        Order = o.Order,
+                        GlobalOrder = o.GlobalOrder,
+                        CompetitorId = o.CompetitorId,
+                        IsFinished = true
+                    });
+                }
+
+                // Add unfinished (reordered) matches
                 foreach (var match in categoryMatches)
                 {
                     if (match.RoundType == RoundType.Knockouts)

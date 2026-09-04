@@ -28,7 +28,7 @@
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8"/>
                     </Border.StrokeShape>
-                    <Grid ColumnDefinitions="Auto, *, Auto">
+                    <Grid ColumnDefinitions="Auto, *">
                         <Label 
                             Grid.Column="0" 
                             Text="🥋" 
@@ -36,7 +36,15 @@
                             VerticalOptions="Center" 
                             Margin="0,0,12,0" 
                         />
-                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                        <Label 
+                            Grid.Column="1" 
+                            VerticalOptions="Center"
+                            Text="{Binding CategoryName}" 
+                            TextColor="White" 
+                            FontSize="16" 
+                            FontAttributes="Bold" 
+                        />
+                        <!--<VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
                             <Label 
                                 Text="{Binding CategoryName}" 
                                 TextColor="White" 
@@ -49,8 +57,8 @@
                                 FontSize="12"
                                 IsVisible="{Binding Details, Converter={StaticResource StringToBoolConverter}}" 
                             />
-                        </VerticalStackLayout>
-                        <Border 
+                        </VerticalStackLayout>-->
+                        <!--<Border 
                             Grid.Column="2" 
                             BackgroundColor="#333333" 
                             Stroke="White" 
@@ -66,7 +74,7 @@
                                 FontSize="11" 
                                 FontAttributes="Bold" 
                             />
-                        </Border>
+                        </Border>-->
                     </Grid>
                 </Border>
             </DataTemplate>
