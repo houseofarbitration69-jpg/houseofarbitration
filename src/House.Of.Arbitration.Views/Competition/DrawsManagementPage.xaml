@@ -370,7 +370,13 @@
         </Grid>
 
         <!-- Bottom Actions & Direct Order Navigation Bar -->
-        <Grid Grid.Row="2" ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="14" VerticalOptions="Center">
+        <Grid 
+            Grid.Row="2" 
+            ColumnDefinitions="Auto, *, Auto, Auto" 
+            ColumnSpacing="14" 
+            VerticalOptions="Center"
+            IsVisible="{OnIdiom Tablet='true', Phone='false'}"
+        >
             <!-- Direct Order Navigation Button (Left) -->
             <Border 
                 Grid.Column="0" 
@@ -453,6 +459,93 @@
                 Padding="0"
             />
         </Grid>
+
+        <VerticalStackLayout
+            Grid.Row="2" 
+            IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+            Spacing="10"
+        >
+            <Border 
+                Grid.Column="0" 
+                BackgroundColor="#222222" 
+                Stroke="#3E3E3E" 
+                StrokeThickness="1" 
+                StrokeShape="RoundRectangle 10" 
+                Padding="6, 4" 
+                VerticalOptions="Center"
+                IsVisible="{Binding HasMatches}">
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <Button 
+                        Text="🔍 Aller au passage..." 
+                        Command="{Binding ScrollToOrderCommand}" 
+                        BackgroundColor="#333333" 
+                        TextColor="White" 
+                        FontSize="13" 
+                        FontAttributes="Bold" 
+                        HeightRequest="42" 
+                        Padding="14, 0" 
+                        CornerRadius="8"
+                    />
+                    <Button 
+                        Text="⏮ Début (1)" 
+                        Command="{Binding ScrollToTargetOrderCommand}" 
+                        CommandParameter="1" 
+                        BackgroundColor="#2A2A2A" 
+                        BorderColor="#444444" 
+                        BorderWidth="1"
+                        TextColor="LightGray" 
+                        FontSize="11" 
+                        HeightRequest="36" 
+                        Padding="10, 0" 
+                        CornerRadius="6"
+                    />
+                    <Button 
+                        Text="Dernier ⏭" 
+                        Command="{Binding ScrollToTargetOrderCommand}" 
+                        CommandParameter="{Binding TotalMatchesCount}" 
+                        BackgroundColor="#2A2A2A" 
+                        BorderColor="#444444" 
+                        BorderWidth="1"
+                        TextColor="LightGray" 
+                        FontSize="11" 
+                        HeightRequest="36" 
+                        Padding="10, 0" 
+                        CornerRadius="6"
+                    />
+                </HorizontalStackLayout>
+            </Border>
+
+            <Grid
+                ColumnDefinitions="*,*"
+                ColumnSpacing="10"
+            >
+                <Button 
+                Grid.Column="0" 
+                Text="{Binding Resources.CLOSE_ACTION}" 
+                BackgroundColor="{DynamicResource ErrorColor}"
+                TextColor="Black"
+                FontAttributes="Bold"
+                Command="{Binding CloseCommand}" 
+                WidthRequest="160"
+                HeightRequest="46"
+                CornerRadius="10"
+                Padding="0"
+            />
+
+                <Button 
+                Grid.Column="1" 
+                Text="{Binding Resources.VALIDATE_ACTION}" 
+                BackgroundColor="{DynamicResource ValidColor}"
+                TextColor="Black"
+                FontAttributes="Bold"
+                Command="{Binding SaveCommand}" 
+                WidthRequest="160"
+                HeightRequest="46"
+                CornerRadius="10"
+                Padding="0"
+            />
+            </Grid>
+        </VerticalStackLayout>
     </Grid>
 
 </base:BasePage>

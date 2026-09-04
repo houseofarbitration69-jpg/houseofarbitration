@@ -21,22 +21,30 @@ public class CompetitionWizardViewModel : WizardViewModel<CompetitionModel>
 
     public override async Task OnAppearing()
     {
-        if (CompetitionId > 0)
+        IsBusy = true;
+        try
         {
-            var competition = await _repository.GetByIdAsync(CompetitionId);
-            if (competition != null)
+            if (CompetitionId > 0)
             {
-                Model = competition;
-
-                // Propagation explicite au cas où le setter ne suffise pas
-                foreach (var step in Steps)
+                var competition = await _repository.GetByIdAsync(CompetitionId);
+                if (competition != null)
                 {
-                    step.Model = Model;
+                    Model = competition;
+
+                    // Propagation explicite au cas où le setter ne suffise pas
+                    foreach (var step in Steps)
+                    {
+                        step.Model = Model;
+                    }
                 }
             }
-        }
 
-        await base.OnAppearing();
+            await base.OnAppearing();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
 }

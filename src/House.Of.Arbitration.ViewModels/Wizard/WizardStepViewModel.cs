@@ -11,6 +11,7 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
 {
     #region Attributs
     private bool _isValid;
+    private bool _isBusy;
     private T _model = default!;
     #endregion
 
@@ -20,6 +21,12 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
 
     #region Properties
     public abstract string Title { get; }
+
+    public bool IsBusy
+    {
+        get => _isBusy;
+        set => SetProperty(ref _isBusy, value);
+    }
 
     public bool IsValid
     {

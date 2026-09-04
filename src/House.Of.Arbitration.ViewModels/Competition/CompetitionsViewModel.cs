@@ -101,9 +101,17 @@ public partial class CompetitionsViewModel : BaseViewModel
     /// </summary>
     public override async Task OnAppearing()
     {
-        var data = await _repository.GetAllAsync(c => c.Categories);
-        Competitions = new ObservableCollection<CompetitionModel>(data ?? new List<CompetitionModel>());
-        await base.OnAppearing();
+        IsBusy = true;
+        try
+        {
+            var data = await _repository.GetAllAsync(c => c.Categories);
+            Competitions = new ObservableCollection<CompetitionModel>(data ?? new List<CompetitionModel>());
+            await base.OnAppearing();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
     #endregion
 }

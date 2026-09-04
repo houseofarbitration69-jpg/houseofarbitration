@@ -46,9 +46,17 @@ public partial class MasterViewModel : BaseViewModel
 
     public override async Task OnAppearing()
     {
-        var data = await _repository.GetAllAsync(c => c.Categories);
-        Competitions = new ObservableCollection<CompetitionModel>(data ?? new List<CompetitionModel>());
-        await base.OnAppearing();
+        IsBusy = true;
+        try
+        {
+            var data = await _repository.GetAllAsync(c => c.Categories);
+            Competitions = new ObservableCollection<CompetitionModel>(data ?? new List<CompetitionModel>());
+            await base.OnAppearing();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     #region Commands
@@ -80,13 +88,21 @@ public partial class MasterViewModel : BaseViewModel
 
         if (confirm)
         {
-            await _repository.DeleteAsync(competition);
-
-            var item = Competitions?.FirstOrDefault(c => c.Id == competition.Id);
-
-            if (item != null)
+            IsBusy = true;
+            try
             {
-                Competitions?.Remove(item);
+                await _repository.DeleteAsync(competition);
+
+                var item = Competitions?.FirstOrDefault(c => c.Id == competition.Id);
+
+                if (item != null)
+                {
+                    Competitions?.Remove(item);
+                }
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
     }

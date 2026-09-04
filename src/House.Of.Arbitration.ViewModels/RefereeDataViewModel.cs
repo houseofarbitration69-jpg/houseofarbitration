@@ -93,29 +93,37 @@ public partial class RefereeDataViewModel : BaseViewModel
     #region Override Methods
     public override async Task OnAppearing()
     {
-        var comps = await _competitionRepository.GetAllAsync();
-        if (comps != null)
+        IsBusy = true;
+        try
         {
-            Competitions = new ObservableCollection<CompetitionModel>(comps);
-        }
+            var comps = await _competitionRepository.GetAllAsync();
+            if (comps != null)
+            {
+                Competitions = new ObservableCollection<CompetitionModel>(comps);
+            }
 
-        var cats = await _categoryRepository.GetAllAsync();
-        if (cats != null)
-        {
-            _allCategories = cats.ToList();
-            UpdateCategories();
-        }
+            var cats = await _categoryRepository.GetAllAsync();
+            if (cats != null)
+            {
+                _allCategories = cats.ToList();
+                UpdateCategories();
+            }
 
-        var datas = await _refereeDataRepository.GetAllAsync(
-            "DrawKnockoutModel.Draw.Category", 
-            "DrawOrder.Draw.Category", 
-            "DrawPools.Draw.Category", 
-            "Competitor");
-        
-        if (datas != null)
+            var datas = await _refereeDataRepository.GetAllAsync(
+                "DrawKnockoutModel.Draw.Category", 
+                "DrawOrder.Draw.Category", 
+                "DrawPools.Draw.Category", 
+                "Competitor");
+            
+            if (datas != null)
+            {
+                _allDatas = datas.ToList();
+                FilterDatas();
+            }
+        }
+        finally
         {
-            _allDatas = datas.ToList();
-            FilterDatas();
+            IsBusy = false;
         }
     }
     #endregion

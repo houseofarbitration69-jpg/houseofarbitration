@@ -92,17 +92,25 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #region Virtual Methods
     public override async Task OnAppearing()
     {
-        if (Category != null)
+        IsBusy = true;
+        try
         {
-            // Reload the category with its registrations and warnings to ensure UI is up-to-date
-            var links = await _competitorCategoryRepository.GetAllAsync("Competitor.Country", "Warnings");
-            var categoryLinks = links?.Where(l => l.CategoryId == Category.Id).ToList();
-
-            if (categoryLinks != null)
+            if (Category != null)
             {
-                Category.Competitors = categoryLinks;
-                Competitors = new ObservableCollection<CompetitorCategoryModel>(categoryLinks);
+                // Reload the category with its registrations and warnings to ensure UI is up-to-date
+                var links = await _competitorCategoryRepository.GetAllAsync("Competitor.Country", "Warnings");
+                var categoryLinks = links?.Where(l => l.CategoryId == Category.Id).ToList();
+
+                if (categoryLinks != null)
+                {
+                    Category.Competitors = categoryLinks;
+                    Competitors = new ObservableCollection<CompetitorCategoryModel>(categoryLinks);
+                }
             }
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
     #endregion
@@ -137,12 +145,21 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         {
             var competitor = result.Result;
 
-            // 1. Check if competitor already exists in DB (same FirstName, LastName and BirthDate)
-            var allCompetitors = await _repository.GetAllAsync();
-            var existingCompetitor = allCompetitors?.FirstOrDefault(c =>
-                string.Equals(c.FirstName, competitor.FirstName, StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(c.LastName, competitor.LastName, StringComparison.OrdinalIgnoreCase) &&
-                c.BirthDate.Date == competitor.BirthDate.Date);
+            // 1. Check if competitor already exists in category or DB
+            var existingCompetitor = Category.Competitors?.FirstOrDefault(cc => 
+                cc.Competitor != null &&
+                string.Equals(cc.Competitor.FirstName, competitor.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(cc.Competitor.LastName, competitor.LastName, StringComparison.OrdinalIgnoreCase) &&
+                cc.Competitor.BirthDate.Date == competitor.BirthDate.Date)?.Competitor;
+
+            if (existingCompetitor == null)
+            {
+                var allCompetitors = await _repository.GetAllAsync();
+                existingCompetitor = allCompetitors?.FirstOrDefault(c =>
+                    string.Equals(c.FirstName, competitor.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(c.LastName, competitor.LastName, StringComparison.OrdinalIgnoreCase) &&
+                    c.BirthDate.Date == competitor.BirthDate.Date);
+            }
 
             if (existingCompetitor != null)
             {
@@ -161,11 +178,11 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
 
                 // Save new competitor
                 await _repository.AddAsync(competitor);
+                CompetitorPopupViewModel.InvalidateClubsCache();
             }
 
             // 2. Create the link in join table if it doesn't already exist for this category
-            var links = await _competitorCategoryRepository.GetAllAsync();
-            var existingLink = links?.FirstOrDefault(cc => cc.CompetitorId == competitor.Id && cc.CategoryId == Category.Id);
+            var existingLink = Category.Competitors?.FirstOrDefault(cc => cc.CompetitorId == competitor.Id && cc.CategoryId == Category.Id);
 
             if (existingLink == null)
             {

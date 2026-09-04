@@ -200,6 +200,10 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     }
     #endregion
 
+    private static List<CountryModel>? _cachedCountries;
+    private static List<string>? _cachedCountryNames;
+    private static List<string>? _cachedClubs;
+
     #region Constructor
     public CompetitorPopupViewModel(IPopupService popupService, ILogger<CompetitorPopupViewModel> logger, ResourceProvider resourceProvider, IRepository<CompetitorModel> repository, IRepository<CountryModel> countryRepository)
         : base(logger, resourceProvider, popupService)
@@ -239,12 +243,37 @@ public partial class CompetitorPopupViewModel : BaseViewModel, IQueryAttributabl
     /// </summary>
     private async void InitData()
     {
-        // Récupération de la liste des clubs
-        Clubs = (await _repository.GetAllAsync())?.Select(c => c.Club).Distinct()?.ToList() ?? new();
+        // 1. Initialisation instantanée depuis le cache si disponible
+        if (_cachedCountries != null)
+        {
+            _countries = _cachedCountries;
+            CountryNames = _cachedCountryNames ?? new();
+        }
 
-        // Récupération de la liste des pays
-        _countries = (await _countryRepository.GetAllAsync())?.ToList() ?? new();
-        CountryNames = _countries.Select(c => c.Name).OrderBy(n => n).ToList();
+        if (_cachedClubs != null)
+        {
+            Clubs = _cachedClubs;
+        }
+
+        // 2. Chargement asynchrone si le cache n'est pas encore initialisé
+        if (_cachedCountries == null)
+        {
+            _countries = (await _countryRepository.GetAllAsync())?.ToList() ?? new();
+            CountryNames = _countries.Select(c => c.Name).OrderBy(n => n).ToList();
+            _cachedCountries = _countries;
+            _cachedCountryNames = CountryNames;
+        }
+
+        if (_cachedClubs == null)
+        {
+            Clubs = (await _repository.GetAllAsync())?.Select(c => c.Club).Where(c => !string.IsNullOrWhiteSpace(c)).Distinct().ToList() ?? new();
+            _cachedClubs = Clubs;
+        }
+    }
+
+    public static void InvalidateClubsCache()
+    {
+        _cachedClubs = null;
     }
     #endregion
 

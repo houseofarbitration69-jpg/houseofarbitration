@@ -225,5 +225,29 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+
+        <!-- Loading Indicator Overlay -->
+        <Border 
+            Grid.RowSpan="3"
+            IsVisible="{Binding IsBusy}" 
+            BackgroundColor="#80000000" 
+            StrokeThickness="0"
+            HorizontalOptions="Fill" 
+            VerticalOptions="Fill"
+            InputTransparent="False">
+            <Border 
+                BackgroundColor="#1E1E1E" 
+                Stroke="{DynamicResource Primary}" 
+                StrokeThickness="2" 
+                StrokeShape="RoundRectangle 16"
+                Padding="24, 20" 
+                HorizontalOptions="Center" 
+                VerticalOptions="Center">
+                <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
+                    <Label Text="Chargement des données d'arbitrage..." TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+        </Border>
     </Grid>
 </base:BasePage>

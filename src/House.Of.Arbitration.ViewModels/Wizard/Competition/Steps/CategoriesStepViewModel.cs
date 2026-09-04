@@ -115,36 +115,44 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     /// </summary>
     public override async Task OnAppearing()
     {
-        if (Model != null)
+        IsBusy = true;
+        try
         {
-            // Reload categories with their competitors, warnings and draws to update UI
-            var categories = await _repository.GetAllAsync("AgeRange", "Competitors.Competitor", "Competitors.Warnings", "Draw.DrawKnockouts", "Draw.DrawPools", "Draw.DrawOrders");
-            var allDraws = await _drawsRepository.GetAllAsync("DrawKnockouts", "DrawPools", "DrawOrders");
-
-            if (categories != null)
+            if (Model != null)
             {
-                var competitionCategories = categories.Where(c => c.CompetitionId == Model.Id).ToList();
+                // Reload categories with their competitors, warnings and draws to update UI
+                var categories = await _repository.GetAllAsync("AgeRange", "Competitors.Competitor", "Competitors.Warnings", "Draw.DrawKnockouts", "Draw.DrawPools", "Draw.DrawOrders");
+                var allDraws = await _drawsRepository.GetAllAsync("DrawKnockouts", "DrawPools", "DrawOrders");
 
-                // On pré-calcule HasDraw avant l'affichage pour éviter les flashs ou retards de notification
-                foreach (var category in competitionCategories)
+                if (categories != null)
                 {
-                    // Fallback manuel si l'Include d'EF Core n'a pas fonctionné (conflits de schéma ou tracking)
-                    if (category.Draw == null && allDraws != null)
+                    var competitionCategories = categories.Where(c => c.CompetitionId == Model.Id).ToList();
+
+                    // On pré-calcule HasDraw avant l'affichage pour éviter les flashs ou retards de notification
+                    foreach (var category in competitionCategories)
                     {
-                        category.Draw = allDraws.FirstOrDefault(d => d.CategoryId == category.Id);
+                        // Fallback manuel si l'Include d'EF Core n'a pas fonctionné (conflits de schéma ou tracking)
+                        if (category.Draw == null && allDraws != null)
+                        {
+                            category.Draw = allDraws.FirstOrDefault(d => d.CategoryId == category.Id);
+                        }
+
+                        category.HasDraw = category.Draw != null;
                     }
 
-                    category.HasDraw = category.Draw != null;
+                    Categories.CollectionChanged -= OnCategoriesCollectionChanged;
+                    Categories = new ObservableCollection<CategoryModel>(competitionCategories);
+                    Categories.CollectionChanged += OnCategoriesCollectionChanged;
+
+                    Model.Categories = competitionCategories;
                 }
-
-                Categories.CollectionChanged -= OnCategoriesCollectionChanged;
-                Categories = new ObservableCollection<CategoryModel>(competitionCategories);
-                Categories.CollectionChanged += OnCategoriesCollectionChanged;
-
-                Model.Categories = competitionCategories;
             }
+            Validate();
         }
-        Validate();
+        finally
+        {
+            IsBusy = false;
+        }
     }    
     #endregion
 

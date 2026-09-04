@@ -111,31 +111,39 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     {
         if (Category == null) return;
 
-        // Try to load existing draw from DB
-
-        if (IsKnockouts)
+        IsBusy = true;
+        try
         {
-            var draws = await _repository.GetAllAsync("DrawKnockouts.Competitor1", "DrawKnockouts.Competitor2");
-            var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
+            // Try to load existing draw from DB
 
-            InitializeKnockout(existingDraw);
+            if (IsKnockouts)
+            {
+                var draws = await _repository.GetAllAsync("DrawKnockouts.Competitor1", "DrawKnockouts.Competitor2");
+                var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
+
+                InitializeKnockout(existingDraw);
+            }
+            else if (IsPools)
+            {
+                var draws = await _repository.GetAllAsync("DrawPools.Competitor1", "DrawPools.Competitor2");
+                var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
+
+                InitializePools(existingDraw);
+            }
+            else if (IsOrder)
+            {
+                var draws = await _repository.GetAllAsync("DrawOrders.Competitor");
+                var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
+
+                InitializeOrder(existingDraw);
+            }
+
+            OnPropertyChanged(nameof(Rounds));
         }
-        else if (IsPools)
+        finally
         {
-            var draws = await _repository.GetAllAsync("DrawPools.Competitor1", "DrawPools.Competitor2");
-            var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
-
-            InitializePools(existingDraw);
+            IsBusy = false;
         }
-        else if (IsOrder)
-        {
-            var draws = await _repository.GetAllAsync("DrawOrders.Competitor");
-            var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
-
-            InitializeOrder(existingDraw);
-        }
-
-        OnPropertyChanged(nameof(Rounds));
     }
 
     private void InitializeKnockout(DrawModel? existingDraw = null)
