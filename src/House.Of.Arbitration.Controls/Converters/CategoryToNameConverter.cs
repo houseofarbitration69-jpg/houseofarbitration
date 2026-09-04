@@ -25,8 +25,16 @@ public class CategoryToNameConverter : IValueConverter
                     return $"Sanda {category.AgeRange?.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{((weights!=String.Empty)?localizer.GetValue("WEIGHT_UNIT"):"")}";
                 case CategoryType.SandaLight:
                     return $"Sanda Light {category.AgeRange?.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
+                case CategoryType.SandaWushu:
+                    return $"Sanda Wushu {category.AgeRange?.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
+                case CategoryType.SandaTradi:
+                    return $"Sanda Tradi {category.AgeRange?.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
                 case CategoryType.Taolu:
                     return $"Taolu {category.AgeRange?.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")}";
+                case CategoryType.TaoluModerneNord:
+                    return $"Taolu Moderne Nord {category.AgeRange?.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")}";
+                case CategoryType.TaoluModerneSud:
+                    return $"Taolu Moderne Sud {category.AgeRange?.Label} {localizer.GetValue($"ENUM_GENRE_{category.Genre.ToString().ToUpper()}")}";
                 default:
                     return String.Empty;
             }

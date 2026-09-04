@@ -111,6 +111,12 @@
                     <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.SandaLight}">
                         <Setter Property="IsVisible" Value="True" />
                     </DataTrigger>
+                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.SandaWushu}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.SandaTradi}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
                 </VerticalStackLayout.Triggers>
             </VerticalStackLayout>
 
@@ -253,6 +259,12 @@
                         <Setter Property="IsVisible" Value="True" />
                     </DataTrigger>
                     <DataTrigger TargetType="Grid" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.SandaLight}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Grid" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.SandaWushu}">
+                        <Setter Property="IsVisible" Value="True" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Grid" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.SandaTradi}">
                         <Setter Property="IsVisible" Value="True" />
                     </DataTrigger>
                 </Grid.Triggers>

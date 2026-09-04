@@ -72,6 +72,54 @@
                         />
                     </VerticalStackLayout>
 
+                    <!-- Type Field -->
+                    <VerticalStackLayout Spacing="5">
+                        <Label 
+                            Text="{Binding Resources.COMPETITION_TYPE}" 
+                            Style="{StaticResource FormLabelStyle}"
+                            Margin="10,0" 
+                        />
+                        
+                        <Border 
+                            x:Name="TypeBorder"
+                            Stroke="{DynamicResource ValidColor}"
+                            StrokeThickness="1"
+                            BackgroundColor="{DynamicResource EntryBackgroundColor}"
+                            Padding="12,4"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding SelectedType.Value, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                    <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid RowDefinitions="40" ColumnDefinitions="Auto, *">
+                                <Label 
+                                    Grid.Column="0"
+                                    Text="{x:Static helpers:FontCustomIcons.CATEGORY}" 
+                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    VerticalOptions="Center" 
+                                    Margin="0,0,10,0" 
+                                />
+                                <Picker 
+                                    Grid.Column="1"
+                                    ItemsSource="{Binding CompetitionTypes}"
+                                    SelectedItem="{Binding SelectedType, Mode=TwoWay}"
+                                    ItemDisplayBinding="{Binding DisplayName}"
+                                    TextColor="Black"
+                                    BackgroundColor="Transparent"
+                                />
+                            </Grid>
+                        </Border>
+                        <Label 
+                            Text="{Binding Resources.TYPE_REQUIRED}" 
+                            Style="{StaticResource FormRequiredMessageStyle}"
+                            IsVisible="{Binding SelectedType.Value, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Invert'}" 
+                        />
+                    </VerticalStackLayout>
+
                     <VerticalStackLayout Spacing="5">
                         <!-- Date Field -->
                         <Label 

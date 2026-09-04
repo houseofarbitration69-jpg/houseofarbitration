@@ -143,7 +143,7 @@ public class WarningService : IWarningService
         }
 
         // Weight Warning (only for Sanda style categories)
-        if (category != null && category.Type == CategoryType.Sanda || category != null && category.Type == CategoryType.SandaLight)
+        if (category != null && (category.Type == CategoryType.Sanda || category.Type == CategoryType.SandaLight || category.Type == CategoryType.SandaWushu || category.Type == CategoryType.SandaTradi))
         {
             if (competitor != null && competitor.Weight < category.WeightMin || competitor != null && competitor.Weight > category.WeightMax)
             {

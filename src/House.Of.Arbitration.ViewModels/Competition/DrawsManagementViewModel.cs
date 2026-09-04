@@ -113,7 +113,7 @@ public partial class DrawsManagementViewModel : BaseViewModel
 
             foreach (var category in _categories)
             {
-                if (category.Type == CategoryType.Taolu)
+                if (category.Type == CategoryType.Taolu || category.Type == CategoryType.TaoluModerneNord || category.Type == CategoryType.TaoluModerneSud)
                 {
                     category.RoundType = RoundType.Order;
                 }

@@ -6,6 +6,7 @@ using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
@@ -14,6 +15,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
 {
     #region Attributs
     private CategoryModel? _category;
+    private CompetitionType _competitionType = CompetitionType.None;
 
     private string _title = String.Empty;
 
@@ -27,6 +29,21 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
 
     #region Properties
     /// <summary>
+    /// Obtient ou définit le type de compétition
+    /// </summary>
+    public CompetitionType CompetitionType
+    {
+        get => _competitionType;
+        set
+        {
+            if (SetProperty(ref _competitionType, value))
+            {
+                UpdateCategoryTypes();
+            }
+        }
+    }
+
+    /// <summary>
     /// Obtient ou définit la catégorie
     /// </summary>
     public CategoryModel? Category
@@ -39,6 +56,11 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
             if (value != null)
             {
                 Title = Resources.UPDATE_CATEGORY;
+                if (value.Competition != null && value.Competition.Type != CompetitionType.None)
+                {
+                    CompetitionType = value.Competition.Type;
+                }
+                UpdateCategoryTypes();
                 SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == value.Type);
                 SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == value.RoundType);
                 SelectedGenre = Genres.FirstOrDefault(x => x.Value == value.Genre);
@@ -54,8 +76,10 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         get => _selectedType;
         set
         {
-            SetProperty(ref _selectedType, value);
-            ValidateCommand.NotifyCanExecuteChanged();
+            if (SetProperty(ref _selectedType, value))
+            {
+                ValidateCommand.NotifyCanExecuteChanged();
+            }
         }
     }
 
@@ -64,8 +88,10 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         get => _selectedRoundType;
         set
         {
-            SetProperty(ref _selectedRoundType, value);
-            ValidateCommand.NotifyCanExecuteChanged();
+            if (SetProperty(ref _selectedRoundType, value))
+            {
+                ValidateCommand.NotifyCanExecuteChanged();
+            }
         }
     }
 
@@ -74,8 +100,10 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         get => _selectedGenre;
         set
         {
-            SetProperty(ref _selectedGenre, value);
-            ValidateCommand.NotifyCanExecuteChanged();
+            if (SetProperty(ref _selectedGenre, value))
+            {
+                ValidateCommand.NotifyCanExecuteChanged();
+            }
         }
     }
 
@@ -84,8 +112,10 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         get => _selectedAgeRange;
         set
         {
-            SetProperty(ref _selectedAgeRange, value);
-            ValidateCommand.NotifyCanExecuteChanged();
+            if (SetProperty(ref _selectedAgeRange, value))
+            {
+                ValidateCommand.NotifyCanExecuteChanged();
+            }
         }
     }
 
@@ -107,7 +137,7 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         set => SetProperty(ref _title, value);
     }
 
-    public List<LocalizedEnum<CategoryType>> CategoryTypes { get; }
+    public ObservableCollection<LocalizedEnum<CategoryType>> CategoryTypes { get; } = new();
 
     public List<LocalizedEnum<RoundType>> RoundTypes { get; }
 
@@ -123,10 +153,11 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         Title = resourceProvider.NEW_CATEGORY;
 
         // Initialisation des listes traduites via le manager global
-        CategoryTypes = LocalizeEnum<CategoryType>("ENUM_CATEGORY_");
         RoundTypes = LocalizeEnum<RoundType>("ENUM_ROUND_");
         Genres = LocalizeEnum<Genre>("ENUM_GENRE_");
         AgeRanges = AgeRangeModel.DefaultRanges;
+
+        UpdateCategoryTypes();
 
         // Valeurs par défaut
         SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == CategoryType.None);
@@ -139,6 +170,15 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     #region Implement IQueryAttributable
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.ContainsKey(nameof(CompetitionType)))
+        {
+            CompetitionType = (CompetitionType)query[nameof(CompetitionType)];
+        }
+        else if (query.ContainsKey("CompetitionType"))
+        {
+            CompetitionType = (CompetitionType)query["CompetitionType"];
+        }
+
         if (query.ContainsKey(nameof(CategoryPopupViewModel.Category)))
         {
             Category = (CategoryModel?)query[nameof(CategoryPopupViewModel.Category)];
@@ -155,9 +195,39 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
             .ToList();
     }
 
+    private void UpdateCategoryTypes()
+    {
+        var currentSelectedValue = SelectedType?.Value ?? _category?.Type ?? CategoryType.None;
+        var allTypes = LocalizeEnum<CategoryType>("ENUM_CATEGORY_");
+        List<LocalizedEnum<CategoryType>> filtered;
+
+        if (CompetitionType == CompetitionType.Taolu)
+        {
+            filtered = allTypes.Where(t => t.Value == CategoryType.None || t.Value == CategoryType.Taolu || t.Value == CategoryType.TaoluModerneNord || t.Value == CategoryType.TaoluModerneSud).ToList();
+        }
+        else if (CompetitionType == CompetitionType.Sanda)
+        {
+            filtered = allTypes.Where(t => t.Value == CategoryType.None || t.Value == CategoryType.Sanda || t.Value == CategoryType.SandaLight || t.Value == CategoryType.SandaWushu || t.Value == CategoryType.SandaTradi).ToList();
+        }
+        else
+        {
+            filtered = allTypes;
+        }
+
+        CategoryTypes.Clear();
+        foreach (var item in filtered)
+        {
+            CategoryTypes.Add(item);
+        }
+
+        SelectedType = CategoryTypes.FirstOrDefault(x => x.Value == currentSelectedValue)
+            ?? CategoryTypes.FirstOrDefault(x => x.Value == CategoryType.None)
+            ?? CategoryTypes.FirstOrDefault();
+    }
+
     public CategoryModel GetResult()
     {
-        if(SelectedRoundType == null || SelectedRoundType.Value == RoundType.None)
+        if (SelectedRoundType == null || SelectedRoundType.Value == RoundType.None)
         {
             SelectedRoundType = RoundTypes.FirstOrDefault(x => x.Value == RoundType.Order);
         }
@@ -196,7 +266,14 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
         result = result && (SelectedGenre != null && SelectedGenre.Value != Genre.None);
         result = result && (SelectedAgeRange != null && SelectedAgeRange.Id > 0);
 
-        result = result && ((SelectedType != null && (SelectedType.Value == CategoryType.Sanda || SelectedType.Value == CategoryType.SandaLight)) ? (SelectedRoundType != null && SelectedRoundType.Value != RoundType.None) : true);
+        bool isSanda = SelectedType != null && (
+            SelectedType.Value == CategoryType.Sanda || 
+            SelectedType.Value == CategoryType.SandaLight || 
+            SelectedType.Value == CategoryType.SandaWushu || 
+            SelectedType.Value == CategoryType.SandaTradi
+        );
+
+        result = result && (!isSanda || (SelectedRoundType != null && SelectedRoundType.Value != RoundType.None));
 
         return result;
     }

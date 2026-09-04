@@ -160,8 +160,12 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     [RelayCommand]
     private async Task AddCategory()
     {
-        // On passe une action vide pour satisfaire la signature de la méthode
-        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(Shell.Current, null);
+        var queryAttributes = new Dictionary<string, object>
+        {
+            [nameof(CategoryPopupViewModel.CompetitionType)] = Model?.Type ?? CompetitionType.None
+        };
+
+        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(Shell.Current, options: PopupOptions.Empty, shellParameters: queryAttributes);
 
         if (result != null && result.Result != null)
         {
@@ -180,7 +184,8 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     {
         var queryAttributes = new Dictionary<string, object>
         {
-            [nameof(CategoryPopupViewModel.Category)] = category
+            [nameof(CategoryPopupViewModel.Category)] = category,
+            [nameof(CategoryPopupViewModel.CompetitionType)] = Model?.Type ?? category.Competition?.Type ?? CompetitionType.None
         };
 
         // On passe une action vide pour satisfaire la signature de la méthode

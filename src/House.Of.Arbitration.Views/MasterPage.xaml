@@ -137,6 +137,19 @@
                                     FontSize="12" 
                                     TextColor="Gray" 
                                 />
+
+                                <Label 
+                                    Text="•" 
+                                    FontSize="12" 
+                                    TextColor="Gray" 
+                                />
+
+                                <Label 
+                                    Text="{Binding Type}" 
+                                    FontSize="12" 
+                                    FontAttributes="Bold"
+                                    TextColor="{DynamicResource ValidColor}" 
+                                />
                             </HorizontalStackLayout>
 
                             <controls:ScrollingText 
@@ -159,6 +172,13 @@
                                 <Label 
                                     Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
                                     TextColor="{DynamicResource PrimaryTextColor}" 
+                                    VerticalOptions="Center" 
+                                />
+
+                                <Label 
+                                    Text="{Binding Type}" 
+                                    TextColor="{DynamicResource ValidColor}" 
+                                    FontAttributes="Bold"
                                     VerticalOptions="Center" 
                                 />
 

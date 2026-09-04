@@ -22,7 +22,22 @@ public partial class CompetitionModel : ObservableObject
     public DateTime Date { get; set; } = DateTime.Now;
 
     /// <summary>
+    /// Obtient ou définit le type de la compétition
+    /// </summary>
+    public CompetitionType Type { get; set; }
+
+    /// <summary>
     /// Obtient ou définit la liste des catégories de la compétition
     /// </summary>
     public List<CategoryModel> Categories { get; set; } = new();
+}
+
+/// <summary>
+/// Enumération des types de compétition
+/// </summary>
+public enum CompetitionType
+{
+    None,
+    Taolu,
+    Sanda
 }

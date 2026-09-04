@@ -749,41 +749,9 @@ public partial class HomeViewModel : BaseViewModel
                 Id = 1,
                 Date = new DateTime(2026, 2, 14),
                 Name = "Championnat de France 2025-2026",
+                Type = CompetitionType.Sanda
             };
             await _competitions.AddAsync(competition);
-
-            #region Taolu
-            category = new CategoryModel()
-            {
-                Id = 100,
-                AgeRangeId = 1,
-                Genre = Genre.Men,
-                RoundType = RoundType.Order,
-                Type = CategoryType.Taolu,
-                CompetitionId = 1
-            };
-            await _categories.AddAsync(category);
-
-            competitor = new CompetitorModel()
-            {
-                Id = 102,
-                FirstName = "Firsname",
-                LastName = "Lastname",
-                Club = "Punch Team Sanda",
-                BirthDate = new DateTime(2013, 1, 20),
-                Genre = Genre.Men,
-                CountryIsoCode = "FR"
-            };
-            await _competitors.AddAsync(competitor);
-
-            await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 102 });
-
-            draw = new DrawModel() { Id = 100, CategoryId = 100 };
-            await _draws.AddAsync(draw);
-
-            drawOrder = new DrawOrderModel() { Id = 100, Order = 95, CompetitorId = 102, DrawId = 100, GlobalOrder = 0 };
-            await _drawOrders.AddAsync(drawOrder);
-            #endregion
 
             #region Sanda Light / Masculin / Cadets / -65kg
         category = new CategoryModel()
@@ -3052,9 +3020,42 @@ public partial class HomeViewModel : BaseViewModel
 
         drawKnockout = new DrawKnockoutModel() { Id = 82, Order = 1, Competitor1Id = 100, Competitor2Id = 101, DrawId = 30, GlobalOrder = 75 };
         await _drawKnockouts.AddAsync(drawKnockout);
-        #endregion
+            #endregion
 
-        await Shell.Current.DisplayAlertAsync(Resources.APPLICATION_NAME, Resources.DATA_GENERATED, "OK");
+            #region Taolu
+            category = new CategoryModel()
+            {
+                Id = 100,
+                AgeRangeId = 1,
+                Genre = Genre.Men,
+                RoundType = RoundType.Order,
+                Type = CategoryType.Taolu,
+                CompetitionId = 1
+            };
+            await _categories.AddAsync(category);
+
+            competitor = new CompetitorModel()
+            {
+                Id = 102,
+                FirstName = "Firsname",
+                LastName = "Lastname",
+                Club = "Punch Team Sanda",
+                BirthDate = new DateTime(2013, 1, 20),
+                Genre = Genre.Men,
+                CountryIsoCode = "FR"
+            };
+            await _competitors.AddAsync(competitor);
+
+            await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 102 });
+
+            draw = new DrawModel() { Id = 100, CategoryId = 100 };
+            await _draws.AddAsync(draw);
+
+            drawOrder = new DrawOrderModel() { Id = 100, Order = 1, CompetitorId = 102, DrawId = 100, GlobalOrder = 95 };
+            await _drawOrders.AddAsync(drawOrder);
+            #endregion
+
+            await Shell.Current.DisplayAlertAsync(Resources.APPLICATION_NAME, Resources.DATA_GENERATED, "OK");
     }
     catch (Exception ex)
     {

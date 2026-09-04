@@ -344,6 +344,12 @@
                             <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Category.Type}" Value="{x:Static models:CategoryType.Taolu}">
                                 <Setter Property="IsVisible" Value="False" />
                             </DataTrigger>
+                            <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Category.Type}" Value="{x:Static models:CategoryType.TaoluModerneNord}">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Category.Type}" Value="{x:Static models:CategoryType.TaoluModerneSud}">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
                         </VerticalStackLayout.Triggers>
                     </VerticalStackLayout>
                 </VerticalStackLayout>

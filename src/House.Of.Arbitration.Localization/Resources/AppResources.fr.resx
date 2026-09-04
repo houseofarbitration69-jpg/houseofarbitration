@@ -198,11 +198,41 @@
   <data name="ENUM_CATEGORY_SANDALIGHT" xml:space="preserve">
     <value>Sanda Light</value>
   </data>
+  <data name="ENUM_CATEGORY_SANDAWUSHU" xml:space="preserve">
+    <value>Sanda Wushu</value>
+  </data>
+  <data name="ENUM_CATEGORY_SANDATRADI" xml:space="preserve">
+    <value>Sanda Tradi</value>
+  </data>
   <data name="ENUM_CATEGORY_NONE" xml:space="preserve">
     <value>Sélectionnez une catégorie</value>
   </data>
   <data name="ENUM_CATEGORY_TAOLU" xml:space="preserve">
     <value>Taolu</value>
+  </data>
+  <data name="ENUM_CATEGORY_TAOLUMODERNENORD" xml:space="preserve">
+    <value>Taolu Moderne Nord</value>
+  </data>
+  <data name="ENUM_CATEGORY_TAOLUMODERNESUD" xml:space="preserve">
+    <value>Taolu Moderne Sud</value>
+  </data>
+  <data name="ENUM_COMPETITION_NONE" xml:space="preserve">
+    <value>Sélectionnez un type</value>
+  </data>
+  <data name="ENUM_COMPETITION_TAOLU" xml:space="preserve">
+    <value>Taolu</value>
+  </data>
+  <data name="ENUM_COMPETITION_SANDA" xml:space="preserve">
+    <value>Sanda</value>
+  </data>
+  <data name="COMPETITION_TYPE" xml:space="preserve">
+    <value>Type de compétition</value>
+  </data>
+  <data name="PLACEHOLDER_COMPETITION_TYPE" xml:space="preserve">
+    <value>Sélectionnez le type</value>
+  </data>
+  <data name="TYPE_REQUIRED" xml:space="preserve">
+    <value>Le type est obligatoire</value>
   </data>
   <data name="ENUM_ROUND_KNOCKOUTS" xml:space="preserve">
     <value>Eliminatoire</value>

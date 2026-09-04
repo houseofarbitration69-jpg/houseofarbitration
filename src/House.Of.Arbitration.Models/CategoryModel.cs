@@ -99,8 +99,16 @@ public partial class CategoryModel : ObservableObject
                     return $"Sanda {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
                 case CategoryType.SandaLight:
                     return $"Sanda Light {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
+                case CategoryType.SandaWushu:
+                    return $"Sanda Wushu {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
+                case CategoryType.SandaTradi:
+                    return $"Sanda Tradi {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")} {weights}{((weights != String.Empty) ? localizer.GetValue("WEIGHT_UNIT") : "")}";
                 case CategoryType.Taolu:
                     return $"Taolu {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")}";
+                case CategoryType.TaoluModerneNord:
+                    return $"Taolu Moderne Nord {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")}";
+                case CategoryType.TaoluModerneSud:
+                    return $"Taolu Moderne Sud {AgeRange?.Label ?? String.Empty} {localizer.GetValue($"ENUM_GENRE_{Genre.ToString().ToUpper()}")}";
                 default:
                     return String.Empty;
             }
@@ -116,7 +124,11 @@ public enum CategoryType
     None,
     Sanda,
     SandaLight,
-    Taolu
+    SandaWushu,
+    SandaTradi,
+    Taolu,
+    TaoluModerneNord,
+    TaoluModerneSud
 }
 
 /// <summary>

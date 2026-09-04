@@ -11,6 +11,7 @@
     <converters:CategoryToNameConverter x:Key="CategoryToNameConverter" />
     <converters:CategoryToWarningBoolConverter x:Key="CategoryToWarningBoolConverter" />
     <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
+    <converters:CompetitionTypeToBoolConverter x:Key="CompetitionTypeToBoolConverter" />
     <converters:CompetitorToWarningsConverter x:Key="CompetitorToWarningsConverter" />
     <converters:DoubleToCornerRadiusConverter x:Key="DoubleToCornerRadiusConverter" />
     <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />

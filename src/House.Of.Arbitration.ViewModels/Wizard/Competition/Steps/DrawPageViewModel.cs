@@ -50,7 +50,7 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             {
                 if (value != null)
                 {
-                    if (value.Type == CategoryType.Taolu)
+                    if (value.Type == CategoryType.Taolu || value.Type == CategoryType.TaoluModerneNord || value.Type == CategoryType.TaoluModerneSud)
                     {
                         value.RoundType = RoundType.Order;
                     }

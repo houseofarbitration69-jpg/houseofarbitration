@@ -198,11 +198,41 @@
   <data name="ENUM_CATEGORY_SANDALIGHT" xml:space="preserve">
     <value>[ENUM CATEGORY SANDA LIGHT]</value>
   </data>
+  <data name="ENUM_CATEGORY_SANDAWUSHU" xml:space="preserve">
+    <value>[ENUM CATEGORY SANDA WUSHU]</value>
+  </data>
+  <data name="ENUM_CATEGORY_SANDATRADI" xml:space="preserve">
+    <value>[ENUM CATEGORY SANDA TRADI]</value>
+  </data>
   <data name="ENUM_CATEGORY_NONE" xml:space="preserve">
     <value>[ENUM CATEGORY NONE]</value>
   </data>
   <data name="ENUM_CATEGORY_TAOLU" xml:space="preserve">
     <value>[ENUM CATEGORY TAOLU]</value>
+  </data>
+  <data name="ENUM_CATEGORY_TAOLUMODERNENORD" xml:space="preserve">
+    <value>[ENUM CATEGORY TAOLU MODERNE NORD]</value>
+  </data>
+  <data name="ENUM_CATEGORY_TAOLUMODERNESUD" xml:space="preserve">
+    <value>[ENUM CATEGORY TAOLU MODERNE SUD]</value>
+  </data>
+  <data name="ENUM_COMPETITION_NONE" xml:space="preserve">
+    <value>[ENUM COMPETITION NONE]</value>
+  </data>
+  <data name="ENUM_COMPETITION_TAOLU" xml:space="preserve">
+    <value>[ENUM COMPETITION TAOLU]</value>
+  </data>
+  <data name="ENUM_COMPETITION_SANDA" xml:space="preserve">
+    <value>[ENUM COMPETITION SANDA]</value>
+  </data>
+  <data name="COMPETITION_TYPE" xml:space="preserve">
+    <value>[COMPETITION TYPE]</value>
+  </data>
+  <data name="PLACEHOLDER_COMPETITION_TYPE" xml:space="preserve">
+    <value>[SELECT COMPETITION TYPE]</value>
+  </data>
+  <data name="TYPE_REQUIRED" xml:space="preserve">
+    <value>[TYPE REQUIRED]</value>
   </data>
   <data name="ENUM_ROUND_KNOCKOUTS" xml:space="preserve">
     <value>[ENUM ROUND KNOCKOUT]</value>

@@ -7,6 +7,29 @@ public class CategoryTypeToBoolConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
+        if (value is CategoryType ct)
+        {
+            if (parameter is string paramStr)
+            {
+                if (paramStr == "Invert") return ct == CategoryType.None;
+
+                bool isNot = paramStr.StartsWith("Not");
+                string targetName = isNot ? paramStr.Substring(3) : paramStr;
+
+                if (Enum.TryParse<CategoryType>(targetName, out var target))
+                {
+                    bool isEqual = ct == target;
+                    return isNot ? !isEqual : isEqual;
+                }
+            }
+            else if (parameter is CategoryType target)
+            {
+                return ct == target;
+            }
+
+            return ct != CategoryType.None;
+        }
+
         RoundType? roundType = null;
         if (value is RoundType rt)
         {

@@ -338,6 +338,24 @@ namespace House.Of.Arbitration.Localization.Resources {
                 return ResourceManager.GetString("ENUM_CATEGORY_SANDALIGHT", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [ENUM CATEGORY SANDA WUSHU].
+        /// </summary>
+        public static string ENUM_CATEGORY_SANDAWUSHU {
+            get {
+                return ResourceManager.GetString("ENUM_CATEGORY_SANDAWUSHU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [ENUM CATEGORY SANDA TRADI].
+        /// </summary>
+        public static string ENUM_CATEGORY_SANDATRADI {
+            get {
+                return ResourceManager.GetString("ENUM_CATEGORY_SANDATRADI", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to [ENUM CATEGORY TAOLU].
@@ -345,6 +363,78 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string ENUM_CATEGORY_TAOLU {
             get {
                 return ResourceManager.GetString("ENUM_CATEGORY_TAOLU", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [ENUM CATEGORY TAOLU MODERNE NORD].
+        /// </summary>
+        public static string ENUM_CATEGORY_TAOLUMODERNENORD {
+            get {
+                return ResourceManager.GetString("ENUM_CATEGORY_TAOLUMODERNENORD", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [ENUM CATEGORY TAOLU MODERNE SUD].
+        /// </summary>
+        public static string ENUM_CATEGORY_TAOLUMODERNESUD {
+            get {
+                return ResourceManager.GetString("ENUM_CATEGORY_TAOLUMODERNESUD", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [ENUM COMPETITION NONE].
+        /// </summary>
+        public static string ENUM_COMPETITION_NONE {
+            get {
+                return ResourceManager.GetString("ENUM_COMPETITION_NONE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [ENUM COMPETITION TAOLU].
+        /// </summary>
+        public static string ENUM_COMPETITION_TAOLU {
+            get {
+                return ResourceManager.GetString("ENUM_COMPETITION_TAOLU", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [ENUM COMPETITION SANDA].
+        /// </summary>
+        public static string ENUM_COMPETITION_SANDA {
+            get {
+                return ResourceManager.GetString("ENUM_COMPETITION_SANDA", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [COMPETITION TYPE].
+        /// </summary>
+        public static string COMPETITION_TYPE {
+            get {
+                return ResourceManager.GetString("COMPETITION_TYPE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [SELECT COMPETITION TYPE].
+        /// </summary>
+        public static string PLACEHOLDER_COMPETITION_TYPE {
+            get {
+                return ResourceManager.GetString("PLACEHOLDER_COMPETITION_TYPE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to [TYPE REQUIRED].
+        /// </summary>
+        public static string TYPE_REQUIRED {
+            get {
+                return ResourceManager.GetString("TYPE_REQUIRED", resourceCulture);
             }
         }
         

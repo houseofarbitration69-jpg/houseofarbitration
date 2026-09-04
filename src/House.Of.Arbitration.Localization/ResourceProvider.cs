@@ -158,6 +158,16 @@ LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_SANDA));
     public string ENUM_CATEGORY_SANDALIGHT =>
 LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_SANDALIGHT));
     /// <summary>
+    /// Gets the translated "ENUM_CATEGORY_SANDAWUSHU" string.
+    /// </summary>
+    public string ENUM_CATEGORY_SANDAWUSHU =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_SANDAWUSHU));
+    /// <summary>
+    /// Gets the translated "ENUM_CATEGORY_SANDATRADI" string.
+    /// </summary>
+    public string ENUM_CATEGORY_SANDATRADI =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_SANDATRADI));
+    /// <summary>
     /// Gets the translated "ENUM_CATEGORY_NONE" string.
     /// </summary>
     public string ENUM_CATEGORY_NONE =>
@@ -167,6 +177,46 @@ LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_NONE));
     /// </summary>
     public string ENUM_CATEGORY_TAOLU =>
 LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_TAOLU));
+    /// <summary>
+    /// Gets the translated "ENUM_CATEGORY_TAOLUMODERNENORD" string.
+    /// </summary>
+    public string ENUM_CATEGORY_TAOLUMODERNENORD =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_TAOLUMODERNENORD));
+    /// <summary>
+    /// Gets the translated "ENUM_CATEGORY_TAOLUMODERNESUD" string.
+    /// </summary>
+    public string ENUM_CATEGORY_TAOLUMODERNESUD =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_CATEGORY_TAOLUMODERNESUD));
+    /// <summary>
+    /// Gets the translated "ENUM_COMPETITION_NONE" string.
+    /// </summary>
+    public string ENUM_COMPETITION_NONE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_COMPETITION_NONE));
+    /// <summary>
+    /// Gets the translated "ENUM_COMPETITION_TAOLU" string.
+    /// </summary>
+    public string ENUM_COMPETITION_TAOLU =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_COMPETITION_TAOLU));
+    /// <summary>
+    /// Gets the translated "ENUM_COMPETITION_SANDA" string.
+    /// </summary>
+    public string ENUM_COMPETITION_SANDA =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENUM_COMPETITION_SANDA));
+    /// <summary>
+    /// Gets the translated "COMPETITION_TYPE" string.
+    /// </summary>
+    public string COMPETITION_TYPE =>
+LocalizationResourceManager.Instance.GetValue(nameof(COMPETITION_TYPE));
+    /// <summary>
+    /// Gets the translated "PLACEHOLDER_COMPETITION_TYPE" string.
+    /// </summary>
+    public string PLACEHOLDER_COMPETITION_TYPE =>
+LocalizationResourceManager.Instance.GetValue(nameof(PLACEHOLDER_COMPETITION_TYPE));
+    /// <summary>
+    /// Gets the translated "TYPE_REQUIRED" string.
+    /// </summary>
+    public string TYPE_REQUIRED =>
+LocalizationResourceManager.Instance.GetValue(nameof(TYPE_REQUIRED));
     /// <summary>
     /// Gets the translated "ENUM_ROUND_KNOCKOUTS" string.
     /// </summary>
