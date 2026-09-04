@@ -781,7 +781,7 @@ public partial class HomeViewModel : BaseViewModel
             draw = new DrawModel() { Id = 100, CategoryId = 100 };
             await _draws.AddAsync(draw);
 
-            drawOrder = new DrawOrderModel() { Id = 100, Order = 1, CompetitorId = 102, DrawId = 100, GlobalOrder = 0 };
+            drawOrder = new DrawOrderModel() { Id = 100, Order = 95, CompetitorId = 102, DrawId = 100, GlobalOrder = 0 };
             await _drawOrders.AddAsync(drawOrder);
             #endregion
 
