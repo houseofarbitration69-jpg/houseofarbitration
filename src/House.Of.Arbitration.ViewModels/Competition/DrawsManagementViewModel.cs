@@ -14,10 +14,11 @@ using System.Collections.ObjectModel;
 namespace House.Of.Arbitration.ViewModels.Competition;
 
 [QueryProperty(nameof(CompetitionId), "CompetitionId")]
-public partial class DrawsManagementViewModel : BaseViewModel
+public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
     private readonly IRepository<CompetitionModel> _competitionRepository;
+    private readonly IRepository<CategoryModel> _categoryRepository;
     private readonly IRepository<DrawModel> _drawRepository;
     #endregion
 
@@ -35,13 +36,7 @@ public partial class DrawsManagementViewModel : BaseViewModel
     public int CompetitionId
     {
         get => _competitionId;
-        set
-        {
-            if (SetProperty(ref _competitionId, value))
-            {
-                MainThread.BeginInvokeOnMainThread(async () => await LoadCompetitionAsync());
-            }
-        }
+        set => SetProperty(ref _competitionId, value);
     }
 
     public CompetitionModel? Competition
@@ -77,17 +72,53 @@ public partial class DrawsManagementViewModel : BaseViewModel
         ILogger<DrawsManagementViewModel> logger, 
         ResourceProvider resourceProvider, 
         IRepository<CompetitionModel> competitionRepository,
+        IRepository<CategoryModel> categoryRepository,
         IRepository<DrawModel> drawRepository)
         : base(logger, resourceProvider, popupService)
     {
         _competitionRepository = competitionRepository;
+        _categoryRepository = categoryRepository;
         _drawRepository = drawRepository;
+    }
+    #endregion
+
+    #region Implement IQueryAttributable
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue(nameof(CompetitionId), out var compIdObj) || query.TryGetValue("CompetitionId", out compIdObj))
+        {
+            int newId = 0;
+            if (compIdObj is int id)
+            {
+                newId = id;
+            }
+            else if (int.TryParse(compIdObj?.ToString(), out int parsedId))
+            {
+                newId = parsedId;
+            }
+
+            CompetitionId = newId;
+            MainThread.BeginInvokeOnMainThread(async () => await LoadCompetitionAsync());
+        }
+    }
+    #endregion
+
+    #region Override Methods
+    public override async Task OnAppearing()
+    {
+        await base.OnAppearing();
+        if (CompetitionId > 0 && (_categories == null || _categories.Count == 0 || _allMatches.Count == 0))
+        {
+            await LoadCompetitionAsync();
+        }
     }
     #endregion
 
     #region Private Methods
     private async Task LoadCompetitionAsync()
     {
+        if (CompetitionId <= 0) return;
+
         IsBusy = true;
         try
         {
@@ -95,8 +126,28 @@ public partial class DrawsManagementViewModel : BaseViewModel
                 "Categories.AgeRange", 
                 "Categories.Competitors.Competitor.Country");
 
-            if (Competition == null || Competition.Categories == null) return;
-            _categories = Competition.Categories.ToList();
+            var allCategories = await _categoryRepository.GetAllAsync(
+                "AgeRange", 
+                "Competitors.Competitor.Country", 
+                "Competitors.Warnings");
+
+            var compCategories = allCategories?.Where(c => c.CompetitionId == CompetitionId).ToList() ?? new List<CategoryModel>();
+
+            if (Competition != null)
+            {
+                Competition.Categories = compCategories;
+            }
+
+            _categories = compCategories;
+
+            if (_categories.Count == 0)
+            {
+                _allMatches.Clear();
+                RefreshDisplayList();
+                return;
+            }
+
+            var categoryIds = _categories.Select(c => c.Id).ToHashSet();
 
             var allDraws = (await _drawRepository.GetAllAsync(
                 "DrawKnockouts.Competitor1.Country",
@@ -107,7 +158,7 @@ public partial class DrawsManagementViewModel : BaseViewModel
                 "DrawPools.Competitor2.Country",
                 "DrawPools.Winner",
                 "DrawPools.Looser",
-                "DrawOrders.Competitor.Country"))?.Where(d => _categories.Any(c => c.Id == d.CategoryId)).ToList();
+                "DrawOrders.Competitor.Country"))?.Where(d => categoryIds.Contains(d.CategoryId)).ToList();
 
             _allMatches.Clear();
 

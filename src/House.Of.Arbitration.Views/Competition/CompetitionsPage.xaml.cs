@@ -23,6 +23,17 @@ public partial class CompetitionsPage : BasePage<CompetitionsViewModel>
         }
     }
 
+    private async void OnDrawsClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Models.CompetitionModel comp)
+        {
+            if (BindingContext is CompetitionsViewModel vm)
+            {
+                await vm.DrawsCommand.ExecuteAsync(comp);
+            }
+        }
+    }
+
     private async void OnStartClicked(object sender, EventArgs e)
     {
         if (sender is Button btn && btn.CommandParameter is Models.CompetitionModel comp)

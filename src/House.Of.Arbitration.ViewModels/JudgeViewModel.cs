@@ -62,6 +62,8 @@ public partial class JudgeViewModel : BaseViewModel
     };
 
     private IDrawModel? _currentDraw;
+    private CompetitionModel? _currentCompetition;
+    private CompetitionType _competitionType = CompetitionType.Sanda;
     #endregion
 
     #region Properties
@@ -70,6 +72,28 @@ public partial class JudgeViewModel : BaseViewModel
         get => _title;
         set => SetProperty(ref _title, value);
     }
+
+    public CompetitionModel? CurrentCompetition
+    {
+        get => _currentCompetition;
+        set => SetProperty(ref _currentCompetition, value);
+    }
+
+    public CompetitionType CompetitionType
+    {
+        get => _competitionType;
+        set
+        {
+            if (SetProperty(ref _competitionType, value))
+            {
+                OnPropertyChanged(nameof(IsTaolu));
+                OnPropertyChanged(nameof(IsSanda));
+            }
+        }
+    }
+
+    public bool IsTaolu => CompetitionType == CompetitionType.Taolu;
+    public bool IsSanda => CompetitionType != CompetitionType.Taolu;
 
     public bool IsScanning
     {
@@ -128,6 +152,9 @@ public partial class JudgeViewModel : BaseViewModel
     public ObservableCollection<DiscoveredDeviceModel> DiscoveredDevices { get; } = new();
     public ObservableCollection<MvtTimeCodeModel> Codes { get; } = new ObservableCollection<MvtTimeCodeModel>();
     public ObservableCollection<JudgeModel> JudgePositions { get; } = new();
+    public ObservableCollection<JudgeModel> JudgePositionsGroupA { get; } = new();
+    public ObservableCollection<JudgeModel> JudgePositionsGroupB { get; } = new();
+    public ObservableCollection<JudgeModel> JudgePositionsGroupC { get; } = new();
 
     public CompetitorModel? Competitor1
     {
@@ -193,6 +220,20 @@ public partial class JudgeViewModel : BaseViewModel
             JudgePositions.Add(new JudgeModel { Name = $"JUGE {i}", Number = i });
         }
 
+        // Taolu positions: Groupe A (1..3), Groupe B (1..3), Groupe C (1..2)
+        for (int i = 1; i <= 3; i++)
+        {
+            JudgePositionsGroupA.Add(new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "A" });
+        }
+        for (int i = 1; i <= 3; i++)
+        {
+            JudgePositionsGroupB.Add(new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "B" });
+        }
+        for (int i = 1; i <= 2; i++)
+        {
+            JudgePositionsGroupC.Add(new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "C" });
+        }
+
         _timer = Application.Current?.Dispatcher.CreateTimer();
         if (_timer != null)
         {
@@ -239,11 +280,20 @@ public partial class JudgeViewModel : BaseViewModel
 
     private void OnDeviceConnected(object? sender, string deviceId)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
+        MainThread.BeginInvokeOnMainThread(async () =>
         {
             _serverDeviceId = deviceId;
             IsConnected = true;
             IsScanning = false;
+
+            try
+            {
+                await _bluetoothClient.SendMessage(_serverDeviceId, Constants.Message.GET_COMPETITION);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error requesting competition from server");
+            }
         });
     }
 
@@ -301,6 +351,9 @@ public partial class JudgeViewModel : BaseViewModel
                     var competition = JsonSerializer.Deserialize<CompetitionModel>(content, _jsonOptions);
                     if (competition != null)
                     {
+                        CurrentCompetition = competition;
+                        CompetitionType = competition.Type;
+
                         // Clean the graph to avoid EF Core key/seed conflicts
                         CleanCompetitionGraph(competition);
 
@@ -486,7 +539,8 @@ public partial class JudgeViewModel : BaseViewModel
         {
             IsReceivingCompetition = true;
 
-            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{judge.Number}");
+            string positionCode = !string.IsNullOrEmpty(judge.Group) ? $"{judge.Group}_{judge.Number}" : judge.Number.ToString();
+            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{positionCode}");
         }
     }
 

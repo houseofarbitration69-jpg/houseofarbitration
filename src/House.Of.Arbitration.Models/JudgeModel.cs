@@ -13,9 +13,18 @@ public partial class JudgeModel : ObservableObject
     private bool _isConnected;
     private string _name = string.Empty;
     private int _number;
+    private string? _group;
     #endregion
 
     #region Properties
+    /// <summary>
+    /// Obtient ou définit le groupe du juge (ex: A, B, C)
+    /// </summary>
+    public string? Group
+    {
+        get => _group;
+        set => SetProperty(ref _group, value);
+    }
     /// <summary>
     /// Obtient ou définit les points rouge
     /// </summary>

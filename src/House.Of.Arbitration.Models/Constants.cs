@@ -1,4 +1,4 @@
-﻿namespace House.Of.Arbitration.Models;
+namespace House.Of.Arbitration.Models;
 
 public static class Constants
 {
@@ -18,6 +18,7 @@ public static class Constants
         public static string TIMER_SET = "TIMER_SET:";
 
         public static string COMPETITION_DATA = "COMPETITION_DATA:";
+        public static string GET_COMPETITION = "GET_COMPETITION";
         public static string MATCH_INFO = "MATCH_INFO:";
         public static string JUDGE_POSITION = "JUDGE_POSITION:";
         public static string JUDGE_DISCONNECT = "JUDGE_DISCONNECT";

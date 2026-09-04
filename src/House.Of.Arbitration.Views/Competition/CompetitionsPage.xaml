@@ -45,7 +45,7 @@
                                         </HorizontalStackLayout>
                                     </Border>
 
-                                    <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
+                                    <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10">
                                         <Button Grid.Column="0" 
                                                 Text="DÉTAILS"
                                                 BackgroundColor="Transparent"
@@ -56,6 +56,15 @@
                                                 CommandParameter="{Binding .}" />
                                         
                                         <Button Grid.Column="1" 
+                                                Text="TIRAGES"
+                                                BackgroundColor="Transparent"
+                                                TextColor="{DynamicResource PrimaryTextColor}"
+                                                BorderColor="{DynamicResource BorderColor}"
+                                                BorderWidth="1"
+                                                Clicked="OnDrawsClicked"
+                                                CommandParameter="{Binding .}" />
+                                        
+                                        <Button Grid.Column="2" 
                                                 Text="DÉMARRER"
                                                 BackgroundColor="{DynamicResource MartialRed}"
                                                 TextColor="White"

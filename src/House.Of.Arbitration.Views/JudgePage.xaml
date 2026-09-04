@@ -365,139 +365,309 @@
                     VerticalOptions="Center" 
                     HorizontalOptions="Center"
                 >
-                    <Label 
-                        Text="{Binding Resources.SELECT_POSITION}" 
-                        HorizontalOptions="Center" 
-                        FontSize="32" 
-                        FontAttributes="Bold" 
-                        TextColor="White"
-                        HorizontalTextAlignment="Center"
-                    />
-
-                    <Grid 
-                        RowDefinitions="{OnIdiom Tablet='80,300,80', Phone='40,150,40'}" 
-                        ColumnDefinitions="{OnIdiom Tablet='100,100,300,100,100', Phone='40,40,150,40,40'}"
-                        RowSpacing="10" 
-                        ColumnSpacing="10"
+                    <!-- A.1 SANDA Position Selection -->
+                    <VerticalStackLayout 
+                        Spacing="30" 
+                        IsVisible="{Binding IsSanda}"
+                        VerticalOptions="Center" 
+                        HorizontalOptions="Center"
                     >
-                        <!-- JUGE 1 -->
-                        <Border 
-                            Grid.Row="0" 
-                            Grid.Column="0" 
-                            Grid.ColumnSpan="2" 
-                            Background="LightGray" 
-                            StrokeShape="RoundRectangle 10"
-                        >
-                            <Label 
-                                Text="{Binding Resources.JUDGE_1}" 
-                                VerticalOptions="Center" 
-                                HorizontalOptions="Center" 
-                                FontSize="24" 
-                                FontAttributes="Bold" 
-                                TextColor="Black"
-                            />
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[0]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                        <Label 
+                            Text="{Binding Resources.SELECT_POSITION}" 
+                            HorizontalOptions="Center" 
+                            FontSize="32" 
+                            FontAttributes="Bold" 
+                            TextColor="White"
+                            HorizontalTextAlignment="Center"
+                        />
 
-                        <!-- JUGE 2 -->
-                        <Border 
-                            Grid.Row="0" 
-                            Grid.Column="3" 
-                            Grid.ColumnSpan="2"
-                            Background="LightGray" 
-                            StrokeShape="RoundRectangle 10"
+                        <Grid 
+                            RowDefinitions="{OnIdiom Tablet='80,300,80', Phone='40,150,40'}" 
+                            ColumnDefinitions="{OnIdiom Tablet='100,100,300,100,100', Phone='40,40,150,40,40'}"
+                            RowSpacing="10" 
+                            ColumnSpacing="10"
                         >
-                            <Label 
-                                Text="{Binding Resources.JUDGE_2}" 
-                                VerticalOptions="Center" 
-                                HorizontalOptions="Center" 
-                                FontSize="24" 
-                                FontAttributes="Bold" 
-                                TextColor="Black"
-                            />
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[1]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                            <!-- JUGE 1 -->
+                            <Border 
+                                Grid.Row="0" 
+                                Grid.Column="0" 
+                                Grid.ColumnSpan="2" 
+                                Background="LightGray" 
+                                StrokeShape="RoundRectangle 10"
+                            >
+                                <Label 
+                                    Text="{Binding Resources.JUDGE_1}" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center" 
+                                    FontSize="24" 
+                                    FontAttributes="Bold" 
+                                    TextColor="Black"
+                                />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[0]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
 
-                        <!-- JUGE 5 -->
-                        <Border 
-                            Grid.Row="0" 
-                            Grid.Column="2" 
-                            MinimumWidthRequest="{OnIdiom Tablet='200', Phone='100'}"
-                            Background="LightGray" 
-                            StrokeShape="RoundRectangle 10" 
+                            <!-- JUGE 2 -->
+                            <Border 
+                                Grid.Row="0" 
+                                Grid.Column="3" 
+                                Grid.ColumnSpan="2"
+                                Background="LightGray" 
+                                StrokeShape="RoundRectangle 10"
+                            >
+                                <Label 
+                                    Text="{Binding Resources.JUDGE_2}" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center" 
+                                    FontSize="24" 
+                                    FontAttributes="Bold" 
+                                    TextColor="Black"
+                                />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[1]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+
+                            <!-- JUGE 5 -->
+                            <Border 
+                                Grid.Row="0" 
+                                Grid.Column="2" 
+                                MinimumWidthRequest="{OnIdiom Tablet='200', Phone='100'}"
+                                Background="LightGray" 
+                                StrokeShape="RoundRectangle 10" 
+                                HorizontalOptions="Center"
+                            >
+                                <Label 
+                                    Text="{Binding Resources.JUDGE_5}" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center" 
+                                    FontSize="24" 
+                                    FontAttributes="Bold" 
+                                    TextColor="Black"
+                                />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[4]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+
+                            <!-- RING -->
+                            <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Background="#333" Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 15">
+                                <Label 
+                                    Text="{Binding Resources.RING}" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center" 
+                                    FontSize="48" 
+                                    FontAttributes="Bold" 
+                                    TextColor="White"
+                                />
+                            </Border>
+
+                            <!-- JUGE 3 -->
+                            <Border 
+                                Grid.Row="2" 
+                                Grid.Column="3" 
+                                Grid.ColumnSpan="2" 
+                                Background="LightGray" 
+                                StrokeShape="RoundRectangle 10"
+                            >
+                                <Label 
+                                    Text="{Binding Resources.JUDGE_3}" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center" 
+                                    FontSize="24" 
+                                    FontAttributes="Bold" 
+                                    TextColor="Black"
+                                />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[2]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+
+                            <!-- JUGE 4 -->
+                            <Border 
+                                Grid.Row="2" 
+                                Grid.Column="0" 
+                                Grid.ColumnSpan="2" 
+                                Background="LightGray" 
+                                StrokeShape="RoundRectangle 10"
+                            >
+                                <Label 
+                                    Text="{Binding Resources.JUDGE_4}" 
+                                    VerticalOptions="Center" 
+                                    HorizontalOptions="Center" 
+                                    FontSize="24" 
+                                    FontAttributes="Bold" 
+                                    TextColor="Black"
+                                />
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[3]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- A.2 TAOLU Position Selection -->
+                    <ScrollView 
+                        IsVisible="{Binding IsTaolu}"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        Orientation="Vertical"
+                    >
+                        <VerticalStackLayout 
+                            Spacing="20" 
+                            Padding="{OnIdiom Tablet='20,10', Phone='10,5'}"
+                            MaximumWidthRequest="{OnIdiom Tablet='850', Phone='450'}"
                             HorizontalOptions="Center"
                         >
-                            <Label 
-                                Text="{Binding Resources.JUDGE_5}" 
-                                VerticalOptions="Center" 
-                                HorizontalOptions="Center" 
-                                FontSize="24" 
-                                FontAttributes="Bold" 
-                                TextColor="Black"
-                            />
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[4]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                                <Label 
+                                    Text="{Binding Resources.SELECT_POSITION}" 
+                                    HorizontalOptions="Center" 
+                                    FontSize="{OnIdiom Tablet='32', Phone='24'}" 
+                                    FontAttributes="Bold" 
+                                    TextColor="White"
+                                    HorizontalTextAlignment="Center"
+                                />
+                                <Label 
+                                    Text="COMPÉTITION TAOLU" 
+                                    HorizontalOptions="Center" 
+                                    FontSize="{OnIdiom Tablet='18', Phone='14'}" 
+                                    FontAttributes="Bold" 
+                                    TextColor="{DynamicResource Secondary}"
+                                    HorizontalTextAlignment="Center"
+                                />
+                            </VerticalStackLayout>
 
-                        <!-- RING -->
-                        <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Background="#333" Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 15">
-                            <Label 
-                                Text="{Binding Resources.RING}" 
-                                VerticalOptions="Center" 
-                                HorizontalOptions="Center" 
-                                FontSize="48" 
-                                FontAttributes="Bold" 
-                                TextColor="White"
-                            />
-                        </Border>
+                            <!-- GROUPE A : Qualité des mouvements -->
+                            <Border 
+                                BackgroundColor="#222" 
+                                Stroke="{DynamicResource Primary}" 
+                                StrokeThickness="2" 
+                                StrokeShape="RoundRectangle 12"
+                                Padding="15"
+                            >
+                                <VerticalStackLayout Spacing="12">
+                                    <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="GROUPE A" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="{DynamicResource Primary}" />
+                                            <Label Text="Qualité des mouvements" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
+                                        </VerticalStackLayout>
+                                        <Border Grid.Column="1" BackgroundColor="{DynamicResource Primary}" StrokeShape="RoundRectangle 6" Padding="8,4" VerticalOptions="Center">
+                                            <Label Text="3 Juges" FontSize="12" FontAttributes="Bold" TextColor="Black" />
+                                        </Border>
+                                    </Grid>
 
-                        <!-- JUGE 3 -->
-                        <Border 
-                            Grid.Row="2" 
-                            Grid.Column="3" 
-                            Grid.ColumnSpan="2" 
-                            Background="LightGray" 
-                            StrokeShape="RoundRectangle 10"
-                        >
-                            <Label 
-                                Text="{Binding Resources.JUDGE_3}" 
-                                VerticalOptions="Center" 
-                                HorizontalOptions="Center" 
-                                FontSize="24" 
-                                FontAttributes="Bold" 
-                                TextColor="Black"
-                            />
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[2]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                                        <!-- Juge 1 -->
+                                        <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[0]}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+                                        <!-- Juge 2 -->
+                                        <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[1]}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+                                        <!-- Juge 3 -->
+                                        <Border Grid.Column="2" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Resources.JUDGE_3}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[2]}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Border>
 
-                        <!-- JUGE 4 -->
-                        <Border 
-                            Grid.Row="2" 
-                            Grid.Column="0" 
-                            Grid.ColumnSpan="2" 
-                            Background="LightGray" 
-                            StrokeShape="RoundRectangle 10"
-                        >
-                            <Label 
-                                Text="{Binding Resources.JUDGE_4}" 
-                                VerticalOptions="Center" 
-                                HorizontalOptions="Center" 
-                                FontSize="24" 
-                                FontAttributes="Bold" 
-                                TextColor="Black"
-                            />
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[3]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                    </Grid>
+                            <!-- GROUPE B : Performance globale -->
+                            <Border 
+                                BackgroundColor="#222" 
+                                Stroke="{DynamicResource Secondary}" 
+                                StrokeThickness="2" 
+                                StrokeShape="RoundRectangle 12"
+                                Padding="15"
+                            >
+                                <VerticalStackLayout Spacing="12">
+                                    <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="GROUPE B" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="{DynamicResource Secondary}" />
+                                            <Label Text="Performance globale" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
+                                        </VerticalStackLayout>
+                                        <Border Grid.Column="1" BackgroundColor="{DynamicResource Secondary}" StrokeShape="RoundRectangle 6" Padding="8,4" VerticalOptions="Center">
+                                            <Label Text="3 Juges" FontSize="12" FontAttributes="Bold" TextColor="Black" />
+                                        </Border>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                                        <!-- Juge 1 -->
+                                        <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[0]}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+                                        <!-- Juge 2 -->
+                                        <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[1]}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+                                        <!-- Juge 3 -->
+                                        <Border Grid.Column="2" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Resources.JUDGE_3}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[2]}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <!-- GROUPE C : Degré de difficulté -->
+                            <Border 
+                                BackgroundColor="#222" 
+                                Stroke="#4CAF50" 
+                                StrokeThickness="2" 
+                                StrokeShape="RoundRectangle 12"
+                                Padding="15"
+                            >
+                                <VerticalStackLayout Spacing="12">
+                                    <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="GROUPE C" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="#4CAF50" />
+                                            <Label Text="Degré de difficulté" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
+                                        </VerticalStackLayout>
+                                        <Border Grid.Column="1" BackgroundColor="#4CAF50" StrokeShape="RoundRectangle 6" Padding="8,4" VerticalOptions="Center">
+                                            <Label Text="2 Juges" FontSize="12" FontAttributes="Bold" TextColor="Black" />
+                                        </Border>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                        <!-- Juge 1 -->
+                                        <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[0]}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+                                        <!-- Juge 2 -->
+                                        <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                            <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[1]}"/>
+                                            </Border.GestureRecognizers>
+                                        </Border>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+                    </ScrollView>
                 </VerticalStackLayout>
 
                 <!-- B. Match Info & Timer (Connected and judge selected) -->

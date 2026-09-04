@@ -186,27 +186,7 @@ public partial class ServerViewModel : BaseViewModel
     #region Event Handlers
     private async void OnDeviceConnected(object? sender, string clientId)
     {
-        //var serverId = _bluetoothServer.InstanceId.ToString().Substring(0, 8);
-
-        //if (_currentCompetition != null)
-        //{
-        //    try
-        //    {
-        //        var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
-        //        await _bluetoothServer.SendToClientAsync($"{Constants.Message.COMPETITION_DATA}{json}", clientId);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error sending competition data to client {ClientId}", clientId);
-        //    }
-        //}
-
-        //// Send current timer state to the new client
-        //await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", clientId);
-        //if (IsTimerRunning)
-        //{
-        //    await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, clientId);
-        //}
+        await SendCompetitionDataToClientAsync(clientId);
     }
 
     private void OnDeviceDisconnected(object? sender, string clientId)
@@ -225,75 +205,67 @@ public partial class ServerViewModel : BaseViewModel
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {
+            if (args.Message == Constants.Message.GET_COMPETITION)
+            {
+                await SendCompetitionDataToClientAsync(args.ClientId);
+                return;
+            }
+
             if (args.Message.StartsWith(Constants.Message.JUDGE_POSITION))
             {
-                if (int.TryParse(args.Message.Substring(Constants.Message.JUDGE_POSITION.Length), out int position))
+                var posStr = args.Message.Substring(Constants.Message.JUDGE_POSITION.Length);
+                JudgeModel? judge = null;
+
+                var parts = posStr.Split('_');
+                if (parts.Length == 2 && int.TryParse(parts[1], out int num))
                 {
-                    var judge = Judges.FirstOrDefault(j => j.Number == position);
-                    if (judge != null)
+                    judge = Judges.FirstOrDefault(j => j.Group == parts[0] && j.Number == num);
+                }
+                else if (int.TryParse(posStr, out int position))
+                {
+                    judge = Judges.FirstOrDefault(j => string.IsNullOrEmpty(j.Group) && j.Number == position)
+                         ?? Judges.FirstOrDefault(j => j.Number == position);
+                }
+                else
+                {
+                    judge = Judges.FirstOrDefault(j => j.Name == posStr);
+                }
+
+                if (judge != null)
+                {
+                    // Remove previous mapping for this client if any
+                    if (_clientJudgeMapping.TryGetValue(args.ClientId, out var oldJudge))
                     {
-                        // Remove previous mapping for this client if any
-                        if (_clientJudgeMapping.TryGetValue(args.ClientId, out var oldJudge))
+                        oldJudge.IsConnected = false;
+                    }
+
+                    // Remove mapping for this judge if another client was using it
+                    var existingMapping = _clientJudgeMapping.FirstOrDefault(x => x.Value == judge);
+                    if (existingMapping.Key != null)
+                    {
+                        _clientJudgeMapping.Remove(existingMapping.Key);
+                    }
+
+                    judge.IsConnected = true;
+                    _clientJudgeMapping[args.ClientId] = judge;
+
+                    // Envoie de la compétition
+                    await SendCompetitionDataToClientAsync(args.ClientId);
+
+                    // Envoi du match courant
+                    if (CurrentDraw != null)
+                    {
+                        try
                         {
-                            oldJudge.IsConnected = false;
+                            var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
+
+                            await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
+
+                            await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
                         }
-
-                        // Remove mapping for this judge if another client was using it
-                        var existingMapping = _clientJudgeMapping.FirstOrDefault(x => x.Value == judge);
-                        if (existingMapping.Key != null)
+                        catch (Exception ex)
                         {
-                            _clientJudgeMapping.Remove(existingMapping.Key);
-                        }
-
-                        judge.IsConnected = true;
-                        _clientJudgeMapping[args.ClientId] = judge;
-
-                        // Envoie de la compétition
-                        if (_currentCompetition == null && CompetitionId > 0)
-                        {
-                            _currentCompetition = await LoadCompetitionDataAsync(CompetitionId);
-                        }
-                        if (_currentCompetition == null && CurrentDraw?.Draw?.Category?.CompetitionId > 0)
-                        {
-                            _currentCompetition = await LoadCompetitionDataAsync(CurrentDraw.Draw.Category.CompetitionId.Value);
-                        }
-                        if (_currentCompetition == null)
-                        {
-                            var firstComp = (await _competitionRepository.GetAllAsync())?.FirstOrDefault();
-                            if (firstComp != null)
-                            {
-                                _currentCompetition = await LoadCompetitionDataAsync(firstComp.Id);
-                            }
-                        }
-
-                        if (_currentCompetition != null)
-                        {
-                            try
-                            {
-                                var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
-                                await _bluetoothServer.SendToClientAsync($"{Constants.Message.COMPETITION_DATA}{json}", args.ClientId);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Error sending competition data to client {ClientId}", args.ClientId);
-                            }
-                        }
-
-                        // Envoi du match courant
-                        if (CurrentDraw != null)
-                        {
-                            try
-                            {
-                                var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
-
-                                await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
-
-                                await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Error sending competition data to client {ClientId}", args.ClientId);
-                            }
+                            _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
                         }
                     }
                 }
@@ -399,6 +371,69 @@ public partial class ServerViewModel : BaseViewModel
     #endregion
 
     #region Private Methods
+    private void SetupJudges(CompetitionType competitionType)
+    {
+        Judges.Clear();
+        if (competitionType == CompetitionType.Taolu)
+        {
+            // Groupe A (1..3)
+            for (int i = 1; i <= 3; i++)
+            {
+                Judges.Add(new JudgeModel { Name = $"JUGE A{i}", Number = i, Group = "A" });
+            }
+            // Groupe B (1..3)
+            for (int i = 1; i <= 3; i++)
+            {
+                Judges.Add(new JudgeModel { Name = $"JUGE B{i}", Number = i, Group = "B" });
+            }
+            // Groupe C (1..2)
+            for (int i = 1; i <= 2; i++)
+            {
+                Judges.Add(new JudgeModel { Name = $"JUGE C{i}", Number = i, Group = "C" });
+            }
+        }
+        else
+        {
+            for (int i = 1; i <= 5; i++)
+            {
+                Judges.Add(new JudgeModel { Name = $"JUGE {i}", Number = i });
+            }
+        }
+    }
+
+    private async Task SendCompetitionDataToClientAsync(string clientId)
+    {
+        if (_currentCompetition == null && CompetitionId > 0)
+        {
+            _currentCompetition = await LoadCompetitionDataAsync(CompetitionId);
+        }
+        if (_currentCompetition == null && CurrentDraw?.Draw?.Category?.CompetitionId > 0)
+        {
+            _currentCompetition = await LoadCompetitionDataAsync(CurrentDraw.Draw.Category.CompetitionId.Value);
+        }
+        if (_currentCompetition == null)
+        {
+            var firstComp = (await _competitionRepository.GetAllAsync())?.FirstOrDefault();
+            if (firstComp != null)
+            {
+                _currentCompetition = await LoadCompetitionDataAsync(firstComp.Id);
+            }
+        }
+
+        if (_currentCompetition != null)
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
+                await _bluetoothServer.SendToClientAsync($"{Constants.Message.COMPETITION_DATA}{json}", clientId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending competition data to client {ClientId}", clientId);
+            }
+        }
+    }
+
     private Task<CompetitionModel?> LoadCompetitionDataAsync(int competitionId)
     {
         return _competitionRepository.GetByIdAsync(competitionId,
@@ -421,6 +456,16 @@ public partial class ServerViewModel : BaseViewModel
         {
             _currentCompetition = await LoadCompetitionDataAsync(CompetitionId);
         }
+        if (_currentCompetition == null)
+        {
+            var firstComp = (await _competitionRepository.GetAllAsync())?.FirstOrDefault();
+            if (firstComp != null)
+            {
+                _currentCompetition = await LoadCompetitionDataAsync(firstComp.Id);
+            }
+        }
+
+        SetupJudges(_currentCompetition?.Type ?? CompetitionType.Sanda);
 
         var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
 
