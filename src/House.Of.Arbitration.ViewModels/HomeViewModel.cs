@@ -3074,7 +3074,7 @@ public partial class HomeViewModel : BaseViewModel
             {
                 Id = 100,
                 AgeRangeId = 1,
-                Genre = Genre.Men,
+                Genre = Genre.Women,
                 RoundType = RoundType.Order,
                 Type = CategoryType.Taolu,
                 CompetitionId = 2
@@ -3084,9 +3084,9 @@ public partial class HomeViewModel : BaseViewModel
             competitor = new CompetitorModel()
             {
                 Id = 102,
-                FirstName = "Firsname",
-                LastName = "Lastname",
-                Club = "Punch Team Sanda",
+                FirstName = "Lisana",
+                LastName = "Ramet Petroczy",
+                Club = "Esprit et combat Cléonnais",
                 BirthDate = new DateTime(2013, 1, 20),
                 Genre = Genre.Men,
                 CountryIsoCode = "FR"
@@ -3096,9 +3096,69 @@ public partial class HomeViewModel : BaseViewModel
             competitor = new CompetitorModel()
             {
                 Id = 103,
-                FirstName = "Firsname 2",
-                LastName = "Lastname 2",
-                Club = "Club 2",
+                FirstName = "Maxime",
+                LastName = "Buffel Du Vaure",
+                Club = "Fanling Académie de KungFu",
+                BirthDate = new DateTime(2013, 1, 21),
+                Genre = Genre.Men,
+                CountryIsoCode = "FR"
+            };
+            await _competitors.AddAsync(competitor);
+
+            competitor = new CompetitorModel()
+            {
+                Id = 104,
+                FirstName = "Lia Mariam",
+                LastName = "Lambard",
+                Club = "Esprit et combat Cléonnais",
+                BirthDate = new DateTime(2013, 1, 21),
+                Genre = Genre.Men,
+                CountryIsoCode = "FR"
+            };
+            await _competitors.AddAsync(competitor);
+
+            competitor = new CompetitorModel()
+            {
+                Id = 105,
+                FirstName = "Laura",
+                LastName = "Vuong",
+                Club = "Académie française de Wushu / Saint-Maur",
+                BirthDate = new DateTime(2013, 1, 21),
+                Genre = Genre.Men,
+                CountryIsoCode = "FR"
+            };
+            await _competitors.AddAsync(competitor);
+
+            competitor = new CompetitorModel()
+            {
+                Id = 106,
+                FirstName = "Emilie",
+                LastName = "Sajan",
+                Club = "Esprit et combat Cléonnais",
+                BirthDate = new DateTime(2013, 1, 21),
+                Genre = Genre.Men,
+                CountryIsoCode = "FR"
+            };
+            await _competitors.AddAsync(competitor);
+
+            competitor = new CompetitorModel()
+            {
+                Id = 107,
+                FirstName = "Lina",
+                LastName = "Arabi",
+                Club = "Fanling Académie de KungFu",
+                BirthDate = new DateTime(2013, 1, 21),
+                Genre = Genre.Men,
+                CountryIsoCode = "FR"
+            };
+            await _competitors.AddAsync(competitor);
+
+            competitor = new CompetitorModel()
+            {
+                Id = 108,
+                FirstName = "Neyla",
+                LastName = "Bure",
+                Club = "Esprit et combat Cléonnais",
                 BirthDate = new DateTime(2013, 1, 21),
                 Genre = Genre.Men,
                 CountryIsoCode = "FR"
@@ -3107,6 +3167,11 @@ public partial class HomeViewModel : BaseViewModel
 
             await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 102 });
             await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 103 });
+            await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 104 });
+            await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 105 });
+            await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 106 });
+            await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 107 });
+            await _competitorsCategories.AddAsync(new CompetitorCategoryModel() { CategoryId = 100, CompetitorId = 108 });
 
             draw = new DrawModel() { Id = 100, CategoryId = 100 };
             await _draws.AddAsync(draw);
@@ -3115,6 +3180,21 @@ public partial class HomeViewModel : BaseViewModel
             await _drawOrders.AddAsync(drawOrder);
 
             drawOrder = new DrawOrderModel() { Id = 101, Order = 2, CompetitorId = 103, DrawId = 100, GlobalOrder = 2 };
+            await _drawOrders.AddAsync(drawOrder);
+
+            drawOrder = new DrawOrderModel() { Id = 101, Order = 3, CompetitorId = 104, DrawId = 100, GlobalOrder = 3 };
+            await _drawOrders.AddAsync(drawOrder);
+
+            drawOrder = new DrawOrderModel() { Id = 101, Order = 4, CompetitorId = 105, DrawId = 100, GlobalOrder = 4 };
+            await _drawOrders.AddAsync(drawOrder);
+
+            drawOrder = new DrawOrderModel() { Id = 101, Order = 5, CompetitorId = 106, DrawId = 100, GlobalOrder = 5 };
+            await _drawOrders.AddAsync(drawOrder);
+
+            drawOrder = new DrawOrderModel() { Id = 101, Order = 6, CompetitorId = 107, DrawId = 100, GlobalOrder = 6 };
+            await _drawOrders.AddAsync(drawOrder);
+
+            drawOrder = new DrawOrderModel() { Id = 101, Order = 7, CompetitorId = 108, DrawId = 100, GlobalOrder = 7 };
             await _drawOrders.AddAsync(drawOrder);
             #endregion
 
