@@ -249,9 +249,6 @@ public partial class ServerViewModel : BaseViewModel
                     judge.IsConnected = true;
                     _clientJudgeMapping[args.ClientId] = judge;
 
-                    // Envoie de la compétition
-                    await SendCompetitionDataToClientAsync(args.ClientId);
-
                     // Envoi du match courant
                     if (CurrentDraw != null)
                     {
@@ -267,6 +264,10 @@ public partial class ServerViewModel : BaseViewModel
                         {
                             _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
                         }
+                    }
+                    else
+                    {
+                        await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
                     }
                 }
             }

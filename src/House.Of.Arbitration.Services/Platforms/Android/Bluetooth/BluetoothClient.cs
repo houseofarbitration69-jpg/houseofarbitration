@@ -1,4 +1,4 @@
-﻿#region Imports
+#region Imports
 using Android.Bluetooth;
 using Android.Bluetooth.LE;
 using Android.Content;
@@ -237,15 +237,11 @@ public class BluetoothClient : IBluetoothClient
 
             if (newState == ProfileState.Connected)
             {
-                //await _alertService.ShowToast($"Connected to GATT server : {gatt?.Device?.Address}");
-
-                MainThread.BeginInvokeOnMainThread(() =>
-                {
-                    _parent.DeviceConnected?.Invoke(_parent, gatt?.Device?.Address ?? String.Empty);
-                });
-
                 // Request larger MTU to avoid truncation of JSON messages
-                gatt?.RequestMtu(512);
+                if (gatt?.RequestMtu(512) != true)
+                {
+                    gatt?.DiscoverServices();
+                }
             }
             else if (newState == ProfileState.Disconnected)
             {
@@ -261,8 +257,6 @@ public class BluetoothClient : IBluetoothClient
         public override async void OnMtuChanged(BluetoothGatt? gatt, int mtu, [GeneratedEnum] GattStatus status)
         {
             base.OnMtuChanged(gatt, mtu, status);
-            
-            //await _alertService.ShowToast($"MTU changed to {mtu} (Status: {status})");
             
             // Proceed to service discovery after MTU is established
             gatt?.DiscoverServices();
@@ -313,6 +307,10 @@ public class BluetoothClient : IBluetoothClient
                         else
                         {
                             await _alertService.ShowToast("CCCD descriptor not found.");
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                _parent.DeviceConnected?.Invoke(_parent, gatt?.Device?.Address ?? String.Empty);
+                            });
                         }
                     }                    else
                     {
@@ -328,6 +326,16 @@ public class BluetoothClient : IBluetoothClient
             {
                 await _alertService.ShowToast($"Service discovery failed : {status}");
             }
+        }
+
+        public override void OnDescriptorWrite(BluetoothGatt? gatt, BluetoothGattDescriptor? descriptor, [GeneratedEnum] GattStatus status)
+        {
+            base.OnDescriptorWrite(gatt, descriptor, status);
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                _parent.DeviceConnected?.Invoke(_parent, gatt?.Device?.Address ?? String.Empty);
+            });
         }
 
         public override void OnCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, byte[] value, [GeneratedEnum] GattStatus status)

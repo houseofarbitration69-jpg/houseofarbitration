@@ -63,7 +63,7 @@ public partial class JudgeViewModel : BaseViewModel
 
     private IDrawModel? _currentDraw;
     private CompetitionModel? _currentCompetition;
-    private CompetitionType _competitionType = CompetitionType.Sanda;
+    private CompetitionType _competitionType = CompetitionType.None;
     #endregion
 
     #region Properties
@@ -76,7 +76,13 @@ public partial class JudgeViewModel : BaseViewModel
     public CompetitionModel? CurrentCompetition
     {
         get => _currentCompetition;
-        set => SetProperty(ref _currentCompetition, value);
+        set
+        {
+            if (SetProperty(ref _currentCompetition, value))
+            {
+                OnPropertyChanged(nameof(CanSelectPosition));
+            }
+        }
     }
 
     public CompetitionType CompetitionType
@@ -93,7 +99,7 @@ public partial class JudgeViewModel : BaseViewModel
     }
 
     public bool IsTaolu => CompetitionType == CompetitionType.Taolu;
-    public bool IsSanda => CompetitionType != CompetitionType.Taolu;
+    public bool IsSanda => CompetitionType == CompetitionType.Sanda;
 
     public bool IsScanning
     {
@@ -104,13 +110,25 @@ public partial class JudgeViewModel : BaseViewModel
     public bool IsConnected
     {
         get => _isConnected;
-        set => SetProperty(ref _isConnected, value);
+        set
+        {
+            if (SetProperty(ref _isConnected, value))
+            {
+                OnPropertyChanged(nameof(CanSelectPosition));
+            }
+        }
     }
 
     public bool IsReceivingCompetition
     {
         get => _isReceivingCompetition;
-        set => SetProperty(ref _isReceivingCompetition, value);
+        set
+        {
+            if (SetProperty(ref _isReceivingCompetition, value))
+            {
+                OnPropertyChanged(nameof(CanSelectPosition));
+            }
+        }
     }
 
     public bool IsReceivingMatch
@@ -122,8 +140,16 @@ public partial class JudgeViewModel : BaseViewModel
     public JudgeModel? SelectedJudge
     {
         get => _selectedJudge;
-        set => SetProperty(ref _selectedJudge, value);
+        set
+        {
+            if (SetProperty(ref _selectedJudge, value))
+            {
+                OnPropertyChanged(nameof(CanSelectPosition));
+            }
+        }
     }
+
+    public bool CanSelectPosition => IsConnected && !IsReceivingCompetition && CurrentCompetition != null && SelectedJudge == null;
 
     public string? CurrentMatchInfo
     {
@@ -285,6 +311,7 @@ public partial class JudgeViewModel : BaseViewModel
             _serverDeviceId = deviceId;
             IsConnected = true;
             IsScanning = false;
+            IsReceivingCompetition = true;
 
             try
             {
@@ -303,6 +330,11 @@ public partial class JudgeViewModel : BaseViewModel
         {
             _serverDeviceId = null;
             IsConnected = false;
+            IsReceivingCompetition = false;
+            IsReceivingMatch = false;
+            CurrentCompetition = null;
+            CompetitionType = CompetitionType.None;
+            SelectedJudge = null;
             _timer?.Stop();
             _pendingChunks.Clear();
         });
@@ -366,7 +398,6 @@ public partial class JudgeViewModel : BaseViewModel
                         await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
                     }
                     IsReceivingCompetition = false;
-                    IsReceivingMatch = true;
                 }
                 else if (message.StartsWith(Constants.Message.MATCH_INFO))
                 {
@@ -527,6 +558,7 @@ public partial class JudgeViewModel : BaseViewModel
         {
             await _bluetoothClient.StopScan();
             IsScanning = false;
+            IsReceivingCompetition = true;
             await _bluetoothClient.ConnectToDevice(device.DeviceId);
         }
     }
@@ -537,7 +569,7 @@ public partial class JudgeViewModel : BaseViewModel
         SelectedJudge = judge;
         if (IsConnected && _serverDeviceId != null)
         {
-            IsReceivingCompetition = true;
+            IsReceivingMatch = true;
 
             string positionCode = !string.IsNullOrEmpty(judge.Group) ? $"{judge.Group}_{judge.Number}" : judge.Number.ToString();
             await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{positionCode}");

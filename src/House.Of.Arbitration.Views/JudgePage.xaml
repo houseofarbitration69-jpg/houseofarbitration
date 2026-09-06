@@ -358,10 +358,10 @@
 
             <!-- 2. Connected Content -->
             <Grid IsVisible="{Binding IsConnected}">
-                <!-- A. Position Selection (Connected but no judge selected) -->
+                <!-- A. Position Selection (Connected, competition received, but no judge selected) -->
                 <VerticalStackLayout 
                     Spacing="30" 
-                    IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullOrEmptyConverter}}" 
+                    IsVisible="{Binding CanSelectPosition}" 
                     VerticalOptions="Center" 
                     HorizontalOptions="Center"
                 >
@@ -372,14 +372,24 @@
                         VerticalOptions="Center" 
                         HorizontalOptions="Center"
                     >
-                        <Label 
-                            Text="{Binding Resources.SELECT_POSITION}" 
-                            HorizontalOptions="Center" 
-                            FontSize="32" 
-                            FontAttributes="Bold" 
-                            TextColor="White"
-                            HorizontalTextAlignment="Center"
-                        />
+                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                            <Label 
+                                Text="{Binding Resources.SELECT_POSITION}" 
+                                HorizontalOptions="Center" 
+                                FontSize="32" 
+                                FontAttributes="Bold" 
+                                TextColor="White"
+                                HorizontalTextAlignment="Center"
+                            />
+                            <Label 
+                                Text="COMPÉTITION SANDA" 
+                                HorizontalOptions="Center" 
+                                FontSize="18" 
+                                FontAttributes="Bold" 
+                                TextColor="{DynamicResource Primary}"
+                                HorizontalTextAlignment="Center"
+                            />
+                        </VerticalStackLayout>
 
                         <Grid 
                             RowDefinitions="{OnIdiom Tablet='80,300,80', Phone='40,150,40'}" 
@@ -685,10 +695,9 @@
                         Stroke="White" 
                         StrokeThickness="2" 
                         StrokeShape="RoundRectangle 15"
-                        IsVisible="{Binding IsReceivingCompetition, Converter={StaticResource InvertBoolConverter}}"
                     >
                         <controls:ScrollingText 
-                            Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE COMPÉTITION'}" 
+                            Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE MATCH'}" 
                             TextColor="White" 
                             FontSize="36" 
                             FontAttributes="Bold" 
@@ -698,7 +707,6 @@
                     <!-- Main Match Display (The Ring) -->
                     <Grid 
                         Grid.Row="1"
-                        IsVisible="{Binding IsReceivingCompetition, Converter={StaticResource InvertBoolConverter}}"
                     >
                         <!-- Empty State -->
                         <!--<VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20" IsVisible="{Binding CurrentMatchInfo, Converter={StaticResource IsNullOrEmptyConverter}}">

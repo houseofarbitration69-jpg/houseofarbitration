@@ -1,4 +1,4 @@
-﻿#region Imports
+#region Imports
 using Android.Bluetooth;
 using Android.Bluetooth.LE;
 using Android.Content;
@@ -365,6 +365,7 @@ public class BluetoothServer : IBluetoothServer
                     //await _alertService.ShowToast($"Enabling notifications for {device?.Address}");
 
                     _parent._subscribedDevices.Add(device?.Address ?? String.Empty);
+                    _parent.DeviceConnected?.Invoke(_parent, device?.Address ?? String.Empty);
                 }
                 else if (value != null && value.Length == 2 && value[0] == 0 && value[1] == 0)
                 {

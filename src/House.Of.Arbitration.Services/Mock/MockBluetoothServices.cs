@@ -1,3 +1,4 @@
+using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Services.Abstractions;
 using System.Collections.ObjectModel;
 
@@ -32,21 +33,6 @@ public class MockBluetoothClient : IBluetoothClient
     {
         await Task.Delay(500);
         DeviceConnected?.Invoke(this, deviceId);
-
-        // Simulate receiving match info after connection in the new JSON format
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(2000);
-            var matchData = new
-            {
-                categoryName = "SANDA SENIORS -70KG",
-                redName = "JEAN DUPONT",
-                blueName = "MARC DURAND",
-                matchNumber = 4
-            };
-            var json = System.Text.Json.JsonSerializer.Serialize(matchData);
-            MessageReceived?.Invoke(this, $"MATCH_INFO:{json}");
-        });
     }
 
     public Task DisconnectFromDevice(string deviceId)
@@ -55,7 +41,39 @@ public class MockBluetoothClient : IBluetoothClient
         return Task.CompletedTask;
     }
 
-    public Task SendMessage(string deviceId, string message) => Task.CompletedTask;
+    public Task SendMessage(string deviceId, string message)
+    {
+        if (message == Constants.Message.GET_COMPETITION)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                var comp = new CompetitionModel
+                {
+                    Id = 1,
+                    Name = "Championnat Mock",
+                    Type = CompetitionType.Taolu
+                };
+                var json = System.Text.Json.JsonSerializer.Serialize(comp);
+                MessageReceived?.Invoke(this, $"{Constants.Message.COMPETITION_DATA}{json}");
+            });
+        }
+        else if (message.StartsWith(Constants.Message.JUDGE_POSITION))
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(500);
+                var matchData = new MatchInfoData
+                {
+                    Id = 1,
+                    Type = RoundType.Order
+                };
+                var json = System.Text.Json.JsonSerializer.Serialize(matchData);
+                MessageReceived?.Invoke(this, $"{Constants.Message.MATCH_INFO}{json}");
+            });
+        }
+        return Task.CompletedTask;
+    }
 }
 
 public class MockBluetoothServer : IBluetoothServer
