@@ -34,11 +34,9 @@ namespace House.Of.Arbitration.App
 
                     // Register FontAwesome
                     fonts.AddFont(FontHelper.FONTAWESOME_SOLID_FILENAME, FontHelper.FONTAWESOME_SOLID_NAME);
-                    fonts.AddFont("fontawesome_solid.otf", "FontAwesomeSolid");
 
                     // Register Custom
                     fonts.AddFont(FontHelper.CUSTOM_FILENAME, FontHelper.CUSTOM_NAME);
-                    fonts.AddFont("custom.otf", "Custom");
                 });
 
 #if DEBUG
