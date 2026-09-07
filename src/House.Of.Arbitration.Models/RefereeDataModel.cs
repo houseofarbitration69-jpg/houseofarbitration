@@ -27,6 +27,11 @@ public partial class RefereeDataModel : ObservableObject
     public double Score { get; set; } = 0;
 
     /// <summary>
+    /// Obtient ou définit le round
+    /// </summary>
+    public int Round { get; set; } = 1;
+
+    /// <summary>
     /// Obtient ou définit la donnée
     /// </summary>
     public string Data { get; set; } = String.Empty;

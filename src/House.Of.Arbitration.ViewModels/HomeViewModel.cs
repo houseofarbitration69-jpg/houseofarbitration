@@ -3182,19 +3182,19 @@ public partial class HomeViewModel : BaseViewModel
             drawOrder = new DrawOrderModel() { Id = 101, Order = 2, CompetitorId = 103, DrawId = 100, GlobalOrder = 2 };
             await _drawOrders.AddAsync(drawOrder);
 
-            drawOrder = new DrawOrderModel() { Id = 101, Order = 3, CompetitorId = 104, DrawId = 100, GlobalOrder = 3 };
+            drawOrder = new DrawOrderModel() { Id = 102, Order = 3, CompetitorId = 104, DrawId = 100, GlobalOrder = 3 };
             await _drawOrders.AddAsync(drawOrder);
 
-            drawOrder = new DrawOrderModel() { Id = 101, Order = 4, CompetitorId = 105, DrawId = 100, GlobalOrder = 4 };
+            drawOrder = new DrawOrderModel() { Id = 103, Order = 4, CompetitorId = 105, DrawId = 100, GlobalOrder = 4 };
             await _drawOrders.AddAsync(drawOrder);
 
-            drawOrder = new DrawOrderModel() { Id = 101, Order = 5, CompetitorId = 106, DrawId = 100, GlobalOrder = 5 };
+            drawOrder = new DrawOrderModel() { Id = 104, Order = 5, CompetitorId = 106, DrawId = 100, GlobalOrder = 5 };
             await _drawOrders.AddAsync(drawOrder);
 
-            drawOrder = new DrawOrderModel() { Id = 101, Order = 6, CompetitorId = 107, DrawId = 100, GlobalOrder = 6 };
+            drawOrder = new DrawOrderModel() { Id = 105, Order = 6, CompetitorId = 107, DrawId = 100, GlobalOrder = 6 };
             await _drawOrders.AddAsync(drawOrder);
 
-            drawOrder = new DrawOrderModel() { Id = 101, Order = 7, CompetitorId = 108, DrawId = 100, GlobalOrder = 7 };
+            drawOrder = new DrawOrderModel() { Id = 106, Order = 7, CompetitorId = 108, DrawId = 100, GlobalOrder = 7 };
             await _drawOrders.AddAsync(drawOrder);
             #endregion
 

@@ -1,4 +1,4 @@
-﻿namespace House.Of.Arbitration.Models;
+namespace House.Of.Arbitration.Models;
 
 public interface IDrawModel
 {
@@ -26,4 +26,9 @@ public interface IDrawModel
     /// Obtient ou définit si le tirage est terminé
     /// </summary>
     bool IsFinished { get; set; }
+
+    /// <summary>
+    /// Obtient ou définit le round actuel
+    /// </summary>
+    int CurrentRound { get; set; }
 }

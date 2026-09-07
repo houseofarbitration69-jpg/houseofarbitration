@@ -130,7 +130,14 @@ public partial class MasterViewModel : BaseViewModel
             { "CompetitionId", competition.Id }
         };
 
-        await Shell.Current.GoToAsync("Server", navigationParameter);
+        if (competition.Type == CompetitionType.Taolu)
+        {
+            await Shell.Current.GoToAsync("ServerTaolu", navigationParameter);
+        }
+        else
+        {
+            await Shell.Current.GoToAsync("Server", navigationParameter);
+        }
     }
 
     [RelayCommand]

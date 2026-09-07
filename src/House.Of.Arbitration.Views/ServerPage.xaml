@@ -147,7 +147,7 @@
                                     />
                                 </HorizontalStackLayout>
                                 <Label 
-                                    Text="En attente match précédent" 
+                                    Text="En attente match prÃ©cÃ©dent" 
                                     IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                                     FontAttributes="Italic" 
                                     TextColor="Gray" 
@@ -194,7 +194,7 @@
                                     />
                                 </HorizontalStackLayout>
                                 <Label 
-                                    Text="En attente match précédent" 
+                                    Text="En attente match prÃ©cÃ©dent" 
                                     IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                                     FontAttributes="Italic" 
                                     TextColor="Gray" 
@@ -309,7 +309,7 @@
                         Stroke="{StaticResource ValidColor}"
                     >
                         <Label 
-                            Text="≡" 
+                            Text="â‰¡" 
                             VerticalOptions="Center" 
                             HorizontalOptions="Center" 
                             FontSize="30" 
@@ -485,11 +485,7 @@
                                 </Border.GestureRecognizers>
                             </Border>
 
-                            <Grid.Triggers>
-                                <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                    <Setter Property="IsVisible" Value="False"/>
-                                </DataTrigger>
-                            </Grid.Triggers>
+                            
                         </Grid>
                     </VerticalStackLayout>
 
@@ -534,11 +530,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
                     <Grid
@@ -553,31 +545,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
-                    <Grid
-                        Grid.Column="1"
-                        Grid.ColumnSpan="2"
-                        IsVisible="False"
-                    >
-                        <Label 
-                            Text="{Binding Judges[0].Score}"
-                            FontSize="18"
-                            VerticalOptions="Center"
-                            TextColor="Green"
-                            FontAttributes="Bold"
-                        />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
-                    </Grid>
+                    
                     
                     <Grid 
                         Grid.Column="4"
@@ -642,11 +613,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
                 </Grid>
 
@@ -772,11 +739,7 @@
                                 </Border.GestureRecognizers>
                             </Border>
 
-                            <Grid.Triggers>
-                                <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                    <Setter Property="IsVisible" Value="False"/>
-                                </DataTrigger>
-                            </Grid.Triggers>
+                            
                         </Grid>
                     </VerticalStackLayout>
 
@@ -821,11 +784,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
                     <Grid
@@ -840,29 +799,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
-                    <Grid
-                        Grid.Column="1"
-                        Grid.ColumnSpan="2"
-                        IsVisible="False"
-                        VerticalOptions="Center"
-                    >
-                        <Label 
-                            Text="{Binding Judges[1].Score}"
-                            FontSize="18"
-                        />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
-                    </Grid>
+                    
 
                     <Grid 
                         Grid.Column="4"
@@ -927,11 +867,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
                 </Grid>
 
@@ -1054,11 +990,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
                 </VerticalStackLayout>
 
@@ -1103,11 +1035,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
                     <Grid
@@ -1122,29 +1050,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
-                    <Grid
-                        Grid.Column="1"
-                        Grid.ColumnSpan="2"
-                        IsVisible="False"
-                    >
-                        <Label 
-                            Text="{Binding Judges[4].Score}"
-                            FontSize="18"
-                            VerticalOptions="Center"
-                        />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
-                    </Grid>
+                    
 
                     <Grid 
                         Grid.Column="4"
@@ -1209,11 +1118,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
                 </Grid>
                 
@@ -1231,8 +1136,8 @@
                         Spacing="20"
                         IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                     >
-                        <Label Text="🏆" FontSize="64" HorizontalOptions="Center"/>
-                        <Label Text="Tous les matchs sont terminés" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
+                        <Label Text="ðŸ†" FontSize="64" HorizontalOptions="Center"/>
+                        <Label Text="Tous les matchs sont terminÃ©s" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
 
                     <!-- Current Match Area -->
@@ -1265,22 +1170,11 @@
                                 StrokeShape="RoundRectangle 0,8,0,8"
                             />
 
-                            <!-- For Order mode, red covers full width -->
-                            <Border 
-                                Grid.ColumnSpan="2" 
-                                Background="#333" 
-                                StrokeThickness="0" 
-                                Opacity="0.8"
-                                IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" 
-                                StrokeShape="RoundRectangle 8"
-                            />
+                            
                         </Grid>
 
                         <!-- Knockout / Round Robin Mode -->
-                        <Grid 
-                            ColumnDefinitions="*,*" 
-                            IsVisible="False"
-                        >
+                        <Grid ColumnDefinitions="*,Auto,*">
                             <!-- Competitor 1 (Red Side) -->
                             <VerticalStackLayout 
                                 Grid.Column="0" 
@@ -1381,8 +1275,26 @@
                                 />
                             </VerticalStackLayout>
 
+                            <!-- Results Center -->
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Start" HorizontalOptions="Center" Spacing="5" Padding="10,0">
+                                <CollectionView ItemsSource="{Binding BindingContext.RoundResults, Source={x:Reference this}}">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:RoundResultModel">
+                                            <Border StrokeShape="RoundRectangle 8" BackgroundColor="#333" Stroke="White" Padding="15,5" Margin="0,2">
+                                                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                                                    <Label Text="{Binding RoundNumber, StringFormat='R{0}'}" TextColor="White" FontAttributes="Bold" VerticalOptions="Center" />
+                                                    <Label Text="{Binding RedVotes}" TextColor="Red" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+                                                    <Label Text="-" TextColor="White" VerticalOptions="Center" />
+                                                    <Label Text="{Binding BlueVotes}" TextColor="Blue" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+                                                </HorizontalStackLayout>
+                                            </Border>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </VerticalStackLayout>
+
                             <!-- Competitor 2 (Blue Side) -->
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="0,5,0,0">
+                            <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="0,5,0,0">
                                 <!-- Circular Photo / Icon -->
                                 <Border 
                                     StrokeShape="RoundRectangle 50" 
@@ -1474,117 +1386,10 @@
                                 />
                             </VerticalStackLayout>
 
-                            <Grid.Triggers>
-                                <DataTrigger TargetType="Grid" Binding="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" Value="True">
-                                    <Setter Property="IsVisible" Value="True"/>
-                                </DataTrigger>
-                            </Grid.Triggers>
+                            
                         </Grid>
 
-                        <!-- Order Mode (Taolu) -->
-                        <Grid IsVisible="False">
-                            <VerticalStackLayout 
-                                VerticalOptions="Center" 
-                                HorizontalOptions="Center" 
-                                Spacing="10"
-                                Padding="0,5,0,0"
-                            >
-                                <!-- Circular Photo / Icon -->
-                                <Border 
-                                    StrokeShape="RoundRectangle 50" 
-                                    HeightRequest="{OnIdiom Tablet='100', Phone='50'}" 
-                                    WidthRequest="{OnIdiom Tablet='100', Phone='50'}" 
-                                    HorizontalOptions="Center" 
-                                    Stroke="White" 
-                                    BackgroundColor="White"
-                                    StrokeThickness="3"
-                                    IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
-                                >
-                                    <Image Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=5}" 
-                                           Aspect="AspectFill" />
-                                </Border>
-
-                                <Border 
-                                    StrokeShape="RoundRectangle 50" 
-                                    HeightRequest="{OnIdiom Tablet='100', Phone='50'}" 
-                                    WidthRequest="{OnIdiom Tablet='100', Phone='50'}" 
-                                    HorizontalOptions="Center" 
-                                    Stroke="White" 
-                                    StrokeThickness="3"
-                                    BackgroundColor="White"
-                                    IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
-                                >
-                                    <Label 
-                                        Text="{Binding Competitor.Genre, Converter={StaticResource GenreToFontConverter}}" 
-                                        FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                        FontSize="{OnIdiom Tablet='90', Phone='45'}" 
-                                        HorizontalOptions="Center"
-                                        VerticalOptions="Center"
-                                        HorizontalTextAlignment="Center"
-                                        VerticalTextAlignment="Center"
-                                    />
-                                </Border>
-
-                                <!-- Name on two lines -->
-                                <VerticalStackLayout HorizontalOptions="Center">
-                                    <controls:ScrollingText 
-                                        Text="{Binding Competitor.LastName}" 
-                                        Style="{StaticResource MainCompetitorNameStyle}" 
-                                        FontSize="{OnIdiom Tablet='28', Phone='20'}" 
-                                    />
-
-                                    <controls:ScrollingText 
-                                        Text="{Binding Competitor.FirstName}" 
-                                        Style="{StaticResource MainCompetitorNameStyle}" 
-                                        FontSize="{OnIdiom Tablet='32', Phone='20'}" 
-                                        Margin="0,-5,0,0" 
-                                    />
-                                </VerticalStackLayout>
-
-                                <!-- Club & Country -->
-                                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                                    <controls:ScrollingText 
-                                        Text="{Binding Competitor.Club}" 
-                                        Style="{StaticResource MainCompetitorClubStyle}" 
-                                        FontSize="{OnIdiom Tablet='18', Phone='16'}" 
-                                    />
-
-                                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
-                                        <Image 
-                                            Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                            WidthRequest="25" 
-                                            HeightRequest="15" 
-                                            VerticalOptions="Center" 
-                                        />
-                                        <Label 
-                                            Text="{Binding Competitor.Country.Name}" 
-                                            Style="{StaticResource MainCompetitorCountryStyle}" 
-                                            FontSize="16" 
-                                            VerticalOptions="Center" 
-                                        />
-                                    </HorizontalStackLayout>
-                                </VerticalStackLayout>
-
-                                <!-- Finish Button for Order mode -->
-                                <Button Text="VALIDER LE PASSAGE" 
-                                        Command="{Binding BindingContext.SetWinnerCommand, Source={x:Reference this}}"
-                                        CommandParameter="Finish"
-                                        BackgroundColor="{DynamicResource ValidColor}"
-                                        TextColor="Black"
-                                        FontAttributes="Bold"
-                                        CornerRadius="20"
-                                        HeightRequest="50"
-                                        WidthRequest="250"
-                                        Margin="0,0,0,0" />
-                            </VerticalStackLayout>
-
-                            <Grid.Triggers>
-                                <DataTrigger TargetType="Grid" Binding="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                    <Setter Property="IsVisible" Value="True"/>
-                                </DataTrigger>
-                            </Grid.Triggers>
                         </Grid>
-                    </Grid>
                 </Grid>
 
                 <!-- JUGE 3 -->
@@ -1711,11 +1516,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
                 </VerticalStackLayout>
 
@@ -1760,11 +1561,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
                     <Grid
@@ -1779,29 +1576,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
-                    <Grid
-                        Grid.Column="1"
-                        Grid.ColumnSpan="2"
-                        IsVisible="False"
-                    >
-                        <Label 
-                            Text="{Binding Judges[2].Score}"
-                            FontSize="18"
-                            VerticalOptions="Center"
-                        />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
-                    </Grid>
+                    
 
                     <Grid 
                         Grid.Column="4"
@@ -1866,11 +1644,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
                 </Grid>
                                 
@@ -1997,11 +1771,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
                 </VerticalStackLayout>
 
@@ -2046,11 +1816,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
                     <Grid
@@ -2065,29 +1831,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
 
-                    <Grid
-                        Grid.Column="1"
-                        Grid.ColumnSpan="2"
-                        IsVisible="False"
-                    >
-                        <Label 
-                            Text="{Binding Judges[3].Score}"
-                            FontSize="18"
-                            VerticalOptions="Center"
-                        />
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="{OnIdiom Tablet='false', Phone='true'}"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
-                    </Grid>
+                    
 
                     <Grid 
                         Grid.Column="4"
@@ -2152,11 +1899,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        <Grid.Triggers>
-                            <DataTrigger TargetType="Grid" Binding="{Binding CurrentDraw.Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                <Setter Property="IsVisible" Value="False"/>
-                            </DataTrigger>
-                        </Grid.Triggers>
+                        
                     </Grid>
                 </Grid>
                 
@@ -2233,6 +1976,13 @@
                     </Border.Triggers>
                         <VerticalStackLayout Spacing="5">
                         <Label 
+                            Text="{Binding CurrentDraw.CurrentRound, StringFormat='ROUND {0}'}" 
+                            HorizontalOptions="Center" 
+                            TextColor="LightGray" 
+                            FontSize="18" 
+                            FontAttributes="Bold" 
+                        />
+                        <Label 
                             Text="{Binding TimeLeftDisplay}" 
                             HorizontalOptions="Center" 
                             TextColor="White" 
@@ -2257,7 +2007,7 @@
                                     <RoundRectangle CornerRadius="20"/>
                                 </Border.StrokeShape>
                                 <Label 
-                                    Text="↺" 
+                                    Text="↻" 
                                     TextColor="White"
                                     FontSize="20"
                                     HorizontalOptions="Center"
@@ -2314,6 +2064,17 @@
                                 </Border.GestureRecognizers>
                             </Border>
                         </HorizontalStackLayout>
+                        
+                        <Button 
+                            Text="ROUND SUIVANT" 
+                            Command="{Binding NextRoundCommand}"
+                            BackgroundColor="#555555"
+                            TextColor="White"
+                            FontAttributes="Bold"
+                            CornerRadius="20"
+                            HeightRequest="40"
+                            Margin="0,10,0,0" 
+                        />
                     </VerticalStackLayout>
                     </Border>
 
@@ -2327,7 +2088,7 @@
                         IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                     >
                         <Label 
-                            Text="≡" 
+                            Text="â‰¡" 
                             VerticalOptions="Center" 
                             HorizontalOptions="Center" 
                             FontSize="30" 
@@ -2351,7 +2112,7 @@
         >
             <controls:SideSheetControl.SheetContent>
                 <VerticalStackLayout Spacing="20">
-                    <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
+                    <Label Text="CONTRÃ”LE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
 
                     <Button 
                         Text="DEMARRER" 

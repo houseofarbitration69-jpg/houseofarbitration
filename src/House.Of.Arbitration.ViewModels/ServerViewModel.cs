@@ -35,6 +35,7 @@ public partial class ServerViewModel : BaseViewModel
     private System.Collections.ObjectModel.ObservableCollection<object>? _draws;
     private IDrawModel? _currentDraw;
     private System.Collections.ObjectModel.ObservableCollection<JudgeModel> _judges = new();
+    private System.Collections.ObjectModel.ObservableCollection<RoundResultModel> _roundResults = new();
 
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private bool _isTimerRunning;
@@ -85,6 +86,12 @@ public partial class ServerViewModel : BaseViewModel
     {
         get => _judges;
         set => SetProperty(ref _judges, value);
+    }
+
+    public System.Collections.ObjectModel.ObservableCollection<RoundResultModel> RoundResults
+    {
+        get => _roundResults;
+        set => SetProperty(ref _roundResults, value);
     }
 
     public string TimeLeftDisplay => _timeLeft.ToString(@"mm\:ss");
@@ -495,6 +502,8 @@ public partial class ServerViewModel : BaseViewModel
         var firstUnfinished = sortedDraws.FirstOrDefault(d => !d.IsFinished);
         CurrentDraw = firstUnfinished;
 
+        RoundResults.Clear();
+
         if (CurrentDraw != null)
         {
             CurrentMatchNumber = sortedDraws.IndexOf(CurrentDraw) + 1;
@@ -535,7 +544,8 @@ public partial class ServerViewModel : BaseViewModel
             Score = score,
             Data = (code != null) ? JsonSerializer.Serialize(code) : String.Empty,
             IsCorrection = isCorrection,
-            CompetitorId = competitorId
+            CompetitorId = competitorId,
+            Round = CurrentDraw.CurrentRound
         };
 
         if (CurrentDraw is DrawKnockoutModel k) data.DrawKnockoutId = k.Id;
@@ -554,9 +564,68 @@ public partial class ServerViewModel : BaseViewModel
 
     #region Commands
     [RelayCommand]
+    private async Task NextRound()
+    {
+        if (CurrentDraw == null) return;
+
+        int redVotes = Judges.Sum(j => (int)j.RedPoints);
+        int blueVotes = Judges.Sum(j => (int)j.BluePoints);
+        string winner = redVotes > blueVotes ? "Red" : (blueVotes > redVotes ? "Blue" : "Draw");
+
+        RoundResults.Add(new RoundResultModel 
+        { 
+            RoundNumber = CurrentDraw.CurrentRound,
+            RedVotes = redVotes,
+            BlueVotes = blueVotes,
+            WinnerColor = winner
+        });
+
+        CurrentDraw.CurrentRound++;
+        OnPropertyChanged(nameof(CurrentDraw));
+
+        if (CurrentDraw is DrawKnockoutModel knockout)
+        {
+            await _drawKnockoutService.UpdateAsync(knockout);
+        }
+        else if (CurrentDraw is DrawPoolsModel pool)
+        {
+            await _drawPoolsModel.UpdateAsync(pool);
+        }
+        else if (CurrentDraw is DrawOrderModel order)
+        {
+            await _drawOrderService.UpdateAsync(order);
+        }
+
+        // Reset judge points
+        foreach (var judge in Judges)
+        {
+            judge.RedPoints = 0;
+            judge.BluePoints = 0;
+        }
+
+        // Reset timer
+        await ResetTimer();
+    }
+
+    [RelayCommand]
     private async Task SetWinner(string color)
     {
         if (CurrentDraw == null) return;
+
+        // Optionally, add the final round result before setting the winner
+        int redVotes = Judges.Count(j => j.RedPoints > j.BluePoints);
+        int blueVotes = Judges.Count(j => j.BluePoints > j.RedPoints);
+        if (redVotes > 0 || blueVotes > 0)
+        {
+            string roundWinner = redVotes > blueVotes ? "Red" : (blueVotes > redVotes ? "Blue" : "Draw");
+            RoundResults.Add(new RoundResultModel 
+            { 
+                RoundNumber = CurrentDraw.CurrentRound,
+                RedVotes = redVotes,
+                BlueVotes = blueVotes,
+                WinnerColor = roundWinner
+            });
+        }
 
         CompetitorModel? winner = null;
         CompetitorModel? looser = null;
@@ -756,6 +825,8 @@ public partial class ServerViewModel : BaseViewModel
     private async Task AddRedPoint(JudgeModel judge)
     {
         judge.RedPoints++;
+        OnPropertyChanged(nameof(Judges));
+
         var competitor = GetCompetitor(CurrentDraw, true);
         if (competitor != null) await SaveRefereeData(judge, competitor.Id, 1, true);
     }
@@ -766,6 +837,8 @@ public partial class ServerViewModel : BaseViewModel
         if (judge.RedPoints > 0)
         {
             judge.RedPoints--;
+            OnPropertyChanged(nameof(Judges));
+
             var competitor = GetCompetitor(CurrentDraw, true);
             if (competitor != null) await SaveRefereeData(judge, competitor.Id, -1, true);
         }
@@ -775,6 +848,8 @@ public partial class ServerViewModel : BaseViewModel
     private async Task AddBluePoint(JudgeModel judge)
     {
         judge.BluePoints++;
+        OnPropertyChanged(nameof(Judges));
+
         var competitor = GetCompetitor(CurrentDraw, false);
         if (competitor != null) await SaveRefereeData(judge, competitor.Id, 1, true);
     }
@@ -785,6 +860,8 @@ public partial class ServerViewModel : BaseViewModel
         if (judge.BluePoints > 0)
         {
             judge.BluePoints--;
+            OnPropertyChanged(nameof(Judges));
+
             var competitor = GetCompetitor(CurrentDraw, false);
             if (competitor != null) await SaveRefereeData(judge, competitor.Id, -1, true);
         }

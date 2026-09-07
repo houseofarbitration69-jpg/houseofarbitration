@@ -55,4 +55,9 @@ public partial class DrawOrderModel : ObservableObject, IDrawModel
     /// <inheritdoc/>
     /// </summary>
     public bool IsFinished { get; set; }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public int CurrentRound { get; set; } = 1;
 }

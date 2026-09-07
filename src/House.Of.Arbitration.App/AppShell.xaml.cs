@@ -1,4 +1,4 @@
-﻿#region Imports
+#region Imports
 using House.Of.Arbitration.Views;
 using House.Of.Arbitration.Views.Competition;
 using House.Of.Arbitration.Views.Wizard.Competition;
@@ -26,6 +26,7 @@ public partial class AppShell : Shell
         //Routing.RegisterRoute("Test", typeof(DragDropPage));
 
         Routing.RegisterRoute("Server", typeof(ServerPage));
+        Routing.RegisterRoute("ServerTaolu", typeof(ServerTaoluPage));
         Routing.RegisterRoute("RefereeDataPage", typeof(RefereeDataPage));
     }
 }

@@ -85,4 +85,9 @@ public partial class DrawKnockoutModel : ObservableObject, IDrawModel
     /// <inheritdoc/>
     /// </summary>
     public bool IsFinished { get; set; }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public int CurrentRound { get; set; } = 1;
 }

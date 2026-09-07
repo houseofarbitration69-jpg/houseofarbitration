@@ -35,6 +35,10 @@ public class AppDbContext : DbContext
     public AppDbContext()
     {
         Database.EnsureCreated();
+        try { Database.ExecuteSqlRaw("ALTER TABLE RefereeDatas ADD COLUMN Round INTEGER NOT NULL DEFAULT 1;"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsPools ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsOrders ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
     }
     #endregion
 
