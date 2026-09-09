@@ -309,14 +309,15 @@
                         Stroke="{StaticResource ValidColor}"
                     >
                         <Label 
-                            Text="â‰¡" 
-                            VerticalOptions="Center" 
-                            HorizontalOptions="Center" 
-                            FontSize="30" 
-                            TextColor="{StaticResource PrimaryTextColor}" 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
+                            FontSize="25" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
                             FontAttributes="Bold"
                         />
-
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
                         </Border.GestureRecognizers>
@@ -485,7 +486,7 @@
                                 </Border.GestureRecognizers>
                             </Border>
 
-                            
+
                         </Grid>
                     </VerticalStackLayout>
 
@@ -530,7 +531,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
                     <Grid
@@ -545,11 +546,11 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
-                    
-                    
+
+
                     <Grid 
                         Grid.Column="4"
                         ColumnDefinitions="*,*,*,*" 
@@ -613,7 +614,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        
+
                     </Grid>
                 </Grid>
 
@@ -739,7 +740,7 @@
                                 </Border.GestureRecognizers>
                             </Border>
 
-                            
+
                         </Grid>
                     </VerticalStackLayout>
 
@@ -784,7 +785,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
                     <Grid
@@ -799,10 +800,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
-                    
+
 
                     <Grid 
                         Grid.Column="4"
@@ -867,7 +868,7 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        
+
                     </Grid>
                 </Grid>
 
@@ -885,21 +886,21 @@
                         Spacing="5"
                         IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                     >
-                    <Border 
+                        <Border 
                         Background="LightGray"
                         WidthRequest="100"
                         HeightRequest="60"
                         StrokeShape="RoundRectangle 5"
                     >
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding Judges[4].IsConnected}" Value="True">
-                                <Setter Property="Background" Value="Green" />
-                                <Setter Property="Stroke" Value="Lime" />
-                                <Setter Property="StrokeThickness" Value="2" />
-                            </DataTrigger>
-                        </Border.Triggers>
-                        <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
-                            <Label 
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding Judges[4].IsConnected}" Value="True">
+                                    <Setter Property="Background" Value="Green" />
+                                    <Setter Property="Stroke" Value="Lime" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
+                                <Label 
                                 Grid.Row="0"
                                 Grid.ColumnSpan="2"
                                 Text="{Binding Judges[4].Name}"
@@ -909,7 +910,7 @@
                                 FontSize="18"
                             />
 
-                            <Label
+                                <Label
                                 Grid.Row="1"
                                 Grid.Column="0"
                                 Text="{Binding Judges[4].RedPoints}"
@@ -918,7 +919,7 @@
                                 HorizontalOptions="Center"
                             />
 
-                            <Label
+                                <Label
                                 Grid.Row="1"
                                 Grid.Column="1"
                                 Text="{Binding Judges[4].BluePoints}"
@@ -926,14 +927,14 @@
                                 FontSize="18"
                                 HorizontalOptions="Center"
                             />
-                        </Grid>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[4]}" />
-                        </Border.GestureRecognizers>
-                    </Border>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[4]}" />
+                            </Border.GestureRecognizers>
+                        </Border>
 
-                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
-                        <Border
+                        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="2">
+                            <Border
                             Grid.Column="0"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -941,13 +942,13 @@
                             BackgroundColor="DarkRed"
                             Stroke="DarkRed"
                         >
-                            <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding RemoveRedPointCommand}" CommandParameter="{Binding Judges[4]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RemoveRedPointCommand}" CommandParameter="{Binding Judges[4]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="1"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -955,13 +956,13 @@
                             BackgroundColor="Red"
                             Stroke="Red"
                         >
-                            <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding AddRedPointCommand}" CommandParameter="{Binding Judges[4]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AddRedPointCommand}" CommandParameter="{Binding Judges[4]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="2"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -969,13 +970,13 @@
                             BackgroundColor="DarkBlue"
                             Stroke="DarkBlue"
                         >
-                            <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding RemoveBluePointCommand}" CommandParameter="{Binding Judges[4]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RemoveBluePointCommand}" CommandParameter="{Binding Judges[4]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="3"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -983,16 +984,16 @@
                             BackgroundColor="Blue"
                             Stroke="Blue"
                         >
-                            <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[4]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[4]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
 
-                        
-                    </Grid>
-                </VerticalStackLayout>
+
+                        </Grid>
+                    </VerticalStackLayout>
 
                     <Border 
                         Grid.Column="0"
@@ -1035,7 +1036,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
                     <Grid
@@ -1050,10 +1051,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
-                    
+
 
                     <Grid 
                         Grid.Column="4"
@@ -1118,10 +1119,10 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        
+
                     </Grid>
                 </Grid>
-                
+
                 <!-- MATCH -->
                 <Grid 
                     Grid.Row="{OnIdiom Tablet='2', Phone='1'}"
@@ -1136,12 +1137,24 @@
                         Spacing="20"
                         IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                     >
-                        <Label Text="ðŸ†" FontSize="64" HorizontalOptions="Center"/>
-                        <Label Text="Tous les matchs sont terminÃ©s" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
+                        <Label 
+                            Text="ðŸ†"
+                            FontSize="64" 
+                            HorizontalOptions="Center"
+                        />
+                        
+                        <Label 
+                            Text="Tous les matchs sont terminés" 
+                            TextColor="White" 
+                            FontSize="28" 
+                            FontAttributes="Bold" 
+                            HorizontalOptions="Center"
+                        />
                     </VerticalStackLayout>
 
                     <!-- Current Match Area -->
                     <Grid 
+                        Grid.Column="0"
                         BindingContext="{Binding CurrentDraw}"
                         IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                         x:DataType="{x:Null}"
@@ -1170,18 +1183,20 @@
                                 StrokeShape="RoundRectangle 0,8,0,8"
                             />
 
-                            
+
                         </Grid>
 
                         <!-- Knockout / Round Robin Mode -->
-                        <Grid ColumnDefinitions="*,Auto,*">
+                        <Grid 
+                            ColumnDefinitions="*,150,*"
+                        >
                             <!-- Competitor 1 (Red Side) -->
                             <VerticalStackLayout 
                                 Grid.Column="0" 
                                 VerticalOptions="Center" 
                                 HorizontalOptions="Center" 
                                 Spacing="10" 
-                                Padding="0,5,0,0"
+                                Padding="75,5,0,0"
                             >
                                 <!-- Circular Photo / Icon -->
                                 <Border 
@@ -1276,7 +1291,13 @@
                             </VerticalStackLayout>
 
                             <!-- Results Center -->
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Start" HorizontalOptions="Center" Spacing="5" Padding="10,0">
+                            <VerticalStackLayout 
+                                Grid.Column="1" 
+                                VerticalOptions="Start" 
+                                HorizontalOptions="Center" 
+                                Spacing="5" 
+                                Padding="10,0"
+                            >
                                 <CollectionView ItemsSource="{Binding BindingContext.RoundResults, Source={x:Reference this}}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:RoundResultModel">
@@ -1294,7 +1315,13 @@
                             </VerticalStackLayout>
 
                             <!-- Competitor 2 (Blue Side) -->
-                            <VerticalStackLayout Grid.Column="2" VerticalOptions="Center" HorizontalOptions="Center" Spacing="10" Padding="0,5,0,0">
+                            <VerticalStackLayout 
+                                Grid.Column="2" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                Spacing="10" 
+                                Padding="0,5,75,0"
+                            >
                                 <!-- Circular Photo / Icon -->
                                 <Border 
                                     StrokeShape="RoundRectangle 50" 
@@ -1386,10 +1413,10 @@
                                 />
                             </VerticalStackLayout>
 
-                            
-                        </Grid>
 
                         </Grid>
+
+                    </Grid>
                 </Grid>
 
                 <!-- JUGE 3 -->
@@ -1439,7 +1466,7 @@
                                     TextColor="Red"
                                     HorizontalOptions="Center"
                                 />
-    
+
                                 <Label
                                     Grid.Row="1"
                                     Grid.Column="1"
@@ -1454,12 +1481,12 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                    <Grid 
+                        <Grid 
                         ColumnDefinitions="*,*,*,*" 
                         ColumnSpacing="5" 
                         IsVisible="True"
                     >
-                        <Border
+                            <Border
                             Grid.Column="0"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -1467,13 +1494,13 @@
                             BackgroundColor="DarkRed"
                             Stroke="DarkRed"
                         >
-                            <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding RemoveRedPointCommand}" CommandParameter="{Binding Judges[2]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RemoveRedPointCommand}" CommandParameter="{Binding Judges[2]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="1"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -1481,13 +1508,13 @@
                             BackgroundColor="Red"
                             Stroke="Red"
                         >
-                            <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding AddRedPointCommand}" CommandParameter="{Binding Judges[2]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AddRedPointCommand}" CommandParameter="{Binding Judges[2]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="2"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -1495,13 +1522,13 @@
                             BackgroundColor="DarkBlue"
                             Stroke="DarkBlue"
                         >
-                            <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding RemoveBluePointCommand}" CommandParameter="{Binding Judges[2]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RemoveBluePointCommand}" CommandParameter="{Binding Judges[2]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="3"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -1509,16 +1536,16 @@
                             BackgroundColor="Blue"
                             Stroke="Blue"
                         >
-                            <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[2]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[2]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
 
-                        
-                    </Grid>
-                </VerticalStackLayout>
+
+                        </Grid>
+                    </VerticalStackLayout>
 
                     <Border 
                         Grid.Column="0"
@@ -1561,7 +1588,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
                     <Grid
@@ -1576,10 +1603,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
-                    
+
 
                     <Grid 
                         Grid.Column="4"
@@ -1644,10 +1671,10 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        
+
                     </Grid>
                 </Grid>
-                                
+
                 <!-- JUGE 4 -->
                 <Grid
                     Grid.Row="{OnIdiom Tablet='3', Phone='5'}" 
@@ -1668,15 +1695,15 @@
                             HeightRequest="60"
                             StrokeShape="RoundRectangle 5"
                         >
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding Judges[3].IsConnected}" Value="True">
-                                <Setter Property="Background" Value="Green" />
-                                <Setter Property="Stroke" Value="Lime" />
-                                <Setter Property="StrokeThickness" Value="2" />
-                            </DataTrigger>
-                        </Border.Triggers>
-                        <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
-                            <Label 
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding Judges[3].IsConnected}" Value="True">
+                                    <Setter Property="Background" Value="Green" />
+                                    <Setter Property="Stroke" Value="Lime" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
+                                <Label 
                                 Grid.Row="0"
                                 Grid.ColumnSpan="2"
                                 Text="{Binding Judges[3].Name}"
@@ -1686,7 +1713,7 @@
                                 FontSize="18"
                             />
 
-                            <Label
+                                <Label
                                 Grid.Row="1"
                                 Grid.Column="0"
                                 Text="{Binding Judges[3].RedPoints}"
@@ -1695,7 +1722,7 @@
                                 HorizontalOptions="Center"
                             />
 
-                            <Label
+                                <Label
                                 Grid.Row="1"
                                 Grid.Column="1"
                                 Text="{Binding Judges[3].BluePoints}"
@@ -1703,18 +1730,18 @@
                                 FontSize="18"
                                 HorizontalOptions="Center"
                             />
-                        </Grid>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[3]}" />
-                        </Border.GestureRecognizers>
-                    </Border>
+                            </Grid>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[3]}" />
+                            </Border.GestureRecognizers>
+                        </Border>
 
-                    <Grid 
+                        <Grid 
                         ColumnDefinitions="*,*,*,*" 
                         ColumnSpacing="5" 
                         IsVisible="True"
                     >
-                        <Border
+                            <Border
                             Grid.Column="0"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -1722,13 +1749,13 @@
                             BackgroundColor="DarkRed"
                             Stroke="DarkRed"
                         >
-                            <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding RemoveRedPointCommand}" CommandParameter="{Binding Judges[3]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RemoveRedPointCommand}" CommandParameter="{Binding Judges[3]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="1"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -1736,13 +1763,13 @@
                             BackgroundColor="Red"
                             Stroke="Red"
                         >
-                            <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding AddRedPointCommand}" CommandParameter="{Binding Judges[3]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AddRedPointCommand}" CommandParameter="{Binding Judges[3]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="2"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -1750,13 +1777,13 @@
                             BackgroundColor="DarkBlue"
                             Stroke="DarkBlue"
                         >
-                            <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding RemoveBluePointCommand}" CommandParameter="{Binding Judges[3]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
-                        <Border
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RemoveBluePointCommand}" CommandParameter="{Binding Judges[3]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
+                            <Border
                             Grid.Column="3"
                             StrokeShape="RoundRectangle 50"
                             HeightRequest="40"
@@ -1764,16 +1791,16 @@
                             BackgroundColor="Blue"
                             Stroke="Blue"
                         >
-                            <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
+                                <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[3]}"/>
-                            </Border.GestureRecognizers>
-                        </Border>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[3]}"/>
+                                </Border.GestureRecognizers>
+                            </Border>
 
-                        
-                    </Grid>
-                </VerticalStackLayout>
+
+                        </Grid>
+                    </VerticalStackLayout>
 
                     <Border 
                         Grid.Column="0"
@@ -1816,7 +1843,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
                     <Grid
@@ -1831,10 +1858,10 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-                        
+
                     </Grid>
 
-                    
+
 
                     <Grid 
                         Grid.Column="4"
@@ -1899,57 +1926,61 @@
                             </Border.GestureRecognizers>
                         </Border>
 
-                        
+
                     </Grid>
                 </Grid>
-                
+
                 <!-- TABLE CENTRAL -->
+                <!--IsVisible="{Binding BindingContext.CurrentDraw, Source={x:Reference this}, Converter={StaticResource EmptyToBoolConverter}}"-->
                 <Grid
                     Grid.Row="{OnIdiom Tablet='3', Phone='7'}"
                     Grid.Column="2" 
-                    IsVisible="{Binding BindingContext.CurrentDraw, Source={x:Reference this}, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="false"
                 >
-                <HorizontalStackLayout 
-                    Spacing="10" 
-                    HorizontalOptions="Center" 
-                    VerticalOptions="End"
-                    IsVisible="{OnIdiom Tablet='true', Phone='false'}"
-                >
-                    <Border 
-                        Grid.Column="0"
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        VerticalOptions="Start"
-                        StrokeShape="RoundRectangle 5"
-                    />
-                    <Border 
-                        Grid.Column="1"
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        VerticalOptions="Start"
-                        StrokeShape="RoundRectangle 5"
-                    />
-                    <Border 
-                        Grid.Column="2"
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        VerticalOptions="Start"
-                        StrokeShape="RoundRectangle 5"
-                    />
-                    <Border 
-                        Grid.Column="3"
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        VerticalOptions="Start"
-                        StrokeShape="RoundRectangle 5"
-                    />
-                </HorizontalStackLayout>
+                    <HorizontalStackLayout 
+                        Spacing="10" 
+                        HorizontalOptions="Center" 
+                        VerticalOptions="End"
+                        IsVisible="{OnIdiom Tablet='true', Phone='false'}"
+                    >
+                        <Border 
+                            Grid.Column="0"
+                            Background="LightGray"
+                            WidthRequest="100"
+                            HeightRequest="60"
+                            VerticalOptions="Start"
+                            StrokeShape="RoundRectangle 5"
+                        />
+
+                        <Border 
+                            Grid.Column="1"
+                            Background="LightGray"
+                            WidthRequest="100"
+                            HeightRequest="60"
+                            VerticalOptions="Start"
+                            StrokeShape="RoundRectangle 5"
+                        />
+
+                        <Border 
+                            Grid.Column="2"
+                            Background="LightGray"
+                            WidthRequest="100"
+                            HeightRequest="60"
+                            VerticalOptions="Start"
+                            StrokeShape="RoundRectangle 5"
+                        />
+
+                        <Border 
+                            Grid.Column="3"
+                            Background="LightGray"
+                            WidthRequest="100"
+                            HeightRequest="60"
+                            VerticalOptions="Start"
+                            StrokeShape="RoundRectangle 5"
+                        />
+                    </HorizontalStackLayout>
                 </Grid>
-                
+
                 <!-- CHRONO & CONTROLS -->
                 <Grid
                     Grid.Row="{OnIdiom Tablet='0', Phone='7'}"
@@ -1961,7 +1992,7 @@
                         Grid.Column="1"
                         HorizontalOptions="Center"
                         VerticalOptions="End"
-                        Margin="{OnIdiom Tablet='0,0,0,70', Phone='0,0,0,10'}"
+                        Margin="{OnIdiom Tablet='0,0,0,0', Phone='0,0,0,10'}"
                         Padding="15,10,15,10"
                         BackgroundColor="#333"
                         Stroke="White"
@@ -1970,112 +2001,120 @@
                         IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                     >
                         <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding BindingContext.CurrentDraw.Type, Source={x:Reference this}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
-                    </Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding BindingContext.CurrentDraw.Type, Source={x:Reference this}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                        </Border.Triggers>
                         <VerticalStackLayout Spacing="5">
-                        <Label 
-                            Text="{Binding CurrentDraw.CurrentRound, StringFormat='ROUND {0}'}" 
-                            HorizontalOptions="Center" 
-                            TextColor="LightGray" 
-                            FontSize="18" 
-                            FontAttributes="Bold" 
-                        />
-                        <Label 
-                            Text="{Binding TimeLeftDisplay}" 
-                            HorizontalOptions="Center" 
-                            TextColor="White" 
-                            FontSize="48" 
-                            FontAttributes="Bold"
-                            FontFamily="Monospace"
-                        >
-                            <Label.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SetTimerCommand}" />
-                            </Label.GestureRecognizers>
-                        </Label>
+                            <Label 
+                                Text="{Binding CurrentDraw.CurrentRound, StringFormat='ROUND {0}'}" 
+                                HorizontalOptions="Center" 
+                                TextColor="LightGray" 
+                                FontSize="18" 
+                                FontAttributes="Bold" 
+                            />
 
-                        <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
-                            <!-- Reset -->
-                            <Border 
-                                BackgroundColor="Gray"
-                                HeightRequest="40"
-                                WidthRequest="40"
-                                StrokeThickness="0"
+                            <Label 
+                                Text="{Binding TimeLeftDisplay}" 
+                                HorizontalOptions="Center" 
+                                TextColor="White" 
+                                FontSize="48" 
+                                FontAttributes="Bold"
+                                FontFamily="Monospace"
                             >
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
-                                <Label 
-                                    Text="↻" 
-                                    TextColor="White"
-                                    FontSize="20"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center" 
-                                    Padding="0,0,0,5"
-                                />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ResetTimerCommand}" />
-                                </Border.GestureRecognizers>
-                            </Border>
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetTimerCommand}" />
+                                </Label.GestureRecognizers>
+                            </Label>
 
-                            <!-- Start -->
-                            <Border BackgroundColor="Green"
+                            <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
+                                <!-- Reset -->
+                                <Border 
+                                    BackgroundColor="Gray"
                                     HeightRequest="40"
                                     WidthRequest="40"
                                     StrokeThickness="0"
-                                    IsVisible="{Binding IsTimerRunning, Converter={StaticResource InvertBoolConverter}}">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
-                                <Path 
-                                    Data="M 0,0 L 12,8 L 0,16 Z" 
-                                    Fill="White" 
-                                    HorizontalOptions="Center" 
-                                    VerticalOptions="Center" 
-                                    TranslationX="2" 
-                                />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding StartTimerCommand}" />
-                                </Border.GestureRecognizers>
-                            </Border>
+                                >
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="20"/>
+                                    </Border.StrokeShape>
 
-                            <!-- Pause -->
-                            <Border 
-                                BackgroundColor="Orange"
+                                    <Label 
+                                        Text="↻" 
+                                        TextColor="White"
+                                        FontSize="20"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" 
+                                        Padding="0,0,0,5"
+                                    />
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ResetTimerCommand}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+
+                                <!-- Start -->
+                                <Border 
+                                    BackgroundColor="Green"
+                                    HeightRequest="40"
+                                    WidthRequest="40"
+                                    StrokeThickness="0"
+                                    IsVisible="{Binding IsTimerRunning, Converter={StaticResource InvertBoolConverter}}"
+                                >
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="20"/>
+                                    </Border.StrokeShape>
+
+                                    <Path 
+                                        Data="M 0,0 L 12,8 L 0,16 Z" 
+                                        Fill="White" 
+                                        HorizontalOptions="Center" 
+                                        VerticalOptions="Center" 
+                                        TranslationX="2" 
+                                    />
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding StartTimerCommand}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+
+                                <!-- Pause -->
+                                <Border 
+                                    BackgroundColor="Orange"
+                                    HeightRequest="40"
+                                    WidthRequest="40"
+                                    StrokeThickness="0"
+                                    IsVisible="{Binding IsTimerRunning}"
+                                >
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="20"/>
+                                    </Border.StrokeShape>
+
+                                    <Grid 
+                                        ColumnDefinitions="4, 4, 4" 
+                                          HorizontalOptions="Center" 
+                                          VerticalOptions="Center" 
+                                          HeightRequest="16"
+                                          ColumnSpacing="0">
+                                        <BoxView Grid.Column="0" BackgroundColor="White" WidthRequest="4" CornerRadius="1"/>
+                                        <BoxView Grid.Column="2" BackgroundColor="White" WidthRequest="4" CornerRadius="1"/>
+                                    </Grid>
+
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding PauseTimerCommand}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </HorizontalStackLayout>
+
+                            <Button 
+                                Text="ROUND SUIVANT" 
+                                Command="{Binding NextRoundCommand}"
+                                BackgroundColor="#555555"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                CornerRadius="20"
                                 HeightRequest="40"
-                                WidthRequest="40"
-                                StrokeThickness="0"
-                                IsVisible="{Binding IsTimerRunning}"
-                            >
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
-                                <Grid ColumnDefinitions="4, 4, 4" 
-                                      HorizontalOptions="Center" 
-                                      VerticalOptions="Center" 
-                                      HeightRequest="16"
-                                      ColumnSpacing="0">
-                                    <BoxView Grid.Column="0" BackgroundColor="White" WidthRequest="4" CornerRadius="1"/>
-                                    <BoxView Grid.Column="2" BackgroundColor="White" WidthRequest="4" CornerRadius="1"/>
-                                </Grid>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding PauseTimerCommand}" />
-                                </Border.GestureRecognizers>
-                            </Border>
-                        </HorizontalStackLayout>
-                        
-                        <Button 
-                            Text="ROUND SUIVANT" 
-                            Command="{Binding NextRoundCommand}"
-                            BackgroundColor="#555555"
-                            TextColor="White"
-                            FontAttributes="Bold"
-                            CornerRadius="20"
-                            HeightRequest="40"
-                            Margin="0,10,0,0" 
-                        />
-                    </VerticalStackLayout>
+                                Margin="0,10,0,0" 
+                            />
+                        </VerticalStackLayout>
                     </Border>
 
                     <Border
@@ -2112,10 +2151,10 @@
         >
             <controls:SideSheetControl.SheetContent>
                 <VerticalStackLayout Spacing="20">
-                    <Label Text="CONTRÃ”LE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
+                    <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
 
                     <Button 
-                        Text="DEMARRER" 
+                        Text="DÉMARRER" 
                         Command="{Binding StartServerCommand}"
                         BackgroundColor="{DynamicResource ValidColor}"
                         TextColor="Black"
@@ -2126,7 +2165,7 @@
                     />
 
                     <Button 
-                        Text="ARRETER" 
+                        Text="ARRÉTER" 
                         Command="{Binding StopServerCommand}"
                         BackgroundColor="Red"
                         TextColor="White"

@@ -13,7 +13,6 @@
     Padding="0">
 
     <ContentView.Resources>
-        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
         <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />
         <converters:IsoCodeToFlagPathConverter x:Key="IsoCodeToFlagPathConverter" />
     </ContentView.Resources>
@@ -89,13 +88,33 @@
                                     IsVisible="{Binding Match.Competitor1, Converter={StaticResource EmptyToBoolConverter}}" 
                                 />
                                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                    <Label Text="{Binding Match.Competitor1.Name, FallbackValue='(BYE)'}" TextColor="White" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation"/>
-                                    <Label Text="{Binding Match.Competitor1.Club}" TextColor="#AAAAAA" FontSize="9" LineBreakMode="TailTruncation" IsVisible="{Binding Match.Competitor1.Club, Converter={StaticResource StringToBoolConverter}}"/>
+                                    <Label 
+                                        Text="{Binding Match.Competitor1.Name, FallbackValue='(BYE)'}" 
+                                        TextColor="White" 
+                                        FontAttributes="Bold" 
+                                        FontSize="11" 
+                                        LineBreakMode="TailTruncation"
+                                    />
+                                    <Label 
+                                        Text="{Binding Match.Competitor1.Club}" 
+                                        TextColor="#AAAAAA" 
+                                        FontSize="9" 
+                                        LineBreakMode="TailTruncation" 
+                                        IsVisible="{Binding Match.Competitor1.Club, Converter={StaticResource EmptyToBoolConverter}}"
+                                    />
                                 </VerticalStackLayout>
                             </Grid>
                         </Border>
 
-                        <Label Grid.Column="1" Text="VS" TextColor="{DynamicResource Secondary}" FontAttributes="Bold" FontSize="10" VerticalOptions="Center" HorizontalOptions="Center"/>
+                        <Label 
+                            Grid.Column="1" 
+                            Text="VS" 
+                            TextColor="{DynamicResource Secondary}"
+                            FontAttributes="Bold" 
+                            FontSize="10" 
+                            VerticalOptions="Center" 
+                            HorizontalOptions="Center"
+                        />
 
                         <!-- Blue Competitor -->
                         <Border Grid.Column="2" BackgroundColor="#1A222B" Stroke="#1976D2" StrokeThickness="1.5" Padding="6, 5" StrokeShape="RoundRectangle 8">
@@ -109,8 +128,20 @@
                                     IsVisible="{Binding Match.Competitor2, Converter={StaticResource EmptyToBoolConverter}}" 
                                 />
                                 <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                    <Label Text="{Binding Match.Competitor2.Name, FallbackValue='(BYE)'}" TextColor="White" FontAttributes="Bold" FontSize="11" LineBreakMode="TailTruncation"/>
-                                    <Label Text="{Binding Match.Competitor2.Club}" TextColor="#AAAAAA" FontSize="9" LineBreakMode="TailTruncation" IsVisible="{Binding Match.Competitor2.Club, Converter={StaticResource StringToBoolConverter}}"/>
+                                    <Label 
+                                        Text="{Binding Match.Competitor2.Name, FallbackValue='(BYE)'}" 
+                                        TextColor="White" 
+                                        FontAttributes="Bold" 
+                                        FontSize="11" 
+                                        LineBreakMode="TailTruncation"
+                                    />
+                                    <Label 
+                                        Text="{Binding Match.Competitor2.Club}" 
+                                        TextColor="#AAAAAA" 
+                                        FontSize="9" 
+                                        LineBreakMode="TailTruncation" 
+                                        IsVisible="{Binding Match.Competitor2.Club, Converter={StaticResource EmptyToBoolConverter}}"
+                                    />
                                 </VerticalStackLayout>
                             </Grid>
                         </Border>
@@ -128,8 +159,20 @@
                                 IsVisible="{Binding Match.Competitor, Converter={StaticResource EmptyToBoolConverter}}" 
                             />
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
-                                <Label Text="{Binding Match.Competitor.Name, FallbackValue='(En attente)'}" TextColor="White" FontAttributes="Bold" FontSize="12" LineBreakMode="TailTruncation"/>
-                                <Label Text="{Binding Match.Competitor.Club}" TextColor="#AAAAAA" FontSize="10" LineBreakMode="TailTruncation" IsVisible="{Binding Match.Competitor.Club, Converter={StaticResource StringToBoolConverter}}"/>
+                                <Label 
+                                    Text="{Binding Match.Competitor.Name, FallbackValue='(En attente)'}" 
+                                    TextColor="White" 
+                                    FontAttributes="Bold" 
+                                    FontSize="12" 
+                                    LineBreakMode="TailTruncation"
+                                />
+                                <Label 
+                                    Text="{Binding Match.Competitor.Club}" 
+                                    TextColor="#AAAAAA" 
+                                    FontSize="10" 
+                                    LineBreakMode="TailTruncation" 
+                                    IsVisible="{Binding Match.Competitor.Club, Converter={StaticResource EmptyToBoolConverter}}"
+                                />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>

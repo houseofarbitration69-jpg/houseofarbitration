@@ -28,4 +28,8 @@ public static class FontAwesomeIcons
     public const string WAREHOUSE = "\uf494";
     public const string MAGNIFYING_GLASS = "\uf002";
     public const string SIGNAL = "\uf012";
+    public const string HAND_FIST = "\uf255";
+    public const string YIN_YANG = "\uf6ad";
+    public const string DRAGON = "\uf6d5";
+    public const string BARS = "\uf0c9";
 }

@@ -10,10 +10,6 @@
     x:DataType="vm:SettingsStepViewModel"
     Shell.NavBarIsVisible="False">
 
-    <ContentView.Resources>
-        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
-    </ContentView.Resources>
-
     <ScrollView Padding="0" Margin="0">
         <VerticalStackLayout Spacing="24" Padding="20">
             <!-- Header Section -->
@@ -45,7 +41,7 @@
                                 <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                             </Border.StrokeShape>
                             <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                <DataTrigger TargetType="Border" Binding="{Binding Name, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}" Value="True">
                                     <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
@@ -68,7 +64,7 @@
                         <Label 
                             Text="{Binding Resources.NAME_REQUIRED}" 
                             Style="{StaticResource FormRequiredMessageStyle}"
-                            IsVisible="{Binding Name, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" 
+                            IsVisible="{Binding Name, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}" 
                         />
                     </VerticalStackLayout>
 

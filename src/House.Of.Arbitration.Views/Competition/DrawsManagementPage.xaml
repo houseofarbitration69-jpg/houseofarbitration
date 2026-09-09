@@ -55,7 +55,7 @@
                                 Text="{Binding Details}" 
                                 TextColor="#AAAAAA" 
                                 FontSize="12"
-                                IsVisible="{Binding Details, Converter={StaticResource StringToBoolConverter}}" 
+                                IsVisible="{Binding Details, Converter={StaticResource EmptyToBoolConverter}}" 
                             />
                         </VerticalStackLayout>-->
                         <!--<Border 
@@ -203,7 +203,7 @@
                                                 TextColor="#999999" 
                                                 FontSize="11"
                                                 LineBreakMode="TailTruncation"
-                                                IsVisible="{Binding Competitor1.Club, Converter={StaticResource StringToBoolConverter}}" 
+                                                IsVisible="{Binding Competitor1.Club, Converter={StaticResource EmptyToBoolConverter}}" 
                                             />
                                         </VerticalStackLayout>
                                     </Grid>
@@ -244,7 +244,7 @@
                                                 TextColor="#999999" 
                                                 FontSize="11"
                                                 LineBreakMode="TailTruncation"
-                                                IsVisible="{Binding Competitor2.Club, Converter={StaticResource StringToBoolConverter}}" 
+                                                IsVisible="{Binding Competitor2.Club, Converter={StaticResource EmptyToBoolConverter}}" 
                                             />
                                         </VerticalStackLayout>
                                     </Grid>
@@ -276,7 +276,7 @@
                                                 TextColor="#999999" 
                                                 FontSize="11"
                                                 LineBreakMode="TailTruncation"
-                                                IsVisible="{Binding Competitor.Club, Converter={StaticResource StringToBoolConverter}}" 
+                                                IsVisible="{Binding Competitor.Club, Converter={StaticResource EmptyToBoolConverter}}" 
                                             />
                                         </VerticalStackLayout>
                                     </Grid>

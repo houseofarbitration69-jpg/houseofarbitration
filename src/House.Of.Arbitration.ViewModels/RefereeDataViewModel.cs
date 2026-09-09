@@ -117,7 +117,12 @@ public partial class RefereeDataViewModel : BaseViewModel
             
             if (datas != null)
             {
-                _allDatas = datas.ToList();
+                _allDatas = datas
+                    .OrderBy(d => d.DrawKnockoutModel?.Draw?.Category?.Name)
+                    .ThenBy(d => d.DrawOrder?.Draw?.Category?.Name)
+                    .ThenBy(d => d.DrawPools?.Draw?.Category?.Name)
+                    .ThenBy(d => d.DrawOrder?.CurrentRound)
+                    .ToList();
                 FilterDatas();
             }
         }

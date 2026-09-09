@@ -7,13 +7,14 @@ public class StringToBoolConverter : IValueConverter
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         bool hasValue = !string.IsNullOrWhiteSpace(value as string);
-        
-        if (parameter as string == "Invert")
+        bool hasParameter = !string.IsNullOrWhiteSpace(parameter as string);
+
+        if (hasValue && hasParameter)
         {
-            return !hasValue;
+            return String.Compare(value as string, parameter as string, true) == 0;
         }
 
-        return hasValue;
+        return false;
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

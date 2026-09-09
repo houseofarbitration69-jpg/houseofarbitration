@@ -14,7 +14,6 @@
     Padding="0"
 >
     <ContentView.Resources>
-        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
         <converters:GenreToBoolConverter x:Key="GenreToBoolConverter" />
         <converters:BirthDateToBoolConverter x:Key="BirthDateToBoolConverter" />
         <converters:CategoryTypeToBoolConverter x:Key="CategoryTypeToBoolConverter" />
@@ -65,7 +64,7 @@
                                 <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                             </Border.StrokeShape>
                             <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding LastName, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                <DataTrigger TargetType="Border" Binding="{Binding LastName, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}" Value="True">
                                     <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
@@ -101,7 +100,7 @@
                                 <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                             </Border.StrokeShape>
                             <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding FirstName, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                <DataTrigger TargetType="Border" Binding="{Binding FirstName, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}" Value="True">
                                     <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
@@ -174,7 +173,7 @@
                                 <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                             </Border.StrokeShape>
                             <Border.Triggers>
-                                <DataTrigger TargetType="Border" Binding="{Binding Club, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                <DataTrigger TargetType="Border" Binding="{Binding Club, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}" Value="True">
                                     <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                 </DataTrigger>
                             </Border.Triggers>
@@ -221,7 +220,7 @@
                                     <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                                 </Border.StrokeShape>
                                 <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding CountryName, Converter={StaticResource StringToBoolConverter}, ConverterParameter='Invert'}" Value="True">
+                                    <DataTrigger TargetType="Border" Binding="{Binding CountryName, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}" Value="True">
                                         <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                                     </DataTrigger>
                                 </Border.Triggers>

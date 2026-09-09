@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <base:BasePage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -309,11 +309,13 @@
                         Stroke="{StaticResource ValidColor}"
                     >
                         <Label 
-                            Text="â‰¡" 
-                            VerticalOptions="Center" 
-                            HorizontalOptions="Center" 
-                            FontSize="30" 
-                            TextColor="{StaticResource PrimaryTextColor}" 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
+                            FontSize="25" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
                             FontAttributes="Bold"
                         />
 
@@ -336,7 +338,7 @@
 
             <Grid 
                 Grid.Column="1" 
-                RowDefinitions="{OnIdiom Tablet='60,105,*,115', Phone='60,*,40,40,40,40,40,150'}" 
+                RowDefinitions="{OnIdiom Tablet='60,150,*,50', Phone='60,*,40,40,40,40,40,150'}" 
                 RowSpacing="15" 
                 ColumnDefinitions="{OnIdiom Tablet='85,80,*,80,85', Phone='*'}"
             >
@@ -361,59 +363,100 @@
                         FontAttributes="Bold"
                     />
                 </Border>
-                
+
                 <!-- JUGES TAOLU -->
                 <FlexLayout
                     Grid.Row="1"
                     Grid.ColumnSpan="5"
                     Wrap="Wrap"
                     Direction="Row"
-                    JustifyContent="SpaceEvenly"
                     AlignItems="Center"
+                    AlignContent="Center"
                     IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
-                    BindableLayout.ItemsSource="{Binding Judges}">
+                    BindableLayout.ItemsSource="{Binding JudgeGroups}"
+                >
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:JudgeModel">
-                            <VerticalStackLayout Spacing="5" Margin="5">
-                                <Border 
-                                    Background="LightGray"
-                                    WidthRequest="100"
-                                    HeightRequest="60"
-                                    StrokeShape="RoundRectangle 5">
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border" Binding="{Binding IsConnected}" Value="True">
-                                            <Setter Property="Background" Value="Green" />
-                                            <Setter Property="Stroke" Value="Lime" />
-                                            <Setter Property="StrokeThickness" Value="2" />
-                                        </DataTrigger>
-                                    </Border.Triggers>
-                                    <Grid RowDefinitions="*,*" ColumnDefinitions="*">
-                                        <Label 
-                                            Grid.Row="0"
-                                            Text="{Binding Name}"
-                                            FontAttributes="Bold"
-                                            HorizontalOptions="Center"
-                                            TextColor="Black"
-                                            FontSize="18"
-                                        />
-                                        <Label 
-                                            Grid.Row="1"
-                                            Text="{Binding Score}"
-                                            FontSize="18"
-                                            TextColor="White"
-                                            HorizontalOptions="Center"
-                                        />
-                                    </Grid>
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding BindingContext.OpenJudgePopupCommand, Source={x:Reference this}}" CommandParameter="{Binding .}" />
-                                    </Border.GestureRecognizers>
-                                </Border>
-                            </VerticalStackLayout>
+                        <DataTemplate x:DataType="models:JudgeGroupModel">
+                            <Border 
+                                Stroke="#EEEEEE"
+                                StrokeShape="RoundRectangle 10"
+                                BackgroundColor="#333"
+                                Padding="0,5,5,5"
+                                Margin="0,5,5,5"
+                                MaximumWidthRequest="380"
+                            >
+                                <VerticalStackLayout>
+                                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                                        <Label Text="{Binding Name}" TextColor="White" FontAttributes="Bold" FontSize="18" VerticalOptions="Center"/>
+                                        <Border BackgroundColor="DodgerBlue" StrokeShape="RoundRectangle 5" Padding="5,2">
+                                            <Label Text="{Binding GlobalScore}" TextColor="White" FontAttributes="Bold" FontSize="16"/>
+                                        </Border>
+                                    </HorizontalStackLayout>
+
+                                    <FlexLayout 
+                                        Wrap="Wrap" 
+                                        Direction="Row" 
+                                        AlignItems="Start"
+                                        AlignContent="Start"
+                                        BindableLayout.ItemsSource="{Binding Judges}"
+                                    >
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="models:JudgeModel">
+                                                <VerticalStackLayout 
+                                                    Margin="5,5,5,5"
+                                                >
+                                                    <Border 
+                                                        Background="LightGray"
+                                                        WidthRequest="85"
+                                                        HeightRequest="60"
+                                                        StrokeShape="RoundRectangle 5"
+                                                    >
+                                                        <Border.Triggers>
+                                                            <DataTrigger TargetType="Border" Binding="{Binding IsConnected}" Value="True">
+                                                                <Setter Property="Background" Value="Green" />
+                                                                <Setter Property="Stroke" Value="Lime" />
+                                                                <Setter Property="StrokeThickness" Value="2" />
+                                                            </DataTrigger>
+                                                        </Border.Triggers>
+                                                        <Grid RowDefinitions="*,*" ColumnDefinitions="*">
+                                                            <Label 
+                                                                Grid.Row="0"
+                                                                Text="{Binding Name}"
+                                                                FontAttributes="Bold"
+                                                                HorizontalOptions="Center"
+                                                                TextColor="Black"
+                                                                FontSize="18"
+                                                            />
+                                                            <Label 
+                                                                Grid.Row="1"
+                                                                Text="{Binding Score}"
+                                                                FontSize="18"
+                                                                TextColor="White"
+                                                                HorizontalOptions="Center"
+                                                            />
+                                                        </Grid>
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer Command="{Binding BindingContext.OpenJudgePopupCommand, Source={x:Reference this}}" CommandParameter="{Binding .}" />
+                                                        </Border.GestureRecognizers>
+                                                    </Border>
+                                                </VerticalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </FlexLayout>
+
+                                    <Label 
+                                        Text="{Binding Description}"
+                                        HorizontalOptions="Center"
+                                        TextColor="White"
+                                        FontSize="12"
+                                        FontAttributes="Italic"
+                                    />
+                                </VerticalStackLayout>
+                            </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </FlexLayout>
-                
-                
+
                 <!-- MATCH -->
                 <Grid 
                     Grid.Row="{OnIdiom Tablet='2', Phone='1'}"
@@ -455,7 +498,7 @@
                             />
                         </Grid>
 
-                        
+
 
                         <!-- Order Mode (Taolu) -->
                         <Grid>
@@ -561,188 +604,6 @@
                             </Grid.Triggers>
                         </Grid>
                     </Grid>
-                </Grid>
-                
-                <!-- TABLE CENTRAL -->
-                <Grid
-                    Grid.Row="{OnIdiom Tablet='3', Phone='7'}"
-                    Grid.Column="2" 
-                    IsVisible="{Binding BindingContext.CurrentDraw, Source={x:Reference this}, Converter={StaticResource EmptyToBoolConverter}}"
-                >
-                <HorizontalStackLayout 
-                    Spacing="10" 
-                    HorizontalOptions="Center" 
-                    VerticalOptions="End"
-                    IsVisible="{OnIdiom Tablet='true', Phone='false'}"
-                >
-                    <Border 
-                        Grid.Column="0"
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        VerticalOptions="Start"
-                        StrokeShape="RoundRectangle 5"
-                    />
-                    <Border 
-                        Grid.Column="1"
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        VerticalOptions="Start"
-                        StrokeShape="RoundRectangle 5"
-                    />
-                    <Border 
-                        Grid.Column="2"
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        VerticalOptions="Start"
-                        StrokeShape="RoundRectangle 5"
-                    />
-                    <Border 
-                        Grid.Column="3"
-                        Background="LightGray"
-                        WidthRequest="100"
-                        HeightRequest="60"
-                        VerticalOptions="Start"
-                        StrokeShape="RoundRectangle 5"
-                    />
-                </HorizontalStackLayout>
-                </Grid>
-                
-                <!-- CHRONO & CONTROLS -->
-                <Grid
-                    Grid.Row="{OnIdiom Tablet='0', Phone='7'}"
-                    Grid.RowSpan="{OnIdiom Tablet='4', Phone='0'}"
-                    Grid.ColumnSpan="{OnIdiom Tablet='5', Phone='0'}" 
-                    ColumnDefinitions="100,*,100"
-                >
-                    <Border 
-                        Grid.Column="1"
-                        HorizontalOptions="Center"
-                        VerticalOptions="End"
-                        Margin="{OnIdiom Tablet='0,0,0,70', Phone='0,0,0,10'}"
-                        Padding="15,10,15,10"
-                        BackgroundColor="#333"
-                        Stroke="White"
-                        StrokeThickness="2"
-                        StrokeShape="RoundRectangle 15"
-                        IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
-                    >
-                        <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding BindingContext.CurrentDraw.Type, Source={x:Reference this}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                            <Setter Property="IsVisible" Value="False" />
-                        </DataTrigger>
-                    </Border.Triggers>
-                        <VerticalStackLayout Spacing="5">
-                        <Label 
-                            Text="{Binding TimeLeftDisplay}" 
-                            HorizontalOptions="Center" 
-                            TextColor="White" 
-                            FontSize="48" 
-                            FontAttributes="Bold"
-                            FontFamily="Monospace"
-                        >
-                            <Label.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding SetTimerCommand}" />
-                            </Label.GestureRecognizers>
-                        </Label>
-
-                        <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
-                            <!-- Reset -->
-                            <Border 
-                                BackgroundColor="Gray"
-                                HeightRequest="40"
-                                WidthRequest="40"
-                                StrokeThickness="0"
-                            >
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
-                                <Label 
-                                    Text="â†º" 
-                                    TextColor="White"
-                                    FontSize="20"
-                                    HorizontalOptions="Center"
-                                    VerticalOptions="Center" 
-                                    Padding="0,0,0,5"
-                                />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding ResetTimerCommand}" />
-                                </Border.GestureRecognizers>
-                            </Border>
-
-                            <!-- Start -->
-                            <Border BackgroundColor="Green"
-                                    HeightRequest="40"
-                                    WidthRequest="40"
-                                    StrokeThickness="0"
-                                    IsVisible="{Binding IsTimerRunning, Converter={StaticResource InvertBoolConverter}}">
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
-                                <Path 
-                                    Data="M 0,0 L 12,8 L 0,16 Z" 
-                                    Fill="White" 
-                                    HorizontalOptions="Center" 
-                                    VerticalOptions="Center" 
-                                    TranslationX="2" 
-                                />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding StartTimerCommand}" />
-                                </Border.GestureRecognizers>
-                            </Border>
-
-                            <!-- Pause -->
-                            <Border 
-                                BackgroundColor="Orange"
-                                HeightRequest="40"
-                                WidthRequest="40"
-                                StrokeThickness="0"
-                                IsVisible="{Binding IsTimerRunning}"
-                            >
-                                <Border.StrokeShape>
-                                    <RoundRectangle CornerRadius="20"/>
-                                </Border.StrokeShape>
-                                <Grid ColumnDefinitions="4, 4, 4" 
-                                      HorizontalOptions="Center" 
-                                      VerticalOptions="Center" 
-                                      HeightRequest="16"
-                                      ColumnSpacing="0">
-                                    <BoxView Grid.Column="0" BackgroundColor="White" WidthRequest="4" CornerRadius="1"/>
-                                    <BoxView Grid.Column="2" BackgroundColor="White" WidthRequest="4" CornerRadius="1"/>
-                                </Grid>
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding PauseTimerCommand}" />
-                                </Border.GestureRecognizers>
-                            </Border>
-                        </HorizontalStackLayout>
-                    </VerticalStackLayout>
-                    </Border>
-
-                    <Border
-                        Grid.Column="2"
-                        StrokeShape="RoundRectangle 50"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        BackgroundColor="{StaticResource ValidColor}"
-                        Stroke="{StaticResource ValidColor}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    >
-                        <Label 
-                            Text="â‰¡" 
-                            VerticalOptions="Center" 
-                            HorizontalOptions="Center" 
-                            FontSize="30" 
-                            TextColor="{StaticResource PrimaryTextColor}" 
-                            FontAttributes="Bold"
-                        />
-
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
-                        </Border.GestureRecognizers>
-                    </Border>
-
                 </Grid>
             </Grid>
         </Grid>

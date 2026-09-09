@@ -93,11 +93,34 @@
                 <DataTemplate x:DataType="models:CompetitionModel">
                     <controls:Card CardPadding="15" CardColor="White">
                         <Grid 
-                            ColumnDefinitions="{OnIdiom Tablet='60,150,*,20', Phone='50,*,Auto,Auto'}" 
+                            ColumnDefinitions="{OnIdiom Tablet='35,150,*,20', Phone='50,*,Auto,Auto'}" 
                             ColumnSpacing="10"
                             RowDefinitions="{OnIdiom Tablet='Auto, Auto', Phone='35,Auto,Auto'}"
                         >
                             <Label 
+                                Grid.Column="0" 
+                                Grid.RowSpan="2" 
+                                FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                                Text="{x:Static helpers:FontAwesomeIcons.HAND_FIST}" 
+                                FontSize="25" 
+                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Sanda'}"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                            />
+
+                            <Label 
+                                Grid.Column="0" 
+                                Grid.RowSpan="2" 
+                                FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                                Text="{x:Static helpers:FontAwesomeIcons.YIN_YANG}" 
+                                FontSize="25" 
+                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Center"
+                            />
+                            <!--<Label 
                                 Grid.Column="0" 
                                 Grid.RowSpan="2" 
                                 Text="{Binding Type}" 
@@ -106,7 +129,7 @@
                                 TextColor="{DynamicResource ValidColor}" 
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center"
-                            />
+                            />-->
 
                             <Label 
                                 Grid.Column="1" 

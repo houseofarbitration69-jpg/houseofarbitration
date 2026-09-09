@@ -141,14 +141,18 @@
                                                                        FontAttributes="Bold"
                                                                        FontSize="13" />
                                                                 <HorizontalStackLayout Spacing="5">
-                                                                    <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
-                                                                           TextColor="#444" 
-                                                                           FontSize="11"
-                                                                           WidthRequest="150" />
-                                                                    <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                           TextColor="#444" 
-                                                                           FontSize="11"
-                                                                           IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                    <controls:ScrollingText 
+                                                                        Text="{Binding Slot1.Competitor.Club}" 
+                                                                        TextColor="#444" 
+                                                                        FontSize="11"
+                                                                        WidthRequest="150" 
+                                                                    />
+                                                                    <Label 
+                                                                        Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                        TextColor="#444" 
+                                                                        FontSize="11"
+                                                                        IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
+                                                                    />
                                                                 </HorizontalStackLayout>
                                                             </VerticalStackLayout>
                                                             <Label Grid.Column="1" Text="➕" 
@@ -188,14 +192,18 @@
                                                                        FontAttributes="Bold"
                                                                        FontSize="13" />
                                                                 <HorizontalStackLayout Spacing="5">
-                                                                    <controls:ScrollingText Text="{Binding Slot2.Competitor.Club}" 
-                                                                           TextColor="#444" 
-                                                                           FontSize="11"
-                                                                           WidthRequest="150" />
-                                                                    <Label Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                           TextColor="#444" 
-                                                                           FontSize="11"
-                                                                           IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                    <controls:ScrollingText 
+                                                                        Text="{Binding Slot2.Competitor.Club}" 
+                                                                        TextColor="#444" 
+                                                                        FontSize="11"
+                                                                        WidthRequest="150" 
+                                                                    />
+                                                                    <Label 
+                                                                        Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                        TextColor="#444" 
+                                                                        FontSize="11"
+                                                                        IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
+                                                                    />
                                                                 </HorizontalStackLayout>
                                                             </VerticalStackLayout>
                                                             <Label Grid.Column="1" Text="➕" 
@@ -235,14 +243,18 @@
                                                                    FontSize="14"
                                                                    HorizontalOptions="Center" />
                                                             <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
-                                                                <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
-                                                                       TextColor="#444" 
-                                                                       FontSize="11"
-                                                                       WidthRequest="150" />
-                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                       TextColor="#444" 
-                                                                       FontSize="11"
-                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                <controls:ScrollingText 
+                                                                    Text="{Binding Slot1.Competitor.Club}" 
+                                                                    TextColor="#444" 
+                                                                    FontSize="11"
+                                                                    WidthRequest="150" 
+                                                                />
+                                                                <Label 
+                                                                    Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                    TextColor="#444" 
+                                                                    FontSize="11"
+                                                                    IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
+                                                                />
                                                             </HorizontalStackLayout>
                                                         </VerticalStackLayout>
                                                     </Border>
@@ -351,14 +363,18 @@
                                                                        FontAttributes="Bold"
                                                                        FontSize="13" />
                                                                 <HorizontalStackLayout Spacing="5">
-                                                                    <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
-                                                                           TextColor="#444" 
-                                                                           FontSize="11"
-                                                                           WidthRequest="150" />
-                                                                    <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                           TextColor="#444" 
-                                                                           FontSize="11"
-                                                                           IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                    <controls:ScrollingText 
+                                                                        Text="{Binding Slot1.Competitor.Club}" 
+                                                                        TextColor="#444" 
+                                                                        FontSize="11"
+                                                                        WidthRequest="150" 
+                                                                    />
+                                                                    <Label
+                                                                        Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                        TextColor="#444" 
+                                                                        FontSize="11"
+                                                                        IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
+                                                                    />
                                                                 </HorizontalStackLayout>
                                                             </VerticalStackLayout>
                                                         </Grid>
@@ -381,14 +397,18 @@
                                                                        FontAttributes="Bold"
                                                                        FontSize="13" />
                                                                 <HorizontalStackLayout Spacing="5">
-                                                                    <controls:ScrollingText Text="{Binding Slot2.Competitor.Club}" 
-                                                                           TextColor="#444" 
-                                                                           FontSize="11"
-                                                                           WidthRequest="150" />
-                                                                    <Label Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                           TextColor="#444" 
-                                                                           FontSize="11"
-                                                                           IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                    <controls:ScrollingText 
+                                                                        Text="{Binding Slot2.Competitor.Club}" 
+                                                                        TextColor="#444" 
+                                                                        FontSize="11"
+                                                                        WidthRequest="150" 
+                                                                    />
+                                                                    <Label 
+                                                                        Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                        TextColor="#444" 
+                                                                        FontSize="11"
+                                                                        IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
+                                                                    />
                                                                 </HorizontalStackLayout>
                                                             </VerticalStackLayout>
                                                         </Grid>
@@ -411,14 +431,18 @@
                                                                    FontSize="14"
                                                                    HorizontalOptions="Center" />
                                                             <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
-                                                                <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
-                                                                       TextColor="#444" 
-                                                                       FontSize="11"
-                                                                       WidthRequest="150" />
-                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                       TextColor="#444" 
-                                                                       FontSize="11"
-                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                <controls:ScrollingText 
+                                                                    Text="{Binding Slot1.Competitor.Club}" 
+                                                                    TextColor="#444" 
+                                                                    FontSize="11"
+                                                                    WidthRequest="150" 
+                                                                />
+                                                                <Label 
+                                                                    Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                    TextColor="#444" 
+                                                                    FontSize="11"
+                                                                    IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
+                                                                />
                                                             </HorizontalStackLayout>
                                                         </VerticalStackLayout>
                                                     </Border>
@@ -527,14 +551,18 @@
                                                                    FontAttributes="Bold"
                                                                    FontSize="13" />
                                                             <HorizontalStackLayout Spacing="5">
-                                                                <controls:ScrollingText Text="{Binding Slot1.Competitor.Club}" 
-                                                                       TextColor="#444" 
-                                                                       FontSize="11"
-                                                                       WidthRequest="150" />
-                                                                <Label Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                       TextColor="#444" 
-                                                                       FontSize="11"
-                                                                       IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource StringToBoolConverter}}" />
+                                                                <controls:ScrollingText 
+                                                                    Text="{Binding Slot1.Competitor.Club}" 
+                                                                    TextColor="#444" 
+                                                                    FontSize="11"
+                                                                    WidthRequest="150" 
+                                                                />
+                                                                <Label 
+                                                                    Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
+                                                                    TextColor="#444" 
+                                                                    FontSize="11"
+                                                                    IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
+                                                                />
                                                             </HorizontalStackLayout>
                                                         </VerticalStackLayout>
                                                     </Grid>

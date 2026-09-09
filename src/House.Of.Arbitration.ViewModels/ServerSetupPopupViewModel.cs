@@ -10,11 +10,12 @@ using Microsoft.Extensions.Logging;
 
 namespace House.Of.Arbitration.ViewModels;
 
-public partial class ServerSetupPopupViewModel : BaseViewModel
+public partial class ServerSetupPopupViewModel : BaseViewModel, IQueryAttributable
 {
     #region Attributs
     private string _serverName = "SERVEUR_KUNGFU";
     private string _serverDescription = "Ring 1";
+    private CompetitionModel? _competition;
     #endregion
 
     #region Properties
@@ -22,9 +23,9 @@ public partial class ServerSetupPopupViewModel : BaseViewModel
     /// Obtient ou définit le nom du serveur
     /// </summary>
     public string ServerName
-    { 
-        get => _serverName; 
-        set => SetProperty(ref _serverName, value); 
+    {
+        get => _serverName;
+        set => SetProperty(ref _serverName, value);
     }
 
     /// <summary>
@@ -35,6 +36,15 @@ public partial class ServerSetupPopupViewModel : BaseViewModel
         get => _serverDescription;
         set => SetProperty(ref _serverDescription, value);
     }
+
+    /// <summary>
+    /// Obtient ou définit la compétition courante
+    /// </summary>
+    public CompetitionModel? Competition
+    {
+        get => _competition;
+        set => SetProperty(ref _competition, value);
+    }
     #endregion
 
     #region Constructors
@@ -43,6 +53,21 @@ public partial class ServerSetupPopupViewModel : BaseViewModel
         ResourceProvider resourceProvider,
         IPopupService popupService) : base(logger, resourceProvider, popupService)
     {
+    }
+    #endregion
+
+    #region Implement IQueryAttributable
+    public void ApplyQueryAttributes(IDictionary<string, object?> query)
+    {
+        if (query.ContainsKey("Competition"))
+        {
+            Competition = query["Competition"] as CompetitionModel;
+
+            if (Competition != null)
+            {
+                ServerName = $"{Competition.Type} - {Competition.Name}";
+            }
+        }
     }
     #endregion
 

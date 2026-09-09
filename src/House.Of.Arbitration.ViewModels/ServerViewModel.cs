@@ -88,6 +88,13 @@ public partial class ServerViewModel : BaseViewModel
         set => SetProperty(ref _judges, value);
     }
 
+    private System.Collections.ObjectModel.ObservableCollection<JudgeGroupModel> _judgeGroups = new();
+    public System.Collections.ObjectModel.ObservableCollection<JudgeGroupModel> JudgeGroups
+    {
+        get => _judgeGroups;
+        set => SetProperty(ref _judgeGroups, value);
+    }
+
     public System.Collections.ObjectModel.ObservableCollection<RoundResultModel> RoundResults
     {
         get => _roundResults;
@@ -382,23 +389,39 @@ public partial class ServerViewModel : BaseViewModel
     private void SetupJudges(CompetitionType competitionType)
     {
         Judges.Clear();
+        JudgeGroups.Clear();
+
         if (competitionType == CompetitionType.Taolu)
         {
+            var groupA = new JudgeGroupModel("Groupe A", "Qualité");
+            var groupB = new JudgeGroupModel("Groupe B", "Performance");
+            var groupC = new JudgeGroupModel("Groupe C", "Difficulté");
+
             // Groupe A (1..3)
             for (int i = 1; i <= 3; i++)
             {
-                Judges.Add(new JudgeModel { Name = $"JUGE A{i}", Number = i, Group = "A" });
+                var judge = new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "A" };
+                Judges.Add(judge);
+                groupA.Judges.Add(judge);
             }
             // Groupe B (1..3)
             for (int i = 1; i <= 3; i++)
             {
-                Judges.Add(new JudgeModel { Name = $"JUGE B{i}", Number = i, Group = "B" });
+                var judge = new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "B" };
+                Judges.Add(judge);
+                groupB.Judges.Add(judge);
             }
-            // Groupe C (1..2)
-            for (int i = 1; i <= 2; i++)
+            // Groupe C (1..3)
+            for (int i = 1; i <= 3; i++)
             {
-                Judges.Add(new JudgeModel { Name = $"JUGE C{i}", Number = i, Group = "C" });
+                var judge = new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "C" };
+                Judges.Add(judge);
+                groupC.Judges.Add(judge);
             }
+
+            JudgeGroups.Add(groupA);
+            JudgeGroups.Add(groupB);
+            JudgeGroups.Add(groupC);
         }
         else
         {
@@ -559,6 +582,104 @@ public partial class ServerViewModel : BaseViewModel
     {
         _timer?.Stop();
         IsTimerRunning = false;
+    }
+    #endregion
+
+    #region Commands Timer
+    /// <summary>
+    /// Commande permettant de démarrer le timer
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task StartTimer()
+    {
+        if (!IsTimerRunning && _timeLeft.TotalSeconds > 0)
+        {
+            _timer?.Start();
+            IsTimerRunning = true;
+            await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_START);
+        }
+    }
+
+    /// <summary>
+    /// Commande permettant de mettre en pause le timer
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task PauseTimer()
+    {
+        StopTimer();
+        await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
+    }
+
+    /// <summary>
+    /// Commande permettant de réinitialiser le timer
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task ResetTimer()
+    {
+        StopTimer();
+        _timeLeft = TimeSpan.FromMinutes(2); // Default reset
+        OnPropertyChanged(nameof(TimeLeftDisplay));
+        await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
+    }
+
+    /// <summary>
+    /// Commande permettant de définir un temps pour le timer
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task SetTimer()
+    {
+        string result = await Shell.Current.DisplayActionSheetAsync("Définir le temps", "Annuler", null, "1:00", "1:30", "2:00", "3:00", "5:00");
+        if (result != null && result != "Annuler")
+        {
+            StopTimer();
+            if (TimeSpan.TryParseExact(result, @"m\:ss", null, out var newTime))
+            {
+                _timeLeft = newTime;
+                OnPropertyChanged(nameof(TimeLeftDisplay));
+                await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
+            }
+        }
+    }
+    #endregion
+
+    #region Commands Server
+    /// <summary>
+    /// Commande permettant de démarrer le serveur
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task StartServer()
+    {
+        var parameters = new Dictionary<string, object?>();
+        parameters.Add("Competition", _currentCompetition);
+
+        var result = await _popupService.ShowPopupAsync<ServerSetupPopupViewModel, ServerSetupResult>(Shell.Current, shellParameters: parameters);
+
+        if (result.Result != null)
+        {
+            ServerName = result.Result.Name;
+            Title = $"{ServerName} - {result.Result.Description}";
+            if (await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName))
+            {
+                IsServerStarted = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Commande permettant d'arrêter le serveur
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task StopServer()
+    {
+        await _bluetoothServer.StopAdvertising();
+        IsServerStarted = false;
+        Title = "SERVER";
     }
     #endregion
 
@@ -734,73 +855,6 @@ public partial class ServerViewModel : BaseViewModel
         else
         {
             BluetoothAvailable = true;
-        }
-    }
-
-    [RelayCommand]
-    private async Task StartServer()
-    {
-        var result = await _popupService.ShowPopupAsync<ServerSetupPopupViewModel, ServerSetupResult>(Shell.Current);
-
-        if (result.Result != null)
-        {
-            ServerName = result.Result.Name;
-            Title = $"{ServerName} - {result.Result.Description}";
-            if (await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName))
-            {
-                IsServerStarted = true;
-            }
-        }
-    }
-
-    [RelayCommand]
-    private async Task StopServer()
-    {
-        await _bluetoothServer.StopAdvertising();
-        IsServerStarted = false;
-        Title = "SERVER";
-    }
-
-    [RelayCommand]
-    private async Task StartTimer()
-    {
-        if (!IsTimerRunning && _timeLeft.TotalSeconds > 0)
-        {
-            _timer?.Start();
-            IsTimerRunning = true;
-            await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_START);
-        }
-    }
-
-    [RelayCommand]
-    private async Task PauseTimer()
-    {
-        StopTimer();
-        await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
-    }
-
-    [RelayCommand]
-    private async Task ResetTimer()
-    {
-        StopTimer();
-        _timeLeft = TimeSpan.FromMinutes(2); // Default reset
-        OnPropertyChanged(nameof(TimeLeftDisplay));
-        await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
-    }
-
-    [RelayCommand]
-    private async Task SetTimer()
-    {
-        string result = await Shell.Current.DisplayActionSheetAsync("Définir le temps", "Annuler", null, "1:00", "1:30", "2:00", "3:00", "5:00");
-        if (result != null && result != "Annuler")
-        {
-            StopTimer();
-            if (TimeSpan.TryParseExact(result, @"m\:ss", null, out var newTime))
-            {
-                _timeLeft = newTime;
-                OnPropertyChanged(nameof(TimeLeftDisplay));
-                await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
-            }
         }
     }
 

@@ -11,10 +11,6 @@
     x:DataType="vm:CompetitionsViewModel"
     x:Name="PageRoot">
 
-    <base:BasePage.Resources>
-        <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
-    </base:BasePage.Resources>
-
     <Grid x:Name="MainContainer">
         <!-- Utilisation d'un BindableLayout à la place de CollectionView pour tester les clics -->
         <ScrollView Padding="20">
