@@ -691,8 +691,45 @@ public partial class JudgeViewModel : BaseViewModel
     {
         if (IsConnected && _serverDeviceId != null)
         {
-            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_DISCONNECT}");
+            try
+            {
+                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_DISCONNECT}");
+                await Task.Delay(150);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending JUDGE_DISCONNECT");
+            }
+
+            try
+            {
+                await _bluetoothClient.DisconnectFromDevice(_serverDeviceId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error disconnecting from device {DeviceId}", _serverDeviceId);
+            }
         }
+
+        if (IsScanning)
+        {
+            try
+            {
+                await _bluetoothClient.StopScan();
+            }
+            catch { }
+            IsScanning = false;
+        }
+
+        _serverDeviceId = null;
+        IsConnected = false;
+        IsReceivingCompetition = false;
+        IsReceivingMatch = false;
+        CurrentCompetition = null;
+        CompetitionType = CompetitionType.None;
+        SelectedJudge = null;
+        _timer?.Stop();
+        _pendingChunks.Clear();
 
         _typeNumberCts?.Cancel();
         _typeNumberCts?.Dispose();

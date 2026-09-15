@@ -199,12 +199,12 @@
                                     VerticalOptions="Center" 
                                 />
 
-                                <Label 
+                                <!--<Label 
                                     Text="{Binding Type}" 
                                     TextColor="{DynamicResource ValidColor}" 
                                     FontAttributes="Bold"
                                     VerticalOptions="Center" 
-                                />
+                                />-->
 
                                 <Label 
                                     Text="{Binding Categories.Count, StringFormat='{0} catégories'}" 

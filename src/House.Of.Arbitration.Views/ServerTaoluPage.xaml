@@ -338,8 +338,8 @@
 
             <Grid 
                 Grid.Column="1" 
-                RowDefinitions="{OnIdiom Tablet='60,150,*,50', Phone='60,*,40,40,40,40,40,150'}" 
-                RowSpacing="15" 
+                RowDefinitions="{OnIdiom Tablet='60,150,*,50', Phone='60,280,*,50'}" 
+                RowSpacing="{OnIdiom Tablet='15', Phone='5'}" 
                 ColumnDefinitions="{OnIdiom Tablet='85,80,*,80,85', Phone='*'}"
             >
                 <!-- CATEGORIE -->
@@ -365,14 +365,119 @@
                 </Border>
 
                 <!-- JUGES TAOLU -->
-                <FlexLayout
+                <Grid
                     Grid.Row="1"
                     Grid.ColumnSpan="5"
-                    Wrap="Wrap"
-                    Direction="Row"
-                    AlignItems="Center"
-                    AlignContent="Center"
-                    IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
+                    IsVisible="{OnIdiom Tablet=True, Phone=False}"
+                >
+                    <FlexLayout
+                        Wrap="Wrap"
+                        Direction="Row"
+                        AlignItems="Center"
+                        AlignContent="Center"
+                        IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
+                        BindableLayout.ItemsSource="{Binding JudgeGroups}"
+                    >
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:JudgeGroupModel">
+                                <Border 
+                                    Stroke="#EEEEEE"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="#333"
+                                    Padding="0,5,5,5"
+                                    Margin="0,5,5,5"
+                                    MaximumWidthRequest="380"
+                                >
+                                    <VerticalStackLayout>
+                                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                                            <Label 
+                                                Text="{Binding Name}" 
+                                                TextColor="White" 
+                                                FontAttributes="Bold" 
+                                                FontSize="18" 
+                                                VerticalOptions="Center"
+                                            />
+                                            <Border 
+                                                BackgroundColor="DodgerBlue" 
+                                                StrokeShape="RoundRectangle 5" 
+                                                Padding="5,2"
+                                            >
+                                                <Label 
+                                                    Text="{Binding GlobalScore}" 
+                                                    TextColor="White" 
+                                                    FontAttributes="Bold" 
+                                                    FontSize="16"
+                                                />
+                                            </Border>
+                                        </HorizontalStackLayout>
+
+                                        <FlexLayout 
+                                            Wrap="Wrap" 
+                                            Direction="Row" 
+                                            AlignItems="Start"
+                                            AlignContent="Start"
+                                            BindableLayout.ItemsSource="{Binding Judges}"
+                                        >
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="models:JudgeModel">
+                                                    <VerticalStackLayout 
+                                                        Margin="5,5,5,5"
+                                                    >
+                                                        <Border 
+                                                            Background="LightGray"
+                                                            WidthRequest="85"
+                                                            HeightRequest="60"
+                                                            StrokeShape="RoundRectangle 5"
+                                                        >
+                                                            <Border.Triggers>
+                                                                <DataTrigger TargetType="Border" Binding="{Binding IsConnected}" Value="True">
+                                                                    <Setter Property="Background" Value="Green" />
+                                                                    <Setter Property="Stroke" Value="Lime" />
+                                                                    <Setter Property="StrokeThickness" Value="2" />
+                                                                </DataTrigger>
+                                                            </Border.Triggers>
+                                                            <Grid RowDefinitions="*,*" ColumnDefinitions="*">
+                                                                <Label 
+                                                                    Grid.Row="0"
+                                                                    Text="{Binding Name}"
+                                                                    FontAttributes="Bold"
+                                                                    HorizontalOptions="Center"
+                                                                    TextColor="Black"
+                                                                    FontSize="18"
+                                                                />
+                                                                <Label 
+                                                                    Grid.Row="1"
+                                                                    Text="{Binding Score}"
+                                                                    FontSize="18"
+                                                                    TextColor="Black"
+                                                                    HorizontalOptions="Center"
+                                                                />
+                                                            </Grid>
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer Command="{Binding BindingContext.OpenJudgePopupCommand, Source={x:Reference this}}" CommandParameter="{Binding .}" />
+                                                            </Border.GestureRecognizers>
+                                                        </Border>
+                                                    </VerticalStackLayout>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </FlexLayout>
+
+                                        <Label 
+                                            Text="{Binding Description}"
+                                            HorizontalOptions="Center"
+                                            TextColor="White"
+                                            FontSize="12"
+                                            FontAttributes="Italic"
+                                        />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </Grid>
+
+                <VerticalStackLayout
+                    Grid.Row="2"
                     BindableLayout.ItemsSource="{Binding JudgeGroups}"
                 >
                     <BindableLayout.ItemTemplate>
@@ -381,34 +486,42 @@
                                 Stroke="#EEEEEE"
                                 StrokeShape="RoundRectangle 10"
                                 BackgroundColor="#333"
-                                Padding="0,5,5,5"
-                                Margin="0,5,5,5"
-                                MaximumWidthRequest="380"
+                                Padding="0,2,5,2"
+                                Margin="0,0,2,2"
                             >
                                 <VerticalStackLayout>
-                                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                                        <Label Text="{Binding Name}" TextColor="White" FontAttributes="Bold" FontSize="18" VerticalOptions="Center"/>
-                                        <Border BackgroundColor="DodgerBlue" StrokeShape="RoundRectangle 5" Padding="5,2">
-                                            <Label Text="{Binding GlobalScore}" TextColor="White" FontAttributes="Bold" FontSize="16"/>
+                                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Start" Padding="10,0,0,0">
+                                        <Label 
+                                            Text="{Binding Name}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold" 
+                                            FontSize="18" 
+                                            VerticalOptions="Center"
+                                        />
+                                        <Border 
+                                            BackgroundColor="DodgerBlue" 
+                                            StrokeShape="RoundRectangle 5" 
+                                            Padding="5,2"
+                                        >
+                                            <Label 
+                                                Text="{Binding GlobalScore}" 
+                                                TextColor="White" 
+                                                FontAttributes="Bold" 
+                                                FontSize="16"
+                                            />
                                         </Border>
                                     </HorizontalStackLayout>
 
-                                    <FlexLayout 
-                                        Wrap="Wrap" 
-                                        Direction="Row" 
-                                        AlignItems="Start"
-                                        AlignContent="Start"
+                                    <VerticalStackLayout 
                                         BindableLayout.ItemsSource="{Binding Judges}"
                                     >
                                         <BindableLayout.ItemTemplate>
                                             <DataTemplate x:DataType="models:JudgeModel">
                                                 <VerticalStackLayout 
-                                                    Margin="5,5,5,5"
+                                                    Margin="5,0,5,0"
                                                 >
                                                     <Border 
                                                         Background="LightGray"
-                                                        WidthRequest="85"
-                                                        HeightRequest="60"
                                                         StrokeShape="RoundRectangle 5"
                                                     >
                                                         <Border.Triggers>
@@ -418,9 +531,9 @@
                                                                 <Setter Property="StrokeThickness" Value="2" />
                                                             </DataTrigger>
                                                         </Border.Triggers>
-                                                        <Grid RowDefinitions="*,*" ColumnDefinitions="*">
+                                                        <Grid ColumnDefinitions="*,*">
                                                             <Label 
-                                                                Grid.Row="0"
+                                                                Grid.Column="0"
                                                                 Text="{Binding Name}"
                                                                 FontAttributes="Bold"
                                                                 HorizontalOptions="Center"
@@ -428,10 +541,10 @@
                                                                 FontSize="18"
                                                             />
                                                             <Label 
-                                                                Grid.Row="1"
+                                                                Grid.Column="1"
                                                                 Text="{Binding Score}"
                                                                 FontSize="18"
-                                                                TextColor="White"
+                                                                TextColor="Black"
                                                                 HorizontalOptions="Center"
                                                             />
                                                         </Grid>
@@ -442,20 +555,20 @@
                                                 </VerticalStackLayout>
                                             </DataTemplate>
                                         </BindableLayout.ItemTemplate>
-                                    </FlexLayout>
+                                    </VerticalStackLayout>
 
                                     <Label 
-                                        Text="{Binding Description}"
-                                        HorizontalOptions="Center"
-                                        TextColor="White"
-                                        FontSize="12"
-                                        FontAttributes="Italic"
-                                    />
+                                            Text="{Binding Description}"
+                                            HorizontalOptions="Center"
+                                            TextColor="White"
+                                            FontSize="12"
+                                            FontAttributes="Italic"
+                                        />
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
-                </FlexLayout>
+                </VerticalStackLayout>
 
                 <!-- MATCH -->
                 <Grid 
@@ -605,6 +718,32 @@
                         </Grid>
                     </Grid>
                 </Grid>
+
+                <Border
+                    Grid.Row="4"
+                    StrokeShape="RoundRectangle 50"
+                    HeightRequest="50"
+                    WidthRequest="50"
+                    BackgroundColor="{StaticResource ValidColor}"
+                    Stroke="{StaticResource ValidColor}"
+                    IsVisible="{OnIdiom Tablet='False', Phone='True'}"
+                >
+                    <Label 
+                        FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                        Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
+                        FontSize="25" 
+                        TextColor="{DynamicResource PrimaryTextColor}" 
+                        IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Center"
+                        FontAttributes="Bold"
+                    />
+
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
+                    </Border.GestureRecognizers>
+                </Border>
+
             </Grid>
         </Grid>
 
@@ -615,10 +754,10 @@
         >
             <controls:SideSheetControl.SheetContent>
                 <VerticalStackLayout Spacing="20">
-                    <Label Text="CONTRÃ”LE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
+                    <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
 
                     <Button 
-                        Text="DEMARRER" 
+                        Text="DÉMARRER" 
                         Command="{Binding StartServerCommand}"
                         BackgroundColor="{DynamicResource ValidColor}"
                         TextColor="Black"
@@ -629,7 +768,7 @@
                     />
 
                     <Button 
-                        Text="ARRETER" 
+                        Text="ARRÉTER" 
                         Command="{Binding StopServerCommand}"
                         BackgroundColor="Red"
                         TextColor="White"

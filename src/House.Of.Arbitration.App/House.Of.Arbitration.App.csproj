@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
     <TargetFrameworks>$(NetVersion)-android</TargetFrameworks>
@@ -26,6 +26,11 @@
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsTarget)</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(WindowsTarget)</TargetPlatformMinVersion>
     <Configurations>Debug;Release;Debug - Server;Debug - Client</Configurations>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
+    <RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
+    <AndroidSupportedAbis>armeabi-v7a;arm64-v8a;x86;x86_64</AndroidSupportedAbis>
   </PropertyGroup>
 
 	<ItemGroup>

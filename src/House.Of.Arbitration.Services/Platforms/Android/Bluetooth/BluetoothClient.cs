@@ -87,14 +87,28 @@ public class BluetoothClient : IBluetoothClient
 
     public async Task ConnectToDevice(string deviceId)
     {
-        if (_discoveredDevices != null && _discoveredDevices.TryGetValue(deviceId, out var device))
+        if (_bluetoothGatt != null)
+        {
+            try
+            {
+                _bluetoothGatt.Disconnect();
+                _bluetoothGatt.Close();
+            }
+            catch { }
+            _bluetoothGatt = null;
+        }
+        _transferManager.Clear();
+
+        BluetoothDevice? device = null;
+        if (_discoveredDevices == null || !_discoveredDevices.TryGetValue(deviceId, out device))
+        {
+            device = _bluetoothAdapter?.GetRemoteDevice(deviceId);
+        }
+
+        if (device != null)
         {
             _gattClientCallback = new CustomGattClientCallback(this, _alertService);
-
-            if (device != null)
-            {
-                _bluetoothGatt = device.ConnectGatt(MauiApplication.Current, false, _gattClientCallback, BluetoothTransports.Le);
-            }
+            _bluetoothGatt = device.ConnectGatt(MauiApplication.Current, false, _gattClientCallback, BluetoothTransports.Le);
         }
         else
         {
@@ -104,9 +118,17 @@ public class BluetoothClient : IBluetoothClient
 
     public async Task DisconnectFromDevice(string deviceId)
     {
-        _bluetoothGatt?.Disconnect();
+        if (_bluetoothGatt != null)
+        {
+            try
+            {
+                _bluetoothGatt.Disconnect();
+                _bluetoothGatt.Close();
+            }
+            catch { }
+            _bluetoothGatt = null;
+        }
         _transferManager.Clear();
-        //await _alertService.ShowToast($"Disconnected from {deviceId}");
     }
 
     public async Task SendMessage(string deviceId, string message)
@@ -178,13 +200,19 @@ public class BluetoothClient : IBluetoothClient
         {
             base.OnScanResult(callbackType, result);
 
-            if (result != null && result.Device != null && !_parent._discoveredDevices.ContainsKey(result.Device?.Address ?? String.Empty))
+            if (result?.Device?.Address != null)
             {
-                _parent._discoveredDevices.Add(result.Device!.Address ?? String.Empty, result.Device);
+                var address = result.Device.Address;
+                var deviceName = !string.IsNullOrWhiteSpace(result.ScanRecord?.DeviceName)
+                    ? result.ScanRecord.DeviceName
+                    : (!string.IsNullOrWhiteSpace(result.Device.Name) ? result.Device.Name : "Unknown");
 
-                _parent.DeviceDiscovered?.Invoke(_parent, (result.Device.Address ?? String.Empty, result.Device.Name ?? "Unknown", result.Rssi));
+                if (!_parent._discoveredDevices.ContainsKey(address))
+                {
+                    _parent._discoveredDevices.Add(address, result.Device);
+                }
 
-                //await _alertService.ShowToast($"Discovered device:{result.Device.Name ?? "Unknown"} ({result.Device.Address}) - RSSI: {result.Rssi}");
+                _parent.DeviceDiscovered?.Invoke(_parent, (address, deviceName, result.Rssi));
             }
         }
 
@@ -245,7 +273,17 @@ public class BluetoothClient : IBluetoothClient
             }
             else if (newState == ProfileState.Disconnected)
             {
-                //await _alertService.ShowToast($"Disconnected from GATT server : {gatt?.Device?.Address}");
+                try
+                {
+                    gatt?.Close();
+                }
+                catch { }
+
+                if (_parent._bluetoothGatt == gatt)
+                {
+                    _parent._bluetoothGatt = null;
+                }
+                _parent._transferManager.Clear();
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {

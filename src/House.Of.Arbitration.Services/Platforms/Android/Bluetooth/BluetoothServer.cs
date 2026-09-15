@@ -4,6 +4,7 @@ using Android.Bluetooth.LE;
 using Android.Content;
 using Android.OS;
 using Android.Runtime;
+using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Services.Abstractions;
 using System.Collections.ObjectModel;
 using System.Text;
@@ -70,13 +71,25 @@ public class BluetoothServer : IBluetoothServer
             return false;
         }
 
-        if(!String.IsNullOrEmpty(deviceName))
+        if (!string.IsNullOrEmpty(deviceName))
         {
-            _bluetoothAdapter.SetName(deviceName);
+            var safeDeviceName = deviceName.Length > 26 ? deviceName.Substring(0, 26) : deviceName;
+            _bluetoothAdapter.SetName(safeDeviceName);
         }
 
+        _gattServerCallback = new CustomGattServerCallback(this, _alertService);
+        _bluetoothGattServer = _bluetoothManager?.OpenGattServer(MauiApplication.Current, _gattServerCallback);
+
+        var service = new BluetoothGattService(ServiceUuid, GattServiceType.Primary);
+        var characteristic = new BluetoothGattCharacteristic(CharacteristicUuid, GattProperty.Read | GattProperty.Write | GattProperty.Notify, GattPermission.Read | GattPermission.Write);
+        var cccDescriptor = new BluetoothGattDescriptor(CccdUuid, GattDescriptorPermission.Read | GattDescriptorPermission.Write);
+        characteristic.AddDescriptor(cccDescriptor);
+        service.AddCharacteristic(characteristic);
+        _bluetoothGattServer?.AddService(service);
+
         _bluetoothLeAdvertiser = _bluetoothAdapter.BluetoothLeAdvertiser;
-        _advertiseCallback = new CustomAdvertiseCallback(this, _alertService);
+        var tcs = new TaskCompletionSource<bool>();
+        _advertiseCallback = new CustomAdvertiseCallback(this, _alertService, tcs);
 
         var settings = new AdvertiseSettings.Builder()
             ?.SetAdvertiseMode(AdvertiseMode.LowLatency)
@@ -85,37 +98,48 @@ public class BluetoothServer : IBluetoothServer
             ?.SetTxPowerLevel(AdvertiseTx.PowerHigh)
             ?.Build();
 
+        // Le paquet d'advertising principal est limité à 31 octets au total (incluant flags et UUID 128-bit de 16 octets).
+        // Ne pas inclure le nom de l'appareil ici pour éviter l'erreur ADVERTISE_FAILED_DATA_TOO_LARGE.
         var data = new AdvertiseData.Builder()
             ?.AddServiceUuid(new ParcelUuid(ServiceUuid))
-            ?.SetIncludeDeviceName(true)
+            ?.SetIncludeDeviceName(false)
+            ?.SetIncludeTxPowerLevel(false)
             ?.Build();
 
-        _bluetoothLeAdvertiser?.StartAdvertising(settings, data, _advertiseCallback);
+        // Le nom de l'appareil est placé dans le Scan Response (budget distinct de 31 octets).
+        var scanResponse = new AdvertiseData.Builder()
+            ?.SetIncludeDeviceName(true)
+            ?.SetIncludeTxPowerLevel(false)
+            ?.Build();
 
-        _gattServerCallback = new CustomGattServerCallback(this, _alertService);
-        _bluetoothGattServer = _bluetoothManager?.OpenGattServer(MauiApplication.Current, _gattServerCallback);
+        _bluetoothLeAdvertiser?.StartAdvertising(settings, data, scanResponse, _advertiseCallback);
 
-        var service = new BluetoothGattService(ServiceUuid, GattServiceType.Primary);
-
-        var characteristic = new BluetoothGattCharacteristic(CharacteristicUuid, GattProperty.Read | GattProperty.Write | GattProperty.Notify, GattPermission.Read | GattPermission.Write);
-
-        var cccDescriptor = new BluetoothGattDescriptor(CccdUuid, GattDescriptorPermission.Read | GattDescriptorPermission.Write);
-        characteristic.AddDescriptor(cccDescriptor);
-
-        service.AddCharacteristic(characteristic);
-        _bluetoothGattServer?.AddService(service);
-
-        //await _alertService.ShowToast("Bluetooth LE Server started advertising");
+        var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(3000));
+        if (completedTask == tcs.Task)
+        {
+            var success = await tcs.Task;
+            if (!success)
+            {
+                await StopAdvertising();
+            }
+            return success;
+        }
 
         return true;
     }
 
     public async Task StopAdvertising()
     {
-        _bluetoothLeAdvertiser?.StopAdvertising(_advertiseCallback);
+        if (_advertiseCallback != null)
+        {
+            _bluetoothLeAdvertiser?.StopAdvertising(_advertiseCallback);
+            _advertiseCallback = null;
+        }
         _bluetoothGattServer?.Close();
-
-        //await _alertService.ShowToast("Bluetooth LE Server stopped advertising");
+        _bluetoothGattServer = null;
+        _connectedDevices.Clear();
+        _subscribedDevices.Clear();
+        MainThread.BeginInvokeOnMainThread(() => ConnectedClients.Clear());
     }
 
     public async Task SendMessage(string message)
@@ -207,14 +231,15 @@ public class BluetoothServer : IBluetoothServer
 
         #region Attributs
         private readonly BluetoothServer _parent;
+        private readonly TaskCompletionSource<bool>? _tcs;
         #endregion
 
         #region Constructors
-        public CustomAdvertiseCallback(BluetoothServer parent, IAlertService alertService)
+        public CustomAdvertiseCallback(BluetoothServer parent, IAlertService alertService, TaskCompletionSource<bool>? tcs = null)
         {
             _parent = parent;
-
             _alertService = alertService;
+            _tcs = tcs;
         }
         #endregion
 
@@ -222,6 +247,7 @@ public class BluetoothServer : IBluetoothServer
         public override async void OnStartSuccess(AdvertiseSettings? settingsInEffect)
         {
             base.OnStartSuccess(settingsInEffect);
+            _tcs?.TrySetResult(true);
 
             //await _alertService.ShowToast("Advertisement start succeeded.");
         }
@@ -229,6 +255,7 @@ public class BluetoothServer : IBluetoothServer
         public override async void OnStartFailure([GeneratedEnum] AdvertiseFailure errorCode)
         {
             base.OnStartFailure(errorCode);
+            _tcs?.TrySetResult(false);
 
             await _alertService.ShowToast($"Advertisement start failed: {errorCode}");
         }
@@ -279,13 +306,14 @@ public class BluetoothServer : IBluetoothServer
 
                 _parent.DeviceDisconnected?.Invoke(_parent, device?.Address ?? String.Empty);
 
-                if (device != null)
+                if (device?.Address != null)
                 {
-                    _parent._connectedDevices.Remove(device);
+                    var address = device.Address;
+                    _parent._connectedDevices.RemoveAll(d => d.Address == address);
+                    _parent._subscribedDevices.Remove(address);
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
-                        _parent.ConnectedClients.Remove(device!.Address ?? String.Empty);
-                        _parent._subscribedDevices.Remove(device!.Address ?? String.Empty);
+                        _parent.ConnectedClients.Remove(address);
                     });
                 }
             }
@@ -326,6 +354,17 @@ public class BluetoothServer : IBluetoothServer
                 
                 if (message != null)
                 {
+                    if (message.StartsWith(Constants.Message.JUDGE_DISCONNECT) && device?.Address != null)
+                    {
+                        var address = device.Address;
+                        _parent._connectedDevices.RemoveAll(d => d.Address == address);
+                        _parent._subscribedDevices.Remove(address);
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            _parent.ConnectedClients.Remove(address);
+                        });
+                    }
+
                     MainThread.BeginInvokeOnMainThread(() =>
                     {
                         _parent.MessageReceived?.Invoke(_parent, (device?.Address ?? string.Empty, message));

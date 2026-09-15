@@ -693,8 +693,8 @@ public partial class ServerViewModel : BaseViewModel
         int blueVotes = Judges.Sum(j => (int)j.BluePoints);
         string winner = redVotes > blueVotes ? "Red" : (blueVotes > redVotes ? "Blue" : "Draw");
 
-        RoundResults.Add(new RoundResultModel 
-        { 
+        RoundResults.Add(new RoundResultModel
+        {
             RoundNumber = CurrentDraw.CurrentRound,
             RedVotes = redVotes,
             BlueVotes = blueVotes,
@@ -739,8 +739,8 @@ public partial class ServerViewModel : BaseViewModel
         if (redVotes > 0 || blueVotes > 0)
         {
             string roundWinner = redVotes > blueVotes ? "Red" : (blueVotes > redVotes ? "Blue" : "Draw");
-            RoundResults.Add(new RoundResultModel 
-            { 
+            RoundResults.Add(new RoundResultModel
+            {
                 RoundNumber = CurrentDraw.CurrentRound,
                 RedVotes = redVotes,
                 BlueVotes = blueVotes,
