@@ -12,6 +12,7 @@ public partial class JudgeGroupModel : ObservableObject
     #region Attributs
     private string _name = string.Empty;
     private string _description = string.Empty;
+    private double _initialScore = 0.0;
     #endregion
 
     #region Properties
@@ -34,20 +35,38 @@ public partial class JudgeGroupModel : ObservableObject
     }
 
     /// <summary>
+    /// Obtient ou définit le score initial du groupe
+    /// </summary>
+    public double InitialScore
+    {
+        get => _initialScore;
+        set
+        {
+            if (SetProperty(ref _initialScore, value))
+            {
+                OnPropertyChanged(nameof(GlobalScore));
+            }
+        }
+    }
+
+    /// <summary>
     /// Obtient la liste des juges du groupe
     /// </summary>
     public ObservableCollection<JudgeModel> Judges { get; } = new();
 
     /// <summary>
-    /// Obtient le score du groupe
+    /// Obtient le score global du groupe (moyenne des juges arrondie à 2 décimales)
     /// </summary>
-    public double GlobalScore => Judges.Sum(j => j.Score);
+    public double GlobalScore => Judges.Count > 0
+        ? Math.Round(Judges.Average(j => j.Score), 2)
+        : InitialScore;
     #endregion
 
-    public JudgeGroupModel(string name, string description)
+    public JudgeGroupModel(string name, string description, double initialScore = 0.0)
     {
         Name = name;
         Description = description;
+        InitialScore = initialScore;
 
         Judges.CollectionChanged += (s, e) => 
         {

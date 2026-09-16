@@ -420,6 +420,14 @@ public partial class JudgeViewModel : BaseViewModel
                         }
 
                         CategoryName = CurrentDraw?.Draw?.Category?.Name;
+                        Codes.Clear();
+
+                        if (SelectedJudge != null && CompetitionType == CompetitionType.Taolu)
+                        {
+                            if (SelectedJudge.Group == "A") Score = 5.0;
+                            else if (SelectedJudge.Group == "B") Score = 3.0;
+                            else if (SelectedJudge.Group == "C") Score = 2.0;
+                        }
                     }
                     IsReceivingMatch = false;
                 }
@@ -567,6 +575,14 @@ public partial class JudgeViewModel : BaseViewModel
     private async Task SelectPosition(JudgeModel judge)
     {
         SelectedJudge = judge;
+
+        if (CompetitionType == CompetitionType.Taolu)
+        {
+            if (judge.Group == "A") Score = 5.0;
+            else if (judge.Group == "B") Score = 3.0;
+            else if (judge.Group == "C") Score = 2.0;
+        }
+
         if (IsConnected && _serverDeviceId != null)
         {
             IsReceivingMatch = true;
