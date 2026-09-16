@@ -58,11 +58,15 @@ public partial class CompetitionsViewModel : BaseViewModel
         ILogger<CompetitionsViewModel> logger,
         ResourceProvider resourceProvider,
         IRepository<CompetitionModel> repository,
-        IPopupService popupService)
+        IPopupService popupService,
+        ServerViewModel serverViewModel)
         : base(logger, resourceProvider, popupService)
     {
         _repository = repository;
+        ServerViewModel = serverViewModel;
     }
+
+    public ServerViewModel ServerViewModel { get; }
     #endregion
 
     #region Commands
@@ -85,7 +89,26 @@ public partial class CompetitionsViewModel : BaseViewModel
     private async Task StartCompetition(CompetitionModel? competition)
     {
         if (competition == null) return;
-        await Shell.Current.DisplayAlertAsync("Démarrage", $"Lancement de la compétition : {competition.Name}", "OK");
+
+        if (ServerViewModel.IsServerStarted && ServerViewModel.CompetitionId != competition.Id)
+        {
+            await Shell.Current.DisplayAlertAsync("Erreur", "Un serveur est déjà en cours pour une autre compétition. Veuillez l'arrêter avant d'en démarrer un nouveau.", "OK");
+            return;
+        }
+
+        var navigationParameter = new Dictionary<string, object>
+        {
+            { "CompetitionId", competition.Id }
+        };
+
+        if (competition.Type == CompetitionType.Taolu)
+        {
+            await Shell.Current.GoToAsync("ServerTaolu", navigationParameter);
+        }
+        else
+        {
+            await Shell.Current.GoToAsync("Server", navigationParameter);
+        }
     }
 
     [RelayCommand]
@@ -118,7 +141,15 @@ public partial class CompetitionsViewModel : BaseViewModel
         try
         {
             var data = await _repository.GetAllAsync(c => c.Categories);
-            Competitions = new ObservableCollection<CompetitionModel>(data ?? new List<CompetitionModel>());
+            var compList = data ?? new List<CompetitionModel>();
+            
+            foreach (var comp in compList)
+            {
+                comp.IsServerRunning = ServerViewModel.IsServerStarted && ServerViewModel.CompetitionId == comp.Id;
+            }
+
+            Competitions = new ObservableCollection<CompetitionModel>(compList);
+            OnPropertyChanged(nameof(ServerViewModel));
             await base.OnAppearing();
         }
         finally

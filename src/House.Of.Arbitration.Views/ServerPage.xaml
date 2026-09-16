@@ -337,7 +337,7 @@
 
             <Grid 
                 Grid.Column="1" 
-                RowDefinitions="{OnIdiom Tablet='60,105,*,115', Phone='60,*,40,40,40,40,40,150'}" 
+                RowDefinitions="{OnIdiom Tablet='60,105,*,115', Phone='60,250,30,30,30,30,30,*'}" 
                 RowSpacing="15" 
                 ColumnDefinitions="{OnIdiom Tablet='85,80,*,80,85', Phone='*'}"
             >
@@ -1482,18 +1482,18 @@
                         </Border>
 
                         <Grid 
-                        ColumnDefinitions="*,*,*,*" 
-                        ColumnSpacing="5" 
-                        IsVisible="True"
-                    >
-                            <Border
-                            Grid.Column="0"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="DarkRed"
-                            Stroke="DarkRed"
+                            ColumnDefinitions="*,*,*,*" 
+                            ColumnSpacing="5" 
+                            IsVisible="True"
                         >
+                            <Border
+                                Grid.Column="0"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="DarkRed"
+                                Stroke="DarkRed"
+                            >
                                 <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -1501,13 +1501,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="1"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="Red"
-                            Stroke="Red"
-                        >
+                                Grid.Column="1"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="Red"
+                                Stroke="Red"
+                            >
                                 <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -1515,13 +1515,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="2"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="DarkBlue"
-                            Stroke="DarkBlue"
-                        >
+                                Grid.Column="2"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="DarkBlue"
+                                Stroke="DarkBlue"
+                            >
                                 <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -1529,21 +1529,19 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="3"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="Blue"
-                            Stroke="Blue"
-                        >
+                                Grid.Column="3"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="Blue"
+                                Stroke="Blue"
+                            >
                                 <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[2]}"/>
                                 </Border.GestureRecognizers>
                             </Border>
-
-
                         </Grid>
                     </VerticalStackLayout>
 
@@ -1603,10 +1601,7 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-
                     </Grid>
-
-
 
                     <Grid 
                         Grid.Column="4"
@@ -1670,8 +1665,6 @@
                                 <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[2]}"/>
                             </Border.GestureRecognizers>
                         </Border>
-
-
                     </Grid>
                 </Grid>
 
@@ -1704,32 +1697,32 @@
                             </Border.Triggers>
                             <Grid RowDefinitions="*,*" ColumnDefinitions="*,*">
                                 <Label 
-                                Grid.Row="0"
-                                Grid.ColumnSpan="2"
-                                Text="{Binding Judges[3].Name}"
-                                FontAttributes="Bold"
-                                HorizontalOptions="Center"
-                                TextColor="Black"
-                                FontSize="18"
-                            />
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="2"
+                                    Text="{Binding Judges[3].Name}"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    TextColor="Black"
+                                    FontSize="18"
+                                />
 
                                 <Label
-                                Grid.Row="1"
-                                Grid.Column="0"
-                                Text="{Binding Judges[3].RedPoints}"
-                                FontSize="18"
-                                TextColor="Red"
-                                HorizontalOptions="Center"
-                            />
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Text="{Binding Judges[3].RedPoints}"
+                                    FontSize="18"
+                                    TextColor="Red"
+                                    HorizontalOptions="Center"
+                                />
 
                                 <Label
-                                Grid.Row="1"
-                                Grid.Column="1"
-                                Text="{Binding Judges[3].BluePoints}"
-                                TextColor="Blue"
-                                FontSize="18"
-                                HorizontalOptions="Center"
-                            />
+                                    Grid.Row="1"
+                                    Grid.Column="1"
+                                    Text="{Binding Judges[3].BluePoints}"
+                                    TextColor="Blue"
+                                    FontSize="18"
+                                    HorizontalOptions="Center"
+                                />
                             </Grid>
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenJudgePopupCommand}" CommandParameter="{Binding Judges[3]}" />
@@ -1737,18 +1730,18 @@
                         </Border>
 
                         <Grid 
-                        ColumnDefinitions="*,*,*,*" 
-                        ColumnSpacing="5" 
-                        IsVisible="True"
-                    >
-                            <Border
-                            Grid.Column="0"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="DarkRed"
-                            Stroke="DarkRed"
+                            ColumnDefinitions="*,*,*,*" 
+                            ColumnSpacing="5" 
+                            IsVisible="True"
                         >
+                            <Border
+                                Grid.Column="0"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="DarkRed"
+                                Stroke="DarkRed"
+                            >
                                 <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -1756,13 +1749,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="1"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="Red"
-                            Stroke="Red"
-                        >
+                                Grid.Column="1"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="Red"
+                                Stroke="Red"
+                            >
                                 <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -1770,13 +1763,13 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="2"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="DarkBlue"
-                            Stroke="DarkBlue"
-                        >
+                                Grid.Column="2"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="DarkBlue"
+                                Stroke="DarkBlue"
+                            >
                                 <Label Text="-1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
@@ -1784,21 +1777,19 @@
                                 </Border.GestureRecognizers>
                             </Border>
                             <Border
-                            Grid.Column="3"
-                            StrokeShape="RoundRectangle 50"
-                            HeightRequest="40"
-                            WidthRequest="40"
-                            BackgroundColor="Blue"
-                            Stroke="Blue"
-                        >
+                                Grid.Column="3"
+                                StrokeShape="RoundRectangle 50"
+                                HeightRequest="40"
+                                WidthRequest="40"
+                                BackgroundColor="Blue"
+                                Stroke="Blue"
+                            >
                                 <Label Text="+1" VerticalOptions="Center" HorizontalOptions="Center" FontSize="12" TextColor="White" FontAttributes="Bold"/>
 
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding AddBluePointCommand}" CommandParameter="{Binding Judges[3]}"/>
                                 </Border.GestureRecognizers>
                             </Border>
-
-
                         </Grid>
                     </VerticalStackLayout>
 
@@ -1843,7 +1834,6 @@
                             Style="{StaticResource JudgePointsLabelStyle}"
                             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                         />
-
                     </Grid>
 
                     <Grid
@@ -1860,8 +1850,6 @@
                         />
 
                     </Grid>
-
-
 
                     <Grid 
                         Grid.Column="4"
@@ -2127,11 +2115,13 @@
                         IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                     >
                         <Label 
-                            Text="â‰¡" 
-                            VerticalOptions="Center" 
-                            HorizontalOptions="Center" 
-                            FontSize="30" 
-                            TextColor="{StaticResource PrimaryTextColor}" 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
+                            FontSize="25" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
                             FontAttributes="Bold"
                         />
 

@@ -30,6 +30,20 @@ public partial class CompetitionModel : ObservableObject
     /// Obtient ou définit la liste des catégories de la compétition
     /// </summary>
     public List<CategoryModel> Categories { get; set; } = new();
+
+    /// <summary>
+    /// Indique si un serveur tourne actuellement pour cette compétition
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public bool IsServerRunning { get; set; }
+
+    /// <summary>
+    /// Texte du bouton
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string ServerButtonText => IsServerRunning ? "REVENIR" : "DÉMARRER";
 }
 
 /// <summary>

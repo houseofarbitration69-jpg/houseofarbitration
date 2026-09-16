@@ -479,6 +479,7 @@
                 <VerticalStackLayout
                     Grid.Row="2"
                     BindableLayout.ItemsSource="{Binding JudgeGroups}"
+                    IsVisible="{OnIdiom Tablet=False, Phone=True}"
                 >
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:JudgeGroupModel">

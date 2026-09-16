@@ -1,4 +1,4 @@
-﻿#region Imports
+#region Imports
 using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
@@ -355,55 +355,59 @@ public partial class ServerViewModel : BaseViewModel
         }
     }
 
-    private CompetitorModel? GetCompetitor(IDrawModel? draw, bool red)
-    {
-        if (draw is DrawKnockoutModel k) return red ? k.Competitor1 : k.Competitor2;
-        if (draw is DrawPoolsModel p) return red ? p.Competitor1 : p.Competitor2;
-        if (draw is DrawOrderModel o) return o.Competitor;
-        return null;
-    }
-    #endregion
-
-    #region Override Methods
-    public override async Task OnAppearing()
-    {
-        _bluetoothServer.DeviceConnected += OnDeviceConnected;
-        _bluetoothServer.DeviceDisconnected += OnDeviceDisconnected;
-        _bluetoothServer.MessageReceived += OnMessageReceived;
-
-        CheckBluetoothAvailabilityCommand.Execute(null);
-
-        await Init();
-    }
-
-    public override Task OnDisappearing()
-    {
-        _bluetoothServer.DeviceConnected -= OnDeviceConnected;
-        _bluetoothServer.DeviceDisconnected -= OnDeviceDisconnected;
-        _bluetoothServer.MessageReceived -= OnMessageReceived;
-        return base.OnDisappearing();
-    }
-    #endregion
-
-    #region Private Methods
-    private void ResetJudgeScores()
-    {
-        foreach (var judge in Judges)
-        {
-            judge.RedPoints = 0;
-            judge.BluePoints = 0;
-            if (judge.Group == "A") judge.Score = 5.0;
-            else if (judge.Group == "B") judge.Score = 3.0;
-            else if (judge.Group == "C") judge.Score = 2.0;
-            else judge.Score = 0.0;
-        }
-    }
-
-    private void SetupJudges(CompetitionType competitionType)
-    {
-        Judges.Clear();
-        JudgeGroups.Clear();
-
+    private CompetitorModel? GetCompetitor(IDrawModel? draw, bool red)
+    {
+        if (draw is DrawKnockoutModel k) return red ? k.Competitor1 : k.Competitor2;
+        if (draw is DrawPoolsModel p) return red ? p.Competitor1 : p.Competitor2;
+        if (draw is DrawOrderModel o) return o.Competitor;
+        return null;
+    }
+    #endregion
+
+    #region Override Methods
+    public override async Task OnAppearing()
+    {
+        _bluetoothServer.DeviceConnected -= OnDeviceConnected;
+        _bluetoothServer.DeviceDisconnected -= OnDeviceDisconnected;
+        _bluetoothServer.MessageReceived -= OnMessageReceived;
+
+        _bluetoothServer.DeviceConnected += OnDeviceConnected;
+        _bluetoothServer.DeviceDisconnected += OnDeviceDisconnected;
+        _bluetoothServer.MessageReceived += OnMessageReceived;
+
+        CheckBluetoothAvailabilityCommand.Execute(null);
+
+        if (!IsServerStarted)
+        {
+            await Init();
+        }
+    }
+
+    public override Task OnDisappearing()
+    {
+        return base.OnDisappearing();
+    }
+    #endregion
+
+    #region Private Methods
+    private void ResetJudgeScores()
+    {
+        foreach (var judge in Judges)
+        {
+            judge.RedPoints = 0;
+            judge.BluePoints = 0;
+            if (judge.Group == "A") judge.Score = 5.0;
+            else if (judge.Group == "B") judge.Score = 3.0;
+            else if (judge.Group == "C") judge.Score = 2.0;
+            else judge.Score = 0.0;
+        }
+    }
+
+    private void SetupJudges(CompetitionType competitionType)
+    {
+        Judges.Clear();
+        JudgeGroups.Clear();
+
         if (competitionType == CompetitionType.Taolu)
         {
             var groupA = new JudgeGroupModel("Groupe A", "Qualité", 5.0);

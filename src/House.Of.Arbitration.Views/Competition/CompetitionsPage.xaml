@@ -11,6 +11,13 @@
     x:DataType="vm:CompetitionsViewModel"
     x:Name="PageRoot">
 
+    <base:BasePage.Resources>
+        <ResourceDictionary>
+            <converters:ServerRunningConverter x:Key="ServerRunningConverter" />
+            <converters:ServerRunningTextConverter x:Key="ServerRunningTextConverter" />
+        </ResourceDictionary>
+    </base:BasePage.Resources>
+
     <Grid x:Name="MainContainer">
         <!-- Utilisation d'un BindableLayout à la place de CollectionView pour tester les clics -->
         <ScrollView Padding="20">
@@ -31,7 +38,10 @@
                                 <VerticalStackLayout Spacing="15">
                                     <Grid ColumnDefinitions="*, Auto">
                                         <Label Text="{Binding Name}" FontSize="20" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
-                                        <Label Grid.Column="1" Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" VerticalOptions="Center" Opacity="0.8" />
+                                        <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                                            <Label Text="🟢 En cours" TextColor="Green" FontAttributes="Bold" VerticalOptions="Center" IsVisible="{Binding IsServerRunning}" />
+                                            <Label Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" Opacity="0.8" VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
                                     </Grid>
 
                                     <Border BackgroundColor="{DynamicResource Tertiary}" Padding="10,5" HorizontalOptions="Start" StrokeThickness="0" StrokeShape="RoundRectangle 4">
@@ -61,7 +71,7 @@
                                                 CommandParameter="{Binding .}" />
                                         
                                         <Button Grid.Column="2" 
-                                                Text="DÉMARRER"
+                                                Text="{Binding ServerButtonText}"
                                                 BackgroundColor="{DynamicResource MartialRed}"
                                                 TextColor="White"
                                                 Clicked="OnStartClicked"
