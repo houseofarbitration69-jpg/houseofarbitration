@@ -851,7 +851,7 @@
                                     </VerticalStackLayout>
 
                                     <VerticalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding AddScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" CommandParameter="{Binding Competitor1.Id}"/>
+                                        <TapGestureRecognizer Command="{Binding AddRedScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"/>
                                     </VerticalStackLayout.GestureRecognizers>
                                 </VerticalStackLayout>
 
@@ -949,7 +949,7 @@
                                     </VerticalStackLayout>
 
                                     <VerticalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding AddScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" CommandParameter="{Binding Competitor2.Id}"/>
+                                        <TapGestureRecognizer Command="{Binding AddBlueScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"/>
                                     </VerticalStackLayout.GestureRecognizers>
                                 </VerticalStackLayout>
 
@@ -1095,224 +1095,365 @@
                                     </Grid>
                                 </Grid>
 
-                                <!-- Code -->
+                                <!-- Code Input & Recognized Codes Section -->
                                 <Grid 
                                     Grid.Column="1"
-                                    RowDefinitions="60,*,*,*,*" 
-                                    ColumnDefinitions="*,*,*" 
-                                    HorizontalOptions="Fill" 
-                                    VerticalOptions="Fill"
+                                    RowDefinitions="45, *"
                                     RowSpacing="10"
-                                    ColumnSpacing="10"
-                                    Margin="0,20,0,20"
+                                    Margin="0,15,0,15"
                                     BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                     x:DataType="vm:JudgeViewModel"
                                 >
-                                    <Border
-                                        Grid.Row="0" 
-                                        Grid.ColumnSpan="3" 
-                                        StrokeShape="RoundRectangle 10"
-                                        BackgroundColor="White"
-                                    >
-                                        <Label 
-                                            Text="{Binding Code}" 
-                                            TextColor="Black"
-                                            HorizontalOptions="Center"
-                                            VerticalOptions="Center"
-                                            FontSize="22"
+                                    <!-- Mode Toggle Bar + Settings Button -->
+                                    <Grid Grid.Row="0" ColumnDefinitions="*, *, Auto" ColumnSpacing="8">
+                                        <Button 
+                                            Grid.Column="0"
+                                            Text="🔢 Clavier"
+                                            FontSize="14"
                                             FontAttributes="Bold"
+                                            CornerRadius="8"
+                                            Command="{Binding SwitchModeCommand}"
+                                            CommandParameter="Keypad"
+                                            BackgroundColor="{DynamicResource Primary}"
+                                            TextColor="White"
+                                        >
+                                            <Button.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsCodesListMode}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="White" />
+                                                    <Setter Property="TextColor" Value="Black" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+                                        </Button>
+
+                                        <Button 
+                                            Grid.Column="1"
+                                            Text="📋 Codes reconnus"
+                                            FontSize="14"
+                                            FontAttributes="Bold"
+                                            CornerRadius="8"
+                                            Command="{Binding SwitchModeCommand}"
+                                            CommandParameter="List"
+                                            BackgroundColor="White"
+                                            TextColor="Black"
+                                        >
+                                            <Button.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsCodesListMode}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
+                                                    <Setter Property="TextColor" Value="White" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+                                        </Button>
+
+                                        <controls:IconButton 
+                                            Grid.Column="2"
+                                            Text="⚙"
+                                            FontSize="16"
+                                            ButtonBackgroundColor="#444"
+                                            TextColor="White"
+                                            Command="{Binding OpenTaoluSettingsCommand}"
+                                            ToolTipProperties.Text="Gérer les codes Taolu"
                                         />
-                                    </Border>
-                                    <Button
-                                        Grid.Row="1"
-                                        Grid.Column="0"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="7"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="7"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
-                                    <Button
-                                        Grid.Row="1"
-                                        Grid.Column="1"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="8"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="8"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
-                                    <Button
-                                        Grid.Row="1"
-                                        Grid.Column="2"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="9"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="9"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
+                                    </Grid>
 
-                                    <Button
-                                        Grid.Row="2"
-                                        Grid.Column="0"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="4"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="4"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
-                                    <Button
-                                        Grid.Row="2"
-                                        Grid.Column="1"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="5"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="5"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
-                                    <Button
-                                        Grid.Row="2"
-                                        Grid.Column="2"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="6"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="6"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
+                                    <!-- View 1: Numeric Keypad with Matching Suggestions -->
+                                    <Grid 
+                                        Grid.Row="1"
+                                        IsVisible="{Binding IsKeypadMode}"
+                                        RowDefinitions="55, Auto, *, *, *, *"
+                                        ColumnDefinitions="*, *, *"
+                                        RowSpacing="8"
+                                        ColumnSpacing="8"
+                                    >
+                                        <!-- Code Display Box with Clear Button -->
+                                        <Border
+                                            Grid.Row="0" 
+                                            Grid.ColumnSpan="3" 
+                                            StrokeShape="RoundRectangle 10"
+                                            BackgroundColor="White"
+                                            Padding="10,0"
+                                        >
+                                            <Grid ColumnDefinitions="*, Auto">
+                                                <Label 
+                                                    Grid.Column="0"
+                                                    Text="{Binding Code}" 
+                                                    TextColor="Black"
+                                                    HorizontalOptions="Center"
+                                                    VerticalOptions="Center"
+                                                    FontSize="26"
+                                                    FontAttributes="Bold"
+                                                />
+                                                <Button
+                                                    Grid.Column="1"
+                                                    Text="✕"
+                                                    TextColor="#888"
+                                                    BackgroundColor="Transparent"
+                                                    FontSize="16"
+                                                    FontAttributes="Bold"
+                                                    Padding="0"
+                                                    HeightRequest="36"
+                                                    WidthRequest="36"
+                                                    IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
+                                                    Command="{Binding ClearCodeCommand}"
+                                                />
+                                            </Grid>
+                                        </Border>
 
-                                    <Button
-                                        Grid.Row="3"
-                                        Grid.Column="0"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="1"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="1"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
-                                    <Button
-                                        Grid.Row="3"
-                                        Grid.Column="1"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="2"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="2"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
-                                    <Button
-                                        Grid.Row="3"
-                                        Grid.Column="2"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="3"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="3"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
+                                        <!-- Suggestions Chips (When typing code digits) -->
+                                        <ScrollView 
+                                            Grid.Row="1" 
+                                            Grid.ColumnSpan="3" 
+                                            Orientation="Horizontal" 
+                                            HorizontalScrollBarVisibility="Never"
+                                            IsVisible="{Binding MatchingCodes.Count, Converter={StaticResource IntToBoolConverter}}"
+                                        >
+                                            <HorizontalStackLayout BindableLayout.ItemsSource="{Binding MatchingCodes}" Spacing="6" Padding="0,2">
+                                                <BindableLayout.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:MvtCodeModel">
+                                                        <Border 
+                                                            BackgroundColor="#333" 
+                                                            Stroke="{DynamicResource Primary}" 
+                                                            StrokeThickness="1" 
+                                                            StrokeShape="RoundRectangle 6"
+                                                            Padding="8,5"
+                                                        >
+                                                            <Border.GestureRecognizers>
+                                                                <TapGestureRecognizer 
+                                                                    Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=ApplyCodeCommand}"
+                                                                    CommandParameter="{Binding .}"
+                                                                />
+                                                            </Border.GestureRecognizers>
+                                                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                                                <Label Text="{Binding Code}" TextColor="Yellow" FontAttributes="Bold" FontSize="14"/>
+                                                                <Label Text="{Binding Movement}" TextColor="White" FontSize="13"/>
+                                                                <Label Text="{Binding Value, StringFormat='-{0:F1}'}" TextColor="#FF8A80" FontAttributes="Bold" FontSize="13"/>
+                                                            </HorizontalStackLayout>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </BindableLayout.ItemTemplate>
+                                            </HorizontalStackLayout>
+                                        </ScrollView>
 
-                                    <Button
-                                        Grid.Row="4"
-                                        Grid.Column="0"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="A"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="A"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
-                                    <Button
-                                        Grid.Row="4"
-                                        Grid.Column="1"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="0"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="0"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
-                                    <Button
-                                        Grid.Row="4"
-                                        Grid.Column="2"
-                                        BackgroundColor="White"
-                                        CornerRadius="10"
-                                        Text="B"
-                                        Command="{Binding TypeNumberCommand}"
-                                        CommandParameter="B"
-                                        FontSize="22"
-                                        FontAttributes="Bold"
-                                    />
+                                        <!-- Keypad Buttons -->
+                                        <Button Grid.Row="2" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="7" Command="{Binding TypeNumberCommand}" CommandParameter="7" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="2" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="8" Command="{Binding TypeNumberCommand}" CommandParameter="8" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="2" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="9" Command="{Binding TypeNumberCommand}" CommandParameter="9" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                        <Button Grid.Row="3" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="4" Command="{Binding TypeNumberCommand}" CommandParameter="4" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="3" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="5" Command="{Binding TypeNumberCommand}" CommandParameter="5" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="3" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="6" Command="{Binding TypeNumberCommand}" CommandParameter="6" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                        <Button Grid.Row="4" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="1" Command="{Binding TypeNumberCommand}" CommandParameter="1" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="4" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="2" Command="{Binding TypeNumberCommand}" CommandParameter="2" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="4" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="3" Command="{Binding TypeNumberCommand}" CommandParameter="3" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                        <Button Grid.Row="5" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="A" Command="{Binding TypeNumberCommand}" CommandParameter="A" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="5" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="0" Command="{Binding TypeNumberCommand}" CommandParameter="0" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="5" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="B" Command="{Binding TypeNumberCommand}" CommandParameter="B" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    </Grid>
+
+                                    <!-- View 2: Recognized Codes List (Direct tap to apply!) -->
+                                    <Grid 
+                                        Grid.Row="1"
+                                        IsVisible="{Binding IsCodesListMode}"
+                                        RowDefinitions="Auto, Auto, *"
+                                        RowSpacing="8"
+                                    >
+                                        <!-- Search bar -->
+                                        <Border 
+                                            Grid.Row="0"
+                                            Stroke="{DynamicResource ValidColor}"
+                                            StrokeThickness="1"
+                                            BackgroundColor="White"
+                                            Padding="10,0"
+                                        >
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                                            </Border.StrokeShape>
+                                            <Entry 
+                                                Text="{Binding SearchRecognizedText}" 
+                                                Placeholder="{Binding Resources.SEARCH_CODES}"
+                                                PlaceholderColor="Gray"
+                                                TextColor="Black"
+                                                ClearButtonVisibility="WhileEditing"
+                                                MinimumHeightRequest="36"
+                                            />
+                                        </Border>
+
+                                        <!-- Group Filter Picker -->
+                                        <Border 
+                                            Grid.Row="1"
+                                            Stroke="{DynamicResource ValidColor}"
+                                            StrokeThickness="1"
+                                            BackgroundColor="White"
+                                            Padding="8,0"
+                                        >
+                                            <Border.StrokeShape>
+                                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                                            </Border.StrokeShape>
+                                            <Picker 
+                                                ItemsSource="{Binding RecognizedGroups}"
+                                                SelectedItem="{Binding SelectedRecognizedGroup}"
+                                                TextColor="Black"
+                                                BackgroundColor="White"
+                                                MinimumHeightRequest="36"
+                                            />
+                                        </Border>
+
+                                        <!-- Codes CollectionView -->
+                                        <CollectionView 
+                                            Grid.Row="2"
+                                            ItemsSource="{Binding FilteredRecognizedCodes}"
+                                        >
+                                            <CollectionView.EmptyView>
+                                                <Label 
+                                                    Text="Aucun code correspondant" 
+                                                    TextColor="LightGray" 
+                                                    HorizontalOptions="Center" 
+                                                    VerticalOptions="Center" 
+                                                    Margin="0,20"
+                                                />
+                                            </CollectionView.EmptyView>
+                                            <CollectionView.ItemsLayout>
+                                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                                            </CollectionView.ItemsLayout>
+                                            <CollectionView.ItemTemplate>
+                                                <DataTemplate x:DataType="models:MvtCodeModel">
+                                                    <Border 
+                                                        BackgroundColor="White"
+                                                        StrokeShape="RoundRectangle 8"
+                                                        Padding="10,8"
+                                                    >
+                                                        <Border.GestureRecognizers>
+                                                            <TapGestureRecognizer 
+                                                                Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=ApplyCodeCommand}"
+                                                                CommandParameter="{Binding .}"
+                                                            />
+                                                        </Border.GestureRecognizers>
+                                                        <Grid ColumnDefinitions="45, *, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                                            <!-- Code Badge -->
+                                                            <Border 
+                                                                Grid.Column="0"
+                                                                BackgroundColor="#222"
+                                                                StrokeShape="RoundRectangle 6"
+                                                                Padding="4,6"
+                                                                HorizontalOptions="Fill"
+                                                                VerticalOptions="Center"
+                                                            >
+                                                                <Label 
+                                                                    Text="{Binding Code}" 
+                                                                    TextColor="White" 
+                                                                    FontSize="17" 
+                                                                    FontAttributes="Bold"
+                                                                    HorizontalTextAlignment="Center"
+                                                                />
+                                                            </Border>
+
+                                                            <!-- Movement, Group & Description -->
+                                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                                                <HorizontalStackLayout Spacing="6">
+                                                                    <Label 
+                                                                        Text="{Binding Movement}" 
+                                                                        TextColor="Black" 
+                                                                        FontSize="14" 
+                                                                        FontAttributes="Bold" 
+                                                                        LineBreakMode="TailTruncation"
+                                                                    />
+                                                                    <Label 
+                                                                        Text="{Binding GroupLabel, StringFormat='• {0}'}" 
+                                                                        TextColor="#666" 
+                                                                        FontSize="11" 
+                                                                        VerticalOptions="Center"
+                                                                    />
+                                                                </HorizontalStackLayout>
+                                                                <Label 
+                                                                    Text="{Binding Description}" 
+                                                                    TextColor="#444" 
+                                                                    FontSize="12" 
+                                                                    LineBreakMode="WordWrap"
+                                                                    MaxLines="2"
+                                                                />
+                                                            </VerticalStackLayout>
+
+                                                            <!-- Deduction Badge -->
+                                                            <Border 
+                                                                Grid.Column="2"
+                                                                BackgroundColor="#FFEBEE"
+                                                                Stroke="#D32F2F"
+                                                                StrokeThickness="1"
+                                                                StrokeShape="RoundRectangle 6"
+                                                                Padding="8,4"
+                                                                VerticalOptions="Center"
+                                                            >
+                                                                <Label 
+                                                                    Text="{Binding Value, StringFormat='-{0:F1}'}" 
+                                                                    TextColor="#D32F2F" 
+                                                                    FontSize="14" 
+                                                                    FontAttributes="Bold"
+                                                                />
+                                                            </Border>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </CollectionView.ItemTemplate>
+                                        </CollectionView>
+                                    </Grid>
                                 </Grid>
 
-                                <!-- Codes -->
+                                <!-- Codes Applied History -->
                                 <CollectionView
                                     Grid.Column="2"
                                     BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                     ItemsSource="{Binding Codes}"
                                     HorizontalOptions="Fill"
                                     VerticalOptions="Fill"
-                                    Margin="5,20,5,20"
+                                    Margin="5,15,5,15"
                                 >
                                     <CollectionView.Behaviors>
                                         <behaviors:ScrollOnNewItemBehavior/>
                                     </CollectionView.Behaviors>
                                     <CollectionView.ItemsLayout>
-                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="5"/>
+                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
                                     </CollectionView.ItemsLayout>
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:MvtTimeCodeModel">
                                             <Border
-                                                Padding="5,10,5,10"
-                                                StrokeShape="RoundRectangle 5"
+                                                Padding="8,6"
+                                                StrokeShape="RoundRectangle 6"
                                                 BackgroundColor="White"
                                             >
-                                                <Grid ColumnDefinitions="70,3,*,Auto" ColumnSpacing="10">
-                                                    <Label
-                                                        Grid.Column="0"
-                                                        Text="{Binding Date, StringFormat='{0:HH:mm:ss}'}"
-                                                        TextColor="Black"
-                                                        FontSize="16"
-                                                        VerticalOptions="Center"
-                                                    />
-                                                    
-                                                    <Label 
-                                                        Grid.Column="1"
-                                                        Text=":"
-                                                        TextColor="Black"
-                                                        FontSize="16"
-                                                        VerticalOptions="Center"
-                                                    />
+                                                <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                                    <!-- Code & Time -->
+                                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="2">
+                                                        <Border BackgroundColor="#222" StrokeShape="RoundRectangle 4" Padding="6,2" HorizontalOptions="Center">
+                                                            <Label Text="{Binding Code.Code}" TextColor="White" FontSize="13" FontAttributes="Bold"/>
+                                                        </Border>
+                                                        <Label Text="{Binding Date, StringFormat='{0:HH:mm:ss}'}" TextColor="Gray" FontSize="10" HorizontalOptions="Center"/>
+                                                    </VerticalStackLayout>
 
+                                                    <!-- Movement & Description -->
+                                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                                        <Label Text="{Binding Code.Movement}" TextColor="Black" FontSize="13" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                                                        <Label Text="{Binding Code.Description}" TextColor="#555" FontSize="11" LineBreakMode="WordWrap" MaxLines="2"/>
+                                                    </VerticalStackLayout>
+
+                                                    <!-- Deduction Value -->
                                                     <Label 
                                                         Grid.Column="2"
-                                                        Text="{Binding Code.Description}"
-                                                        TextColor="Black"
-                                                        FontSize="16"
+                                                        Text="{Binding Code.Value, StringFormat='-{0:F1}'}"
+                                                        TextColor="#D32F2F"
+                                                        FontSize="14"
+                                                        FontAttributes="Bold"
                                                         VerticalOptions="Center"
                                                     />
 
+                                                    <!-- Delete Button -->
                                                     <controls:IconButton
                                                         Grid.Column="3"
                                                         Style="{StaticResource ListActionDeleteButtonStyle}"
                                                         IsVisible="{Binding CanDelete}"
                                                         Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=DeleteCodeCommand}"
                                                         CommandParameter="{Binding .}"
+                                                        VerticalOptions="Center"
                                                     />
                                                 </Grid>
                                             </Border>

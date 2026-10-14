@@ -396,4 +396,52 @@
   <data name="DATA_GENERATED" xml:space="preserve">
     <value>Les données de démonstration ont été générées avec succès.</value>
   </data>
+  <data name="TAOLU_CODES" xml:space="preserve">
+    <value>Codes Taolu</value>
+  </data>
+  <data name="ADD_CODE" xml:space="preserve">
+    <value>Ajouter un code</value>
+  </data>
+  <data name="EDIT_CODE" xml:space="preserve">
+    <value>Modifier le code</value>
+  </data>
+  <data name="DELETE_CODE" xml:space="preserve">
+    <value>Supprimer le code</value>
+  </data>
+  <data name="RESET_DEFAULT_CODES" xml:space="preserve">
+    <value>Rétablir les codes par défaut</value>
+  </data>
+  <data name="CONFIRM_RESET_CODES" xml:space="preserve">
+    <value>Voulez-vous rétablir la liste des codes Taolu par défaut ?</value>
+  </data>
+  <data name="CONFIRM_DELETE_CODE" xml:space="preserve">
+    <value>Voulez-vous supprimer ce code de pénalité ?</value>
+  </data>
+  <data name="CODE_LABEL" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="GROUP_LABEL" xml:space="preserve">
+    <value>Groupe</value>
+  </data>
+  <data name="MOVEMENT_LABEL" xml:space="preserve">
+    <value>Mouvement</value>
+  </data>
+  <data name="DESCRIPTION_LABEL" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="DEDUCTION_VALUE" xml:space="preserve">
+    <value>Déduction de points</value>
+  </data>
+  <data name="RECOGNIZED_CODES" xml:space="preserve">
+    <value>Codes reconnus</value>
+  </data>
+  <data name="KEYPAD" xml:space="preserve">
+    <value>Pavé numérique</value>
+  </data>
+  <data name="ALL_GROUPS" xml:space="preserve">
+    <value>Tous les groupes</value>
+  </data>
+  <data name="SEARCH_CODES" xml:space="preserve">
+    <value>Rechercher code, mouvement, description...</value>
+  </data>
 </root>

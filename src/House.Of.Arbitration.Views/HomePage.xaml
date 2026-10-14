@@ -46,6 +46,12 @@
                 CommandParameter="RefereeDataPage"
             />
             <controls:IconButton 
+                Text="{Binding Resources.TAOLU_CODES}"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding NavigateToCommand}"
+                CommandParameter="TaoluCodesPage"
+            />
+            <controls:IconButton 
                 Text="{Binding Resources.GENERATE_DATA}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding SeedDataCommand}"

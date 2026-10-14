@@ -396,4 +396,52 @@
   <data name="DATA_GENERATED" xml:space="preserve">
     <value>[DATA GENERATED]</value>
   </data>
+  <data name="TAOLU_CODES" xml:space="preserve">
+    <value>[TAOLU CODES]</value>
+  </data>
+  <data name="ADD_CODE" xml:space="preserve">
+    <value>[ADD CODE]</value>
+  </data>
+  <data name="EDIT_CODE" xml:space="preserve">
+    <value>[EDIT CODE]</value>
+  </data>
+  <data name="DELETE_CODE" xml:space="preserve">
+    <value>[DELETE CODE]</value>
+  </data>
+  <data name="RESET_DEFAULT_CODES" xml:space="preserve">
+    <value>[RESET DEFAULT CODES]</value>
+  </data>
+  <data name="CONFIRM_RESET_CODES" xml:space="preserve">
+    <value>[DO YOU WANT TO RESET ALL TAOLU CODES TO DEFAULT?]</value>
+  </data>
+  <data name="CONFIRM_DELETE_CODE" xml:space="preserve">
+    <value>[DO YOU WANT TO DELETE THIS CODE?]</value>
+  </data>
+  <data name="CODE_LABEL" xml:space="preserve">
+    <value>[CODE]</value>
+  </data>
+  <data name="GROUP_LABEL" xml:space="preserve">
+    <value>[GROUP]</value>
+  </data>
+  <data name="MOVEMENT_LABEL" xml:space="preserve">
+    <value>[MOVEMENT]</value>
+  </data>
+  <data name="DESCRIPTION_LABEL" xml:space="preserve">
+    <value>[DESCRIPTION]</value>
+  </data>
+  <data name="DEDUCTION_VALUE" xml:space="preserve">
+    <value>[DEDUCTION VALUE]</value>
+  </data>
+  <data name="RECOGNIZED_CODES" xml:space="preserve">
+    <value>[RECOGNIZED CODES]</value>
+  </data>
+  <data name="KEYPAD" xml:space="preserve">
+    <value>[KEYPAD]</value>
+  </data>
+  <data name="ALL_GROUPS" xml:space="preserve">
+    <value>[ALL GROUPS]</value>
+  </data>
+  <data name="SEARCH_CODES" xml:space="preserve">
+    <value>[SEARCH CODE, MOVEMENT, DESCRIPTION...]</value>
+  </data>
 </root>

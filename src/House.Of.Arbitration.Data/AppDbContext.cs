@@ -39,6 +39,11 @@ public class AppDbContext : DbContext
         try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
         try { Database.ExecuteSqlRaw("ALTER TABLE DrawsPools ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
         try { Database.ExecuteSqlRaw("ALTER TABLE DrawsOrders ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN RoundResultsJson TEXT NOT NULL DEFAULT '';"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsPools ADD COLUMN RoundResultsJson TEXT NOT NULL DEFAULT '';"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsOrders ADD COLUMN RoundResultsJson TEXT NOT NULL DEFAULT '';"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE MvtCodes ADD COLUMN GroupName TEXT NOT NULL DEFAULT '';"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE MvtCodes ADD COLUMN Movement TEXT NOT NULL DEFAULT '';"); } catch { }
     }
     #endregion
 

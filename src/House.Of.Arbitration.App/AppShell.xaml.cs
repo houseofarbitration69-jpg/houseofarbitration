@@ -28,5 +28,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute("Server", typeof(ServerPage));
         Routing.RegisterRoute("ServerTaolu", typeof(ServerTaoluPage));
         Routing.RegisterRoute("RefereeDataPage", typeof(RefereeDataPage));
+        Routing.RegisterRoute("TaoluCodesPage", typeof(TaoluCodesPage));
     }
 }

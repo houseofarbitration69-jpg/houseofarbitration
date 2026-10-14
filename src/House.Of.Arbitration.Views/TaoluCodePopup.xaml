@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mct:Popup 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    x:Class="House.Of.Arbitration.Views.TaoluCodePopup"
+    x:DataType="vm:TaoluCodePopupViewModel"
+    BackgroundColor="Transparent"
+    Padding="0"
+>
+    <Border 
+        VerticalOptions="Center"
+        HorizontalOptions="Center"
+        BackgroundColor="{DynamicResource PageBackgroundColor}"
+        Padding="15"
+        MaximumWidthRequest="420"
+        WidthRequest="360"
+    >
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
+        </Border.StrokeShape>
+        
+        <Grid RowDefinitions="Auto,*" RowSpacing="10">
+            <!-- Header -->
+            <Label 
+                Grid.Row="0"
+                Text="{Binding Title}" 
+                Style="{DynamicResource Headline}" 
+                TextColor="White"
+                FontSize="22" 
+                HorizontalOptions="Center"
+            />
+
+            <!-- Form & Actions inside ScrollView -->
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout Spacing="12">
+                    <!-- Code -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label 
+                            Text="{Binding Resources.CODE_LABEL, StringFormat='{0} (nombre, ex: 01, 10, 23)'}" 
+                            FontAttributes="Bold" 
+                            FontSize="13" 
+                            TextColor="LightGray"
+                        />
+                        <Border 
+                            Stroke="{DynamicResource ValidColor}"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            Padding="8,0"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Entry 
+                                Text="{Binding Code}" 
+                                Placeholder="01"
+                                PlaceholderColor="Gray"
+                                TextColor="Black"
+                                Keyboard="Text"
+                                MinimumHeightRequest="40"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Groupe -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label 
+                            Text="{Binding Resources.GROUP_LABEL}" 
+                            FontAttributes="Bold" 
+                            FontSize="13" 
+                            TextColor="LightGray"
+                        />
+                        <Border 
+                            Stroke="{DynamicResource ValidColor}"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            Padding="8,0"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Picker 
+                                ItemsSource="{Binding AvailableGroups}"
+                                SelectedItem="{Binding SelectedGroup}"
+                                TextColor="Black"
+                                BackgroundColor="White"
+                                MinimumHeightRequest="40"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Groupe personnalisé (si Autre sélectionné) -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label 
+                            Text="Nom du groupe" 
+                            FontAttributes="Bold" 
+                            FontSize="13" 
+                            TextColor="LightGray"
+                        />
+                        <Border 
+                            Stroke="{DynamicResource ValidColor}"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            Padding="8,0"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Entry 
+                                Text="{Binding GroupName}" 
+                                Placeholder="Techniques de main, Equilibres..."
+                                PlaceholderColor="Gray"
+                                TextColor="Black"
+                                MinimumHeightRequest="40"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Mouvement -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label 
+                            Text="{Binding Resources.MOVEMENT_LABEL}" 
+                            FontAttributes="Bold" 
+                            FontSize="13" 
+                            TextColor="LightGray"
+                        />
+                        <Border 
+                            Stroke="{DynamicResource ValidColor}"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            Padding="8,0"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Entry 
+                                Text="{Binding Movement}" 
+                                Placeholder="Ex: Quan (Poing), Gong Bu, Teng Kong..."
+                                PlaceholderColor="Gray"
+                                TextColor="Black"
+                                MinimumHeightRequest="40"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Description -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label 
+                            Text="{Binding Resources.DESCRIPTION_LABEL}" 
+                            FontAttributes="Bold" 
+                            FontSize="13" 
+                            TextColor="LightGray"
+                        />
+                        <Border 
+                            Stroke="{DynamicResource ValidColor}"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            Padding="8,4"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Editor 
+                                Text="{Binding Description}" 
+                                Placeholder="Description de l'erreur ou pénalité..."
+                                PlaceholderColor="Gray"
+                                TextColor="Black"
+                                AutoSize="TextChanges"
+                                HeightRequest="75"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Valeur de déduction -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label 
+                            Text="{Binding Resources.DEDUCTION_VALUE, StringFormat='{0} (ex: 0.1, 0.2)'}" 
+                            FontAttributes="Bold" 
+                            FontSize="13" 
+                            TextColor="LightGray"
+                        />
+                        <Border 
+                            Stroke="{DynamicResource ValidColor}"
+                            StrokeThickness="1"
+                            BackgroundColor="White"
+                            Padding="8,0"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                            </Border.StrokeShape>
+                            <Entry 
+                                Text="{Binding ValueText}" 
+                                Placeholder="0.1"
+                                PlaceholderColor="Gray"
+                                TextColor="Black"
+                                Keyboard="Numeric"
+                                MinimumHeightRequest="40"
+                            />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- Buttons -->
+                    <Grid ColumnDefinitions="*, *" ColumnSpacing="12" Margin="0,15,0,5">
+                        <controls:IconButton 
+                            Grid.Column="0"
+                            Text="{Binding Resources.CANCEL}" 
+                            ButtonBackgroundColor="{DynamicResource ErrorColor}"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                            Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
+                            IconColor="{DynamicResource PrimaryTextColor}"
+                            Command="{Binding CloseCommand}"
+                            MinimumHeightRequest="42"
+                        />
+                        <controls:IconButton 
+                            Grid.Column="1"
+                            Text="{Binding Resources.SAVE}" 
+                            ButtonBackgroundColor="{DynamicResource ValidColor}"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                            Icon="{x:Static helpers:FontCustomIcons.CHECK}"
+                            IconColor="{DynamicResource PrimaryTextColor}"
+                            Command="{Binding ValidateCommand}"
+                            MinimumHeightRequest="42"
+                        />
+                    </Grid>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+    </Border>
+</mct:Popup>

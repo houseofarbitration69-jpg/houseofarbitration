@@ -31,4 +31,9 @@ public interface IDrawModel
     /// Obtient ou définit le round actuel
     /// </summary>
     int CurrentRound { get; set; }
+
+    /// <summary>
+    /// Données JSON des rounds précédents
+    /// </summary>
+    string RoundResultsJson { get; set; }
 }

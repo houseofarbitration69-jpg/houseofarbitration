@@ -10,5 +10,7 @@ public partial class TransfertScoreModel : ObservableObject
 
     public int? CompetitorId { get; set; }
 
+    public string? Side { get; set; }
+
     public MvtTimeCodeModel? Code { get; set; }
 }

@@ -89,5 +89,15 @@ public partial class DrawKnockoutModel : ObservableObject, IDrawModel
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public int CurrentRound { get; set; } = 1;
+    private int _currentRound = 1;
+    public int CurrentRound
+    {
+        get => _currentRound;
+        set => SetProperty(ref _currentRound, value);
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public string RoundResultsJson { get; set; } = string.Empty;
 }

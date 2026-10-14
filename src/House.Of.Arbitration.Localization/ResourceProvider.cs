@@ -488,6 +488,23 @@ LocalizationResourceManager.Instance.GetValue(nameof(DATA_CLEARED));
     public string DATA_GENERATED =>
 LocalizationResourceManager.Instance.GetValue(nameof(DATA_GENERATED));
 
+    public string TAOLU_CODES => LocalizationResourceManager.Instance.GetValue(nameof(TAOLU_CODES));
+    public string ADD_CODE => LocalizationResourceManager.Instance.GetValue(nameof(ADD_CODE));
+    public string EDIT_CODE => LocalizationResourceManager.Instance.GetValue(nameof(EDIT_CODE));
+    public string DELETE_CODE => LocalizationResourceManager.Instance.GetValue(nameof(DELETE_CODE));
+    public string RESET_DEFAULT_CODES => LocalizationResourceManager.Instance.GetValue(nameof(RESET_DEFAULT_CODES));
+    public string CONFIRM_RESET_CODES => LocalizationResourceManager.Instance.GetValue(nameof(CONFIRM_RESET_CODES));
+    public string CONFIRM_DELETE_CODE => LocalizationResourceManager.Instance.GetValue(nameof(CONFIRM_DELETE_CODE));
+    public string CODE_LABEL => LocalizationResourceManager.Instance.GetValue(nameof(CODE_LABEL));
+    public string GROUP_LABEL => LocalizationResourceManager.Instance.GetValue(nameof(GROUP_LABEL));
+    public string MOVEMENT_LABEL => LocalizationResourceManager.Instance.GetValue(nameof(MOVEMENT_LABEL));
+    public string DESCRIPTION_LABEL => LocalizationResourceManager.Instance.GetValue(nameof(DESCRIPTION_LABEL));
+    public string DEDUCTION_VALUE => LocalizationResourceManager.Instance.GetValue(nameof(DEDUCTION_VALUE));
+    public string RECOGNIZED_CODES => LocalizationResourceManager.Instance.GetValue(nameof(RECOGNIZED_CODES));
+    public string KEYPAD => LocalizationResourceManager.Instance.GetValue(nameof(KEYPAD));
+    public string ALL_GROUPS => LocalizationResourceManager.Instance.GetValue(nameof(ALL_GROUPS));
+    public string SEARCH_CODES => LocalizationResourceManager.Instance.GetValue(nameof(SEARCH_CODES));
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.
     /// Subscribes to the <see cref="LocalizationResourceManager"/>'s PropertyChanged event

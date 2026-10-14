@@ -64,6 +64,9 @@ public partial class JudgeViewModel : BaseViewModel
     private IDrawModel? _currentDraw;
     private CompetitionModel? _currentCompetition;
     private CompetitionType _competitionType = CompetitionType.None;
+    private string _selectedRecognizedGroup = string.Empty;
+    private string _searchRecognizedText = string.Empty;
+    private bool _isCodesListMode = false;
     #endregion
 
     #region Properties
@@ -211,6 +214,49 @@ public partial class JudgeViewModel : BaseViewModel
         get => _score;
         set => SetProperty(ref _score, value);
     }
+
+    public ObservableCollection<MvtCodeModel> RecognizedCodes { get; } = new();
+    public ObservableCollection<MvtCodeModel> FilteredRecognizedCodes { get; } = new();
+    public ObservableCollection<string> RecognizedGroups { get; } = new();
+    public ObservableCollection<MvtCodeModel> MatchingCodes { get; } = new();
+
+    public string SelectedRecognizedGroup
+    {
+        get => _selectedRecognizedGroup;
+        set
+        {
+            if (SetProperty(ref _selectedRecognizedGroup, value))
+            {
+                ApplyRecognizedFilters();
+            }
+        }
+    }
+
+    public string SearchRecognizedText
+    {
+        get => _searchRecognizedText;
+        set
+        {
+            if (SetProperty(ref _searchRecognizedText, value))
+            {
+                ApplyRecognizedFilters();
+            }
+        }
+    }
+
+    public bool IsCodesListMode
+    {
+        get => _isCodesListMode;
+        set
+        {
+            if (SetProperty(ref _isCodesListMode, value))
+            {
+                OnPropertyChanged(nameof(IsKeypadMode));
+            }
+        }
+    }
+
+    public bool IsKeypadMode => !IsCodesListMode;
     #endregion
 
     #region Constructors
@@ -326,7 +372,7 @@ public partial class JudgeViewModel : BaseViewModel
 
     private void OnDeviceDisconnected(object? sender, string deviceId)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
+        MainThread.BeginInvokeOnMainThread(async () =>
         {
             _serverDeviceId = null;
             IsConnected = false;
@@ -337,6 +383,8 @@ public partial class JudgeViewModel : BaseViewModel
             SelectedJudge = null;
             _timer?.Stop();
             _pendingChunks.Clear();
+
+            await _alertService.ShowAlert("Déconnexion", "Le serveur s'est arrêté.", "OK");
         });
     }
 
@@ -421,6 +469,27 @@ public partial class JudgeViewModel : BaseViewModel
 
                         CategoryName = CurrentDraw?.Draw?.Category?.Name;
                         Codes.Clear();
+
+                        if (CurrentDraw is DrawKnockoutModel k)
+                        {
+                            Competitor1 = k.Competitor1;
+                            Competitor2 = k.Competitor2;
+                        }
+                        else if (CurrentDraw is DrawPoolsModel p)
+                        {
+                            Competitor1 = p.Competitor1;
+                            Competitor2 = p.Competitor2;
+                        }
+                        else if (CurrentDraw is DrawOrderModel o)
+                        {
+                            Competitor1 = o.Competitor;
+                            Competitor2 = null;
+                        }
+                        else
+                        {
+                            Competitor1 = null;
+                            Competitor2 = null;
+                        }
 
                         if (SelectedJudge != null && CompetitionType == CompetitionType.Taolu)
                         {
@@ -514,7 +583,7 @@ public partial class JudgeViewModel : BaseViewModel
                 {
                     foreach (var k in category.Draw.DrawKnockouts)
                     {
-                        k.Draw = null;
+                        //k.Draw = null;
                         CleanDrawCompetitor(k.Competitor1, c => k.Competitor1 = c);
                         CleanDrawCompetitor(k.Competitor2, c => k.Competitor2 = c);
                         CleanDrawCompetitor(k.Winner, c => k.Winner = c);
@@ -526,7 +595,7 @@ public partial class JudgeViewModel : BaseViewModel
                 {
                     foreach (var p in category.Draw.DrawPools)
                     {
-                        p.Draw = null;
+                        //p.Draw = null;
                         CleanDrawCompetitor(p.Competitor1, c => p.Competitor1 = c);
                         CleanDrawCompetitor(p.Competitor2, c => p.Competitor2 = c);
                         CleanDrawCompetitor(p.Winner, c => p.Winner = c);
@@ -593,9 +662,46 @@ public partial class JudgeViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private async Task AddScore(int competitorId)
+    private async Task AddRedScore()
     {
-        var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId }, _jsonOptions);
+        int? compId = Competitor1?.Id;
+        if (compId == null && CurrentDraw is DrawKnockoutModel k) compId = k.Competitor1Id ?? k.Competitor1?.Id;
+        else if (compId == null && CurrentDraw is DrawPoolsModel p) compId = p.Competitor1Id ?? p.Competitor1?.Id;
+        await SendScore(compId, "Red");
+    }
+
+    [RelayCommand]
+    private async Task AddBlueScore()
+    {
+        int? compId = Competitor2?.Id;
+        if (compId == null && CurrentDraw is DrawKnockoutModel k) compId = k.Competitor2Id ?? k.Competitor2?.Id;
+        else if (compId == null && CurrentDraw is DrawPoolsModel p) compId = p.Competitor2Id ?? p.Competitor2?.Id;
+        await SendScore(compId, "Blue");
+    }
+
+    [RelayCommand]
+    private async Task AddScore(object? param)
+    {
+        int? compId = null;
+        string? side = null;
+        if (param is int id)
+        {
+            compId = id;
+            if (Competitor1?.Id == id) side = "Red";
+            else if (Competitor2?.Id == id) side = "Blue";
+        }
+        else if (param is string s && int.TryParse(s, out int parsedId))
+        {
+            compId = parsedId;
+            if (Competitor1?.Id == parsedId) side = "Red";
+            else if (Competitor2?.Id == parsedId) side = "Blue";
+        }
+        await SendScore(compId, side);
+    }
+
+    private async Task SendScore(int? competitorId, string? side)
+    {
+        var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId, Side = side }, _jsonOptions);
 
         if (IsConnected && _serverDeviceId != null)
         {
@@ -614,6 +720,7 @@ public partial class JudgeViewModel : BaseViewModel
 
                 // Append digit to current code
                 Code += number;
+                UpdateMatchingCodes(Code);
 
                 // Initialize timer if needed
                 if (_typeTimer == null)
@@ -628,7 +735,6 @@ public partial class JudgeViewModel : BaseViewModel
                             if (!string.IsNullOrEmpty(Code))
                             {
                                 var fullCode = Code;
-                                Code = string.Empty;
                                 await ProcessTypedCode(fullCode);
                             }
                         };
@@ -645,9 +751,53 @@ public partial class JudgeViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private void ClearCode()
+    {
+        Code = string.Empty;
+        MatchingCodes.Clear();
+    }
+
+    [RelayCommand]
+    private void SwitchMode(string mode)
+    {
+        IsCodesListMode = string.Equals(mode, "List", StringComparison.OrdinalIgnoreCase);
+    }
+
+    [RelayCommand]
+    private async Task OpenTaoluSettings()
+    {
+        await Shell.Current.GoToAsync("TaoluCodesPage");
+    }
+
+    [RelayCommand]
+    private async Task ApplyCode(MvtCodeModel? code)
+    {
+        if (code == null) return;
+        await ProcessCode(code);
+    }
+
+    [RelayCommand]
     private async Task DeleteCode(MvtTimeCodeModel code)
     {
+        if (code == null) return;
         Codes.Remove(code);
+
+        if (code.Code != null)
+        {
+            Score = Math.Round(Score + Math.Abs(code.Code.Value), 1);
+
+            if (IsConnected && _serverDeviceId != null)
+            {
+                int? competitorId = null;
+                if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                {
+                    competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
+                }
+
+                var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = Score, CompetitorId = competitorId }, _jsonOptions);
+                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+            }
+        }
     }
 
     private void UpdateCodesCanDelete()
@@ -660,33 +810,151 @@ public partial class JudgeViewModel : BaseViewModel
 
     private async Task ProcessTypedCode(string code)
     {
+        if (string.IsNullOrEmpty(code)) return;
+
+        var findCode = RecognizedCodes.FirstOrDefault(c => string.Equals(c.Code, code, StringComparison.OrdinalIgnoreCase))
+            ?? (await _mvtCodesService.GetAllAsync())?.FirstOrDefault(c => string.Equals(c.Code, code, StringComparison.OrdinalIgnoreCase));
+
+        if (findCode == null)
+        {
+            await _alertService.ShowToast("Code inconnu");
+            Code = string.Empty;
+            MatchingCodes.Clear();
+        }
+        else
+        {
+            await ProcessCode(findCode);
+        }
+    }
+
+    private async Task ProcessCode(MvtCodeModel findCode)
+    {
+        Score = Math.Round(Score - Math.Abs(findCode.Value), 1);
+        int? competitorId = null;
+
+        if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+        {
+            competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
+        }
+
+        var data = new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode, Score = Score };
+        Codes.Insert(0, data);
+
+        Code = string.Empty;
+        MatchingCodes.Clear();
+
         if (IsConnected && _serverDeviceId != null)
         {
-            if (!String.IsNullOrEmpty(code))
+            var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data }, _jsonOptions);
+            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+        }
+    }
+
+    public async Task LoadRecognizedCodesAsync()
+    {
+        try
+        {
+            var list = await _mvtCodesService.GetAllAsync();
+            if (list == null || !list.Any() || list.All(c => string.IsNullOrEmpty(c.Movement) && string.IsNullOrEmpty(c.GroupName)))
             {
-                var findCode = (await _mvtCodesService.GetAllAsync())?.FirstOrDefault(c => c.Code == code);
-
-                if (findCode == null)
+                foreach (var defaultCode in MvtCodeModel.DefaultCodes)
                 {
-                    // Pas de code correspondant
-                    await _alertService.ShowToast("Code inconnu");
-                }
-                else
-                {
-                    Score = Math.Round(Score - findCode.Value, 1);
-                    int? competitorId = null;
-
-                    if(CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                    await _mvtCodesService.AddAsync(new MvtCodeModel
                     {
-                        competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
-                    }
-
-                    var data = new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode };
-                    Codes.Insert(0, data);
-
-                    var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data }, _jsonOptions);
-                    await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                        Code = defaultCode.Code,
+                        GroupName = defaultCode.GroupName,
+                        Movement = defaultCode.Movement,
+                        Description = defaultCode.Description,
+                        Value = defaultCode.Value,
+                        Category = defaultCode.Category
+                    });
                 }
+                list = await _mvtCodesService.GetAllAsync();
+            }
+
+            RecognizedCodes.Clear();
+            if (list != null)
+            {
+                foreach (var c in list.OrderBy(c => c.Code))
+                {
+                    RecognizedCodes.Add(c);
+                }
+            }
+
+            UpdateRecognizedGroups();
+            ApplyRecognizedFilters();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading recognized codes in JudgeViewModel");
+        }
+    }
+
+    private void UpdateRecognizedGroups()
+    {
+        var current = SelectedRecognizedGroup;
+        RecognizedGroups.Clear();
+        RecognizedGroups.Add(Resources.ALL_GROUPS);
+
+        var groups = RecognizedCodes
+            .Select(c => c.GroupLabel)
+            .Where(g => !string.IsNullOrWhiteSpace(g))
+            .Distinct()
+            .OrderBy(g => g);
+
+        foreach (var g in groups)
+        {
+            RecognizedGroups.Add(g);
+        }
+
+        if (!string.IsNullOrEmpty(current) && RecognizedGroups.Contains(current))
+        {
+            SelectedRecognizedGroup = current;
+        }
+        else
+        {
+            SelectedRecognizedGroup = RecognizedGroups.FirstOrDefault() ?? Resources.ALL_GROUPS;
+        }
+    }
+
+    public void ApplyRecognizedFilters()
+    {
+        FilteredRecognizedCodes.Clear();
+        var query = RecognizedCodes.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(SelectedRecognizedGroup) && SelectedRecognizedGroup != Resources.ALL_GROUPS)
+        {
+            query = query.Where(c => string.Equals(c.GroupLabel, SelectedRecognizedGroup, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchRecognizedText))
+        {
+            var search = SearchRecognizedText.Trim().ToLowerInvariant();
+            query = query.Where(c =>
+                (c.Code != null && c.Code.ToLowerInvariant().Contains(search)) ||
+                (c.Movement != null && c.Movement.ToLowerInvariant().Contains(search)) ||
+                (c.Description != null && c.Description.ToLowerInvariant().Contains(search)) ||
+                (c.GroupLabel != null && c.GroupLabel.ToLowerInvariant().Contains(search)));
+        }
+
+        foreach (var c in query.OrderBy(c => c.Code))
+        {
+            FilteredRecognizedCodes.Add(c);
+        }
+    }
+
+    private void UpdateMatchingCodes(string prefix)
+    {
+        MatchingCodes.Clear();
+        if (!string.IsNullOrWhiteSpace(prefix))
+        {
+            var matches = RecognizedCodes
+                .Where(c => c.Code.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .Take(6);
+
+            foreach (var m in matches)
+            {
+                MatchingCodes.Add(m);
             }
         }
     }
@@ -700,11 +968,17 @@ public partial class JudgeViewModel : BaseViewModel
         _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;
         _bluetoothClient.MessageReceived += OnMessageReceived;
 
+        await LoadRecognizedCodesAsync();
         await base.OnAppearing();
     }
 
     public override async Task OnDisappearing()
     {
+        _bluetoothClient.DeviceDiscovered -= OnDeviceDiscovered;
+        _bluetoothClient.DeviceConnected -= OnDeviceConnected;
+        _bluetoothClient.DeviceDisconnected -= OnDeviceDisconnected;
+        _bluetoothClient.MessageReceived -= OnMessageReceived;
+
         if (IsConnected && _serverDeviceId != null)
         {
             try
@@ -750,11 +1024,6 @@ public partial class JudgeViewModel : BaseViewModel
         _typeNumberCts?.Cancel();
         _typeNumberCts?.Dispose();
         _typeNumberCts = null;
-
-        _bluetoothClient.DeviceDiscovered -= OnDeviceDiscovered;
-        _bluetoothClient.DeviceConnected -= OnDeviceConnected;
-        _bluetoothClient.DeviceDisconnected -= OnDeviceDisconnected;
-        _bluetoothClient.MessageReceived -= OnMessageReceived;
 
         await base.OnDisappearing();
     }

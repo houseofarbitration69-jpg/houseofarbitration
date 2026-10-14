@@ -20,6 +20,8 @@ public static class BuilderExtensions
         builder.Services.AddTransient<MasterViewModel>();
         builder.Services.AddSingleton<ServerViewModel>();
         builder.Services.AddTransient<JudgeViewModel>();
+        builder.Services.AddTransient<TaoluCodesViewModel>();
+        builder.Services.AddTransient<TaoluCodePopupViewModel>();
         builder.Services.AddTransient<CompetitionsViewModel>();
         builder.Services.AddTransient<DrawsManagementViewModel>();
         builder.Services.AddTransient<ChangeOrderPopupViewModel>();

@@ -60,4 +60,9 @@ public partial class DrawOrderModel : ObservableObject, IDrawModel
     /// <inheritdoc/>
     /// </summary>
     public int CurrentRound { get; set; } = 1;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public string RoundResultsJson { get; set; } = string.Empty;
 }

@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    x:TypeArguments="vm:TaoluCodesViewModel"
+    x:Class="House.Of.Arbitration.Views.TaoluCodesPage"
+    x:Name="this"
+    x:DataType="vm:TaoluCodesViewModel"
+    Title="{Binding Title}"
+    BackgroundColor="{DynamicResource PageBackgroundColor}"
+>
+    <Grid RowDefinitions="Auto, Auto, *" Padding="20" RowSpacing="15">
+        
+        <!-- Header -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="12">
+            <!-- Back Button -->
+            <controls:IconButton 
+                Grid.Column="0"
+                IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                Icon="{x:Static helpers:FontCustomIcons.CLOSE}"
+                ButtonBackgroundColor="Transparent"
+                IconColor="White"
+                Command="{Binding CloseCommand}"
+                VerticalOptions="Center"
+            />
+
+            <!-- Page Title -->
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                <Label 
+                    Text="{Binding Resources.TAOLU_CODES}" 
+                    TextColor="{DynamicResource PageTitleColor}"
+                    FontSize="28" 
+                    FontAttributes="Bold"
+                    VerticalOptions="Center"
+                />
+                <Label 
+                    Text="Paramétrage des codes d'erreurs et déductions de points" 
+                    TextColor="LightGray"
+                    FontSize="13" 
+                />
+            </VerticalStackLayout>
+
+            <!-- Reset Defaults Button -->
+            <controls:IconButton 
+                Grid.Column="2"
+                Text="{Binding Resources.RESET_DEFAULT_CODES}"
+                ButtonBackgroundColor="#444"
+                TextColor="White"
+                Command="{Binding ResetDefaultCodesCommand}"
+                VerticalOptions="Center"
+            />
+
+            <!-- Add Code Button -->
+            <controls:IconButton 
+                Grid.Column="3"
+                Text="{Binding Resources.ADD_CODE}"
+                ButtonBackgroundColor="LightGreen"
+                TextColor="Black"
+                Command="{Binding AddCodeCommand}"
+                VerticalOptions="Center"
+            >
+                <controls:IconButton.Icons>
+                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
+                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
+                </controls:IconButton.Icons>
+            </controls:IconButton>
+        </Grid>
+
+        <!-- Filters Row -->
+        <Grid Grid.Row="1" ColumnDefinitions="*, 250" ColumnSpacing="12">
+            <!-- Search Bar -->
+            <Border 
+                Grid.Column="0"
+                Stroke="{DynamicResource ValidColor}"
+                StrokeThickness="1"
+                BackgroundColor="White"
+                Padding="10,0"
+            >
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                </Border.StrokeShape>
+                <Entry 
+                    Text="{Binding SearchText}" 
+                    Placeholder="{Binding Resources.SEARCH_CODES}"
+                    PlaceholderColor="Gray"
+                    TextColor="Black"
+                    ClearButtonVisibility="WhileEditing"
+                    MinimumHeightRequest="40"
+                />
+            </Border>
+
+            <!-- Group Filter Picker -->
+            <Border 
+                Grid.Column="1"
+                Stroke="{DynamicResource ValidColor}"
+                StrokeThickness="1"
+                BackgroundColor="White"
+                Padding="8,0"
+            >
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                </Border.StrokeShape>
+                <Picker 
+                    ItemsSource="{Binding Groups}"
+                    SelectedItem="{Binding SelectedGroup}"
+                    TextColor="Black"
+                    BackgroundColor="White"
+                    MinimumHeightRequest="40"
+                />
+            </Border>
+        </Grid>
+
+        <!-- Codes CollectionView -->
+        <CollectionView 
+            Grid.Row="2" 
+            ItemsSource="{Binding FilteredCodes}"
+        >
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Spacing="10" VerticalOptions="Center" HorizontalOptions="Center" Margin="0,40">
+                    <Label 
+                        Text="Aucun code trouvé" 
+                        FontSize="18" 
+                        FontAttributes="Bold"
+                        TextColor="LightGray" 
+                        HorizontalOptions="Center"
+                    />
+                    <Label 
+                        Text="Essayez d'ajuster vos critères de recherche ou réinitialisez les filtres." 
+                        FontSize="14" 
+                        TextColor="Gray" 
+                        HorizontalOptions="Center"
+                    />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:MvtCodeModel">
+                    <controls:Card CardPadding="12" CardColor="White">
+                        <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="15" VerticalOptions="Center">
+                            
+                            <!-- Code Badge -->
+                            <Border 
+                                Grid.Column="0"
+                                BackgroundColor="#222"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="12,8"
+                                VerticalOptions="Center"
+                                MinimumWidthRequest="55"
+                            >
+                                <Label 
+                                    Text="{Binding Code}" 
+                                    TextColor="White"
+                                    FontSize="20"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"
+                                />
+                            </Border>
+
+                            <!-- Movement, Group & Description -->
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label 
+                                        Text="{Binding Movement}" 
+                                        FontSize="18" 
+                                        FontAttributes="Bold" 
+                                        TextColor="{DynamicResource PrimaryTextColor}" 
+                                    />
+                                    
+                                    <!-- Group Pill -->
+                                    <Border 
+                                        BackgroundColor="#EEE"
+                                        StrokeShape="RoundRectangle 6"
+                                        Padding="8,2"
+                                        VerticalOptions="Center"
+                                    >
+                                        <Label 
+                                            Text="{Binding GroupLabel}" 
+                                            FontSize="12" 
+                                            TextColor="#555" 
+                                            FontAttributes="Italic"
+                                        />
+                                    </Border>
+                                </HorizontalStackLayout>
+
+                                <Label 
+                                    Text="{Binding Description}" 
+                                    FontSize="13" 
+                                    TextColor="#666" 
+                                    LineBreakMode="WordWrap"
+                                />
+                            </VerticalStackLayout>
+
+                            <!-- Deduction Value Badge -->
+                            <Border 
+                                Grid.Column="2"
+                                BackgroundColor="#FFEBEE"
+                                Stroke="#D32F2F"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="12,6"
+                                VerticalOptions="Center"
+                            >
+                                <Label 
+                                    Text="{Binding Value, StringFormat='-{0:F1} pt'}" 
+                                    TextColor="#D32F2F"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                />
+                            </Border>
+
+                            <!-- Action Buttons -->
+                            <HorizontalStackLayout Grid.Column="3" Spacing="8" VerticalOptions="Center">
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.PEN}"
+                                    ButtonBackgroundColor="{DynamicResource EditColor}"
+                                    IconColor="Black"
+                                    Command="{Binding BindingContext.EditCodeCommand, Source={x:Reference this}}"
+                                    CommandParameter="{Binding .}"
+                                />
+                                <controls:IconButton
+                                    IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Icon="{x:Static helpers:FontCustomIcons.TRASH}"
+                                    ButtonBackgroundColor="{DynamicResource ErrorColor}"
+                                    IconColor="White"
+                                    Command="{Binding BindingContext.DeleteCodeCommand, Source={x:Reference this}}"
+                                    CommandParameter="{Binding .}"
+                                />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </controls:Card>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</base:BasePage>

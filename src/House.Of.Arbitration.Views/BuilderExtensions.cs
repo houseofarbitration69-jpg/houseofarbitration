@@ -29,6 +29,7 @@ public static class BuilderExtensions
         //builder.Services.AddTransient<DragDropPage>();
         builder.Services.AddTransient<ServerPage>();
         builder.Services.AddTransient<RefereeDataPage>();
+        builder.Services.AddTransient<TaoluCodesPage>();
 
         builder.Services.AddTransientPopup<CategoryPopup, CategoryPopupViewModel>();
         builder.Services.AddTransientPopup<CompetitorPopup, CompetitorPopupViewModel>();
@@ -36,6 +37,7 @@ public static class BuilderExtensions
         builder.Services.AddTransientPopup<JudgePointsPopup, JudgePointsPopupViewModel>();
         builder.Services.AddTransientPopup<ServerSetupPopup, ServerSetupPopupViewModel>();
         builder.Services.AddTransientPopup<ChangeOrderPopup, ChangeOrderPopupViewModel>();
+        builder.Services.AddTransientPopup<TaoluCodePopup, TaoluCodePopupViewModel>();
         return builder;
     }
 }

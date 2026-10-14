@@ -1298,6 +1298,24 @@
                                 Spacing="5" 
                                 Padding="10,0"
                             >
+                                <!-- Current Round Score (Real Time) -->
+
+                                <Border StrokeShape="RoundRectangle 8" BackgroundColor="#222" Stroke="Green" Padding="15,5" Margin="0,2,0,10">
+
+                                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+
+                                        <Label Text="{Binding CurrentRound, StringFormat='R{0}'}" TextColor="Green" FontAttributes="Bold" VerticalOptions="Center" />
+
+                                        <Label Text="{Binding BindingContext.CurrentRedVotes, Source={x:Reference this}}" TextColor="Red" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+
+                                        <Label Text="-" TextColor="White" VerticalOptions="Center" />
+
+                                        <Label Text="{Binding BindingContext.CurrentBlueVotes, Source={x:Reference this}}" TextColor="Blue" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+
+                                    </HorizontalStackLayout>
+
+                                </Border>
+
                                 <CollectionView ItemsSource="{Binding BindingContext.RoundResults, Source={x:Reference this}}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:RoundResultModel">
