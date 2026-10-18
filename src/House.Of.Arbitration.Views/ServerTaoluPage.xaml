@@ -300,6 +300,7 @@
                 RowSpacing="10"
                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
             >
+                <!-- MENU -->
                 <HorizontalStackLayout Grid.Row="0" Spacing="10" VerticalOptions="Center">
                     <Border
                         StrokeShape="RoundRectangle 50"
@@ -325,6 +326,7 @@
                     </Border>
                 </HorizontalStackLayout>
 
+                <!-- DRAWS -->
                 <CollectionView 
                     Grid.Row="1"
                     ItemsSource="{Binding Draws}"
@@ -338,7 +340,7 @@
 
             <Grid 
                 Grid.Column="1" 
-                RowDefinitions="{OnIdiom Tablet='60,150,*,50', Phone='60,280,*,50'}" 
+                RowDefinitions="{OnIdiom Tablet='60,35,150,*,50', Phone='60,35,280,*,50'}" 
                 RowSpacing="{OnIdiom Tablet='15', Phone='5'}" 
                 ColumnDefinitions="{OnIdiom Tablet='85,80,*,80,85', Phone='*'}"
             >
@@ -363,12 +365,87 @@
                         FontAttributes="Bold"
                     />
                 </Border>
+                
+                <!-- ETAT DU SERVEUR -->
+                <Border
+                    Grid.Row="1"
+                    Grid.Column="{OnIdiom Tablet='2', Phone='1'}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="12,6"
+                    StrokeThickness="1.5"
+                    BackgroundColor="#2B2B2B"
+                    Stroke="#757575"
+                >
+                    <Border.Triggers>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
+                            <Setter Property="Stroke" Value="#4CAF50" />
+                            <Setter Property="BackgroundColor" Value="#1B3B22" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
+                            <Setter Property="Stroke" Value="#E53935" />
+                            <Setter Property="BackgroundColor" Value="#3B1B1B" />
+                        </DataTrigger>
+                    </Border.Triggers>
+
+                    <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                        <!-- Pastille de statut -->
+                            <BoxView
+                                WidthRequest="10"
+                                HeightRequest="10"
+                                CornerRadius="5"
+                                VerticalOptions="Center"
+                                Color="#E53935"
+                                BackgroundColor="Transparent"
+                            >
+                                <BoxView.Triggers>
+                                    <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
+                                        <Setter Property="Color" Value="#4CAF50" />
+                                    </DataTrigger>
+                                </BoxView.Triggers>
+                            </BoxView>
+
+                        <!-- Texte statut DEMARRE -->
+                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center" IsVisible="{Binding IsServerStarted}">
+                                <Label
+                                    Text="Serveur actif"
+                                    TextColor="#81C784"
+                                    FontAttributes="Bold"
+                                    FontSize="13"
+                                    VerticalOptions="Center"
+                                />
+                                <Label
+                                    Text="{Binding ServerName, StringFormat='({0})'}"
+                                    TextColor="#C8E6C9"
+                                    FontSize="12"
+                                    VerticalOptions="Center"
+                                    IsVisible="{Binding ServerName, Converter={StaticResource EmptyToBoolConverter}}"
+                                />
+                            </HorizontalStackLayout>
+
+                        <!-- Texte statut ARRETE -->
+                            <Label
+                                Text="Serveur arrêté"
+                                TextColor="#E57373"
+                                FontAttributes="Bold"
+                                FontSize="13"
+                                VerticalOptions="Center"
+                                IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
+                            />
+                        </HorizontalStackLayout>
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}" />
+                        </Border.GestureRecognizers>
+                    </Border>
 
                 <!-- JUGES TAOLU -->
                 <Grid
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Grid.ColumnSpan="5"
                     IsVisible="{OnIdiom Tablet=True, Phone=False}"
+                    Margin="0,-15,0,0"
                 >
                     <FlexLayout
                         Wrap="Wrap"
@@ -477,7 +554,7 @@
                 </Grid>
 
                 <VerticalStackLayout
-                    Grid.Row="2"
+                    Grid.Row="3"
                     BindableLayout.ItemsSource="{Binding JudgeGroups}"
                     IsVisible="{OnIdiom Tablet=False, Phone=True}"
                 >
@@ -573,7 +650,7 @@
 
                 <!-- MATCH -->
                 <Grid 
-                    Grid.Row="{OnIdiom Tablet='2', Phone='1'}"
+                    Grid.Row="{OnIdiom Tablet='3', Phone='2'}"
                     Grid.Column="1" 
                     Grid.ColumnSpan="3"
                     x:DataType="vm:ServerViewModel"
@@ -721,7 +798,7 @@
                 </Grid>
 
                 <Border
-                    Grid.Row="4"
+                    Grid.Row="5"
                     StrokeShape="RoundRectangle 50"
                     HeightRequest="50"
                     WidthRequest="50"
@@ -756,6 +833,59 @@
             <controls:SideSheetControl.SheetContent>
                 <VerticalStackLayout Spacing="20">
                     <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
+
+                    <!-- Statut du serveur dans la feuille latérale -->
+                    <Border
+                        StrokeShape="RoundRectangle 12"
+                        Padding="14,10"
+                        StrokeThickness="1.5"
+                        BackgroundColor="#2B2B2B"
+                        Stroke="#757575"
+                    >
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
+                                <Setter Property="Stroke" Value="#4CAF50" />
+                                <Setter Property="BackgroundColor" Value="#1B3B22" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
+                                <Setter Property="Stroke" Value="#E53935" />
+                                <Setter Property="BackgroundColor" Value="#3B1B1B" />
+                            </DataTrigger>
+                        </Border.Triggers>
+
+                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                            <BoxView
+                                WidthRequest="12"
+                                HeightRequest="12"
+                                CornerRadius="6"
+                                VerticalOptions="Center"
+                                Color="#E53935"
+                            >
+                                <BoxView.Triggers>
+                                    <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
+                                        <Setter Property="Color" Value="#4CAF50" />
+                                    </DataTrigger>
+                                </BoxView.Triggers>
+                            </BoxView>
+
+                            <Label
+                                Text="SERVEUR EN LIGNE"
+                                TextColor="#81C784"
+                                FontAttributes="Bold"
+                                FontSize="14"
+                                VerticalOptions="Center"
+                                IsVisible="{Binding IsServerStarted}"
+                            />
+                            <Label
+                                Text="SERVEUR HORS LIGNE"
+                                TextColor="#E57373"
+                                FontAttributes="Bold"
+                                FontSize="14"
+                                VerticalOptions="Center"
+                                IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
+                            />
+                        </HorizontalStackLayout>
+                    </Border>
 
                     <Button 
                         Text="DÉMARRER" 

@@ -72,6 +72,14 @@ public class MockBluetoothClient : IBluetoothClient
                 MessageReceived?.Invoke(this, $"{Constants.Message.MATCH_INFO}{json}");
             });
         }
+        else if (message == Constants.Message.PING)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(50);
+                MessageReceived?.Invoke(this, Constants.Message.PONG);
+            });
+        }
         return Task.CompletedTask;
     }
 }

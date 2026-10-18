@@ -46,7 +46,6 @@ public partial class JudgeViewModel : BaseViewModel
 
     private string _code = "";
     private CancellationTokenSource? _typeNumberCts;
-    private IDispatcherTimer? _typeTimer;
 
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private IDispatcherTimer? _timer;
@@ -66,7 +65,17 @@ public partial class JudgeViewModel : BaseViewModel
     private CompetitionType _competitionType = CompetitionType.None;
     private string _selectedRecognizedGroup = string.Empty;
     private string _searchRecognizedText = string.Empty;
-    private bool _isCodesListMode = false;
+    private TaoluInputMode _currentTaoluInputMode = TaoluInputMode.Code;
+    private string _pointsInput = string.Empty;
+    private int _lastMatchId;
+    private string? _lastServerDeviceId;
+    private bool _hasUnsyncedChanges;
+    private readonly List<TransfertScoreModel> _unsyncedScores = new();
+    private bool _isReconnecting;
+    private IDispatcherTimer? _autoReconnectTimer;
+    private IDispatcherTimer? _watchdogTimer;
+    private DateTime _lastServerContactTime = DateTime.UtcNow;
+    private int _consecutiveFailedPings;
     #endregion
 
     #region Properties
@@ -84,6 +93,7 @@ public partial class JudgeViewModel : BaseViewModel
             if (SetProperty(ref _currentCompetition, value))
             {
                 OnPropertyChanged(nameof(CanSelectPosition));
+                OnPropertyChanged(nameof(ShowPositionScreen));
             }
         }
     }
@@ -118,8 +128,70 @@ public partial class JudgeViewModel : BaseViewModel
             if (SetProperty(ref _isConnected, value))
             {
                 OnPropertyChanged(nameof(CanSelectPosition));
+                OnPropertyChanged(nameof(ShowConnectionScreen));
+                OnPropertyChanged(nameof(ShowPositionScreen));
+                OnPropertyChanged(nameof(IsJudging));
+                OnPropertyChanged(nameof(IsServerOffline));
+                OnPropertyChanged(nameof(ConnectionStatusText));
+                OnPropertyChanged(nameof(ConnectionStatusColor));
             }
         }
+    }
+
+    public bool HasUnsyncedChanges
+    {
+        get => _hasUnsyncedChanges;
+        set
+        {
+            if (SetProperty(ref _hasUnsyncedChanges, value))
+            {
+                OnPropertyChanged(nameof(OfflineSyncStatusText));
+            }
+        }
+    }
+
+    public IReadOnlyList<TransfertScoreModel> UnsyncedScores => _unsyncedScores.AsReadOnly();
+
+    public bool IsReconnecting
+    {
+        get => _isReconnecting;
+        set
+        {
+            if (SetProperty(ref _isReconnecting, value))
+            {
+                OnPropertyChanged(nameof(ReconnectButtonText));
+            }
+        }
+    }
+
+    public bool ShowConnectionScreen => SelectedJudge == null && !IsConnected;
+
+    public bool ShowPositionScreen => CanSelectPosition;
+
+    public bool IsJudging => SelectedJudge != null;
+
+    public bool IsServerOffline => SelectedJudge != null && !IsConnected;
+
+    public string ConnectionStatusText => IsConnected ? "CONNECTÉ" : "DÉCONNECTÉ (HORS-LIGNE)";
+
+    public string ConnectionStatusColor => IsConnected ? "#4CAF50" : "#FF5252";
+
+    public string OfflineSyncStatusText => HasUnsyncedChanges
+        ? "⚠️ Notations locales non synchronisées. En attente de reconnexion..."
+        : "Vos notations sont conservées localement et seront synchronisées dès reconnexion.";
+
+    public string ReconnectButtonText => IsReconnecting ? "Connexion..." : "Reconnecter";
+
+    public DateTime LastServerContactTime
+    {
+        get => _lastServerContactTime;
+        set => _lastServerContactTime = value;
+    }
+
+    public int ConsecutiveFailedPings
+    {
+        get => _consecutiveFailedPings;
+        set => _consecutiveFailedPings = value;
     }
 
     public bool IsReceivingCompetition
@@ -130,6 +202,7 @@ public partial class JudgeViewModel : BaseViewModel
             if (SetProperty(ref _isReceivingCompetition, value))
             {
                 OnPropertyChanged(nameof(CanSelectPosition));
+                OnPropertyChanged(nameof(ShowPositionScreen));
             }
         }
     }
@@ -148,6 +221,12 @@ public partial class JudgeViewModel : BaseViewModel
             if (SetProperty(ref _selectedJudge, value))
             {
                 OnPropertyChanged(nameof(CanSelectPosition));
+                OnPropertyChanged(nameof(ShowConnectionScreen));
+                OnPropertyChanged(nameof(ShowPositionScreen));
+                OnPropertyChanged(nameof(IsJudging));
+                OnPropertyChanged(nameof(IsServerOffline));
+                OnPropertyChanged(nameof(GroupCodesButtonText));
+                UpdateRecognizedGroups();
             }
         }
     }
@@ -244,19 +323,51 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
-    public bool IsCodesListMode
+    public TaoluInputMode CurrentTaoluInputMode
     {
-        get => _isCodesListMode;
+        get => _currentTaoluInputMode;
         set
         {
-            if (SetProperty(ref _isCodesListMode, value))
+            if (SetProperty(ref _currentTaoluInputMode, value))
             {
+                OnPropertyChanged(nameof(IsCodeMode));
+                OnPropertyChanged(nameof(IsPointMode));
+                OnPropertyChanged(nameof(IsGroupCodesMode));
+                OnPropertyChanged(nameof(IsCodesListMode));
                 OnPropertyChanged(nameof(IsKeypadMode));
             }
         }
     }
 
-    public bool IsKeypadMode => !IsCodesListMode;
+    public bool IsCodeMode => CurrentTaoluInputMode == TaoluInputMode.Code;
+    public bool IsPointMode => CurrentTaoluInputMode == TaoluInputMode.Points;
+    public bool IsGroupCodesMode => CurrentTaoluInputMode == TaoluInputMode.GroupCodes;
+
+    public bool IsCodesListMode
+    {
+        get => IsGroupCodesMode;
+        set => CurrentTaoluInputMode = value ? TaoluInputMode.GroupCodes : TaoluInputMode.Code;
+    }
+
+    public bool IsKeypadMode => IsCodeMode;
+
+    public string PointsInput
+    {
+        get => _pointsInput;
+        set => SetProperty(ref _pointsInput, value);
+    }
+
+    public string GroupCodesButtonText
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(SelectedJudge?.Group))
+            {
+                return $"📋 Codes {SelectedJudge.Group}";
+            }
+            return Resources.GROUP_CODES_MODE;
+        }
+    }
     #endregion
 
     #region Constructors
@@ -354,11 +465,24 @@ public partial class JudgeViewModel : BaseViewModel
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            _serverDeviceId = deviceId;
-            IsConnected = true;
-            IsScanning = false;
-            IsReceivingCompetition = true;
+            await HandleDeviceConnectedAsync(deviceId);
+        });
+    }
 
+    public async Task HandleDeviceConnectedAsync(string deviceId)
+    {
+        _serverDeviceId = deviceId;
+        _lastServerDeviceId = deviceId;
+        IsConnected = true;
+        IsScanning = false;
+        _lastServerContactTime = DateTime.UtcNow;
+        _consecutiveFailedPings = 0;
+        StopAutoReconnect();
+        StartWatchdog();
+
+        if (SelectedJudge == null)
+        {
+            IsReceivingCompetition = true;
             try
             {
                 await _bluetoothClient.SendMessage(_serverDeviceId, Constants.Message.GET_COMPETITION);
@@ -367,146 +491,447 @@ public partial class JudgeViewModel : BaseViewModel
             {
                 _logger.LogError(ex, "Error requesting competition from server");
             }
-        });
+        }
+        else
+        {
+            // Reconnecting with an active judge
+            try
+            {
+                string positionCode = !string.IsNullOrEmpty(SelectedJudge.Group)
+                    ? $"{SelectedJudge.Group}_{SelectedJudge.Number}"
+                    : SelectedJudge.Number.ToString();
+                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{positionCode}");
+
+                await Task.Delay(150);
+
+                if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
+                {
+                    await SyncUnsyncedScoresAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error re-registering judge position upon reconnection");
+            }
+        }
     }
 
     private void OnDeviceDisconnected(object? sender, string deviceId)
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            _serverDeviceId = null;
-            IsConnected = false;
-            IsReceivingCompetition = false;
-            IsReceivingMatch = false;
+            await HandleDeviceDisconnectedAsync(deviceId);
+        });
+    }
+
+    public async Task HandleDeviceDisconnectedAsync(string? deviceId = null)
+    {
+        bool wasAlreadyOffline = !IsConnected && SelectedJudge != null;
+
+        StopWatchdog();
+        _consecutiveFailedPings = 0;
+
+        if (!string.IsNullOrEmpty(deviceId))
+        {
+            _lastServerDeviceId = deviceId;
+        }
+        else if (!string.IsNullOrEmpty(_serverDeviceId))
+        {
+            _lastServerDeviceId = _serverDeviceId;
+        }
+
+        _serverDeviceId = null;
+        IsConnected = false;
+        IsReceivingCompetition = false;
+        IsReceivingMatch = false;
+
+        if (SelectedJudge == null)
+        {
             CurrentCompetition = null;
             CompetitionType = CompetitionType.None;
-            SelectedJudge = null;
+            _lastMatchId = 0;
+            Codes.Clear();
             _timer?.Stop();
             _pendingChunks.Clear();
 
-            await _alertService.ShowAlert("Déconnexion", "Le serveur s'est arrêté.", "OK");
-        });
+            await _alertService.ShowToast("Le serveur s'est déconnecté.");
+        }
+        else if (!wasAlreadyOffline)
+        {
+            // Judge is actively in a match: keep local data, activate offline mode and background auto-reconnect
+            StartAutoReconnect();
+            await _alertService.ShowToast("Serveur déconnecté. Mode hors-ligne actif : continuez à noter.");
+        }
+    }
+
+    public void StartWatchdog()
+    {
+        _lastServerContactTime = DateTime.UtcNow;
+        _consecutiveFailedPings = 0;
+        if (_watchdogTimer == null)
+        {
+            _watchdogTimer = Application.Current?.Dispatcher?.CreateTimer();
+            if (_watchdogTimer != null)
+            {
+                _watchdogTimer.Interval = TimeSpan.FromSeconds(4);
+                _watchdogTimer.Tick += async (s, e) =>
+                {
+                    await PerformWatchdogTickAsync();
+                };
+            }
+        }
+        _watchdogTimer?.Start();
+    }
+
+    public void StopWatchdog()
+    {
+        _watchdogTimer?.Stop();
+        _consecutiveFailedPings = 0;
+    }
+
+    public async Task PerformWatchdogTickAsync()
+    {
+        if (!IsConnected || string.IsNullOrEmpty(_serverDeviceId))
+        {
+            return;
+        }
+
+        if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(12))
+        {
+            _logger.LogWarning("Server heartbeat timeout (>12s). Declaring server disconnected.");
+            await HandleDeviceDisconnectedAsync(_serverDeviceId);
+            return;
+        }
+
+        try
+        {
+            await _bluetoothClient.SendMessage(_serverDeviceId, Constants.Message.PING);
+        }
+        catch (Exception ex)
+        {
+            _consecutiveFailedPings++;
+            _logger.LogWarning(ex, "Failed to send PING to server (attempt {Attempt}/3).", _consecutiveFailedPings);
+
+            if (_consecutiveFailedPings >= 3)
+            {
+                _logger.LogWarning("3 consecutive PING attempts failed. Declaring server disconnected.");
+                await HandleDeviceDisconnectedAsync(_serverDeviceId);
+            }
+        }
+    }
+
+    public void StartAutoReconnect()
+    {
+        if (_autoReconnectTimer == null)
+        {
+            _autoReconnectTimer = Application.Current?.Dispatcher?.CreateTimer();
+            if (_autoReconnectTimer != null)
+            {
+                _autoReconnectTimer.Interval = TimeSpan.FromSeconds(3);
+                _autoReconnectTimer.Tick += async (s, e) =>
+                {
+                    if (!IsConnected && SelectedJudge != null && !string.IsNullOrEmpty(_lastServerDeviceId))
+                    {
+                        await TryReconnectAsync();
+                    }
+                };
+            }
+        }
+        _autoReconnectTimer?.Start();
+    }
+
+    public void StopAutoReconnect()
+    {
+        _autoReconnectTimer?.Stop();
+    }
+
+    [RelayCommand]
+    public async Task Reconnect()
+    {
+        await TryReconnectAsync();
+    }
+
+    public async Task TryReconnectAsync()
+    {
+        if (IsConnected || _isReconnecting || string.IsNullOrEmpty(_lastServerDeviceId)) return;
+
+        IsReconnecting = true;
+        try
+        {
+            await _bluetoothClient.ConnectToDevice(_lastServerDeviceId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed attempt to reconnect to server {DeviceId}", _lastServerDeviceId);
+        }
+        finally
+        {
+            IsReconnecting = false;
+        }
+    }
+
+    public async Task SyncUnsyncedScoresAsync()
+    {
+        if (!IsConnected || _serverDeviceId == null || SelectedJudge == null) return;
+
+        try
+        {
+            if (_unsyncedScores.Count > 0)
+            {
+                var scoresToSend = _unsyncedScores.ToList();
+                foreach (var scoreItem in scoresToSend)
+                {
+                    var json = JsonSerializer.Serialize(scoreItem, _jsonOptions);
+                    await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                    _unsyncedScores.Remove(scoreItem);
+                    if (scoreItem.Code != null)
+                    {
+                        scoreItem.Code.IsSynced = true;
+                    }
+                    await Task.Delay(50);
+                }
+            }
+            else if (Codes.Any(c => !c.IsSynced))
+            {
+                int? competitorId = (CurrentDraw is DrawOrderModel o) ? o.CompetitorId : null;
+                var unsynced = Codes.Where(c => !c.IsSynced).OrderBy(c => c.Date).ToList();
+                foreach (var c in unsynced)
+                {
+                    var model = new TransfertScoreModel { Score = c.Score, CompetitorId = competitorId, Code = c };
+                    var json = JsonSerializer.Serialize(model, _jsonOptions);
+                    await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                    c.IsSynced = true;
+                    await Task.Delay(50);
+                }
+            }
+
+            foreach (var c in Codes)
+            {
+                c.IsSynced = true;
+            }
+
+            await SendSyncStateAsync();
+            HasUnsyncedChanges = false;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error syncing unsynced scores with server");
+            HasUnsyncedChanges = true;
+        }
+    }
+
+    public async Task SendSyncStateAsync()
+    {
+        if (!IsConnected || _serverDeviceId == null || SelectedJudge == null) return;
+
+        try
+        {
+            var syncState = new JudgeStateModel
+            {
+                Group = SelectedJudge.Group,
+                Number = SelectedJudge.Number,
+                Name = SelectedJudge.Name,
+                Score = Score,
+                RedPoints = SelectedJudge.RedPoints,
+                BluePoints = SelectedJudge.BluePoints,
+                Codes = Codes.ToList()
+            };
+
+            var json = JsonSerializer.Serialize(syncState, _jsonOptions);
+            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SYNC_STATE}{json}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending sync state to server");
+        }
     }
 
     private void OnMessageReceived(object? sender, string message)
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {
-            try
-            {
-                if (message == Constants.Message.TIMER_START)
-                {
-                    _timer?.Start();
-                    return;
-                }
-
-                if (message == Constants.Message.TIMER_PAUSE)
-                {
-                    _timer?.Stop();
-                    return;
-                }
-
-                if (message == Constants.Message.TIMER_STOP)
-                {
-                    _timer?.Stop();
-                    _timeLeft = TimeSpan.Zero;
-                    TimeLeftDisplay = "00:00";
-                    return;
-                }
-
-                if (message.StartsWith(Constants.Message.TIMER_SET))
-                {
-                    var timeStr = message.Substring(Constants.Message.TIMER_SET.Length);
-                    if (TimeSpan.TryParseExact(timeStr, @"mm\:ss", null, out var newTime))
-                    {
-                        _timeLeft = newTime;
-                        TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
-                    }
-                    return;
-                }
-
-                if (message.StartsWith(Constants.Message.COMPETITION_DATA))
-                {
-                    var content = message.Substring(Constants.Message.COMPETITION_DATA.Length);
-                    var competition = JsonSerializer.Deserialize<CompetitionModel>(content, _jsonOptions);
-                    if (competition != null)
-                    {
-                        CurrentCompetition = competition;
-                        CompetitionType = competition.Type;
-
-                        // Clean the graph to avoid EF Core key/seed conflicts
-                        CleanCompetitionGraph(competition);
-
-                        var existing = await _competitionRepository.GetByIdAsync(competition.Id);
-                        if (existing != null)
-                            await _competitionRepository.UpdateAsync(competition);
-                        else
-                            await _competitionRepository.AddAsync(competition);
-
-                        await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
-                    }
-                    IsReceivingCompetition = false;
-                }
-                else if (message.StartsWith(Constants.Message.MATCH_INFO))
-                {
-                    var content = message.Substring(Constants.Message.MATCH_INFO.Length);
-                    var matchData = JsonSerializer.Deserialize<MatchInfoData>(content, _jsonOptions);
-
-                    if (matchData != null)
-                    {
-                        switch (matchData.Type)
-                        {
-                            case RoundType.Knockouts:
-                                CurrentDraw = await _drawKnockoutService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser");
-                                break;
-                            case RoundType.Pools:
-                                CurrentDraw = await _drawPoolsService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser");
-                                break;
-                            case RoundType.Order:
-                                CurrentDraw = await _drawOrderService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor.Country");
-                                break;
-                        }
-
-                        CategoryName = CurrentDraw?.Draw?.Category?.Name;
-                        Codes.Clear();
-
-                        if (CurrentDraw is DrawKnockoutModel k)
-                        {
-                            Competitor1 = k.Competitor1;
-                            Competitor2 = k.Competitor2;
-                        }
-                        else if (CurrentDraw is DrawPoolsModel p)
-                        {
-                            Competitor1 = p.Competitor1;
-                            Competitor2 = p.Competitor2;
-                        }
-                        else if (CurrentDraw is DrawOrderModel o)
-                        {
-                            Competitor1 = o.Competitor;
-                            Competitor2 = null;
-                        }
-                        else
-                        {
-                            Competitor1 = null;
-                            Competitor2 = null;
-                        }
-
-                        if (SelectedJudge != null && CompetitionType == CompetitionType.Taolu)
-                        {
-                            if (SelectedJudge.Group == "A") Score = 5.0;
-                            else if (SelectedJudge.Group == "B") Score = 3.0;
-                            else if (SelectedJudge.Group == "C") Score = 2.0;
-                        }
-                    }
-                    IsReceivingMatch = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error processing received message");
-                await _alertService.ShowToast($"Error: {ex.Message}");
-            }
+            await HandleMessageAsync(message);
         });
+    }
+
+    public async Task HandleMessageAsync(string message)
+    {
+        try
+        {
+            _lastServerContactTime = DateTime.UtcNow;
+            _consecutiveFailedPings = 0;
+
+            if (message == Constants.Message.PONG)
+            {
+                return;
+            }
+
+            if (message == Constants.Message.SERVER_STOPPED)
+            {
+                _logger.LogInformation("Server announced it has stopped.");
+                await HandleDeviceDisconnectedAsync(_serverDeviceId);
+                return;
+            }
+
+            if (message == Constants.Message.TIMER_START)
+            {
+                _timer?.Start();
+                return;
+            }
+
+            if (message == Constants.Message.TIMER_PAUSE)
+            {
+                _timer?.Stop();
+                return;
+            }
+
+            if (message == Constants.Message.TIMER_STOP)
+            {
+                _timer?.Stop();
+                _timeLeft = TimeSpan.Zero;
+                TimeLeftDisplay = "00:00";
+                return;
+            }
+
+            if (message.StartsWith(Constants.Message.TIMER_SET))
+            {
+                var timeStr = message.Substring(Constants.Message.TIMER_SET.Length);
+                if (TimeSpan.TryParseExact(timeStr, @"mm\:ss", null, out var newTime))
+                {
+                    _timeLeft = newTime;
+                    TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
+                }
+                return;
+            }
+
+            if (message.StartsWith(Constants.Message.COMPETITION_DATA))
+            {
+                var content = message.Substring(Constants.Message.COMPETITION_DATA.Length);
+                var competition = JsonSerializer.Deserialize<CompetitionModel>(content, _jsonOptions);
+                if (competition != null)
+                {
+                    CurrentCompetition = competition;
+                    CompetitionType = competition.Type;
+
+                    // Clean the graph to avoid EF Core key/seed conflicts
+                    CleanCompetitionGraph(competition);
+
+                    var existing = await _competitionRepository.GetByIdAsync(competition.Id);
+                    if (existing != null)
+                        await _competitionRepository.UpdateAsync(competition);
+                    else
+                        await _competitionRepository.AddAsync(competition);
+
+                    await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
+                }
+                IsReceivingCompetition = false;
+            }
+            else if (message.StartsWith(Constants.Message.MATCH_INFO))
+            {
+                var content = message.Substring(Constants.Message.MATCH_INFO.Length);
+                var matchData = JsonSerializer.Deserialize<MatchInfoData>(content, _jsonOptions);
+
+                if (matchData != null)
+                {
+                    bool isNewMatch = _lastMatchId != matchData.Id;
+                    _lastMatchId = matchData.Id;
+
+                    switch (matchData.Type)
+                    {
+                        case RoundType.Knockouts:
+                            CurrentDraw = await _drawKnockoutService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser");
+                            break;
+                        case RoundType.Pools:
+                            CurrentDraw = await _drawPoolsService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser");
+                            break;
+                        case RoundType.Order:
+                            CurrentDraw = await _drawOrderService.GetByIdAsync(matchData.Id, "Draw.Category.AgeRange", "Competitor.Country");
+                            break;
+                    }
+
+                    CategoryName = CurrentDraw?.Draw?.Category?.Name;
+                    if (isNewMatch)
+                    {
+                        if (!HasUnsyncedChanges && _unsyncedScores.Count == 0 && !Codes.Any(c => !c.IsSynced))
+                        {
+                            Codes.Clear();
+                            HasUnsyncedChanges = false;
+                        }
+                    }
+
+                    if (CurrentDraw is DrawKnockoutModel k)
+                    {
+                        Competitor1 = k.Competitor1;
+                        Competitor2 = k.Competitor2;
+                    }
+                    else if (CurrentDraw is DrawPoolsModel p)
+                    {
+                        Competitor1 = p.Competitor1;
+                        Competitor2 = p.Competitor2;
+                    }
+                    else if (CurrentDraw is DrawOrderModel o)
+                    {
+                        Competitor1 = o.Competitor;
+                        Competitor2 = null;
+                    }
+                    else
+                    {
+                        Competitor1 = null;
+                        Competitor2 = null;
+                    }
+
+                    if (isNewMatch && SelectedJudge != null && CompetitionType == CompetitionType.Taolu && !HasUnsyncedChanges)
+                    {
+                        if (SelectedJudge.Group == "A") Score = 5.0;
+                        else if (SelectedJudge.Group == "B") Score = 3.0;
+                        else if (SelectedJudge.Group == "C") Score = 2.0;
+                    }
+                }
+                IsReceivingMatch = false;
+            }
+            else if (message.StartsWith(Constants.Message.JUDGE_STATE))
+            {
+                if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
+                {
+                    // If we have offline changes, do not overwrite them with server state. Send/replay them immediately.
+                    await SyncUnsyncedScoresAsync();
+                    return;
+                }
+
+                var content = message.Substring(Constants.Message.JUDGE_STATE.Length);
+                var state = JsonSerializer.Deserialize<JudgeStateModel>(content, _jsonOptions);
+                if (state != null)
+                {
+                    Score = state.Score;
+                    Codes.Clear();
+                    if (state.Codes != null)
+                    {
+                        foreach (var c in state.Codes)
+                        {
+                            Codes.Add(c);
+                        }
+                    }
+                    UpdateCodesCanDelete();
+
+                    if (SelectedJudge != null)
+                    {
+                        SelectedJudge.Score = state.Score;
+                        SelectedJudge.RedPoints = state.RedPoints;
+                        SelectedJudge.BluePoints = state.BluePoints;
+                    }
+                }
+            }
+            else if (message == Constants.Message.JUDGE_SYNC_ACK)
+            {
+                HasUnsyncedChanges = false;
+                await _alertService.ShowToast("Données synchronisées avec le serveur.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing received message");
+            await _alertService.ShowToast($"Error: {ex.Message}");
+        }
     }
     #endregion
 
@@ -657,7 +1082,15 @@ public partial class JudgeViewModel : BaseViewModel
             IsReceivingMatch = true;
 
             string positionCode = !string.IsNullOrEmpty(judge.Group) ? $"{judge.Group}_{judge.Number}" : judge.Number.ToString();
-            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{positionCode}");
+            try
+            {
+                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{positionCode}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send JUDGE_POSITION to server. Transitioning to offline mode.");
+                await HandleDeviceDisconnectedAsync(_serverDeviceId);
+            }
         }
     }
 
@@ -690,7 +1123,12 @@ public partial class JudgeViewModel : BaseViewModel
             if (Competitor1?.Id == id) side = "Red";
             else if (Competitor2?.Id == id) side = "Blue";
         }
-        else if (param is string s && int.TryParse(s, out int parsedId))
+        else if (param is string s && (string.Equals(s, "Red", StringComparison.OrdinalIgnoreCase) || string.Equals(s, "Blue", StringComparison.OrdinalIgnoreCase)))
+        {
+            side = s;
+            compId = string.Equals(s, "Red", StringComparison.OrdinalIgnoreCase) ? Competitor1?.Id : Competitor2?.Id;
+        }
+        else if (param is string sNum && int.TryParse(sNum, out int parsedId))
         {
             compId = parsedId;
             if (Competitor1?.Id == parsedId) side = "Red";
@@ -701,11 +1139,32 @@ public partial class JudgeViewModel : BaseViewModel
 
     private async Task SendScore(int? competitorId, string? side)
     {
-        var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId, Side = side }, _jsonOptions);
-
-        if (IsConnected && _serverDeviceId != null)
+        if (SelectedJudge != null)
         {
-            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+            if (string.Equals(side, "Red", StringComparison.OrdinalIgnoreCase)) SelectedJudge.RedPoints++;
+            else if (string.Equals(side, "Blue", StringComparison.OrdinalIgnoreCase)) SelectedJudge.BluePoints++;
+        }
+
+        var scoreModel = new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId, Side = side };
+
+        if (!IsConnected || _serverDeviceId == null)
+        {
+            _unsyncedScores.Add(scoreModel);
+            HasUnsyncedChanges = true;
+        }
+        else
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send score to server; stored locally for future sync.");
+                _unsyncedScores.Add(scoreModel);
+                HasUnsyncedChanges = true;
+            }
         }
     }
 
@@ -716,37 +1175,50 @@ public partial class JudgeViewModel : BaseViewModel
         {
             try
             {
-                string number = val?.ToString() ?? String.Empty;
+                string number = val?.ToString() ?? string.Empty;
+
+                if (!RecognizedCodes.Any())
+                {
+                    await LoadRecognizedCodesAsync();
+                }
 
                 // Append digit to current code
                 Code += number;
                 UpdateMatchingCodes(Code);
 
-                // Initialize timer if needed
-                if (_typeTimer == null)
+                // Auto-validate when there is only one possible code remaining
+                var allMatches = RecognizedCodes
+                    .Where(c => c.Code.StartsWith(Code, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                if (allMatches.Count == 1 && string.Equals(allMatches[0].Code, Code, StringComparison.OrdinalIgnoreCase))
                 {
-                    _typeTimer = Application.Current?.Dispatcher.CreateTimer();
-                    if (_typeTimer != null)
-                    {
-                        _typeTimer.Interval = TimeSpan.FromMilliseconds(500);
-                        _typeTimer.Tick += async (s, e) =>
-                        {
-                            _typeTimer.Stop();
-                            if (!string.IsNullOrEmpty(Code))
-                            {
-                                var fullCode = Code;
-                                await ProcessTypedCode(fullCode);
-                            }
-                        };
-                    }
+                    await ProcessCode(allMatches[0]);
                 }
-                // Restart timer on each new digit
-                _typeTimer?.Start();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in TypeNumber command");
             }
+        }
+    }
+
+    [RelayCommand]
+    private void BackspaceCode()
+    {
+        if (!string.IsNullOrEmpty(Code))
+        {
+            Code = Code.Substring(0, Code.Length - 1);
+            UpdateMatchingCodes(Code);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ValidateCode()
+    {
+        if (!string.IsNullOrWhiteSpace(Code))
+        {
+            await ProcessTypedCode(Code);
         }
     }
 
@@ -760,7 +1232,129 @@ public partial class JudgeViewModel : BaseViewModel
     [RelayCommand]
     private void SwitchMode(string mode)
     {
-        IsCodesListMode = string.Equals(mode, "List", StringComparison.OrdinalIgnoreCase);
+        if (string.Equals(mode, "Points", StringComparison.OrdinalIgnoreCase) || string.Equals(mode, "Point", StringComparison.OrdinalIgnoreCase))
+        {
+            CurrentTaoluInputMode = TaoluInputMode.Points;
+        }
+        else if (string.Equals(mode, "GroupCodes", StringComparison.OrdinalIgnoreCase) || string.Equals(mode, "List", StringComparison.OrdinalIgnoreCase) || string.Equals(mode, "Group", StringComparison.OrdinalIgnoreCase))
+        {
+            CurrentTaoluInputMode = TaoluInputMode.GroupCodes;
+            ApplyJudgeGroupFilter();
+        }
+        else
+        {
+            CurrentTaoluInputMode = TaoluInputMode.Code;
+        }
+    }
+
+    [RelayCommand]
+    private void TypePoint(object? val)
+    {
+        if (val == null) return;
+        string s = val.ToString() ?? string.Empty;
+        if (s == "." || s == ",")
+        {
+            if (string.IsNullOrEmpty(PointsInput))
+            {
+                PointsInput = "0.";
+            }
+            else if (!PointsInput.Contains('.') && !PointsInput.Contains(','))
+            {
+                PointsInput += ".";
+            }
+        }
+        else
+        {
+            if (PointsInput == "0" && s != ".")
+            {
+                PointsInput = s;
+            }
+            else
+            {
+                PointsInput += s;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void ClearPoints()
+    {
+        PointsInput = string.Empty;
+    }
+
+    [RelayCommand]
+    private void BackspacePoints()
+    {
+        if (!string.IsNullOrEmpty(PointsInput))
+        {
+            PointsInput = PointsInput.Substring(0, PointsInput.Length - 1);
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeductPoints(object? val)
+    {
+        double pts = 0;
+        if (val is double d)
+        {
+            pts = d;
+        }
+        else if (val is string s && double.TryParse(s.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedVal))
+        {
+            pts = parsedVal;
+        }
+        else if (!string.IsNullOrWhiteSpace(PointsInput) && double.TryParse(PointsInput.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedInput))
+        {
+            pts = parsedInput;
+        }
+
+        if (pts <= 0) return;
+
+        pts = Math.Round(pts, 2);
+        Score = Math.Round(Math.Max(0, Score - pts), 2);
+
+        int? competitorId = null;
+        if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+        {
+            competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
+        }
+
+        var syntheticCode = new MvtCodeModel
+        {
+            Code = $"-{pts.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture)}",
+            Movement = "Déduction libre",
+            Description = $"Déduction de {pts.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture)} pt(s)",
+            Value = pts,
+            Category = "Points"
+        };
+
+        var data = new MvtTimeCodeModel { Date = DateTime.Now, Code = syntheticCode, Score = Score, IsSynced = false };
+        Codes.Insert(0, data);
+
+        PointsInput = string.Empty;
+
+        var scoreModel = new TransfertScoreModel { Score = Score, CompetitorId = competitorId, Code = data };
+
+        if (!IsConnected || _serverDeviceId == null)
+        {
+            _unsyncedScores.Add(scoreModel);
+            HasUnsyncedChanges = true;
+        }
+        else
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                data.IsSynced = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send points deduction to server immediately; stored locally for future sync.");
+                _unsyncedScores.Add(scoreModel);
+                HasUnsyncedChanges = true;
+            }
+        }
     }
 
     [RelayCommand]
@@ -784,18 +1378,33 @@ public partial class JudgeViewModel : BaseViewModel
 
         if (code.Code != null)
         {
-            Score = Math.Round(Score + Math.Abs(code.Code.Value), 1);
-
-            if (IsConnected && _serverDeviceId != null)
+            int? competitorId = null;
+            if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
             {
-                int? competitorId = null;
-                if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
-                {
-                    competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
-                }
+                competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
+            }
 
-                var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = Score, CompetitorId = competitorId }, _jsonOptions);
-                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+            Score = Math.Round(Score + Math.Abs(code.Code.Value), 2);
+            var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId };
+
+            if (!IsConnected || _serverDeviceId == null)
+            {
+                _unsyncedScores.Add(scoreModel);
+                HasUnsyncedChanges = true;
+            }
+            else
+            {
+                try
+                {
+                    var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+                    await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send deleted code score to server immediately; stored locally for future sync.");
+                    _unsyncedScores.Add(scoreModel);
+                    HasUnsyncedChanges = true;
+                }
             }
         }
     }
@@ -818,8 +1427,6 @@ public partial class JudgeViewModel : BaseViewModel
         if (findCode == null)
         {
             await _alertService.ShowToast("Code inconnu");
-            Code = string.Empty;
-            MatchingCodes.Clear();
         }
         else
         {
@@ -829,7 +1436,7 @@ public partial class JudgeViewModel : BaseViewModel
 
     private async Task ProcessCode(MvtCodeModel findCode)
     {
-        Score = Math.Round(Score - Math.Abs(findCode.Value), 1);
+        Score = Math.Round(Math.Max(0, Score - Math.Abs(findCode.Value)), 2);
         int? competitorId = null;
 
         if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
@@ -837,16 +1444,33 @@ public partial class JudgeViewModel : BaseViewModel
             competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
         }
 
-        var data = new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode, Score = Score };
+        var data = new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode, Score = Score, IsSynced = false };
         Codes.Insert(0, data);
 
         Code = string.Empty;
         MatchingCodes.Clear();
 
-        if (IsConnected && _serverDeviceId != null)
+        var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data };
+
+        if (!IsConnected || _serverDeviceId == null)
         {
-            var json = JsonSerializer.Serialize(new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data }, _jsonOptions);
-            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+            _unsyncedScores.Add(scoreModel);
+            HasUnsyncedChanges = true;
+        }
+        else
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                data.IsSynced = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send code to server immediately; stored locally for future sync.");
+                _unsyncedScores.Add(scoreModel);
+                HasUnsyncedChanges = true;
+            }
         }
     }
 
@@ -896,6 +1520,18 @@ public partial class JudgeViewModel : BaseViewModel
         RecognizedGroups.Clear();
         RecognizedGroups.Add(Resources.ALL_GROUPS);
 
+        if (!string.IsNullOrWhiteSpace(SelectedJudge?.Group))
+        {
+            string judgeGroupTitle = SelectedJudge.Group.ToUpperInvariant() switch
+            {
+                "A" => "Groupe A (Qualité des mouvements)",
+                "B" => "Groupe B (Performance globale)",
+                "C" => "Groupe C (Degré de difficulté)",
+                _ => $"Groupe {SelectedJudge.Group}"
+            };
+            RecognizedGroups.Add(judgeGroupTitle);
+        }
+
         var groups = RecognizedCodes
             .Select(c => c.GroupLabel)
             .Where(g => !string.IsNullOrWhiteSpace(g))
@@ -917,6 +1553,21 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    private void ApplyJudgeGroupFilter()
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedJudge?.Group))
+        {
+            string judgeGroupPrefix = $"Groupe {SelectedJudge.Group.ToUpperInvariant()}";
+            var matching = RecognizedGroups.FirstOrDefault(g => g.StartsWith(judgeGroupPrefix, StringComparison.OrdinalIgnoreCase));
+            if (matching != null)
+            {
+                SelectedRecognizedGroup = matching;
+                return;
+            }
+        }
+        SelectedRecognizedGroup = Resources.ALL_GROUPS;
+    }
+
     public void ApplyRecognizedFilters()
     {
         FilteredRecognizedCodes.Clear();
@@ -924,7 +1575,22 @@ public partial class JudgeViewModel : BaseViewModel
 
         if (!string.IsNullOrWhiteSpace(SelectedRecognizedGroup) && SelectedRecognizedGroup != Resources.ALL_GROUPS)
         {
-            query = query.Where(c => string.Equals(c.GroupLabel, SelectedRecognizedGroup, StringComparison.OrdinalIgnoreCase));
+            if (SelectedRecognizedGroup.StartsWith("Groupe A", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => CodeMatchesJudgeGroup(c, "A"));
+            }
+            else if (SelectedRecognizedGroup.StartsWith("Groupe B", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => CodeMatchesJudgeGroup(c, "B"));
+            }
+            else if (SelectedRecognizedGroup.StartsWith("Groupe C", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => CodeMatchesJudgeGroup(c, "C"));
+            }
+            else
+            {
+                query = query.Where(c => string.Equals(c.GroupLabel, SelectedRecognizedGroup, StringComparison.OrdinalIgnoreCase));
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(SearchRecognizedText))
@@ -941,6 +1607,43 @@ public partial class JudgeViewModel : BaseViewModel
         {
             FilteredRecognizedCodes.Add(c);
         }
+    }
+
+    private static bool CodeMatchesJudgeGroup(MvtCodeModel code, string? judgeGroup)
+    {
+        if (string.IsNullOrWhiteSpace(judgeGroup)) return true;
+
+        judgeGroup = judgeGroup.Trim().ToUpperInvariant();
+        if (judgeGroup == "A")
+        {
+            return string.Equals(code.GroupLabel, "Techniques de main", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Equilibres", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Techniques de jambe", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Positions", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Techniques spécifiques aux armes", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "A", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "Groupe A", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.Category, "Groupe A", StringComparison.OrdinalIgnoreCase);
+        }
+        else if (judgeGroup == "B")
+        {
+            return string.Equals(code.GroupLabel, "Autres erreurs", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Performance globale", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "B", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "Groupe B", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.Category, "Groupe B", StringComparison.OrdinalIgnoreCase);
+        }
+        else if (judgeGroup == "C")
+        {
+            return string.Equals(code.GroupLabel, "Techniques de saut", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Degré de difficulté", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Difficultés", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "C", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "Groupe C", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.Category, "Groupe C", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return true;
     }
 
     private void UpdateMatchingCodes(string prefix)
@@ -1020,10 +1723,11 @@ public partial class JudgeViewModel : BaseViewModel
         SelectedJudge = null;
         _timer?.Stop();
         _pendingChunks.Clear();
+        _unsyncedScores.Clear();
 
         _typeNumberCts?.Cancel();
-        _typeNumberCts?.Dispose();
-        _typeNumberCts = null;
+        StopWatchdog();
+        StopAutoReconnect();
 
         await base.OnDisappearing();
     }

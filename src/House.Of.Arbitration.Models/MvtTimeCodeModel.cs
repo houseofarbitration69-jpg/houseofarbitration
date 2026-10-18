@@ -10,6 +10,7 @@ public partial class MvtTimeCodeModel : ObservableObject
     private MvtCodeModel? _code;
     private double _score = 0.0;
     private bool _canDelete;
+    private bool _isSynced = true;
 
     public DateTime Date
     {
@@ -33,5 +34,11 @@ public partial class MvtTimeCodeModel : ObservableObject
     {
         get => _canDelete;
         set => SetProperty(ref _canDelete, value);
+    }
+
+    public bool IsSynced
+    {
+        get => _isSynced;
+        set => SetProperty(ref _isSynced, value);
     }
 }

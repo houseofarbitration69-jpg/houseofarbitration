@@ -444,4 +444,13 @@
   <data name="SEARCH_CODES" xml:space="preserve">
     <value>Rechercher code, mouvement, description...</value>
   </data>
+  <data name="CODE_INPUT_MODE" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="POINT_INPUT_MODE" xml:space="preserve">
+    <value>Points</value>
+  </data>
+  <data name="GROUP_CODES_MODE" xml:space="preserve">
+    <value>Codes du groupe</value>
+  </data>
 </root>

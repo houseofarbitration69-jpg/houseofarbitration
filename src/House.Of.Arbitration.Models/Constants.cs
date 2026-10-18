@@ -23,5 +23,11 @@ public static class Constants
         public static string JUDGE_POSITION = "JUDGE_POSITION:";
         public static string JUDGE_DISCONNECT = "JUDGE_DISCONNECT";
         public static string JUDGE_SCORE = "JUDGE_SCORE";
+        public static string JUDGE_STATE = "JUDGE_STATE:";
+        public static string JUDGE_SYNC_STATE = "JUDGE_SYNC_STATE:";
+        public static string JUDGE_SYNC_ACK = "JUDGE_SYNC_ACK";
+        public static string PING = "PING";
+        public static string PONG = "PONG";
+        public static string SERVER_STOPPED = "SERVER_STOPPED";
     }
 }

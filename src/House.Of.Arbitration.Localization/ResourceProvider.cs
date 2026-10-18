@@ -504,6 +504,9 @@ LocalizationResourceManager.Instance.GetValue(nameof(DATA_GENERATED));
     public string KEYPAD => LocalizationResourceManager.Instance.GetValue(nameof(KEYPAD));
     public string ALL_GROUPS => LocalizationResourceManager.Instance.GetValue(nameof(ALL_GROUPS));
     public string SEARCH_CODES => LocalizationResourceManager.Instance.GetValue(nameof(SEARCH_CODES));
+    public string CODE_INPUT_MODE => LocalizationResourceManager.Instance.GetValue(nameof(CODE_INPUT_MODE));
+    public string POINT_INPUT_MODE => LocalizationResourceManager.Instance.GetValue(nameof(POINT_INPUT_MODE));
+    public string GROUP_CODES_MODE => LocalizationResourceManager.Instance.GetValue(nameof(GROUP_CODES_MODE));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

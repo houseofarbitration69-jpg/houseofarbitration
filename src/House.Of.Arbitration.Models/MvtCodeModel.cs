@@ -109,3 +109,14 @@ public partial class MvtCodeModel : ObservableObject
         new MvtCodeModel { Id = 40, Code = "75", GroupName = "Autres erreurs", Movement = "Sortie du tapis", Description = "Un ou deux pieds sortent de la surface de compétition", Value = 0.1, Category = "Taolu" }
     };
 }
+
+/// <summary>
+/// Mode de saisie pour l'arbitrage Taolu
+/// </summary>
+public enum TaoluInputMode
+{
+    Code,
+    Points,
+    GroupCodes
+}
+

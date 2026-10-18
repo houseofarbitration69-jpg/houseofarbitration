@@ -90,6 +90,6 @@ public class DrawPageViewModelTests
 
         // Assert
         Assert.Equal(competitor1, slot1.Competitor);
-        Assert.Equal(slot1, viewModel.DraggedSlot);
+        Assert.Null(viewModel.DraggedSlot);
     }
 }

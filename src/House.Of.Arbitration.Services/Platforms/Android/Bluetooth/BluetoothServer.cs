@@ -135,8 +135,19 @@ public class BluetoothServer : IBluetoothServer
             _bluetoothLeAdvertiser?.StopAdvertising(_advertiseCallback);
             _advertiseCallback = null;
         }
-        _bluetoothGattServer?.Close();
-        _bluetoothGattServer = null;
+        if (_bluetoothGattServer != null)
+        {
+            foreach (var device in _connectedDevices.ToList())
+            {
+                try
+                {
+                    _bluetoothGattServer.CancelConnection(device);
+                }
+                catch { }
+            }
+            _bluetoothGattServer.Close();
+            _bluetoothGattServer = null;
+        }
         _connectedDevices.Clear();
         _subscribedDevices.Clear();
         MainThread.BeginInvokeOnMainThread(() => ConnectedClients.Clear());

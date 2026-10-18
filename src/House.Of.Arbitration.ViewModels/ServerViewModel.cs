@@ -464,14 +464,23 @@ public partial class ServerViewModel : BaseViewModel
 
         {
 
-            if (args.Message == Constants.Message.GET_COMPETITION)
-
+            if (args.Message == Constants.Message.PING)
             {
-
-                await SendCompetitionDataToClientAsync(args.ClientId);
-
+                try
+                {
+                    await _bluetoothServer.SendToClientAsync(Constants.Message.PONG, args.ClientId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error replying PONG to client {ClientId}", args.ClientId);
+                }
                 return;
+            }
 
+            if (args.Message == Constants.Message.GET_COMPETITION)
+            {
+                await SendCompetitionDataToClientAsync(args.ClientId);
+                return;
             }
 
 
@@ -568,6 +577,47 @@ public partial class ServerViewModel : BaseViewModel
                     {
                         await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
                     }
+
+                    // Restore codes from repository if server in-memory codes are empty
+                    if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order && judge.Codes.Count == 0)
+                    {
+                        try
+                        {
+                            var allData = await _refereeDataRepository.GetAllAsync();
+                            if (allData != null)
+                            {
+                                var judgeHistory = allData
+                                    .Where(d => d.Referee == judge.Name &&
+                                        ((CurrentDraw is DrawOrderModel o && d.DrawOrderId == o.Id) ||
+                                         (CurrentDraw is DrawKnockoutModel k && d.DrawKnockoutId == k.Id) ||
+                                         (CurrentDraw is DrawPoolsModel p && d.DrawPoolsId == p.Id)))
+                                    .OrderBy(d => d.Date)
+                                    .ToList();
+
+                                foreach (var item in judgeHistory)
+                                {
+                                    if (!string.IsNullOrEmpty(item.Data))
+                                    {
+                                        var mvtCode = JsonSerializer.Deserialize<MvtTimeCodeModel>(item.Data, _jsonOptions);
+                                        if (mvtCode != null)
+                                        {
+                                            judge.Codes.Insert(0, mvtCode);
+                                        }
+                                    }
+                                    if (item.Score > 0)
+                                    {
+                                        judge.Score = item.Score;
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error restoring judge history from repository for client {ClientId}", args.ClientId);
+                        }
+                    }
+
+                    await SendJudgeStateAsync(judge, args.ClientId);
                 }
             }
             else if (args.Message.StartsWith(Constants.Message.JUDGE_DISCONNECT))
@@ -620,6 +670,14 @@ public partial class ServerViewModel : BaseViewModel
                         else if (scoreData != null && CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
                         {
                             judge.Score = scoreData.Score;
+                            if (scoreData.Code != null)
+                            {
+                                judge.Codes.Insert(0, scoreData.Code);
+                            }
+                            else if (judge.Codes.Count > 0)
+                            {
+                                judge.Codes.RemoveAt(0);
+                            }
                             OnPropertyChanged(nameof(Judges));
                             var competitor = GetCompetitor(CurrentDraw, true);
 
@@ -635,7 +693,83 @@ public partial class ServerViewModel : BaseViewModel
                     }
                 }
             }
+            else if (args.Message.StartsWith(Constants.Message.JUDGE_SYNC_STATE))
+            {
+                try
+                {
+                    var json = args.Message.Substring(Constants.Message.JUDGE_SYNC_STATE.Length);
+                    var clientState = JsonSerializer.Deserialize<JudgeStateModel>(json, _jsonOptions);
+                    if (clientState != null)
+                    {
+                        JudgeModel? judge = null;
+                        if (!string.IsNullOrEmpty(clientState.Group))
+                        {
+                            judge = Judges.FirstOrDefault(j => j.Group == clientState.Group && j.Number == clientState.Number);
+                        }
+                        else
+                        {
+                            judge = Judges.FirstOrDefault(j => j.Number == clientState.Number)
+                                 ?? Judges.FirstOrDefault(j => j.Name == clientState.Name);
+                        }
 
+                        if (judge != null)
+                        {
+                            judge.IsConnected = true;
+                            _clientJudgeMapping[args.ClientId] = judge;
+
+                            judge.Score = clientState.Score;
+                            judge.RedPoints = clientState.RedPoints;
+                            judge.BluePoints = clientState.BluePoints;
+
+                            if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                            {
+                                judge.Codes.Clear();
+                                if (clientState.Codes != null)
+                                {
+                                    foreach (var c in clientState.Codes)
+                                    {
+                                        judge.Codes.Add(c);
+                                    }
+                                }
+
+                                var competitor = GetCompetitor(CurrentDraw, true);
+                                if (competitor != null && clientState.Codes != null)
+                                {
+                                    var existingData = await _refereeDataRepository.GetAllAsync();
+                                    var savedDates = existingData?
+                                        .Where(d => d.Referee == judge.Name &&
+                                            ((CurrentDraw is DrawOrderModel o && d.DrawOrderId == o.Id) ||
+                                             (CurrentDraw is DrawKnockoutModel k && d.DrawKnockoutId == k.Id) ||
+                                             (CurrentDraw is DrawPoolsModel p && d.DrawPoolsId == p.Id)))
+                                        .Select(d => d.Date)
+                                        .ToHashSet() ?? new HashSet<DateTime>();
+
+                                    foreach (var code in clientState.Codes)
+                                    {
+                                        if (!savedDates.Contains(code.Date))
+                                        {
+                                            await SaveRefereeData(judge, competitor.Id, code.Score, false, code);
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                UpdateCurrentRoundVotes();
+                            }
+
+                            OnPropertyChanged(nameof(Judges));
+
+                            // Send sync ACK
+                            await _bluetoothServer.SendToClientAsync(Constants.Message.JUDGE_SYNC_ACK, args.ClientId);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing judge sync state from client {ClientId}", args.ClientId);
+                }
+            }
         });
 
     }
@@ -674,6 +808,36 @@ public partial class ServerViewModel : BaseViewModel
 
     }
 
+    private async Task SendJudgeStateAsync(JudgeModel judge, string? clientId = null)
+    {
+        try
+        {
+            if (clientId == null)
+            {
+                clientId = _clientJudgeMapping.FirstOrDefault(x => x.Value == judge).Key;
+            }
+
+            if (string.IsNullOrEmpty(clientId)) return;
+
+            var judgeState = new JudgeStateModel
+            {
+                Group = judge.Group,
+                Number = judge.Number,
+                Name = judge.Name,
+                Score = judge.Score,
+                RedPoints = judge.RedPoints,
+                BluePoints = judge.BluePoints,
+                Codes = judge.Codes.ToList()
+            };
+            var stateJson = JsonSerializer.Serialize(judgeState, _jsonOptions);
+            await _bluetoothServer.SendToClientAsync($"{Constants.Message.JUDGE_STATE}{stateJson}", clientId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending judge state for judge {JudgeName}", judge.Name);
+        }
+    }
+
 
 
     private CompetitorModel? GetCompetitor(IDrawModel? draw, bool red)
@@ -704,9 +868,29 @@ public partial class ServerViewModel : BaseViewModel
         }
     }
 
-    public override Task OnDisappearing()
+    public override async Task OnDisappearing()
     {
-        return base.OnDisappearing();
+        if (IsServerStarted)
+        {
+            try
+            {
+                await _bluetoothServer.SendToAllAsync(Constants.Message.SERVER_STOPPED);
+                await Task.Delay(150);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error notifying clients on server disappearing");
+            }
+
+            await _bluetoothServer.StopAdvertising();
+            IsServerStarted = false;
+        }
+
+        _bluetoothServer.DeviceConnected -= OnDeviceConnected;
+        _bluetoothServer.DeviceDisconnected -= OnDeviceDisconnected;
+        _bluetoothServer.MessageReceived -= OnMessageReceived;
+
+        await base.OnDisappearing();
     }
     #endregion
 
@@ -717,6 +901,7 @@ public partial class ServerViewModel : BaseViewModel
         {
             judge.RedPoints = 0;
             judge.BluePoints = 0;
+            judge.Codes.Clear();
             if (judge.Group == "A") judge.Score = 5.0;
             else if (judge.Group == "B") judge.Score = 3.0;
             else if (judge.Group == "C") judge.Score = 2.0;
@@ -1298,6 +1483,16 @@ public partial class ServerViewModel : BaseViewModel
     [RelayCommand]
     private async Task StopServer()
     {
+        try
+        {
+            await _bluetoothServer.SendToAllAsync(Constants.Message.SERVER_STOPPED);
+            await Task.Delay(150);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error notifying clients on StopServer");
+        }
+
         await _bluetoothServer.StopAdvertising();
         IsServerStarted = false;
     }
@@ -1467,15 +1662,17 @@ public partial class ServerViewModel : BaseViewModel
 
 
 
-            if (result.Result != null)
+            if (result.Result != null && judge != null)
 
             {
 
-                judge?.RedPoints = result.Result.RedPoints;
+                judge.RedPoints = result.Result.RedPoints;
 
-                judge?.BluePoints = result.Result.BluePoints;
+                judge.BluePoints = result.Result.BluePoints;
 
                 UpdateCurrentRoundVotes();
+
+                await SendJudgeStateAsync(judge);
 
             }
 
@@ -1496,6 +1693,8 @@ public partial class ServerViewModel : BaseViewModel
         OnPropertyChanged(nameof(Judges));
 
         UpdateCurrentRoundVotes();
+
+        await SendJudgeStateAsync(judge);
 
 
 
@@ -1523,6 +1722,8 @@ public partial class ServerViewModel : BaseViewModel
 
             UpdateCurrentRoundVotes();
 
+            await SendJudgeStateAsync(judge);
+
 
 
             var competitor = GetCompetitor(CurrentDraw, true);
@@ -1546,6 +1747,8 @@ public partial class ServerViewModel : BaseViewModel
         OnPropertyChanged(nameof(Judges));
 
         UpdateCurrentRoundVotes();
+
+        await SendJudgeStateAsync(judge);
 
 
 
@@ -1572,6 +1775,8 @@ public partial class ServerViewModel : BaseViewModel
             OnPropertyChanged(nameof(Judges));
 
             UpdateCurrentRoundVotes();
+
+            await SendJudgeStateAsync(judge);
 
 
 

@@ -1,4 +1,5 @@
 #region Imports
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 #endregion
 
@@ -14,6 +15,7 @@ public partial class JudgeModel : ObservableObject
     private string _name = string.Empty;
     private int _number;
     private string? _group;
+    private ObservableCollection<MvtTimeCodeModel> _codes = new();
     #endregion
 
     #region Properties
@@ -74,6 +76,15 @@ public partial class JudgeModel : ObservableObject
     {
         get => _score;
         set => SetProperty(ref _score, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit les codes de pénalité appliqués
+    /// </summary>
+    public ObservableCollection<MvtTimeCodeModel> Codes
+    {
+        get => _codes;
+        set => SetProperty(ref _codes, value);
     }
     #endregion
 }

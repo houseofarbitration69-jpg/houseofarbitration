@@ -273,7 +273,7 @@
             <!-- 1. Connection (Not Connected) -->
             <VerticalStackLayout 
                 Spacing="15" 
-                IsVisible="{Binding IsConnected, Converter={StaticResource InvertBoolConverter}}" 
+                IsVisible="{Binding ShowConnectionScreen}" 
                 VerticalOptions="Center" 
                 HorizontalOptions="Center"
             >
@@ -356,15 +356,13 @@
                 </CollectionView>
             </VerticalStackLayout>
 
-            <!-- 2. Connected Content -->
-            <Grid IsVisible="{Binding IsConnected}">
-                <!-- A. Position Selection (Connected, competition received, but no judge selected) -->
-                <VerticalStackLayout 
-                    Spacing="30" 
-                    IsVisible="{Binding CanSelectPosition}" 
-                    VerticalOptions="Center" 
-                    HorizontalOptions="Center"
-                >
+            <!-- 2. Position Selection (Connected, competition received, but no judge selected) -->
+            <VerticalStackLayout 
+                Spacing="30" 
+                IsVisible="{Binding ShowPositionScreen}" 
+                VerticalOptions="Center" 
+                HorizontalOptions="Center"
+            >
                     <!-- A.1 SANDA Position Selection -->
                     <VerticalStackLayout 
                         Spacing="30" 
@@ -678,15 +676,44 @@
                     </ScrollView>
                 </VerticalStackLayout>
 
-                <!-- B. Match Info & Timer (Connected and judge selected) -->
+                <!-- 3. Match Info & Timer (Judge selected, online or offline) -->
                 <Grid 
-                    IsVisible="{Binding SelectedJudge, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}" 
-                    RowDefinitions="Auto, *, Auto" 
-                    RowSpacing="20"
+                    IsVisible="{Binding IsJudging}" 
+                    RowDefinitions="Auto, Auto, *, Auto" 
+                    RowSpacing="15"
                 >
-                    <!-- Category Name Header -->
+                    <!-- Row 0: Offline Status Banner -->
                     <Border 
-                        Grid.Row="0" 
+                        Grid.Row="0"
+                        IsVisible="{Binding IsServerOffline}" 
+                        BackgroundColor="#B00020" 
+                        Stroke="#FF5252" 
+                        StrokeThickness="1.5" 
+                        Padding="15,10" 
+                        StrokeShape="RoundRectangle 12">
+                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                            <Label Grid.Column="0" Text="⚠️" FontSize="22" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                <Label Text="Serveur déconnecté - Mode hors-ligne actif" TextColor="White" FontSize="15" FontAttributes="Bold"/>
+                                <Label Text="{Binding OfflineSyncStatusText}" TextColor="#FFCDD2" FontSize="12"/>
+                            </VerticalStackLayout>
+                            <Button 
+                                Grid.Column="2" 
+                                Text="{Binding ReconnectButtonText}" 
+                                Command="{Binding ReconnectCommand}" 
+                                IsEnabled="{Binding IsReconnecting, Converter={StaticResource InvertBoolConverter}}"
+                                BackgroundColor="White" 
+                                TextColor="#B00020" 
+                                FontAttributes="Bold" 
+                                HeightRequest="38" 
+                                Padding="14,0" 
+                                CornerRadius="19"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Row 1: Category Name Header -->
+                    <Border 
+                        Grid.Row="1" 
                         HorizontalOptions="Center" 
                         Padding="10,10,10,10" 
                         BackgroundColor="#333" 
@@ -702,9 +729,9 @@
                         />
                     </Border>
 
-                    <!-- Main Match Display (The Ring) -->
+                    <!-- Row 2: Main Match Display (The Ring) -->
                     <Grid 
-                        Grid.Row="1"
+                        Grid.Row="2"
                     >
                         <!-- Empty State -->
                         <!--<VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20" IsVisible="{Binding CurrentMatchInfo, Converter={StaticResource IsNullOrEmptyConverter}}">
@@ -1105,39 +1132,61 @@
                                     x:DataType="vm:JudgeViewModel"
                                 >
                                     <!-- Mode Toggle Bar + Settings Button -->
-                                    <Grid Grid.Row="0" ColumnDefinitions="*, *, Auto" ColumnSpacing="8">
+                                    <Grid Grid.Row="0" ColumnDefinitions="*, *, *, Auto" ColumnSpacing="6">
                                         <Button 
                                             Grid.Column="0"
-                                            Text="🔢 Clavier"
-                                            FontSize="14"
+                                            Text="{Binding Resources.CODE_INPUT_MODE, FallbackValue='Code'}"
+                                            FontSize="{OnIdiom Tablet='14', Phone='11'}"
                                             FontAttributes="Bold"
                                             CornerRadius="8"
                                             Command="{Binding SwitchModeCommand}"
-                                            CommandParameter="Keypad"
-                                            BackgroundColor="{DynamicResource Primary}"
-                                            TextColor="White"
+                                            CommandParameter="Code"
+                                            BackgroundColor="White"
+                                            TextColor="Black"
+                                            Padding="2,0"
                                         >
                                             <Button.Triggers>
-                                                <DataTrigger TargetType="Button" Binding="{Binding IsCodesListMode}" Value="True">
-                                                    <Setter Property="BackgroundColor" Value="White" />
-                                                    <Setter Property="TextColor" Value="Black" />
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsCodeMode}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
+                                                    <Setter Property="TextColor" Value="White" />
                                                 </DataTrigger>
                                             </Button.Triggers>
                                         </Button>
 
                                         <Button 
                                             Grid.Column="1"
-                                            Text="📋 Codes reconnus"
-                                            FontSize="14"
+                                            Text="{Binding Resources.POINT_INPUT_MODE, FallbackValue='Points'}"
+                                            FontSize="{OnIdiom Tablet='14', Phone='11'}"
                                             FontAttributes="Bold"
                                             CornerRadius="8"
                                             Command="{Binding SwitchModeCommand}"
-                                            CommandParameter="List"
+                                            CommandParameter="Points"
                                             BackgroundColor="White"
                                             TextColor="Black"
+                                            Padding="2,0"
                                         >
                                             <Button.Triggers>
-                                                <DataTrigger TargetType="Button" Binding="{Binding IsCodesListMode}" Value="True">
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsPointMode}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
+                                                    <Setter Property="TextColor" Value="White" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+                                        </Button>
+
+                                        <Button 
+                                            Grid.Column="2"
+                                            Text="{Binding GroupCodesButtonText}"
+                                            FontSize="{OnIdiom Tablet='14', Phone='11'}"
+                                            FontAttributes="Bold"
+                                            CornerRadius="8"
+                                            Command="{Binding SwitchModeCommand}"
+                                            CommandParameter="GroupCodes"
+                                            BackgroundColor="White"
+                                            TextColor="Black"
+                                            Padding="2,0"
+                                        >
+                                            <Button.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsGroupCodesMode}" Value="True">
                                                     <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
                                                     <Setter Property="TextColor" Value="White" />
                                                 </DataTrigger>
@@ -1145,7 +1194,7 @@
                                         </Button>
 
                                         <controls:IconButton 
-                                            Grid.Column="2"
+                                            Grid.Column="3"
                                             Text="⚙"
                                             FontSize="16"
                                             ButtonBackgroundColor="#444"
@@ -1155,16 +1204,16 @@
                                         />
                                     </Grid>
 
-                                    <!-- View 1: Numeric Keypad with Matching Suggestions -->
+                                    <!-- View 1: Numeric Keypad with Matching Suggestions (Code Mode) -->
                                     <Grid 
                                         Grid.Row="1"
-                                        IsVisible="{Binding IsKeypadMode}"
+                                        IsVisible="{Binding IsCodeMode}"
                                         RowDefinitions="55, Auto, *, *, *, *"
                                         ColumnDefinitions="*, *, *"
                                         RowSpacing="8"
                                         ColumnSpacing="8"
                                     >
-                                        <!-- Code Display Box with Clear Button -->
+                                        <!-- Code Display Box with Clear, Backspace, and Validate Buttons -->
                                         <Border
                                             Grid.Row="0" 
                                             Grid.ColumnSpan="3" 
@@ -1172,7 +1221,7 @@
                                             BackgroundColor="White"
                                             Padding="10,0"
                                         >
-                                            <Grid ColumnDefinitions="*, Auto">
+                                            <Grid ColumnDefinitions="*, Auto, Auto, Auto">
                                                 <Label 
                                                     Grid.Column="0"
                                                     Text="{Binding Code}" 
@@ -1184,6 +1233,19 @@
                                                 />
                                                 <Button
                                                     Grid.Column="1"
+                                                    Text="⌫"
+                                                    TextColor="#444"
+                                                    BackgroundColor="Transparent"
+                                                    FontSize="18"
+                                                    FontAttributes="Bold"
+                                                    Padding="0"
+                                                    HeightRequest="36"
+                                                    WidthRequest="36"
+                                                    IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
+                                                    Command="{Binding BackspaceCodeCommand}"
+                                                />
+                                                <Button
+                                                    Grid.Column="2"
                                                     Text="✕"
                                                     TextColor="#888"
                                                     BackgroundColor="Transparent"
@@ -1194,6 +1256,20 @@
                                                     WidthRequest="36"
                                                     IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
                                                     Command="{Binding ClearCodeCommand}"
+                                                />
+                                                <Button
+                                                    Grid.Column="3"
+                                                    Text="✓"
+                                                    TextColor="#2E7D32"
+                                                    BackgroundColor="#E8F5E9"
+                                                    CornerRadius="18"
+                                                    FontSize="18"
+                                                    FontAttributes="Bold"
+                                                    Padding="0"
+                                                    HeightRequest="36"
+                                                    WidthRequest="36"
+                                                    IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
+                                                    Command="{Binding ValidateCodeCommand}"
                                                 />
                                             </Grid>
                                         </Border>
@@ -1251,10 +1327,122 @@
                                         <Button Grid.Row="5" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="B" Command="{Binding TypeNumberCommand}" CommandParameter="B" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
                                     </Grid>
 
-                                    <!-- View 2: Recognized Codes List (Direct tap to apply!) -->
+                                    <!-- View 2: Points Deduction Keypad Mode -->
                                     <Grid 
                                         Grid.Row="1"
-                                        IsVisible="{Binding IsCodesListMode}"
+                                        IsVisible="{Binding IsPointMode}"
+                                        RowDefinitions="55, Auto, *, *, *, *, 46"
+                                        ColumnDefinitions="*, *, *"
+                                        RowSpacing="8"
+                                        ColumnSpacing="8"
+                                    >
+                                        <!-- Points Display Box -->
+                                        <Border
+                                            Grid.Row="0" 
+                                            Grid.ColumnSpan="3" 
+                                            StrokeShape="RoundRectangle 10"
+                                            BackgroundColor="White"
+                                            Padding="10,0"
+                                        >
+                                            <Grid ColumnDefinitions="*, Auto, Auto">
+                                                <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center" VerticalOptions="Center" Spacing="4">
+                                                    <Label 
+                                                        Text="-" 
+                                                        TextColor="#D32F2F" 
+                                                        FontSize="26" 
+                                                        FontAttributes="Bold" 
+                                                        VerticalOptions="Center"
+                                                        IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
+                                                    />
+                                                    <Label 
+                                                        Text="{Binding PointsInput}" 
+                                                        TextColor="Black"
+                                                        VerticalOptions="Center"
+                                                        FontSize="26"
+                                                        FontAttributes="Bold"
+                                                        IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
+                                                    />
+                                                    <Label 
+                                                        Text="0.0 pt" 
+                                                        TextColor="#AAA" 
+                                                        VerticalOptions="Center"
+                                                        FontSize="24"
+                                                        IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                                                    />
+                                                </HorizontalStackLayout>
+                                                <Button
+                                                    Grid.Column="1"
+                                                    Text="⌫"
+                                                    TextColor="#444"
+                                                    BackgroundColor="Transparent"
+                                                    FontSize="18"
+                                                    FontAttributes="Bold"
+                                                    Padding="0"
+                                                    HeightRequest="36"
+                                                    WidthRequest="36"
+                                                    IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
+                                                    Command="{Binding BackspacePointsCommand}"
+                                                />
+                                                <Button
+                                                    Grid.Column="2"
+                                                    Text="✕"
+                                                    TextColor="#888"
+                                                    BackgroundColor="Transparent"
+                                                    FontSize="16"
+                                                    FontAttributes="Bold"
+                                                    Padding="0"
+                                                    HeightRequest="36"
+                                                    WidthRequest="36"
+                                                    IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
+                                                    Command="{Binding ClearPointsCommand}"
+                                                />
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Quick points deduction chips -->
+                                        <Grid Grid.Row="1" Grid.ColumnSpan="3" ColumnDefinitions="*, *, *, *, *" ColumnSpacing="6">
+                                            <Button Grid.Column="0" Text="-0.1" BackgroundColor="#424242" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.1"/>
+                                            <Button Grid.Column="1" Text="-0.2" BackgroundColor="#424242" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.2"/>
+                                            <Button Grid.Column="2" Text="-0.3" BackgroundColor="#424242" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.3"/>
+                                            <Button Grid.Column="3" Text="-0.5" BackgroundColor="#424242" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.5"/>
+                                            <Button Grid.Column="4" Text="-1.0" BackgroundColor="#424242" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="1.0"/>
+                                        </Grid>
+
+                                        <!-- Keypad Buttons -->
+                                        <Button Grid.Row="2" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="7" Command="{Binding TypePointCommand}" CommandParameter="7" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="2" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="8" Command="{Binding TypePointCommand}" CommandParameter="8" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="2" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="9" Command="{Binding TypePointCommand}" CommandParameter="9" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                        <Button Grid.Row="3" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="4" Command="{Binding TypePointCommand}" CommandParameter="4" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="3" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="5" Command="{Binding TypePointCommand}" CommandParameter="5" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="3" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="6" Command="{Binding TypePointCommand}" CommandParameter="6" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                        <Button Grid.Row="4" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="1" Command="{Binding TypePointCommand}" CommandParameter="1" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="4" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="2" Command="{Binding TypePointCommand}" CommandParameter="2" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="4" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="3" Command="{Binding TypePointCommand}" CommandParameter="3" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                        <Button Grid.Row="5" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="." Command="{Binding TypePointCommand}" CommandParameter="." FontSize="24" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="5" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="0" Command="{Binding TypePointCommand}" CommandParameter="0" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                        <Button Grid.Row="5" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="⌫" Command="{Binding BackspacePointsCommand}" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
+
+                                        <!-- Validate Deduction Button -->
+                                        <Button 
+                                            Grid.Row="6" 
+                                            Grid.ColumnSpan="3" 
+                                            Text="➖ Retirer de la note" 
+                                            BackgroundColor="{DynamicResource Primary}" 
+                                            TextColor="White" 
+                                            FontAttributes="Bold" 
+                                            FontSize="16" 
+                                            CornerRadius="10" 
+                                            Command="{Binding DeductPointsCommand}"
+                                        />
+                                    </Grid>
+
+                                    <!-- View 3: Recognized Codes List (Direct tap to apply!) -->
+                                    <Grid 
+                                        Grid.Row="1"
+                                        IsVisible="{Binding IsGroupCodesMode}"
                                         RowDefinitions="Auto, Auto, *"
                                         RowSpacing="8"
                                     >
@@ -1499,13 +1687,13 @@
 
                     <!-- Footer Info (Judge Position & Connection Status) -->
                     <HorizontalStackLayout 
-                        Grid.Row="2" 
+                        Grid.Row="3" 
                         HorizontalOptions="Center" 
                         Spacing="30"
                     >
                         <HorizontalStackLayout Spacing="10">
                             <BoxView 
-                                Color="{DynamicResource ValidColor}" 
+                                Color="{Binding ConnectionStatusColor}" 
                                 WidthRequest="20" 
                                 HeightRequest="20" 
                                 CornerRadius="10" 
@@ -1513,8 +1701,8 @@
                                 BackgroundColor="Transparent"
                             />
                             <Label 
-                                Text="CONNECTÉ" 
-                                TextColor="{DynamicResource ValidColor}" 
+                                Text="{Binding ConnectionStatusText}" 
+                                TextColor="{Binding ConnectionStatusColor}" 
                                 FontSize="18" 
                                 FontAttributes="Bold" 
                                 VerticalOptions="Center"
@@ -1531,7 +1719,6 @@
                     </HorizontalStackLayout>
                 </Grid>
             </Grid>
-        </Grid>
 
         <!-- Data Reception Overlays -->
         <Grid BackgroundColor="#AA000000" IsVisible="{Binding IsReceivingCompetition}">
