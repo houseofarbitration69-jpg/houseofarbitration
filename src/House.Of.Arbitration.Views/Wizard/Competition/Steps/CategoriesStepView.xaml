@@ -13,7 +13,7 @@
     Shell.NavBarIsVisible="False"
 >
     <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="20">
-        <!-- Header -->
+        <!-- HEADER -->
         <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
             <Label 
                 Grid.Column="0"

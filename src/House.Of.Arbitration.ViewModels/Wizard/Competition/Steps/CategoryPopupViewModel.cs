@@ -17,8 +17,6 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     private CategoryModel? _category;
     private CompetitionType _competitionType = CompetitionType.None;
 
-    private string _title = String.Empty;
-
     private LocalizedEnum<CategoryType>? _selectedType;
     private LocalizedEnum<RoundType>? _selectedRoundType;
     private LocalizedEnum<Genre>? _selectedGenre;
@@ -129,12 +127,6 @@ public partial class CategoryPopupViewModel : BaseViewModel, IQueryAttributable
     {
         get => _weightMax;
         set => SetProperty(ref _weightMax, value);
-    }
-
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
     }
 
     public ObservableCollection<LocalizedEnum<CategoryType>> CategoryTypes { get; } = new();

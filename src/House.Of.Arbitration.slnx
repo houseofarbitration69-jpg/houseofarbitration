@@ -42,4 +42,7 @@
       <Build Solution="Debug - Server|*" Project="false" />
     </Project>
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
 </Solution>

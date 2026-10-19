@@ -22,18 +22,11 @@ public partial class TaoluCodesViewModel : BaseViewModel
     #endregion
 
     #region Attributes
-    private string _title = string.Empty;
     private string _searchText = string.Empty;
     private string _selectedGroup = string.Empty;
     #endregion
 
     #region Properties
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
-    }
-
     public string SearchText
     {
         get => _searchText;
@@ -241,10 +234,14 @@ public partial class TaoluCodesViewModel : BaseViewModel
             }
 
             var saved = await _mvtCodesRepository.AddAsync(codeToSave);
-            Codes.Add(saved);
-            UpdateGroupsList();
-            ApplyFilters();
-            await _alertService.ShowToast($"Code '{saved.Code}' ajouté");
+            if (saved != null)
+            {
+                Codes.Add(saved);
+
+                UpdateGroupsList();
+                ApplyFilters();
+                await _alertService.ShowToast($"Code '{saved.Code}' ajouté");
+            }
         }
     }
 

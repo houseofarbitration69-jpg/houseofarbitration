@@ -1,19 +1,9 @@
-using Microsoft.Maui.Controls;
 using System.Collections.Specialized;
-using System.ComponentModel;
 
 namespace House.Of.Arbitration.Views.Behaviors;
 
 /// <summary>
-/// A Behavior that scrolls a <see cref="CollectionView"/> to the newest item (inserted at index 0)
-/// whenever the bound <see cref="ObservableCollection{T}"/> changes.
-/// This class can be used directly in XAML:
-///   <CollectionView>
-///       <CollectionView.Behaviors>
-///           <behaviors:ScrollOnNewItemBehavior/>
-///       </CollectionView.Behaviors>
-///   </CollectionView>
-/// No code‑behind required.
+/// 
 /// </summary>
 public class ScrollOnNewItemBehavior : Behavior<CollectionView>
 {

@@ -3,6 +3,7 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Localization;
+using House.Of.Arbitration.Models;
 #endregion
 
 namespace House.Of.Arbitration.ViewModels.Core;
@@ -13,56 +14,47 @@ public partial class ConfirmationPopupViewModel : ObservableObject, IQueryAttrib
     private readonly IPopupService _popupService;
     #endregion
 
-    #region Attributs
-    private string _title = string.Empty;
-    private string _message = string.Empty;
-    private string _acceptText = string.Empty;
-    private string _cancelText = string.Empty;
-    #endregion
-
     #region Properties
+    /// <summary>
+    /// Obtient les resources pour les trzaductions
+    /// </summary>
     public ResourceProvider Resources { get; }
 
-    
     /// <summary>
     /// Obtient ou définit le titre
     /// </summary>
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
-    }
+    [ObservableProperty]
+    public string _title = String.Empty;
 
     /// <summary>
     /// Obtient ou définit le message
     /// </summary>
-    public string Message
-    {
-        get => _message;
-        set => SetProperty(ref _message, value);
-    }
+    [ObservableProperty]
+    public string _message = String.Empty;
 
     /// <summary>
     /// Obtient ou définit le message d'acceptation
     /// </summary>
-    public string AcceptText
-    {
-        get => _acceptText;
-        set => SetProperty(ref _acceptText, value);
-    }
+    [ObservableProperty]
+    public string _acceptText = String.Empty;
 
     /// <summary>
     /// Obtient ou définit le message d'annulation
     /// </summary>
-    public string CancelText
-    {
-        get => _cancelText;
-        set => SetProperty(ref _cancelText, value);
-    }
+    [ObservableProperty]
+    public string _cancelText = String.Empty;
     #endregion
 
     #region Constructor
-    public ConfirmationPopupViewModel(IPopupService popupService, ResourceProvider resourceProvider)
+    /// <summary>
+    /// Constructeur permettant d'initialiser les différents services
+    /// </summary>
+    /// <param name="popupService">Service de gestion des popups</param>
+    /// <param name="resourceProvider">Service de traduction</param>
+    public ConfirmationPopupViewModel(
+        IPopupService popupService, 
+        ResourceProvider resourceProvider
+    )
     {
         _popupService = popupService;
         Resources = resourceProvider;
@@ -70,22 +62,34 @@ public partial class ConfirmationPopupViewModel : ObservableObject, IQueryAttrib
     #endregion
 
     #region Implement IQueryAttributable
+    /// <summary>
+    /// Méthode permettant de récupérer la liste des paramètres
+    /// </summary>
+    /// <param name="query"></param>
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.ContainsKey("Title")) Title = query["Title"].ToString() ?? string.Empty;
-        if (query.ContainsKey("Message")) Message = query["Message"].ToString() ?? string.Empty;
-        if (query.ContainsKey("Accept")) AcceptText = query["Accept"].ToString() ?? string.Empty;
-        if (query.ContainsKey("Cancel")) CancelText = query["Cancel"].ToString() ?? string.Empty;
+        if (query.ContainsKey(Constants.QueryParameter.TITLE)) Title = query[Constants.QueryParameter.TITLE].ToString() ?? string.Empty;
+        if (query.ContainsKey(Constants.QueryParameter.MESSAGE)) Message = query[Constants.QueryParameter.MESSAGE].ToString() ?? string.Empty;
+        if (query.ContainsKey(Constants.QueryParameter.ACCEPT)) AcceptText = query[Constants.QueryParameter.ACCEPT].ToString() ?? string.Empty;
+        if (query.ContainsKey(Constants.QueryParameter.CANCEL)) CancelText = query[Constants.QueryParameter.CANCEL].ToString() ?? string.Empty;
     }
     #endregion
 
     #region Commands
+    /// <summary>
+    /// Commande permettant de valider la fenêtre
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Accept()
     {
         await _popupService.ClosePopupAsync(Shell.Current, true);
     }
 
+    /// <summary>
+    /// Méthode permettant d'annuler la fenêtre
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Cancel()
     {

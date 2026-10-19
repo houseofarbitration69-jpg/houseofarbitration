@@ -17,6 +17,6 @@
     <!-- Enable XamlC binding with source compilation optimization -->
     <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
 
-    <NoWarn>$(NoWarn);MSB3774;WMC1006;XA0101;</NoWarn>
+    <NoWarn>$(NoWarn);MSB3774;WMC1006;XA0101;MVVMTK0045;NU1903;XA0036;</NoWarn>
   </PropertyGroup>
 </Project>

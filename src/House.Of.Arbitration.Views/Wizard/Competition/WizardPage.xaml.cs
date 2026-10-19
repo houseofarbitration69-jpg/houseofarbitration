@@ -13,6 +13,17 @@ namespace House.Of.Arbitration.Views.Wizard.Competition;
 
 public partial class WizardPage : BasePage<CompetitionWizardViewModel>
 {
+    #region Constructors
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="popupService"></param>
+    /// <param name="viewModel"></param>
+    /// <param name="resource"></param>
+    /// <param name="warningService"></param>
+    /// <param name="competitionRepository"></param>
+    /// <param name="categoryRepository"></param>
+    /// <param name="drawRepository"></param>
     public WizardPage(
         IPopupService popupService,
         CompetitionWizardViewModel viewModel,
@@ -39,8 +50,6 @@ public partial class WizardPage : BasePage<CompetitionWizardViewModel>
                 WizardCarousel.ScrollTo(index, position: ScrollToPosition.Center, animate: true);
             });
         };
-
-        //IsMenuVisible = false;
-        //IsBackButtonVisible = true;
     }
+    #endregion
 }

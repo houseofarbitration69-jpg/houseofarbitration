@@ -12,7 +12,7 @@
 
     <ScrollView Padding="0" Margin="0">
         <VerticalStackLayout Spacing="24" Padding="20">
-            <!-- Header Section -->
+            <!-- HEADER -->
             <VerticalStackLayout Spacing="4">
                 <Label 
                     Text="{Binding Resources.COMPETITION_SETTINGS}" 
@@ -21,15 +21,15 @@
             </VerticalStackLayout>
 
             <controls:Card>
-                <!-- Name Field -->
                 <VerticalStackLayout Spacing="20">
+                    <!-- NOM DE LA COMPETITION -->
                     <VerticalStackLayout Spacing="5">
                         <Label 
                             Text="{Binding Resources.COMPETITION_NAME}" 
                             Style="{StaticResource FormLabelStyle}"
                             Margin="10,0" 
                         />
-                        
+
                         <Border 
                             x:Name="NameBorder"
                             Stroke="{DynamicResource ValidColor}"
@@ -68,14 +68,14 @@
                         />
                     </VerticalStackLayout>
 
-                    <!-- Type Field -->
+                    <!-- TYPE DE COMPETITION -->
                     <VerticalStackLayout Spacing="5">
                         <Label 
                             Text="{Binding Resources.COMPETITION_TYPE}" 
                             Style="{StaticResource FormLabelStyle}"
                             Margin="10,0" 
                         />
-                        
+
                         <Border 
                             x:Name="TypeBorder"
                             Stroke="{DynamicResource ValidColor}"
@@ -95,6 +95,7 @@
                                 <Label 
                                     Grid.Column="0"
                                     Text="{x:Static helpers:FontCustomIcons.CATEGORY}" 
+                                    TextColor="{DynamicResource PrimaryTextColor}"
                                     FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
                                     VerticalOptions="Center" 
                                     Margin="0,0,10,0" 
@@ -104,7 +105,7 @@
                                     ItemsSource="{Binding CompetitionTypes}"
                                     SelectedItem="{Binding SelectedType, Mode=TwoWay}"
                                     ItemDisplayBinding="{Binding DisplayName}"
-                                    TextColor="Black"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
                                     BackgroundColor="Transparent"
                                 />
                             </Grid>
@@ -116,8 +117,8 @@
                         />
                     </VerticalStackLayout>
 
+                    <!-- DATE DE LA COMPETITION -->
                     <VerticalStackLayout Spacing="5">
-                        <!-- Date Field -->
                         <Label 
                             Text="{Binding Resources.COMPETITION_DATE}" 
                             Style="{StaticResource FormLabelStyle}"
@@ -150,9 +151,7 @@
                         </Border>
                     </VerticalStackLayout>
                 </VerticalStackLayout>
-
             </controls:Card>
-
         </VerticalStackLayout>
     </ScrollView>
 </ContentView>

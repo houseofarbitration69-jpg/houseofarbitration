@@ -200,7 +200,6 @@ public partial class HomeViewModel : BaseViewModel
             DrawModel draw;
             DrawPoolsModel drawPool;
             DrawKnockoutModel drawKnockout;
-            DrawOrderModel drawOrder;
 
             var competition = new CompetitionModel()
             {

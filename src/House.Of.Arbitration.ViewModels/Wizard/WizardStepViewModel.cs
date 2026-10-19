@@ -2,6 +2,7 @@
 using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using House.Of.Arbitration.Localization;
+using House.Of.Arbitration.Models;
 using House.Of.Arbitration.ViewModels.Core;
 #endregion
 
@@ -10,30 +11,37 @@ namespace House.Of.Arbitration.ViewModels.Wizard;
 public abstract partial class WizardStepViewModel<T> : ObservableObject where T : class
 {
     #region Attributs
-    private bool _isValid;
-    private bool _isBusy;
     private T _model = default!;
     #endregion
 
     #region Services
+    /// <summary>
+    /// Service de gestion des popups
+    /// </summary>
     protected readonly IPopupService _popupService;
     #endregion
 
     #region Properties
+    /// <summary>
+    /// Obtient le titre de la page
+    /// </summary>
     public abstract string Title { get; }
 
-    public bool IsBusy
-    {
-        get => _isBusy;
-        set => SetProperty(ref _isBusy, value);
-    }
+    /// <summary>
+    /// Obtient ou définit si la page est en cour de chargement
+    /// </summary>
+    [ObservableProperty]
+    protected bool _isBusy;
 
-    public bool IsValid
-    {
-        get => _isValid;
-        set => SetProperty(ref _isValid, value);
-    }
-   
+    /// <summary>
+    /// Obtient ou définit si les données de la page sont valide
+    /// </summary>
+    [ObservableProperty]
+    protected bool _isValid;
+
+    /// <summary>
+    /// Obtient ou définit les données a afficher
+    /// </summary>
     public T Model
     {
         get => _model;
@@ -55,7 +63,15 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
     #endregion
 
     #region Constructors
-    public WizardStepViewModel(ResourceProvider resourceProvider, IPopupService popupService)
+    /// <summary>
+    /// Constructeur permettant d'initialiser les différents services
+    /// </summary>
+    /// <param name="resourceProvider">Service de traduction</param>
+    /// <param name="popupService">Service de gestion des popup</param>
+    public WizardStepViewModel(
+        ResourceProvider resourceProvider, 
+        IPopupService popupService
+    )
     {
         Resources = resourceProvider;
         _popupService = popupService;
@@ -63,19 +79,34 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
     #endregion
 
     #region UI Methods
+    /// <summary>
+    /// Méthode permettant d'afficher une alerte
+    /// </summary>
+    /// <param name="title">Titre de la fenêtre</param>
+    /// <param name="message">Message contenu dans la fenêtre</param>
+    /// <param name="cancel">Texte du bouton permettant de fermer la popup</param>
+    /// <returns></returns>
     protected async Task DisplayAlert(string title, string message, string cancel)
     {
         await Shell.Current.CurrentPage.DisplayAlertAsync(title, message, cancel);
     }
 
+    /// <summary>
+    /// Méthode permettant d'afficher une fenêtre de confirmation
+    /// </summary>
+    /// <param name="title">Titre de la fenêtre</param>
+    /// <param name="message">Contenu de la fenêtre</param>
+    /// <param name="accept">Texte du bouton de validation</param>
+    /// <param name="cancel">Texte du bouton d'annulation</param>
+    /// <returns></returns>
     protected async Task<bool> DisplayConfirmation(string title, string message, string accept, string cancel)
     {
         var queryAttributes = new Dictionary<string, object>
         {
-            { "Title", title },
-            { "Message", message },
-            { "Accept", accept },
-            { "Cancel", cancel }
+            { Constants.QueryParameter.TITLE, title },
+            { Constants.QueryParameter.MESSAGE, message },
+            { Constants.QueryParameter.ACCEPT, accept },
+            { Constants.QueryParameter.CANCEL, cancel }
         };
 
         var result = await _popupService.ShowPopupAsync<ConfirmationPopupViewModel, bool>(Shell.Current, shellParameters: queryAttributes);
@@ -84,14 +115,17 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
     #endregion
 
     #region Public Methods
-    public virtual async Task OnAppearing()
-    {
-        await Task.CompletedTask;
-    }
+    /// <summary>
+    /// Méthode appellés lors de l'apparition de la page
+    /// </summary>
+    /// <returns></returns>
+    public virtual async Task OnAppearing() { }
 
-    public virtual async Task Save()
-    {
-    }
+    /// <summary>
+    /// Méthode appellée pour sauvegarder les données de la page
+    /// </summary>
+    /// <returns></returns>
+    public virtual async Task Save() { }
     #endregion
 
     #region Protected Methods

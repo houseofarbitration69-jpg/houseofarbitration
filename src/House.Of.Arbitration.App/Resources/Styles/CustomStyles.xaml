@@ -55,7 +55,8 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_REGULAR_NAME}"/>
-        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+        <!--<Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="TextColor" Value="{DynamicResource InverseTextColor}"/>
     </Style>
     <!-- END FORM -->
 
@@ -175,7 +176,7 @@
 
     <!-- Judge Styles -->
     <Style x:Key="JudgePointsLabelStyle" TargetType="Label">
-        <Style.Triggers>
+        <!--<Style.Triggers>
             <DataTrigger 
                 TargetType="Label" 
                 x:DataType="models:RoundType"
@@ -183,15 +184,20 @@
                 Value="True">
                 <Setter Property="IsVisible" Value="False" />
             </DataTrigger>
-        </Style.Triggers>
+        </Style.Triggers>-->
     </Style>
 
     <Style x:Key="JudgeButtonsGridStyle" TargetType="Grid">
-        <Style.Triggers>
-            <DataTrigger TargetType="Grid" Binding="{Binding BindingContext.CurrentDraw.Draw.Category.RoundType, Source={RelativeSource AncestorType={x:Type ContentPage}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+        <!--<Style.Triggers>
+            <DataTrigger 
+                TargetType="Grid" 
+                x:DataType="models:RoundType"
+                Binding="{Binding BindingContext.CurrentDraw.Draw.Category.RoundType, Source={RelativeSource AncestorType={x:Type ContentPage}}, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" 
+                Value="True"
+            >
                 <Setter Property="IsVisible" Value="False" />
             </DataTrigger>
-        </Style.Triggers>
+        </Style.Triggers>-->
     </Style>
 
 </ResourceDictionary>

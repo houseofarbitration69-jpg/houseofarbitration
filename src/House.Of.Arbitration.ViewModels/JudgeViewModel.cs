@@ -31,7 +31,6 @@ public partial class JudgeViewModel : BaseViewModel
     private CompetitorModel? _competitor1;
     private CompetitorModel? _competitor2;
 
-    private string _title;
     private bool _isScanning;
     private bool _isConnected;
     private bool _isReceivingCompetition;
@@ -79,12 +78,6 @@ public partial class JudgeViewModel : BaseViewModel
     #endregion
 
     #region Properties
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
-    }
-
     public CompetitionModel? CurrentCompetition
     {
         get => _currentCompetition;
@@ -1666,6 +1659,8 @@ public partial class JudgeViewModel : BaseViewModel
     #region Override Methods
     public override async Task OnAppearing()
     {
+        _typeNumberCts = new CancellationTokenSource();
+
         _bluetoothClient.DeviceDiscovered += OnDeviceDiscovered;
         _bluetoothClient.DeviceConnected += OnDeviceConnected;
         _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;

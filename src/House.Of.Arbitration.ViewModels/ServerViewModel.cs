@@ -58,8 +58,6 @@ public partial class ServerViewModel : BaseViewModel
 
     #region Attributs
 
-    private string _title = String.Empty;
-
     private bool _bluetoothAvailable = false;
 
     private string _serverName = String.Empty;
@@ -117,17 +115,6 @@ public partial class ServerViewModel : BaseViewModel
 
 
     #region Properties
-
-    public string Title
-
-    {
-
-        get => _title;
-
-        set => SetProperty(ref _title, value);
-
-    }
-
 
 
     public bool BluetoothAvailable
@@ -1379,61 +1366,38 @@ public partial class ServerViewModel : BaseViewModel
 
 
     #region Commands Server
-
     /// <summary>
-
     /// Commande permettant de démarrer le serveur
-
     /// </summary>
-
     /// <returns></returns>
-
     [RelayCommand]
-
     private async Task StartServer()
-
     {
-
-        var parameters = new Dictionary<string, object?>();
-
-        parameters.Add("Competition", _currentCompetition);
-
-
-
-        var result = await _popupService.ShowPopupAsync<ServerSetupPopupViewModel, ServerSetupResult>(Shell.Current, shellParameters: parameters);
-
-
-
-        if (result.Result != null)
-
+        if (_currentCompetition != null)
         {
+            var parameters = new Dictionary<string, object>();
+            parameters.Add("Competition", _currentCompetition);
 
-            ServerName = result.Result.Name;
+            var result = await _popupService.ShowPopupAsync<ServerSetupPopupViewModel, ServerSetupResult>(Shell.Current, shellParameters: parameters);
 
-            Title = $"{ServerName} - {result.Result.Description}";
-
-            if (await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName))
-
+            if (result.Result != null)
             {
+                ServerName = result.Result.Name;
+                Title = $"{ServerName} - {result.Result.Description}";
 
-                IsServerStarted = true;
-
+                if (await _bluetoothServer.StartAdvertising("BluetoothAppService", ServerName))
+                {
+                    IsServerStarted = true;
+                }
             }
-
         }
-
     }
 
 
-
     /// <summary>
-
     /// Commande permettant d'arrêter le serveur
-
     /// </summary>
-
     /// <returns></returns>
-
     [RelayCommand]
     private async Task StopServer()
     {
@@ -1450,6 +1414,7 @@ public partial class ServerViewModel : BaseViewModel
         await _bluetoothServer.StopAdvertising();
         IsServerStarted = false;
     }
+
 
     [RelayCommand]
     private async Task SetWinner(string color)

@@ -25,7 +25,7 @@
             </DataTemplate>
 
             <wizard:StepTemplateSelector 
-                x:Key="StepSelector"                                 
+                x:Key="StepSelector"
                 SettingsStepTemplate="{StaticResource SettingsStepTemplate}"
                 CategoriesStepTemplate="{StaticResource CategoriesStepTemplate}"
             />
@@ -81,7 +81,8 @@
                 StrokeShape="RoundRectangle 16"
                 Padding="24, 20" 
                 HorizontalOptions="Center" 
-                VerticalOptions="Center">
+                VerticalOptions="Center"
+            >
                 <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
                     <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
                     <Label Text="Chargement en cours..." TextColor="{DynamicResource PrimaryTextColor}" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>

@@ -23,7 +23,6 @@ public partial class TaoluCodePopupViewModel : BaseViewModel, IQueryAttributable
     private string _valueText = "0.1";
     private string _selectedGroup = string.Empty;
     private bool _isEditMode;
-    private string _title = string.Empty;
     #endregion
 
     #region Properties
@@ -101,12 +100,6 @@ public partial class TaoluCodePopupViewModel : BaseViewModel, IQueryAttributable
     {
         get => _isEditMode;
         set => SetProperty(ref _isEditMode, value);
-    }
-
-    public string Title
-    {
-        get => _title;
-        set => SetProperty(ref _title, value);
     }
 
     public ObservableCollection<string> AvailableGroups { get; } = new();

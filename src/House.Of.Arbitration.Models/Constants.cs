@@ -2,6 +2,14 @@ namespace House.Of.Arbitration.Models;
 
 public static class Constants
 {
+    public static class QueryParameter
+    {
+        public static string TITLE = "Title";
+        public static string MESSAGE = "Message";
+        public static string ACCEPT = "Accept";
+        public static string CANCEL = "Cancel";
+    }
+
     /// <summary>
     /// Local database constants (SQLite)
     /// </summary>
