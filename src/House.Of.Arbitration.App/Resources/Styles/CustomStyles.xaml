@@ -91,7 +91,7 @@
         <!--<Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>-->
         <Setter Property="IconColor" Value="{DynamicResource InverseTextColor}"/>
         
-        <Setter Property="ButtonBackgroundColor" Value="{DynamicResource EditColor}"/>
+        <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ValidColor}"/>
         <Setter Property="ButtonPadding" Value="15,10,15,10"/>
         <Setter Property="IsFullWidth" Value="True"/>
 
@@ -131,7 +131,7 @@
         <!--<Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>-->
         <Setter Property="IconColor" Value="{DynamicResource InverseTextColor}"/>
 
-        <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ValidColor}"/>
+        <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ActionColor}"/>
         <Setter Property="ButtonPadding" Value="15,10,15,10"/>
         <Setter Property="IsFullWidth" Value="True"/>
 
