@@ -22,9 +22,9 @@
             <DataTemplate x:Key="KnockoutTemplate" x:DataType="models:DrawKnockoutModel">
                 <Border 
                     Padding="10,10,10,10" 
-                    Stroke="#EEEEEE" 
+                    Stroke="{DynamicResource SurfaceLight}" 
                     StrokeShape="RoundRectangle 8"
-                    BackgroundColor="#EEEEEE"
+                    BackgroundColor="{DynamicResource SurfaceLight}"
                 >
                     <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*">
                         <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="Auto, *">
@@ -120,9 +120,9 @@
                 <Border 
                     Margin="0,2" 
                     Padding="10"
-                    Stroke="#EEEEEE" 
+                    Stroke="{DynamicResource SurfaceLight}" 
                     StrokeShape="RoundRectangle 8"
-                    BackgroundColor="#EEEEEE"
+                    BackgroundColor="{DynamicResource SurfaceLight}"
                 >
                     <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*">
                         <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="Auto, *">
@@ -216,9 +216,9 @@
                 <Border 
                     Margin="0,2" 
                     Padding="10" 
-                    Stroke="#EEEEEE" 
+                    Stroke="{DynamicResource SurfaceLight}" 
                     StrokeShape="RoundRectangle 8"
-                    BackgroundColor="#EEEEEE"
+                    BackgroundColor="{DynamicResource SurfaceLight}"
                 >
                     <Grid ColumnDefinitions="*">
                         <Grid Grid.Column="0" ColumnDefinitions="Auto, *">
@@ -264,14 +264,14 @@
             <DataTemplate x:Key="HeaderTemplate" x:DataType="x:String">
                 <Border
                     Padding="10,10,10,10" 
-                    Stroke="White"
+                    Stroke="{DynamicResource PrimaryTextColor}"
                     StrokeThickness="2"
                     StrokeShape="RoundRectangle 8"
-                    BackgroundColor="#333"
+                    BackgroundColor="{DynamicResource SurfaceElevation6}"
                 >
                     <Label 
                         Text="{Binding .}" 
-                        TextColor="White"
+                        TextColor="{DynamicResource PrimaryTextColor}"
                         FontAttributes="Bold" 
                         FontSize="14"
                         HorizontalOptions="Center"
@@ -364,15 +364,15 @@
                         VerticalOptions="Center"
                         Margin="0,0,0,0"
                         Padding="15,5,15,5"
-                        BackgroundColor="#333"
-                        Stroke="White"
+                        BackgroundColor="{DynamicResource SurfaceElevation6}"
+                        Stroke="{DynamicResource PrimaryTextColor}"
                         StrokeThickness="2"
                         StrokeShape="RoundRectangle 15"
                         IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                     >
                         <controls:ScrollingText 
                             Text="{Binding CurrentDraw.Draw.Category.Name}"
-                            TextColor="White" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
                             FontSize="{OnIdiom Tablet='32', Phone='20'}" 
                             FontAttributes="Bold"
                         />
@@ -386,17 +386,17 @@
                         StrokeShape="RoundRectangle 18"
                         Padding="12,6"
                         StrokeThickness="1.5"
-                        BackgroundColor="#2B2B2B"
-                        Stroke="#757575"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
                     >
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
-                                <Setter Property="Stroke" Value="#4CAF50" />
-                                <Setter Property="BackgroundColor" Value="#1B3B22" />
+                                <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
+                                <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
-                                <Setter Property="Stroke" Value="#E53935" />
-                                <Setter Property="BackgroundColor" Value="#3B1B1B" />
+                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
+                                <Setter Property="BackgroundColor" Value="{DynamicResource ErrorBg}" />
                             </DataTrigger>
                         </Border.Triggers>
 
@@ -407,11 +407,11 @@
                                 HeightRequest="10"
                                 CornerRadius="5"
                                 VerticalOptions="Center"
-                                Color="#E53935"
+                                Color="{DynamicResource ErrorColor}"
                             >
                                 <BoxView.Triggers>
                                     <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
-                                        <Setter Property="Color" Value="#4CAF50" />
+                                        <Setter Property="Color" Value="{DynamicResource SuccessColor}" />
                                     </DataTrigger>
                                 </BoxView.Triggers>
                             </BoxView>
@@ -420,14 +420,14 @@
                             <HorizontalStackLayout Spacing="4" VerticalOptions="Center" IsVisible="{Binding IsServerStarted}">
                                 <Label
                                     Text="Serveur actif"
-                                    TextColor="#81C784"
+                                    TextColor="{DynamicResource SuccessLight}"
                                     FontAttributes="Bold"
                                     FontSize="13"
                                     VerticalOptions="Center"
                                 />
                                 <Label
                                     Text="{Binding ServerName, StringFormat='({0})'}"
-                                    TextColor="#C8E6C9"
+                                    TextColor="{DynamicResource SuccessVeryLight}"
                                     FontSize="12"
                                     VerticalOptions="Center"
                                     IsVisible="{Binding ServerName, Converter={StaticResource EmptyToBoolConverter}}"
@@ -437,7 +437,7 @@
                             <!-- Texte statut ARRETE -->
                             <Label
                                 Text="Serveur arrêté"
-                                TextColor="#E57373"
+                                TextColor="{DynamicResource ErrorLight}"
                                 FontAttributes="Bold"
                                 FontSize="13"
                                 VerticalOptions="Center"
@@ -1388,17 +1388,17 @@
                             >
                                 <!-- Current Round Score (Real Time) -->
 
-                                <Border StrokeShape="RoundRectangle 8" BackgroundColor="#222" Stroke="Green" Padding="15,5" Margin="0,2,0,10">
+                                <Border StrokeShape="RoundRectangle 8" BackgroundColor="{DynamicResource SurfaceElevation2}" Stroke="{DynamicResource SuccessColor}" Padding="15,5" Margin="0,2,0,10">
 
                                     <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
 
-                                        <Label Text="{Binding CurrentRound, StringFormat='R{0}'}" TextColor="Green" FontAttributes="Bold" VerticalOptions="Center" />
+                                        <Label Text="{Binding CurrentRound, StringFormat='R{0}'}" TextColor="{DynamicResource SuccessColor}" FontAttributes="Bold" VerticalOptions="Center" />
 
-                                        <Label Text="{Binding BindingContext.CurrentRedVotes, Source={x:Reference this}}" TextColor="Red" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+                                        <Label Text="{Binding BindingContext.CurrentRedVotes, Source={x:Reference this}}" TextColor="{DynamicResource RedCornerColor}" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
 
-                                        <Label Text="-" TextColor="White" VerticalOptions="Center" />
+                                        <Label Text="-" TextColor="{DynamicResource PrimaryTextColor}" VerticalOptions="Center" />
 
-                                        <Label Text="{Binding BindingContext.CurrentBlueVotes, Source={x:Reference this}}" TextColor="Blue" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+                                        <Label Text="{Binding BindingContext.CurrentBlueVotes, Source={x:Reference this}}" TextColor="{DynamicResource BlueCornerColor}" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
 
                                     </HorizontalStackLayout>
 
@@ -1407,12 +1407,12 @@
                                 <CollectionView ItemsSource="{Binding BindingContext.RoundResults, Source={x:Reference this}}">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:RoundResultModel">
-                                            <Border StrokeShape="RoundRectangle 8" BackgroundColor="#333" Stroke="White" Padding="15,5" Margin="0,2">
+                                            <Border StrokeShape="RoundRectangle 8" BackgroundColor="{DynamicResource SurfaceElevation6}" Stroke="{DynamicResource PrimaryTextColor}" Padding="15,5" Margin="0,2">
                                                 <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                                                    <Label Text="{Binding RoundNumber, StringFormat='R{0}'}" TextColor="White" FontAttributes="Bold" VerticalOptions="Center" />
-                                                    <Label Text="{Binding RedVotes}" TextColor="Red" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
-                                                    <Label Text="-" TextColor="White" VerticalOptions="Center" />
-                                                    <Label Text="{Binding BlueVotes}" TextColor="Blue" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+                                                    <Label Text="{Binding RoundNumber, StringFormat='R{0}'}" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold" VerticalOptions="Center" />
+                                                    <Label Text="{Binding RedVotes}" TextColor="{DynamicResource RedCornerColor}" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
+                                                    <Label Text="-" TextColor="{DynamicResource PrimaryTextColor}" VerticalOptions="Center" />
+                                                    <Label Text="{Binding BlueVotes}" TextColor="{DynamicResource BlueCornerColor}" FontAttributes="Bold" FontSize="18" VerticalOptions="Center" />
                                                 </HorizontalStackLayout>
                                             </Border>
                                         </DataTemplate>
@@ -2088,8 +2088,8 @@
                         VerticalOptions="End"
                         Margin="{OnIdiom Tablet='0,0,0,0', Phone='0,0,0,10'}"
                         Padding="15,10,15,10"
-                        BackgroundColor="#333"
-                        Stroke="White"
+                        BackgroundColor="{DynamicResource SurfaceElevation6}"
+                        Stroke="{DynamicResource PrimaryTextColor}"
                         StrokeThickness="2"
                         StrokeShape="RoundRectangle 15"
                         IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
@@ -2103,7 +2103,7 @@
                             <Label 
                                 Text="{Binding CurrentDraw.CurrentRound, StringFormat='ROUND {0}'}" 
                                 HorizontalOptions="Center" 
-                                TextColor="LightGray" 
+                                TextColor="{DynamicResource SecondaryTextColor}" 
                                 FontSize="18" 
                                 FontAttributes="Bold" 
                             />
@@ -2111,7 +2111,7 @@
                             <Label 
                                 Text="{Binding TimeLeftDisplay}" 
                                 HorizontalOptions="Center" 
-                                TextColor="White" 
+                                TextColor="{DynamicResource PrimaryTextColor}" 
                                 FontSize="48" 
                                 FontAttributes="Bold"
                                 FontFamily="Monospace"
@@ -2124,7 +2124,7 @@
                             <HorizontalStackLayout Spacing="15" HorizontalOptions="Center">
                                 <!-- Reset -->
                                 <Border 
-                                    BackgroundColor="Gray"
+                                    BackgroundColor="{DynamicResource BorderMuted}"
                                     HeightRequest="40"
                                     WidthRequest="40"
                                     StrokeThickness="0"
@@ -2135,7 +2135,7 @@
 
                                     <Label 
                                         Text="↻" 
-                                        TextColor="White"
+                                        TextColor="{DynamicResource PrimaryTextColor}"
                                         FontSize="20"
                                         HorizontalOptions="Center"
                                         VerticalOptions="Center" 
@@ -2148,7 +2148,7 @@
 
                                 <!-- Start -->
                                 <Border 
-                                    BackgroundColor="Green"
+                                    BackgroundColor="{DynamicResource SuccessColor}"
                                     HeightRequest="40"
                                     WidthRequest="40"
                                     StrokeThickness="0"
@@ -2160,7 +2160,7 @@
 
                                     <Path 
                                         Data="M 0,0 L 12,8 L 0,16 Z" 
-                                        Fill="White" 
+                                        Fill="{DynamicResource PrimaryTextColor}" 
                                         HorizontalOptions="Center" 
                                         VerticalOptions="Center" 
                                         TranslationX="2" 
@@ -2172,7 +2172,7 @@
 
                                 <!-- Pause -->
                                 <Border 
-                                    BackgroundColor="Orange"
+                                    BackgroundColor="{DynamicResource WarningColor}"
                                     HeightRequest="40"
                                     WidthRequest="40"
                                     StrokeThickness="0"
@@ -2188,8 +2188,8 @@
                                           VerticalOptions="Center" 
                                           HeightRequest="16"
                                           ColumnSpacing="0">
-                                        <BoxView Grid.Column="0" BackgroundColor="White" WidthRequest="4" CornerRadius="1"/>
-                                        <BoxView Grid.Column="2" BackgroundColor="White" WidthRequest="4" CornerRadius="1"/>
+                                        <BoxView Grid.Column="0" BackgroundColor="{DynamicResource PrimaryTextColor}" WidthRequest="4" CornerRadius="1"/>
+                                        <BoxView Grid.Column="2" BackgroundColor="{DynamicResource PrimaryTextColor}" WidthRequest="4" CornerRadius="1"/>
                                     </Grid>
 
                                     <Border.GestureRecognizers>
@@ -2201,8 +2201,8 @@
                             <Button 
                                 Text="ROUND SUIVANT" 
                                 Command="{Binding NextRoundCommand}"
-                                BackgroundColor="#555555"
-                                TextColor="White"
+                                BackgroundColor="{DynamicResource SurfaceElevation7}"
+                                TextColor="{DynamicResource PrimaryTextColor}"
                                 FontAttributes="Bold"
                                 CornerRadius="20"
                                 HeightRequest="40"
@@ -2216,8 +2216,8 @@
                         StrokeShape="RoundRectangle 50"
                         HeightRequest="50"
                         WidthRequest="50"
-                        BackgroundColor="{StaticResource ValidColor}"
-                        Stroke="{StaticResource ValidColor}"
+                        BackgroundColor="{DynamicResource ValidColor}"
+                        Stroke="{DynamicResource ValidColor}"
                         IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                     >
                         <Label 
@@ -2246,24 +2246,24 @@
         >
             <controls:SideSheetControl.SheetContent>
                 <VerticalStackLayout Spacing="20">
-                    <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="White" HorizontalOptions="Center" Margin="0,0,0,10" />
+                    <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" HorizontalOptions="Center" Margin="0,0,0,10" />
 
                     <!-- Statut du serveur dans la feuille latérale -->
                     <Border
                         StrokeShape="RoundRectangle 12"
                         Padding="14,10"
                         StrokeThickness="1.5"
-                        BackgroundColor="#2B2B2B"
-                        Stroke="#757575"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
                     >
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
-                                <Setter Property="Stroke" Value="#4CAF50" />
-                                <Setter Property="BackgroundColor" Value="#1B3B22" />
+                                <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
+                                <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
-                                <Setter Property="Stroke" Value="#E53935" />
-                                <Setter Property="BackgroundColor" Value="#3B1B1B" />
+                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
+                                <Setter Property="BackgroundColor" Value="{DynamicResource ErrorBg}" />
                             </DataTrigger>
                         </Border.Triggers>
 
@@ -2273,18 +2273,18 @@
                                 HeightRequest="12"
                                 CornerRadius="6"
                                 VerticalOptions="Center"
-                                Color="#E53935"
+                                Color="{DynamicResource ErrorColor}"
                             >
                                 <BoxView.Triggers>
                                     <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
-                                        <Setter Property="Color" Value="#4CAF50" />
+                                        <Setter Property="Color" Value="{DynamicResource SuccessColor}" />
                                     </DataTrigger>
                                 </BoxView.Triggers>
                             </BoxView>
 
                             <Label
                                 Text="SERVEUR EN LIGNE"
-                                TextColor="#81C784"
+                                TextColor="{DynamicResource SuccessLight}"
                                 FontAttributes="Bold"
                                 FontSize="14"
                                 VerticalOptions="Center"
@@ -2292,7 +2292,7 @@
                             />
                             <Label
                                 Text="SERVEUR HORS LIGNE"
-                                TextColor="#E57373"
+                                TextColor="{DynamicResource ErrorLight}"
                                 FontAttributes="Bold"
                                 FontSize="14"
                                 VerticalOptions="Center"

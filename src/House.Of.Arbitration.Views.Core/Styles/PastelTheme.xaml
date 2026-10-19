@@ -4,14 +4,160 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="House.Of.Arbitration.Views.Core.Styles.PastelTheme">
 
+    <!-- ========================================================================= -->
+    <!-- BRAND / IDENTITY (PALETTE PASTEL / LUMINEUSE)                             -->
+    <!-- ========================================================================= -->
     <Color x:Key="Primary">#A8DADC</Color>
-    <Color x:Key="Secondary">#F1FAEE</Color>
+    <Color x:Key="PrimaryDark">#457B9D</Color>
+    <Color x:Key="PrimaryLight">#EBF4F6</Color>
+    <Color x:Key="PrimaryDarkText">#1D3557</Color>
+
+    <Color x:Key="Secondary">#F4A261</Color>
+    <Color x:Key="SecondaryDark">#E76F51</Color>
+    <Color x:Key="SecondaryDarkText">#FFFFFF</Color>
+
     <Color x:Key="Tertiary">#457B9D</Color>
+
+    <!-- Aliases pour compatibilité palette -->
+    <Color x:Key="MartialRed">#E63946</Color>
+    <Color x:Key="MartialGold">#F4A261</Color>
+    <Color x:Key="MartialDark">#F8F9FA</Color>
+    <Color x:Key="MartialSurface">#FFFFFF</Color>
+    <Color x:Key="MartialWhite">#1D3557</Color>
+    <Color x:Key="MartialGray">#457B9D</Color>
+
+    <!-- ========================================================================= -->
+    <!-- SURFACES & ARRIÈRE-PLANS (LIGHT ELEVATION SYSTEM)                         -->
+    <!-- ========================================================================= -->
     <Color x:Key="PageBackgroundColor">#F8F9FA</Color>
     <Color x:Key="SurfaceColor">#FFFFFF</Color>
+    <Color x:Key="SurfaceElevation0">#F8F9FA</Color>
+    <Color x:Key="SurfaceElevation1">#FFFFFF</Color>
+    <Color x:Key="SurfaceElevation2">#F1FAEE</Color>
+    <Color x:Key="SurfaceElevation3">#EBF2FA</Color>
+    <Color x:Key="SurfaceElevation4">#E9ECEF</Color>
+    <Color x:Key="SurfaceElevation5">#DEE2E6</Color>
+    <Color x:Key="SurfaceElevation6">#CED4DA</Color>
+    <Color x:Key="SurfaceElevation7">#ADB5BD</Color>
+    <Color x:Key="SurfaceElevation8">#6C757D</Color>
+    <Color x:Key="SurfaceElevation9">#495057</Color>
+
+    <!-- Surfaces claires -->
+    <Color x:Key="SurfaceLight">#FFFFFF</Color>
+    <Color x:Key="SurfaceLightAlt">#F8F9FA</Color>
+
+    <!-- ========================================================================= -->
+    <!-- TEXTES & TYPOGRAPHIE                                                      -->
+    <!-- ========================================================================= -->
     <Color x:Key="PrimaryTextColor">#1D3557</Color>
     <Color x:Key="SecondaryTextColor">#457B9D</Color>
+    <Color x:Key="MutedTextColor">#6C757D</Color>
+    <Color x:Key="SubtleTextColor">#8D99AE</Color>
+    <Color x:Key="DisabledTextColor">#CED4DA</Color>
+    <Color x:Key="InverseTextColor">#FFFFFF</Color>
+
+    <Color x:Key="ApplicationNameColor">#1D3557</Color>
+    <Color x:Key="PageTitleColor">#1D3557</Color>
+    <Color x:Key="PlaceholderColor">#8D99AE</Color>
+
+    <!-- ========================================================================= -->
+    <!-- COINS DE COMBAT (COIN ROUGE / COIN BLEU)                                 -->
+    <!-- ========================================================================= -->
+    <!-- Coin Rouge (Compétiteur 1) -->
+    <Color x:Key="RedCornerColor">#E63946</Color>
+    <Color x:Key="RedCornerLight">#F28482</Color>
+    <Color x:Key="RedCornerBorder">#E63946</Color>
+    <Color x:Key="RedCornerBg">#FFEBEE</Color>
+    <Color x:Key="RedCornerDarkBg">#FFCDD2</Color>
+    <Color x:Key="RedCornerBadgeBg">#FFEBEE</Color>
+    <Color x:Key="RedCornerBadgeText">#E63946</Color>
+    <Color x:Key="RedCornerText">#C1121F</Color>
+
+    <!-- Coin Bleu (Compétiteur 2) -->
+    <Color x:Key="BlueCornerColor">#457B9D</Color>
+    <Color x:Key="BlueCornerLight">#A8DADC</Color>
+    <Color x:Key="BlueCornerBorder">#457B9D</Color>
+    <Color x:Key="BlueCornerBg">#E3F2FD</Color>
+    <Color x:Key="BlueCornerBadgeBg">#E3F2FD</Color>
+    <Color x:Key="BlueCornerBadgeText">#457B9D</Color>
+
+    <!-- ========================================================================= -->
+    <!-- STATUTS & FEEDBACK                                                        -->
+    <!-- ========================================================================= -->
+    <!-- Succès / Connecté / Valide (Vert Pastel) -->
+    <Color x:Key="ValidColor">#2A9D8F</Color>
+    <Color x:Key="SuccessColor">#2A9D8F</Color>
+    <Color x:Key="SuccessDark">#1B6C63</Color>
+    <Color x:Key="SuccessLight">#83C5BE</Color>
+    <Color x:Key="SuccessAccent">#52B788</Color>
+    <Color x:Key="SuccessBg">#E8F5E9</Color>
+    <Color x:Key="SuccessBadgeBg">#E8F5E9</Color>
+    <Color x:Key="SuccessBadgeText">#2A9D8F</Color>
+    <Color x:Key="SuccessChipText">#2A9D8F</Color>
+
+    <!-- Avertissement / En attente / Highlight (Pêche / Orange) -->
+    <Color x:Key="WarningColor">#F4A261</Color>
+    <Color x:Key="WarningBg">#FFF3E0</Color>
+    <Color x:Key="WarningLight">#FFE0B2</Color>
+
+    <!-- Erreur / Déconnecté / Stop (Corail) -->
+    <Color x:Key="ErrorColor">#E63946</Color>
+    <Color x:Key="ErrorDark">#C1121F</Color>
+    <Color x:Key="ErrorAccent">#F28482</Color>
+    <Color x:Key="ErrorBg">#FFEBEE</Color>
+    <Color x:Key="ErrorText">#C1121F</Color>
+    <Color x:Key="ErrorLight">#FFCDD2</Color>
+
+    <!-- Édition / Info (Bleu clair) -->
+    <Color x:Key="EditColor">#A8DADC</Color>
+    <Color x:Key="InfoColor">#457B9D</Color>
+
+    <!-- ========================================================================= -->
+    <!-- BORDURES & SÉPARATEURS                                                    -->
+    <!-- ========================================================================= -->
     <Color x:Key="BorderColor">#A8DADC</Color>
+    <Color x:Key="BorderSubtle">#E9ECEF</Color>
+    <Color x:Key="BorderMedium">#DEE2E6</Color>
+    <Color x:Key="BorderStrong">#457B9D</Color>
+    <Color x:Key="BorderFocus">#1D3557</Color>
+    <Color x:Key="BorderLight">#E9ECEF</Color>
+
+    <!-- ========================================================================= -->
+    <!-- CONTRÔLES & PAVÉ NUMÉRIQUE (KEYPAD)                                       -->
+    <!-- ========================================================================= -->
+    <Color x:Key="EntryBackgroundColor">#FFFFFF</Color>
+    <Color x:Key="EntryBorderColor">#A8DADC</Color>
+    <Color x:Key="KeypadButtonBg">#E9ECEF</Color>
+    <Color x:Key="KeypadButtonText">#1D3557</Color>
+    <Color x:Key="KeypadDigitBg">#FFFFFF</Color>
+    <Color x:Key="KeypadDigitText">#1D3557</Color>
     <x:Int32 x:Key="ButtonCornerRadius">12</x:Int32>
+    <x:Int32 x:Key="EntryCornerRadius">6</x:Int32>
+    <x:Int32 x:Key="CardCornerRadius">10</x:Int32>
+
+    <!-- ========================================================================= -->
+    <!-- SUPERPOSITIONS (MODALES / BACKDROPS)                                      -->
+    <!-- ========================================================================= -->
+    <Color x:Key="OverlayModalColor">#80000000</Color>
+    <Color x:Key="OverlayHeavyColor">#AA000000</Color>
+    <Color x:Key="OverlayLightColor">#33FFFFFF</Color>
+
+    <!-- ========================================================================= -->
+    <!-- PINCEAUX (SOLIDCOLORBRUSHES)                                              -->
+    <!-- ========================================================================= -->
+    <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
+    <SolidColorBrush x:Key="PrimaryDarkBrush" Color="{StaticResource PrimaryDark}"/>
+    <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
+    <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="PageBackgroundBrush" Color="{StaticResource PageBackgroundColor}"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="{StaticResource SurfaceColor}"/>
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource PrimaryTextColor}"/>
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}"/>
+    <SolidColorBrush x:Key="RedCornerBrush" Color="{StaticResource RedCornerColor}"/>
+    <SolidColorBrush x:Key="BlueCornerBrush" Color="{StaticResource BlueCornerColor}"/>
+    <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource SuccessColor}"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource WarningColor}"/>
+    <SolidColorBrush x:Key="ErrorBrush" Color="{StaticResource ErrorColor}"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
 
 </ResourceDictionary>

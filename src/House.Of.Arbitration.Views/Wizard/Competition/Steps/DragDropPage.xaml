@@ -47,8 +47,8 @@
                                                 <!-- Slot 1 -->
                                                 <Border Padding="10" 
                                                             HeightRequest="40" 
-                                                            BackgroundColor="#F5F5F5" 
-                                                            Stroke="Gray"
+                                                            BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                                            Stroke="{DynamicResource BorderColor}"
                                                             StrokeThickness="1"
                                                             IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertedBoolConverter}}">
                                                     <Border.StrokeShape>
@@ -84,8 +84,8 @@
                                                 <!-- Slot 2 -->
                                                 <Border Padding="10" 
                                                             HeightRequest="40" 
-                                                            BackgroundColor="#F5F5F5" 
-                                                            Stroke="Gray"
+                                                            BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                                            Stroke="{DynamicResource BorderColor}"
                                                             StrokeThickness="1"
                                                             IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertedBoolConverter}}">
                                                     <Border.StrokeShape>
@@ -147,36 +147,5 @@
     </ScrollView>
 
 
-    <!--<Grid RowDefinitions="*,*" >
-        <Frame Grid.Row="0">
-            <Frame.GestureRecognizers>
-                <DropGestureRecognizer AllowDrop="True" Drop="DropGestureRecognizer_Drop" />
-            </Frame.GestureRecognizers>
-            <VerticalStackLayout>
-                <Label Text="Drop here" VerticalOptions="Center" FontSize="Small" TextColor="Green"/>
-            </VerticalStackLayout>
-        </Frame>
-        <Frame Grid.Row="1">
-            <VerticalStackLayout>
-                <Label Text="Drag me 1" VerticalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <DragGestureRecognizer CanDrag="True"
-                      DragStarting="DragGestureRecognizer_DragStarting" />
-                    </Label.GestureRecognizers>
-                </Label>
-                <Label Text="Drag me 2" VerticalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <DragGestureRecognizer CanDrag="True"
-                       DragStarting="DragGestureRecognizer_DragStarting" />
-                    </Label.GestureRecognizers>
-                </Label>
-                <Label Text="Drag me 3" VerticalOptions="Center">
-                    <Label.GestureRecognizers>
-                        <DragGestureRecognizer CanDrag="True" 
-                      DragStarting="DragGestureRecognizer_DragStarting" />
-                    </Label.GestureRecognizers>
-                </Label>
-            </VerticalStackLayout>
-        </Frame>
-    </Grid>-->
 </base:BasePage>
+

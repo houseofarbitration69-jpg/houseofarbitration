@@ -22,8 +22,8 @@
                 <Border 
                     Margin="0, 16, 0, 6" 
                     Padding="14, 10" 
-                    BackgroundColor="#222222"
-                    Stroke="White"
+                    BackgroundColor="{DynamicResource SurfaceElevation2}"
+                    Stroke="{DynamicResource PrimaryTextColor}"
                     StrokeThickness="2">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="8"/>
@@ -40,41 +40,10 @@
                             Grid.Column="1" 
                             VerticalOptions="Center"
                             Text="{Binding CategoryName}" 
-                            TextColor="White" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
                             FontSize="16" 
                             FontAttributes="Bold" 
                         />
-                        <!--<VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                            <Label 
-                                Text="{Binding CategoryName}" 
-                                TextColor="White" 
-                                FontSize="16" 
-                                FontAttributes="Bold" 
-                            />
-                            <Label 
-                                Text="{Binding Details}" 
-                                TextColor="#AAAAAA" 
-                                FontSize="12"
-                                IsVisible="{Binding Details, Converter={StaticResource EmptyToBoolConverter}}" 
-                            />
-                        </VerticalStackLayout>-->
-                        <!--<Border 
-                            Grid.Column="2" 
-                            BackgroundColor="#333333" 
-                            Stroke="White" 
-                            StrokeThickness="1" 
-                            Padding="8, 4" 
-                            VerticalOptions="Center">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="6"/>
-                            </Border.StrokeShape>
-                            <Label 
-                                Text="Catégorie" 
-                                TextColor="White" 
-                                FontSize="11" 
-                                FontAttributes="Bold" 
-                            />
-                        </Border>-->
                     </Grid>
                 </Border>
             </DataTemplate>
@@ -84,8 +53,8 @@
                 <Border 
                     Margin="0, 3" 
                     Padding="10, 8" 
-                    BackgroundColor="#1E1E1E"
-                    Stroke="#383838"
+                    BackgroundColor="{DynamicResource SurfaceColor}"
+                    Stroke="{DynamicResource BorderDark}"
                     StrokeThickness="1"
                     StrokeShape="RoundRectangle 8">
                     <Grid ColumnDefinitions="50, *" ColumnSpacing="12">
@@ -94,8 +63,8 @@
                             <!-- Move Up Button -->
                             <Border 
                                 Grid.Row="0"
-                                BackgroundColor="#2D2D2D" 
-                                Stroke="#555555" 
+                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
+                                Stroke="{DynamicResource BorderMuted}" 
                                 StrokeThickness="1" 
                                 StrokeShape="RoundRectangle 6"
                                 HeightRequest="28" 
@@ -122,7 +91,7 @@
                                 BackgroundColor="{DynamicResource Primary}" 
                                 Stroke="{DynamicResource PrimaryDark}" 
                                 StrokeThickness="1" 
-                                StrokeShape="RoundRectangle 6"
+                                StrokeShape="RoundRectangle 6" 
                                 HeightRequest="34" 
                                 WidthRequest="46"
                                 Padding="0">
@@ -131,7 +100,7 @@
                                 </Border.GestureRecognizers>
                                 <Label 
                                     Text="{Binding GlobalOrder}" 
-                                    TextColor="White" 
+                                    TextColor="{DynamicResource PrimaryTextColor}" 
                                     FontSize="15" 
                                     FontAttributes="Bold"
                                     HorizontalOptions="Center" 
@@ -144,8 +113,8 @@
                             <!-- Move Down Button -->
                             <Border 
                                 Grid.Row="2"
-                                BackgroundColor="#2D2D2D" 
-                                Stroke="#555555" 
+                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
+                                Stroke="{DynamicResource BorderMuted}" 
                                 StrokeThickness="1" 
                                 StrokeShape="RoundRectangle 6"
                                 HeightRequest="28" 
@@ -171,16 +140,16 @@
                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="4">
                             <!-- Match Subtitle & Category info -->
                             <HorizontalStackLayout Spacing="8">
-                                <Border BackgroundColor="#333333" Padding="6, 2" StrokeShape="RoundRectangle 4">
-                                    <Label Text="{Binding MatchTitle}" TextColor="White" FontSize="11" FontAttributes="Bold"/>
+                                <Border BackgroundColor="{DynamicResource SurfaceElevation6}" Padding="6, 2" StrokeShape="RoundRectangle 4">
+                                    <Label Text="{Binding MatchTitle}" TextColor="{DynamicResource PrimaryTextColor}" FontSize="11" FontAttributes="Bold"/>
                                 </Border>
-                                <Label Text="{Binding CategoryName}" TextColor="#AAAAAA" FontSize="11" VerticalOptions="Center"/>
+                                <Label Text="{Binding CategoryName}" TextColor="{DynamicResource SecondaryTextColor}" FontSize="11" VerticalOptions="Center"/>
                             </HorizontalStackLayout>
 
                             <!-- Duel View (Knockouts / Pools) -->
                             <Grid IsVisible="{Binding IsDuel}" ColumnDefinitions="*, Auto, *" ColumnSpacing="8" VerticalOptions="Center">
                                 <!-- Red Slot / Competitor 1 -->
-                                <Border Grid.Column="0" BackgroundColor="#262626" Stroke="#D32F2F" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
+                                <Border Grid.Column="0" BackgroundColor="{DynamicResource RedCornerBg}" Stroke="{DynamicResource RedCornerColor}" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
                                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
                                         <Image 
                                             Grid.Column="0" 
@@ -193,15 +162,15 @@
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
                                             <Label 
                                                 Text="{Binding Competitor1.Name, FallbackValue='(BYE / En attente)'}" 
-                                                TextColor="White" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
                                                 FontAttributes="Bold" 
                                                 FontSize="12" 
                                                 LineBreakMode="TailTruncation"
                                             />
                                             <Label 
                                                 Text="{Binding Competitor1.Club}" 
-                                                TextColor="#999999" 
-                                                FontSize="11"
+                                                TextColor="{DynamicResource SubtleTextColor}" 
+                                                FontSize="11" 
                                                 LineBreakMode="TailTruncation"
                                                 IsVisible="{Binding Competitor1.Club, Converter={StaticResource EmptyToBoolConverter}}" 
                                             />
@@ -221,7 +190,7 @@
                                 />
 
                                 <!-- Blue Slot / Competitor 2 -->
-                                <Border Grid.Column="2" BackgroundColor="#262626" Stroke="#1976D2" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
+                                <Border Grid.Column="2" BackgroundColor="{DynamicResource BlueCornerBg}" Stroke="{DynamicResource BlueCornerColor}" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
                                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
                                         <Image 
                                             Grid.Column="0" 
@@ -234,15 +203,15 @@
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
                                             <Label 
                                                 Text="{Binding Competitor2.Name, FallbackValue='(BYE / En attente)'}" 
-                                                TextColor="White" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
                                                 FontAttributes="Bold" 
                                                 FontSize="12" 
                                                 LineBreakMode="TailTruncation"
                                             />
                                             <Label 
                                                 Text="{Binding Competitor2.Club}" 
-                                                TextColor="#999999" 
-                                                FontSize="11"
+                                                TextColor="{DynamicResource SubtleTextColor}" 
+                                                FontSize="11" 
                                                 LineBreakMode="TailTruncation"
                                                 IsVisible="{Binding Competitor2.Club, Converter={StaticResource EmptyToBoolConverter}}" 
                                             />
@@ -253,7 +222,7 @@
 
                             <!-- Single View (Taolu / Order) -->
                             <Grid IsVisible="{Binding IsSingle}" ColumnDefinitions="*" VerticalOptions="Center">
-                                <Border BackgroundColor="#262626" Stroke="{DynamicResource Secondary}" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
+                                <Border BackgroundColor="{DynamicResource SurfaceElevation3}" Stroke="{DynamicResource Secondary}" StrokeThickness="1.5" StrokeShape="RoundRectangle 6" Padding="8, 6">
                                     <Grid ColumnDefinitions="Auto, *" ColumnSpacing="8">
                                         <Image 
                                             Grid.Column="0" 
@@ -266,15 +235,15 @@
                                         <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
                                             <Label 
                                                 Text="{Binding Competitor.Name, FallbackValue='(En attente)'}" 
-                                                TextColor="White" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
                                                 FontAttributes="Bold" 
                                                 FontSize="12" 
                                                 LineBreakMode="TailTruncation"
                                             />
                                             <Label 
                                                 Text="{Binding Competitor.Club}" 
-                                                TextColor="#999999" 
-                                                FontSize="11"
+                                                TextColor="{DynamicResource SubtleTextColor}" 
+                                                FontSize="11" 
                                                 LineBreakMode="TailTruncation"
                                                 IsVisible="{Binding Competitor.Club, Converter={StaticResource EmptyToBoolConverter}}" 
                                             />
@@ -314,7 +283,7 @@
                 <Label 
                     Text="GESTION DES TIRAGES &amp; ORDRE DES PASSAGES"
                     FontSize="13"
-                    TextColor="White"
+                    TextColor="{DynamicResource PrimaryTextColor}"
                     FontAttributes="Bold"
                     VerticalOptions="Center"
                     HorizontalOptions="Start"
@@ -322,13 +291,13 @@
             </VerticalStackLayout>
 
             <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
-                <Border BackgroundColor="#262626" Stroke="#444444" StrokeThickness="1" Padding="12, 8">
+                <Border BackgroundColor="{DynamicResource SurfaceElevation3}" Stroke="{DynamicResource BorderMuted}" StrokeThickness="1" Padding="12, 8">
                     <Border.StrokeShape>
                         <RoundRectangle CornerRadius="6"/>
                     </Border.StrokeShape>
                     <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
                         <Label Text="🥊" FontSize="14" VerticalOptions="Center"/>
-                        <Label Text="{Binding TotalMatchesCount, StringFormat='{0} rencontres'}" TextColor="White" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
+                        <Label Text="{Binding TotalMatchesCount, StringFormat='{0} rencontres'}" TextColor="{DynamicResource PrimaryTextColor}" FontSize="13" FontAttributes="Bold" VerticalOptions="Center"/>
                     </HorizontalStackLayout>
                 </Border>
             </HorizontalStackLayout>
@@ -350,19 +319,19 @@
                 VerticalOptions="Center" 
                 Spacing="12">
                 <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
-                <Label Text="Aucune rencontre ou catégorie configurée pour cette compétition." TextColor="Gray" FontSize="14" HorizontalOptions="Center" />
+                <Label Text="Aucune rencontre ou catégorie configurée pour cette compétition." TextColor="{DynamicResource SubtleTextColor}" FontSize="14" HorizontalOptions="Center" />
             </VerticalStackLayout>
 
             <!-- Loading Indicator Overlay during operations / reordering -->
             <Border 
                 IsVisible="{Binding IsBusy}" 
-                BackgroundColor="#80000000" 
+                BackgroundColor="{DynamicResource OverlayModalColor}" 
                 StrokeThickness="0"
                 HorizontalOptions="Fill" 
                 VerticalOptions="Fill"
                 InputTransparent="False">
                 <Border 
-                    BackgroundColor="#1E1E1E" 
+                    BackgroundColor="{DynamicResource SurfaceColor}" 
                     Stroke="{DynamicResource Primary}" 
                     StrokeThickness="2" 
                     StrokeShape="RoundRectangle 16"
@@ -371,7 +340,7 @@
                     VerticalOptions="Center">
                     <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
                         <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
-                        <Label Text="Mise à jour de l'ordre..." TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                        <Label Text="Mise à jour de l'ordre..." TextColor="{DynamicResource PrimaryTextColor}" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
                 </Border>
             </Border>
@@ -388,8 +357,8 @@
             <!-- Direct Order Navigation Button (Left) -->
             <Border 
                 Grid.Column="0" 
-                BackgroundColor="#222222" 
-                Stroke="#3E3E3E" 
+                BackgroundColor="{DynamicResource SurfaceElevation2}" 
+                Stroke="{DynamicResource BorderDark}" 
                 StrokeThickness="1" 
                 StrokeShape="RoundRectangle 10" 
                 Padding="6, 4" 
@@ -399,8 +368,8 @@
                     <Button 
                         Text="🔍 Aller au passage..." 
                         Command="{Binding ScrollToOrderCommand}" 
-                        BackgroundColor="#333333" 
-                        TextColor="White" 
+                        BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                        TextColor="{DynamicResource PrimaryTextColor}" 
                         FontSize="13" 
                         FontAttributes="Bold" 
                         HeightRequest="42" 
@@ -411,10 +380,10 @@
                         Text="⏮ Début (1)" 
                         Command="{Binding ScrollToTargetOrderCommand}" 
                         CommandParameter="1" 
-                        BackgroundColor="#2A2A2A" 
-                        BorderColor="#444444" 
+                        BackgroundColor="{DynamicResource SurfaceElevation4}" 
+                        BorderColor="{DynamicResource BorderMuted}" 
                         BorderWidth="1"
-                        TextColor="LightGray" 
+                        TextColor="{DynamicResource SecondaryTextColor}" 
                         FontSize="11" 
                         HeightRequest="36" 
                         Padding="10, 0" 
@@ -424,10 +393,10 @@
                         Text="Dernier ⏭" 
                         Command="{Binding ScrollToTargetOrderCommand}" 
                         CommandParameter="{Binding TotalMatchesCount}" 
-                        BackgroundColor="#2A2A2A" 
-                        BorderColor="#444444" 
+                        BackgroundColor="{DynamicResource SurfaceElevation4}" 
+                        BorderColor="{DynamicResource BorderMuted}" 
                         BorderWidth="1"
-                        TextColor="LightGray" 
+                        TextColor="{DynamicResource SecondaryTextColor}" 
                         FontSize="11" 
                         HeightRequest="36" 
                         Padding="10, 0" 
@@ -444,7 +413,7 @@
                 Grid.Column="2" 
                 Text="{Binding Resources.CLOSE_ACTION}" 
                 BackgroundColor="{DynamicResource ErrorColor}"
-                TextColor="Black"
+                TextColor="{DynamicResource PrimaryTextColor}"
                 FontAttributes="Bold"
                 Command="{Binding CloseCommand}" 
                 WidthRequest="160"
@@ -458,7 +427,7 @@
                 Grid.Column="3" 
                 Text="{Binding Resources.VALIDATE_ACTION}" 
                 BackgroundColor="{DynamicResource ValidColor}"
-                TextColor="Black"
+                TextColor="{DynamicResource PrimaryTextColor}"
                 FontAttributes="Bold"
                 Command="{Binding SaveCommand}" 
                 WidthRequest="160"
@@ -475,8 +444,8 @@
         >
             <Border 
                 Grid.Column="0" 
-                BackgroundColor="#222222" 
-                Stroke="#3E3E3E" 
+                BackgroundColor="{DynamicResource SurfaceElevation2}" 
+                Stroke="{DynamicResource BorderDark}" 
                 StrokeThickness="1" 
                 StrokeShape="RoundRectangle 10" 
                 Padding="6, 4" 
@@ -486,8 +455,8 @@
                     <Button 
                         Text="🔍 Aller au passage..." 
                         Command="{Binding ScrollToOrderCommand}" 
-                        BackgroundColor="#333333" 
-                        TextColor="White" 
+                        BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                        TextColor="{DynamicResource PrimaryTextColor}" 
                         FontSize="13" 
                         FontAttributes="Bold" 
                         HeightRequest="42" 
@@ -498,10 +467,10 @@
                         Text="⏮ Début (1)" 
                         Command="{Binding ScrollToTargetOrderCommand}" 
                         CommandParameter="1" 
-                        BackgroundColor="#2A2A2A" 
-                        BorderColor="#444444" 
+                        BackgroundColor="{DynamicResource SurfaceElevation4}" 
+                        BorderColor="{DynamicResource BorderMuted}" 
                         BorderWidth="1"
-                        TextColor="LightGray" 
+                        TextColor="{DynamicResource SecondaryTextColor}" 
                         FontSize="11" 
                         HeightRequest="36" 
                         Padding="10, 0" 
@@ -511,10 +480,10 @@
                         Text="Dernier ⏭" 
                         Command="{Binding ScrollToTargetOrderCommand}" 
                         CommandParameter="{Binding TotalMatchesCount}" 
-                        BackgroundColor="#2A2A2A" 
-                        BorderColor="#444444" 
+                        BackgroundColor="{DynamicResource SurfaceElevation4}" 
+                        BorderColor="{DynamicResource BorderMuted}" 
                         BorderWidth="1"
-                        TextColor="LightGray" 
+                        TextColor="{DynamicResource SecondaryTextColor}" 
                         FontSize="11" 
                         HeightRequest="36" 
                         Padding="10, 0" 
@@ -531,7 +500,7 @@
                 Grid.Column="0" 
                 Text="{Binding Resources.CLOSE_ACTION}" 
                 BackgroundColor="{DynamicResource ErrorColor}"
-                TextColor="Black"
+                TextColor="{DynamicResource PrimaryTextColor}"
                 FontAttributes="Bold"
                 Command="{Binding CloseCommand}" 
                 WidthRequest="160"
@@ -544,7 +513,7 @@
                 Grid.Column="1" 
                 Text="{Binding Resources.VALIDATE_ACTION}" 
                 BackgroundColor="{DynamicResource ValidColor}"
-                TextColor="Black"
+                TextColor="{DynamicResource PrimaryTextColor}"
                 FontAttributes="Bold"
                 Command="{Binding SaveCommand}" 
                 WidthRequest="160"

@@ -134,13 +134,13 @@
         <Border 
             Grid.RowSpan="3"
             IsVisible="{Binding IsBusy}" 
-            BackgroundColor="#80000000" 
+            BackgroundColor="{DynamicResource OverlayModalColor}" 
             StrokeThickness="0"
             HorizontalOptions="Fill" 
             VerticalOptions="Fill"
             InputTransparent="False">
             <Border 
-                BackgroundColor="#1E1E1E" 
+                BackgroundColor="{DynamicResource SurfaceColor}" 
                 Stroke="{DynamicResource Primary}" 
                 StrokeThickness="2" 
                 StrokeShape="RoundRectangle 16"
@@ -149,7 +149,7 @@
                 VerticalOptions="Center">
                 <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
                     <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
-                    <Label Text="Chargement des compétiteurs..." TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label Text="Chargement des compétiteurs..." TextColor="{DynamicResource PrimaryTextColor}" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Border>
         </Border>

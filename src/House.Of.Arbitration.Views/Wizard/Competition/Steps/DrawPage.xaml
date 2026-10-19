@@ -32,7 +32,7 @@
                 <Label 
                     Text="{Binding Resources.DRAW}"
                     FontSize="14"
-                    TextColor="White"
+                    TextColor="{DynamicResource PrimaryTextColor}"
                     VerticalOptions="Center"
                     HorizontalOptions="Start"
                 />
@@ -54,7 +54,7 @@
                         <DataTemplate x:DataType="vm:BracketRoundViewModel">
                             <VerticalStackLayout Spacing="0" VerticalOptions="Start">
                                 <Label Text="{Binding Name}" 
-                                       TextColor="White" 
+                                       TextColor="{DynamicResource PrimaryTextColor}" 
                                        FontSize="18" 
                                        FontAttributes="Bold" 
                                        HorizontalOptions="Center" 
@@ -81,8 +81,8 @@
                                                         </Label.GestureRecognizers>
                                                     </Label>
                                                     <Border Grid.Row="1" 
-                                                            BackgroundColor="#333" 
-                                                            Stroke="Gray" 
+                                                            BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                                                            Stroke="{DynamicResource BorderMuted}" 
                                                             StrokeThickness="1" 
                                                             HeightRequest="30" WidthRequest="35"
                                                             HorizontalOptions="Center"
@@ -93,7 +93,7 @@
                                                         <Grid>
                                                             <!-- Using a Label for display to ensure perfect centering -->
                                                             <Label Text="{Binding GlobalOrder}"
-                                                                   TextColor="White"
+                                                                   TextColor="{DynamicResource PrimaryTextColor}"
                                                                    FontSize="12"
                                                                    HorizontalOptions="Center"
                                                                    VerticalOptions="Center"
@@ -127,8 +127,8 @@
                                                     <!-- Slot 1 -->
                                                     <Border Padding="10, 5" 
                                                             HeightRequest="60" 
-                                                            BackgroundColor="#F5F5F5" 
-                                                            Stroke="Gray"
+                                                            BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                                            Stroke="{DynamicResource BorderMuted}"
                                                             StrokeThickness="1"
                                                             IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
                                                         <Border.StrokeShape>
@@ -137,19 +137,19 @@
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
                                                             <VerticalStackLayout VerticalOptions="Center" Spacing="0">
                                                                 <controls:ScrollingText Text="{Binding Slot1.Competitor.Name, FallbackValue='(BYE)'}" 
-                                                                       TextColor="Black" 
+                                                                       TextColor="{DynamicResource SecondaryDarkText}" 
                                                                        FontAttributes="Bold"
                                                                        FontSize="13" />
                                                                 <HorizontalStackLayout Spacing="5">
                                                                     <controls:ScrollingText 
                                                                         Text="{Binding Slot1.Competitor.Club}" 
-                                                                        TextColor="#444" 
+                                                                        TextColor="{DynamicResource BorderMuted}" 
                                                                         FontSize="11"
                                                                         WidthRequest="150" 
                                                                     />
                                                                     <Label 
                                                                         Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                        TextColor="#444" 
+                                                                        TextColor="{DynamicResource BorderMuted}" 
                                                                         FontSize="11"
                                                                         IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
                                                                     />
@@ -178,8 +178,8 @@
                                                     <!-- Slot 2 -->
                                                     <Border Padding="10, 5" 
                                                             HeightRequest="60" 
-                                                            BackgroundColor="#F5F5F5" 
-                                                            Stroke="Gray"
+                                                            BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                                            Stroke="{DynamicResource BorderMuted}"
                                                             StrokeThickness="1"
                                                             IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
                                                         <Border.StrokeShape>
@@ -188,19 +188,19 @@
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
                                                             <VerticalStackLayout VerticalOptions="Center" Spacing="0">
                                                                 <controls:ScrollingText Text="{Binding Slot2.Competitor.Name, FallbackValue='(BYE)'}" 
-                                                                       TextColor="Black" 
+                                                                       TextColor="{DynamicResource SecondaryDarkText}" 
                                                                        FontAttributes="Bold"
                                                                        FontSize="13" />
                                                                 <HorizontalStackLayout Spacing="5">
                                                                     <controls:ScrollingText 
                                                                         Text="{Binding Slot2.Competitor.Club}" 
-                                                                        TextColor="#444" 
+                                                                        TextColor="{DynamicResource BorderMuted}" 
                                                                         FontSize="11"
                                                                         WidthRequest="150" 
                                                                     />
                                                                     <Label 
                                                                         Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                        TextColor="#444" 
+                                                                        TextColor="{DynamicResource BorderMuted}" 
                                                                         FontSize="11"
                                                                         IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
                                                                     />
@@ -229,8 +229,8 @@
                                                     <!-- Winner Slot -->
                                                     <Border Padding="10, 5" 
                                                             HeightRequest="60" 
-                                                            BackgroundColor="Gold" 
-                                                            Stroke="Orange"
+                                                            BackgroundColor="{DynamicResource Secondary}" 
+                                                            Stroke="{DynamicResource SecondaryDark}"
                                                             StrokeThickness="1"
                                                             IsVisible="{Binding IsWinnerSlot}">
                                                         <Border.StrokeShape>
@@ -238,20 +238,20 @@
                                                         </Border.StrokeShape>
                                                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0">
                                                             <controls:ScrollingText Text="{Binding Slot1.Competitor.Name, FallbackValue='WINNER'}" 
-                                                                   TextColor="Black" 
+                                                                   TextColor="{DynamicResource SecondaryDarkText}" 
                                                                    FontAttributes="Bold"
                                                                    FontSize="14"
                                                                    HorizontalOptions="Center" />
                                                             <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
                                                                 <controls:ScrollingText 
                                                                     Text="{Binding Slot1.Competitor.Club}" 
-                                                                    TextColor="#444" 
+                                                                    TextColor="{DynamicResource BorderMuted}" 
                                                                     FontSize="11"
                                                                     WidthRequest="150" 
                                                                 />
                                                                 <Label 
                                                                     Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                    TextColor="#444" 
+                                                                    TextColor="{DynamicResource BorderMuted}" 
                                                                     FontSize="11"
                                                                     IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
                                                                 />
@@ -305,8 +305,8 @@
                                                         </Label.GestureRecognizers>
                                                     </Label>
                                                     <Border Grid.Row="1" 
-                                                            BackgroundColor="#333" 
-                                                            Stroke="Gray" 
+                                                            BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                                                            Stroke="{DynamicResource BorderMuted}" 
                                                             StrokeThickness="1" 
                                                             HeightRequest="30" WidthRequest="35"
                                                             HorizontalOptions="Center"
@@ -316,7 +316,7 @@
                                                         </Border.StrokeShape>
                                                         <Grid>
                                                             <Label Text="{Binding GlobalOrder}"
-                                                                   TextColor="White"
+                                                                   TextColor="{DynamicResource PrimaryTextColor}"
                                                                    FontSize="12"
                                                                    HorizontalOptions="Center"
                                                                    VerticalOptions="Center"
@@ -349,8 +349,8 @@
                                                     <!-- Slot 1 -->
                                                     <Border Padding="10, 5" 
                                                             HeightRequest="60" 
-                                                            BackgroundColor="#F5F5F5" 
-                                                            Stroke="Gray"
+                                                            BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                                            Stroke="{DynamicResource BorderMuted}"
                                                             StrokeThickness="1"
                                                             IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
                                                         <Border.StrokeShape>
@@ -359,19 +359,19 @@
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
                                                             <VerticalStackLayout VerticalOptions="Center" Spacing="0">
                                                                 <controls:ScrollingText Text="{Binding Slot1.Competitor.Name, FallbackValue='(BYE)'}" 
-                                                                       TextColor="Black" 
+                                                                       TextColor="{DynamicResource SecondaryDarkText}" 
                                                                        FontAttributes="Bold"
                                                                        FontSize="13" />
                                                                 <HorizontalStackLayout Spacing="5">
                                                                     <controls:ScrollingText 
                                                                         Text="{Binding Slot1.Competitor.Club}" 
-                                                                        TextColor="#444" 
+                                                                        TextColor="{DynamicResource BorderMuted}" 
                                                                         FontSize="11"
                                                                         WidthRequest="150" 
                                                                     />
                                                                     <Label
                                                                         Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                        TextColor="#444" 
+                                                                        TextColor="{DynamicResource BorderMuted}" 
                                                                         FontSize="11"
                                                                         IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
                                                                     />
@@ -383,8 +383,8 @@
                                                     <!-- Slot 2 -->
                                                     <Border Padding="10, 5" 
                                                             HeightRequest="60" 
-                                                            BackgroundColor="#F5F5F5" 
-                                                            Stroke="Gray"
+                                                            BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                                            Stroke="{DynamicResource BorderMuted}"
                                                             StrokeThickness="1"
                                                             IsVisible="{Binding IsWinnerSlot, Converter={StaticResource InvertBoolConverter}}">
                                                         <Border.StrokeShape>
@@ -393,19 +393,19 @@
                                                         <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
                                                             <VerticalStackLayout VerticalOptions="Center" Spacing="0">
                                                                 <controls:ScrollingText Text="{Binding Slot2.Competitor.Name, FallbackValue='(BYE)'}" 
-                                                                       TextColor="Black" 
+                                                                       TextColor="{DynamicResource SecondaryDarkText}" 
                                                                        FontAttributes="Bold"
                                                                        FontSize="13" />
                                                                 <HorizontalStackLayout Spacing="5">
                                                                     <controls:ScrollingText 
                                                                         Text="{Binding Slot2.Competitor.Club}" 
-                                                                        TextColor="#444" 
+                                                                        TextColor="{DynamicResource BorderMuted}" 
                                                                         FontSize="11"
                                                                         WidthRequest="150" 
                                                                     />
                                                                     <Label 
                                                                         Text="{Binding Slot2.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                        TextColor="#444" 
+                                                                        TextColor="{DynamicResource BorderMuted}" 
                                                                         FontSize="11"
                                                                         IsVisible="{Binding Slot2.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
                                                                     />
@@ -417,8 +417,8 @@
                                                     <!-- Winner Slot -->
                                                     <Border Padding="10, 5" 
                                                             HeightRequest="60" 
-                                                            BackgroundColor="Gold" 
-                                                            Stroke="Orange"
+                                                            BackgroundColor="{DynamicResource Secondary}" 
+                                                            Stroke="{DynamicResource SecondaryDark}"
                                                             StrokeThickness="1"
                                                             IsVisible="{Binding IsWinnerSlot}">
                                                         <Border.StrokeShape>
@@ -426,20 +426,20 @@
                                                         </Border.StrokeShape>
                                                         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="0">
                                                             <controls:ScrollingText Text="{Binding Slot1.Competitor.Name, FallbackValue='WINNER'}" 
-                                                                   TextColor="Black" 
+                                                                   TextColor="{DynamicResource SecondaryDarkText}" 
                                                                    FontAttributes="Bold"
                                                                    FontSize="14"
                                                                    HorizontalOptions="Center" />
                                                             <HorizontalStackLayout Spacing="5" HorizontalOptions="Center">
                                                                 <controls:ScrollingText 
                                                                     Text="{Binding Slot1.Competitor.Club}" 
-                                                                    TextColor="#444" 
+                                                                    TextColor="{DynamicResource BorderMuted}" 
                                                                     FontSize="11"
                                                                     WidthRequest="150" 
                                                                 />
                                                                 <Label 
                                                                     Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                    TextColor="#444" 
+                                                                    TextColor="{DynamicResource BorderMuted}" 
                                                                     FontSize="11"
                                                                     IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
                                                                 />
@@ -493,8 +493,8 @@
                                                         </Label.GestureRecognizers>
                                                     </Label>
                                                     <Border Grid.Row="1" 
-                                                            BackgroundColor="#333" 
-                                                            Stroke="Gray" 
+                                                            BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                                                            Stroke="{DynamicResource BorderMuted}" 
                                                             StrokeThickness="1" 
                                                             HeightRequest="30" WidthRequest="35"
                                                             HorizontalOptions="Center"
@@ -504,7 +504,7 @@
                                                         </Border.StrokeShape>
                                                         <Grid>
                                                             <Label Text="{Binding GlobalOrder}"
-                                                                   TextColor="White"
+                                                                   TextColor="{DynamicResource PrimaryTextColor}"
                                                                    FontSize="12"
                                                                    HorizontalOptions="Center"
                                                                    VerticalOptions="Center"
@@ -537,9 +537,9 @@
                                                 <Border Grid.Column="1" 
                                                         Padding="10, 5" 
                                                         HeightRequest="60" 
-                                                        BackgroundColor="#F5F5F5" 
-                                                        Stroke="Gray"
-                                                        StrokeThickness="1"
+                                                        BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                                        Stroke="{DynamicResource BorderMuted}" 
+                                                        StrokeThickness="1" 
                                                         VerticalOptions="Center">
                                                     <Border.StrokeShape>
                                                         <RoundRectangle CornerRadius="5"/>
@@ -547,19 +547,19 @@
                                                     <Grid ColumnDefinitions="*, Auto" InputTransparent="True" CascadeInputTransparent="True">
                                                         <VerticalStackLayout VerticalOptions="Center" Spacing="0">
                                                             <controls:ScrollingText Text="{Binding Slot1.Competitor.Name}" 
-                                                                   TextColor="Black" 
+                                                                   TextColor="{DynamicResource SecondaryDarkText}" 
                                                                    FontAttributes="Bold"
                                                                    FontSize="13" />
                                                             <HorizontalStackLayout Spacing="5">
                                                                 <controls:ScrollingText 
                                                                     Text="{Binding Slot1.Competitor.Club}" 
-                                                                    TextColor="#444" 
+                                                                    TextColor="{DynamicResource BorderMuted}" 
                                                                     FontSize="11"
                                                                     WidthRequest="150" 
                                                                 />
                                                                 <Label 
                                                                     Text="{Binding Slot1.Competitor.Country.Name, StringFormat='({0})'}" 
-                                                                    TextColor="#444" 
+                                                                    TextColor="{DynamicResource BorderMuted}" 
                                                                     FontSize="11"
                                                                     IsVisible="{Binding Slot1.Competitor.Country.Name, Converter={StaticResource EmptyToBoolConverter}}" 
                                                                 />
@@ -580,7 +580,7 @@
                 <VerticalStackLayout IsVisible="{Binding Rounds.Count, Converter={StaticResource InvertBoolConverter}}"
                                      HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
                     <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
-                    <Label Text="Draw view not implemented for this category type." TextColor="Gray" HorizontalOptions="Center" />
+                    <Label Text="Draw view not implemented for this category type." TextColor="{DynamicResource SubtleTextColor}" HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </Grid>
         </ScrollView>
@@ -591,7 +591,7 @@
                 Grid.Column="1" 
                 Text="{Binding Resources.CLOSE_ACTION}" 
                 BackgroundColor="{DynamicResource ErrorColor}"
-                TextColor="Black"
+                TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding CloseCommand}" 
                 Padding="15" 
             />
@@ -599,7 +599,7 @@
                 Grid.Column="2" 
                 Text="{Binding Resources.VALIDATE_ACTION}" 
                 BackgroundColor="{DynamicResource ValidColor}"
-                TextColor="Black"
+                TextColor="{DynamicResource PrimaryTextColor}"
                 Command="{Binding SaveCommand}" 
                 Padding="15" 
             />
@@ -609,13 +609,13 @@
         <Border 
             Grid.RowSpan="3"
             IsVisible="{Binding IsBusy}" 
-            BackgroundColor="#80000000" 
+            BackgroundColor="{DynamicResource OverlayModalColor}" 
             StrokeThickness="0"
             HorizontalOptions="Fill" 
             VerticalOptions="Fill"
             InputTransparent="False">
             <Border 
-                BackgroundColor="#1E1E1E" 
+                BackgroundColor="{DynamicResource SurfaceColor}" 
                 Stroke="{DynamicResource Primary}" 
                 StrokeThickness="2" 
                 StrokeShape="RoundRectangle 16"
@@ -624,7 +624,7 @@
                 VerticalOptions="Center">
                 <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
                     <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
-                    <Label Text="Génération du tirage en cours..." TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label Text="Génération du tirage en cours..." TextColor="{DynamicResource PrimaryTextColor}" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Border>
         </Border>

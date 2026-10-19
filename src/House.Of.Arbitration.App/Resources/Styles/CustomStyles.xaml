@@ -62,11 +62,13 @@
     <!-- BUTTONS -->
     <Style x:Key="PrimaryButtonStyle" TargetType="controls:IconButton">
         <Setter Property="TextFontSize" Value="14"/>
-        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+        <!--<Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="TextColor" Value="{DynamicResource InverseTextColor}"/>
 
         <Setter Property="IconFontSize" Value="18"/>
         <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"/>
-        <Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>
+        <!--<Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="IconColor" Value="{DynamicResource InverseTextColor}"/>
 
         <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ValidColor}"/>
         <Setter Property="ButtonPadding" Value="15,10,15,10"/>
@@ -79,13 +81,15 @@
 
     <Style x:Key="ListActionEditButtonStyle" TargetType="controls:IconButton">
         <Setter Property="TextFontSize" Value="14"/>
-        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+        <!--<Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="TextColor" Value="{DynamicResource InverseTextColor}"/>
 
         <Setter Property="Icon" Value="{x:Static helpers:FontCustomIcons.PEN}"/>
         <Setter Property="IconFontSize" Value="18"/>
         <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.CUSTOM_NAME}"/>
-        <Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>
-
+        <!--<Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="IconColor" Value="{DynamicResource InverseTextColor}"/>
+        
         <Setter Property="ButtonBackgroundColor" Value="{DynamicResource EditColor}"/>
         <Setter Property="ButtonPadding" Value="15,10,15,10"/>
         <Setter Property="IsFullWidth" Value="True"/>
@@ -97,12 +101,14 @@
 
     <Style x:Key="ListActionDeleteButtonStyle" TargetType="controls:IconButton">
         <Setter Property="TextFontSize" Value="14"/>
-        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+        <!--<Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="TextColor" Value="{DynamicResource InverseTextColor}"/>
 
         <Setter Property="Icon" Value="{x:Static helpers:FontCustomIcons.TRASH}"/>
         <Setter Property="IconFontSize" Value="18"/>
         <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.CUSTOM_NAME}"/>
-        <Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>
+        <!--<Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="IconColor" Value="{DynamicResource InverseTextColor}"/>
 
         <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ErrorColor}"/>
         <Setter Property="ButtonPadding" Value="15,10,15,10"/>
@@ -115,12 +121,14 @@
 
     <Style x:Key="ListActionPlayButtonStyle" TargetType="controls:IconButton">
         <Setter Property="TextFontSize" Value="14"/>
-        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
+        <!--<Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="TextColor" Value="{DynamicResource InverseTextColor}"/>
 
         <Setter Property="Icon" Value="{x:Static helpers:FontCustomIcons.PLAY}"/>
         <Setter Property="IconFontSize" Value="18"/>
         <Setter Property="IconFontFamily" Value="{x:Static helpers:FontHelper.CUSTOM_NAME}"/>
-        <Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>
+        <!--<Setter Property="IconColor" Value="{DynamicResource PrimaryTextColor}"/>-->
+        <Setter Property="IconColor" Value="{DynamicResource InverseTextColor}"/>
 
         <Setter Property="ButtonBackgroundColor" Value="{DynamicResource ValidColor}"/>
         <Setter Property="ButtonPadding" Value="15,10,15,10"/>

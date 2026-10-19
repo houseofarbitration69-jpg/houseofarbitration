@@ -169,16 +169,6 @@ public class WizardViewModel<T> : BaseViewModel, INotifyPropertyChanged where T 
 
         if (isAllValid)
         {
-            //// Vérifier si c'est un ajout ou une mise à jour via réflexion
-            //var idProp = Model.GetType().GetProperty("Id");
-            //int id = idProp != null ? (int)idProp.GetValue(Model)! : 0;
-
-            //if (id > 0)
-            //    await _repository.UpdateAsync(Model);
-            //else
-            //    await _repository.AddAsync(Model);
-
-            //await Shell.Current.DisplayAlertAsync("Validation", "La compétition a été enregistrée avec succès !", "OK");
             await Shell.Current.GoToAsync("..");
         }
         else

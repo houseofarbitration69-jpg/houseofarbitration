@@ -19,7 +19,7 @@
         Padding="20" 
         RowSpacing="20"
     >
-        <!-- Header -->
+        <!-- HEADER TABLET -->
         <Grid 
             Grid.Row="0" 
             ColumnDefinitions="*,Auto"
@@ -40,18 +40,19 @@
                 <controls:IconButton.Icons>
                     <controls:IconInfo 
                         Icon="{x:Static helpers:FontCustomIcons.ADD}" 
-                        Color="{StaticResource PrimaryTextColor}" 
+                        Color="{StaticResource InverseTextColor}" 
                         FontSize="16" 
                     />
                     <controls:IconInfo 
                         Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
-                        Color="{StaticResource PrimaryTextColor}" 
+                        Color="{StaticResource InverseTextColor}" 
                         FontSize="24" 
                     />
                 </controls:IconButton.Icons>
             </controls:IconButton>
         </Grid>
 
+        <!-- HEADER PHONE -->
         <Label 
             Grid.Row="0"
             Text="{Binding Resources.COMPETITION_LIST}" 
@@ -70,18 +71,18 @@
             <controls:IconButton.Icons>
                 <controls:IconInfo 
                         Icon="{x:Static helpers:FontCustomIcons.ADD}" 
-                        Color="{StaticResource PrimaryTextColor}" 
+                        Color="{StaticResource InverseTextColor}" 
                         FontSize="16" 
                     />
                 <controls:IconInfo 
                         Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
-                        Color="{StaticResource PrimaryTextColor}" 
+                        Color="{StaticResource InverseTextColor}" 
                         FontSize="24" 
                     />
             </controls:IconButton.Icons>
         </controls:IconButton>
 
-        <!-- Liste des Compétitions (BindableLayout) -->
+        <!-- LISTE DES COMPETITIONS -->
         <CollectionView 
             Grid.Row="{OnIdiom Tablet='1', Phone='2'}" 
             ItemsSource="{Binding Competitions}"
@@ -103,7 +104,7 @@
                                 FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
                                 Text="{x:Static helpers:FontAwesomeIcons.HAND_FIST}" 
                                 FontSize="25" 
-                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                TextColor="{DynamicResource InverseTextColor}" 
                                 IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Sanda'}"
                                 VerticalOptions="Center"
                                 HorizontalOptions="Center"
@@ -115,27 +116,17 @@
                                 FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
                                 Text="{x:Static helpers:FontAwesomeIcons.YIN_YANG}" 
                                 FontSize="25" 
-                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                TextColor="{DynamicResource InverseTextColor}" 
                                 IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
                                 VerticalOptions="Center"
                                 HorizontalOptions="Center"
                             />
-                            <!--<Label 
-                                Grid.Column="0" 
-                                Grid.RowSpan="2" 
-                                Text="{Binding Type}" 
-                                FontSize="18" 
-                                FontAttributes="Bold"
-                                TextColor="{DynamicResource ValidColor}" 
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center"
-                            />-->
 
                             <Label 
                                 Grid.Column="1" 
                                 Grid.Row="0" 
                                 Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
-                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                TextColor="{DynamicResource InverseTextColor}" 
                                 VerticalOptions="Center" 
                                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                             />
@@ -145,7 +136,7 @@
                                 Grid.Row="0"
                                 Grid.RowSpan="2"
                                 Text="{Binding Name}" 
-                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                TextColor="{DynamicResource InverseTextColor}" 
                                 FontAttributes="Bold" 
                                 FontSize="18" 
                                 VerticalOptions="Center" 
@@ -163,14 +154,20 @@
                                 <Label 
                                     Text="{x:Static helpers:FontCustomIcons.CATEGORY}" 
                                     FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                    TextColor="{DynamicResource PrimaryTextColor}" 
+                                    TextColor="{DynamicResource InverseTextColor}" 
                                     FontSize="18" 
                                 />
 
                                 <Label 
-                                    Text="{Binding Categories.Count, StringFormat='{0} catégories'}" 
+                                    Text="{Binding Categories.Count}" 
                                     FontSize="12" 
-                                    TextColor="Gray" 
+                                    TextColor="{DynamicResource SecondaryTextColor}" 
+                                />
+
+                                <Label 
+                                    Text="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=Resources.CATEGORIES}" 
+                                    FontSize="12" 
+                                    TextColor="{DynamicResource SecondaryTextColor}" 
                                 />
                             </HorizontalStackLayout>
 
@@ -178,7 +175,7 @@
                                 Grid.Column="1"
                                 Grid.Row="0"
                                 Text="{Binding Name}" 
-                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                TextColor="{DynamicResource InverseTextColor}" 
                                 FontAttributes="Bold" 
                                 FontSize="18" 
                                 VerticalOptions="Center" 
@@ -195,20 +192,19 @@
                             >
                                 <Label 
                                     Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
-                                    TextColor="{DynamicResource PrimaryTextColor}" 
+                                    TextColor="{DynamicResource InverseTextColor}" 
                                     VerticalOptions="Center" 
                                 />
 
-                                <!--<Label 
-                                    Text="{Binding Type}" 
-                                    TextColor="{DynamicResource ValidColor}" 
-                                    FontAttributes="Bold"
-                                    VerticalOptions="Center" 
-                                />-->
+                                <Label 
+                                    Text="{Binding Categories.Count}" 
+                                    TextColor="{DynamicResource InverseTextColor}" 
+                                />
 
                                 <Label 
-                                    Text="{Binding Categories.Count, StringFormat='{0} catégories'}" 
-                                    TextColor="{DynamicResource PrimaryTextColor}" 
+                                    Text="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=Resources.CATEGORIES}" 
+                                    FontSize="12" 
+                                    TextColor="{DynamicResource SecondaryTextColor}" 
                                 />
                             </HorizontalStackLayout>
 
@@ -273,26 +269,39 @@
             </CollectionView.EmptyView>
         </CollectionView>
 
-        <!-- Loading Indicator Overlay -->
+        <!-- INDICATEUR DE CHARGEMENT -->
         <Border 
             Grid.RowSpan="3"
             IsVisible="{Binding IsBusy}" 
-            BackgroundColor="#80000000" 
+            BackgroundColor="{DynamicResource OverlayModalColor}" 
             StrokeThickness="0"
             HorizontalOptions="Fill" 
             VerticalOptions="Fill"
             InputTransparent="False">
             <Border 
-                BackgroundColor="#1E1E1E" 
+                BackgroundColor="{DynamicResource SurfaceColor}" 
                 Stroke="{DynamicResource Primary}" 
                 StrokeThickness="2" 
                 StrokeShape="RoundRectangle 16"
                 Padding="24, 20" 
                 HorizontalOptions="Center" 
                 VerticalOptions="Center">
+                
                 <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
-                    <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
-                    <Label Text="Chargement en cours..." TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <ActivityIndicator 
+                        IsRunning="True" 
+                        Color="{DynamicResource Primary}" 
+                        WidthRequest="44" 
+                        HeightRequest="44"
+                    />
+                    
+                    <Label 
+                        Text="{Binding Resources.LOADING}" 
+                        TextColor="{DynamicResource PrimaryTextColor}" 
+                        FontSize="13" 
+                        FontAttributes="Bold" 
+                        HorizontalOptions="Center"
+                    />
                 </VerticalStackLayout>
             </Border>
         </Border>

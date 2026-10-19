@@ -11,20 +11,4 @@ public partial class CategoryPopup
         BindingContext = viewModel;
 	}
 
-    private void OnCancelClicked(object sender, EventArgs e)
-    {
-        //Close(null);
-    }
-
-    private void OnSaveClicked(object sender, EventArgs e)
-    {
-        //if (BindingContext is AddCategoryPopupViewModel vm)
-        //{
-        //    Close(vm.GetResult());
-        //}
-        //else
-        //{
-        //    Close(null);
-        //}
-    }
 }

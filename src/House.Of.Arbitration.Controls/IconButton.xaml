@@ -27,7 +27,6 @@
                 <VisualState x:Name="Disabled">
                     <VisualState.Setters>
                         <Setter Property="Opacity" Value="0.5" />
-                        <!--<Setter TargetName="MainBorder" Property="BackgroundColor" Value="{StaticResource Gray200}" />-->
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

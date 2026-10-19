@@ -27,15 +27,8 @@ public partial class WizardPage : BasePage<CompetitionWizardViewModel>
         
         var settingsStep = new SettingsStepViewModel(resource, popupService, competitionRepository);
         var categoriesStep = new CategoriesStepViewModel(popupService, resource, categoryRepository, drawRepository, warningService);
-        //var userStep = new UserStepViewModel();
-        //var termsStep = new TermsStepViewModel();
-        //var summaryStep = new SummaryStepViewModel(userStep, termsStep);
-
         viewModel.AddStep(settingsStep);
         viewModel.AddStep(categoriesStep);
-        //_viewModel.AddStep(userStep);
-        //_viewModel.AddStep(termsStep);
-        //_viewModel.AddStep(summaryStep);
         
         viewModel.ScrollToRequested += async (index) => 
         {

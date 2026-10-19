@@ -7,12 +7,12 @@
     x:TypeArguments="vm:ServerSetupPopupViewModel"
     x:Class="House.Of.Arbitration.Views.ServerSetupPopup"
     x:DataType="vm:ServerSetupPopupViewModel"
-    BackgroundColor="#333333">
+    BackgroundColor="{DynamicResource OverlayModalColor}">
 
     <Border 
-        Stroke="White" 
-        StrokeThickness="2" 
-        BackgroundColor="#222222" 
+        Stroke="{DynamicResource BorderStrong}" 
+        StrokeThickness="1.5" 
+        BackgroundColor="{DynamicResource SurfaceElevation2}" 
         Padding="20" 
         WidthRequest="{OnIdiom Tablet='400', Phone='300'}" 
         HorizontalOptions="Center" 
@@ -23,21 +23,21 @@
         </Border.StrokeShape>
         
         <VerticalStackLayout Spacing="15">
-            <Label Text="CONFIGURATION DU SERVEUR" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" TextColor="White"/>
+            <Label Text="CONFIGURATION DU SERVEUR" FontSize="20" FontAttributes="Bold" HorizontalOptions="Center" TextColor="{DynamicResource PrimaryTextColor}"/>
             
             <VerticalStackLayout Spacing="5">
-                <Label Text="Nom du serveur" TextColor="LightGray" FontSize="14"/>
-                <Entry Text="{Binding ServerName}" Placeholder="Nom (ex: SERVEUR_KUNGFU)" TextColor="White" BackgroundColor="#444444"/>
+                <Label Text="Nom du serveur" TextColor="{DynamicResource SecondaryTextColor}" FontSize="14"/>
+                <Entry Text="{Binding ServerName}" Placeholder="Nom (ex: SERVEUR_KUNGFU)" TextColor="{DynamicResource PrimaryTextColor}" BackgroundColor="{DynamicResource EntryBackgroundColor}"/>
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="5">
-                <Label Text="Description / Ring" TextColor="LightGray" FontSize="14"/>
-                <Entry Text="{Binding ServerDescription}" Placeholder="Description (ex: Ring 1)" TextColor="White" BackgroundColor="#444444"/>
+                <Label Text="Description / Ring" TextColor="{DynamicResource SecondaryTextColor}" FontSize="14"/>
+                <Entry Text="{Binding ServerDescription}" Placeholder="Description (ex: Ring 1)" TextColor="{DynamicResource PrimaryTextColor}" BackgroundColor="{DynamicResource EntryBackgroundColor}"/>
             </VerticalStackLayout>
 
             <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,10,0,0">
-                <Button Grid.Column="0" Text="ANNULER" Command="{Binding CancelCommand}" BackgroundColor="Gray" TextColor="White"/>
-                <Button Grid.Column="1" Text="DÉMARRER" Command="{Binding ConfirmCommand}" BackgroundColor="{DynamicResource ValidColor}" TextColor="White"/>
+                <Button Grid.Column="0" Text="ANNULER" Command="{Binding CancelCommand}" BackgroundColor="{DynamicResource SurfaceElevation7}" TextColor="{DynamicResource PrimaryTextColor}"/>
+                <Button Grid.Column="1" Text="DÉMARRER" Command="{Binding ConfirmCommand}" BackgroundColor="{DynamicResource ValidColor}" TextColor="{DynamicResource PrimaryTextColor}"/>
             </Grid>
         </VerticalStackLayout>
     </Border>

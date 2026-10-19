@@ -63,15 +63,6 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         Validate();
     }
 
-    private void RefreshCategory(CategoryModel category)
-    {
-        var index = Categories.IndexOf(category);
-        if (index != -1)
-        {
-            Categories[index] = null!;
-            Categories[index] = category;
-        }
-    }
 
     private async Task DeleteDrawAsync(int categoryId)
     {
@@ -245,8 +236,6 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         };
 
         await Shell.Current.GoToAsync("CompetitorsPage", queryAttributes);
-        
-        //RefreshCategory(category);
     }
 
     [RelayCommand]

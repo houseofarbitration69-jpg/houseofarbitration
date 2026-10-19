@@ -22,9 +22,9 @@
             <DataTemplate x:Key="KnockoutTemplate" x:DataType="models:DrawKnockoutModel">
                 <Border 
                     Padding="10,10,10,10" 
-                    Stroke="#EEEEEE" 
+                    Stroke="{DynamicResource SurfaceLight}" 
                     StrokeShape="RoundRectangle 8"
-                    BackgroundColor="#EEEEEE"
+                    BackgroundColor="{DynamicResource SurfaceLight}"
                 >
                     <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*">
                         <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="Auto, *">
@@ -120,9 +120,9 @@
                 <Border 
                     Margin="0,2" 
                     Padding="10"
-                    Stroke="#EEEEEE" 
+                    Stroke="{DynamicResource SurfaceLight}" 
                     StrokeShape="RoundRectangle 8"
-                    BackgroundColor="#EEEEEE"
+                    BackgroundColor="{DynamicResource SurfaceLight}"
                 >
                     <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*">
                         <Grid Grid.Column="0" Grid.Row="0" ColumnDefinitions="Auto, *">
@@ -147,7 +147,7 @@
                                     />
                                 </HorizontalStackLayout>
                                 <Label 
-                                    Text="En attente match prÃ©cÃ©dent" 
+                                    Text="En attente match précédent" 
                                     IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                                     FontAttributes="Italic" 
                                     TextColor="Gray" 
@@ -194,7 +194,7 @@
                                     />
                                 </HorizontalStackLayout>
                                 <Label 
-                                    Text="En attente match prÃ©cÃ©dent" 
+                                    Text="En attente match précédent" 
                                     IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                                     FontAttributes="Italic" 
                                     TextColor="Gray" 
@@ -216,9 +216,9 @@
                 <Border 
                     Margin="0,2" 
                     Padding="10" 
-                    Stroke="#EEEEEE" 
+                    Stroke="{DynamicResource SurfaceLight}" 
                     StrokeShape="RoundRectangle 8"
-                    BackgroundColor="#EEEEEE"
+                    BackgroundColor="{DynamicResource SurfaceLight}"
                 >
                     <Grid ColumnDefinitions="*">
                         <Grid Grid.Column="0" ColumnDefinitions="Auto, *">
@@ -264,14 +264,14 @@
             <DataTemplate x:Key="HeaderTemplate" x:DataType="x:String">
                 <Border
                     Padding="10,10,10,10" 
-                    Stroke="White"
+                    Stroke="{DynamicResource PrimaryTextColor}"
                     StrokeThickness="2"
                     StrokeShape="RoundRectangle 8"
-                    BackgroundColor="#333"
+                    BackgroundColor="{DynamicResource SurfaceElevation6}"
                 >
                     <Label 
                         Text="{Binding .}" 
-                        TextColor="White"
+                        TextColor="{DynamicResource PrimaryTextColor}"
                         FontAttributes="Bold" 
                         FontSize="14"
                         HorizontalOptions="Center"
@@ -352,7 +352,7 @@
                     VerticalOptions="Center"
                     Margin="0,0,0,0"
                     Padding="15,5,15,5"
-                    BackgroundColor="#333"
+                    BackgroundColor="{DynamicResource SurfaceElevation6}"
                     Stroke="White"
                     StrokeThickness="2"
                     StrokeShape="RoundRectangle 15"
@@ -375,17 +375,17 @@
                     StrokeShape="RoundRectangle 18"
                     Padding="12,6"
                     StrokeThickness="1.5"
-                    BackgroundColor="#2B2B2B"
-                    Stroke="#757575"
+                    BackgroundColor="{DynamicResource SurfaceElevation4}"
+                    Stroke="{DynamicResource BorderMuted}"
                 >
                     <Border.Triggers>
                         <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
-                            <Setter Property="Stroke" Value="#4CAF50" />
-                            <Setter Property="BackgroundColor" Value="#1B3B22" />
+                            <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
+                            <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
                         </DataTrigger>
                         <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
-                            <Setter Property="Stroke" Value="#E53935" />
-                            <Setter Property="BackgroundColor" Value="#3B1B1B" />
+                            <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
+                            <Setter Property="BackgroundColor" Value="{DynamicResource ErrorBg}" />
                         </DataTrigger>
                     </Border.Triggers>
 
@@ -396,12 +396,12 @@
                                 HeightRequest="10"
                                 CornerRadius="5"
                                 VerticalOptions="Center"
-                                Color="#E53935"
+                                Color="{DynamicResource ErrorColor}"
                                 BackgroundColor="Transparent"
                             >
                                 <BoxView.Triggers>
                                     <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
-                                        <Setter Property="Color" Value="#4CAF50" />
+                                        <Setter Property="Color" Value="{DynamicResource SuccessColor}" />
                                     </DataTrigger>
                                 </BoxView.Triggers>
                             </BoxView>
@@ -410,14 +410,14 @@
                             <HorizontalStackLayout Spacing="4" VerticalOptions="Center" IsVisible="{Binding IsServerStarted}">
                                 <Label
                                     Text="Serveur actif"
-                                    TextColor="#81C784"
+                                    TextColor="{DynamicResource SuccessLight}"
                                     FontAttributes="Bold"
                                     FontSize="13"
                                     VerticalOptions="Center"
                                 />
                                 <Label
                                     Text="{Binding ServerName, StringFormat='({0})'}"
-                                    TextColor="#C8E6C9"
+                                    TextColor="{DynamicResource SuccessVeryLight}"
                                     FontSize="12"
                                     VerticalOptions="Center"
                                     IsVisible="{Binding ServerName, Converter={StaticResource EmptyToBoolConverter}}"
@@ -427,7 +427,7 @@
                         <!-- Texte statut ARRETE -->
                             <Label
                                 Text="Serveur arrêté"
-                                TextColor="#E57373"
+                                TextColor="{DynamicResource ErrorLight}"
                                 FontAttributes="Bold"
                                 FontSize="13"
                                 VerticalOptions="Center"
@@ -458,9 +458,9 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="models:JudgeGroupModel">
                                 <Border 
-                                    Stroke="#EEEEEE"
+                                    Stroke="{DynamicResource BorderDark}"
                                     StrokeShape="RoundRectangle 10"
-                                    BackgroundColor="#333"
+                                    BackgroundColor="{DynamicResource SurfaceElevation6}"
                                     Padding="0,5,5,5"
                                     Margin="0,5,5,5"
                                     MaximumWidthRequest="380"
@@ -561,9 +561,9 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:JudgeGroupModel">
                             <Border 
-                                Stroke="#EEEEEE"
+                                Stroke="{DynamicResource BorderDark}"
                                 StrokeShape="RoundRectangle 10"
-                                BackgroundColor="#333"
+                                BackgroundColor="{DynamicResource SurfaceElevation6}"
                                 Padding="0,2,5,2"
                                 Margin="0,0,2,2"
                             >
@@ -681,7 +681,7 @@
                             <!-- For Order mode, red covers full width -->
                             <Border 
                                 Grid.ColumnSpan="2" 
-                                Background="#333" 
+                                Background="{DynamicResource SurfaceElevation6}" 
                                 StrokeThickness="0" 
                                 Opacity="0.8"
                                 IsVisible="True" 
@@ -839,17 +839,17 @@
                         StrokeShape="RoundRectangle 12"
                         Padding="14,10"
                         StrokeThickness="1.5"
-                        BackgroundColor="#2B2B2B"
-                        Stroke="#757575"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
                     >
                         <Border.Triggers>
                             <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
-                                <Setter Property="Stroke" Value="#4CAF50" />
-                                <Setter Property="BackgroundColor" Value="#1B3B22" />
+                                <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
+                                <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
                             </DataTrigger>
                             <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
-                                <Setter Property="Stroke" Value="#E53935" />
-                                <Setter Property="BackgroundColor" Value="#3B1B1B" />
+                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
+                                <Setter Property="BackgroundColor" Value="{DynamicResource ErrorBg}" />
                             </DataTrigger>
                         </Border.Triggers>
 
@@ -859,18 +859,18 @@
                                 HeightRequest="12"
                                 CornerRadius="6"
                                 VerticalOptions="Center"
-                                Color="#E53935"
+                                Color="{DynamicResource ErrorColor}"
                             >
                                 <BoxView.Triggers>
                                     <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
-                                        <Setter Property="Color" Value="#4CAF50" />
+                                        <Setter Property="Color" Value="{DynamicResource SuccessColor}" />
                                     </DataTrigger>
                                 </BoxView.Triggers>
                             </BoxView>
 
                             <Label
                                 Text="SERVEUR EN LIGNE"
-                                TextColor="#81C784"
+                                TextColor="{DynamicResource SuccessLight}"
                                 FontAttributes="Bold"
                                 FontSize="14"
                                 VerticalOptions="Center"
@@ -878,7 +878,7 @@
                             />
                             <Label
                                 Text="SERVEUR HORS LIGNE"
-                                TextColor="#E57373"
+                                TextColor="{DynamicResource ErrorLight}"
                                 FontAttributes="Bold"
                                 FontSize="14"
                                 VerticalOptions="Center"

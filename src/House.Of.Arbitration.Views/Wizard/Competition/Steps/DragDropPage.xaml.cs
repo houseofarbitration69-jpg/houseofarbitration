@@ -12,27 +12,7 @@ public partial class DragDropPage
         InitializeComponent();
     }
 
-    private void DropGestureRecognizer_Drop(object sender, DropEventArgs e)
-    {
-        var data = e.Data.Properties["Text"].ToString();
-        var frame = (sender as Element) as Frame;
-        var list = (frame?.Content as VerticalStackLayout);
-        list?.Children.Add(new Label
-        {
-            Text = data ?? string.Empty,
-            TextColor = Colors.Black
-        });
-    }
 
-    private void DragGestureRecognizer_DragStarting(object sender, DragStartingEventArgs e)
-    {
-        var label = (sender as Element) as Label;
-
-        if (label != null)
-        {
-            e.Data.Properties.Add("Text", label.Text);
-        }
-    }
 
 
 

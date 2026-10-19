@@ -24,39 +24,15 @@
                 <steps:CategoriesStepView />
             </DataTemplate>
 
-            <!--<DataTemplate x:Key="UserStepTemplate">
-                <views:UserStepView />
-            </DataTemplate>-->
-
-            <!--<DataTemplate x:Key="TermsStepTemplate">
-                <views:TermsStepView />
-            </DataTemplate>-->
-
-            <!--<DataTemplate x:Key="SummaryStepTemplate">
-                <views:SummaryStepView />
-            </DataTemplate>-->
-
             <wizard:StepTemplateSelector 
                 x:Key="StepSelector"                                 
                 SettingsStepTemplate="{StaticResource SettingsStepTemplate}"
                 CategoriesStepTemplate="{StaticResource CategoriesStepTemplate}"
             />
-            <!--CategoriesStepTemplate="{StaticResource CategoriesStepTemplate}"
-                UserStepTemplate="{StaticResource UserStepTemplate}"
-                TermsStepTemplate="{StaticResource TermsStepTemplate}"
-                SummaryStepTemplate="{StaticResource SummaryStepTemplate}" 
-            />-->
         </ResourceDictionary>
     </base:BasePage.Resources>
 
     <Grid RowDefinitions="*, Auto" Padding="0">
-        <!--<Label Grid.Row="0" 
-               Text="{Binding CurrentStep.Title}" 
-               FontSize="28" 
-               FontAttributes="Bold" 
-               HorizontalOptions="Center" 
-               Margin="0,0,0,30" />-->
-
         <CarouselView 
             Grid.Row="0"
             x:Name="WizardCarousel"
@@ -93,13 +69,13 @@
         <Border 
             Grid.RowSpan="2"
             IsVisible="{Binding IsBusy}" 
-            BackgroundColor="#80000000" 
+            BackgroundColor="{DynamicResource OverlayModalColor}" 
             StrokeThickness="0"
             HorizontalOptions="Fill" 
             VerticalOptions="Fill"
             InputTransparent="False">
             <Border 
-                BackgroundColor="#1E1E1E" 
+                BackgroundColor="{DynamicResource SurfaceColor}" 
                 Stroke="{DynamicResource Primary}" 
                 StrokeThickness="2" 
                 StrokeShape="RoundRectangle 16"
@@ -108,7 +84,7 @@
                 VerticalOptions="Center">
                 <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
                     <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
-                    <Label Text="Chargement en cours..." TextColor="White" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <Label Text="Chargement en cours..." TextColor="{DynamicResource PrimaryTextColor}" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
                 </VerticalStackLayout>
             </Border>
         </Border>

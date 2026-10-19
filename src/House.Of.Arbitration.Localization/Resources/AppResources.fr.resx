@@ -453,4 +453,7 @@
   <data name="GROUP_CODES_MODE" xml:space="preserve">
     <value>Codes du groupe</value>
   </data>
+  <data name="LOADING" xml:space="preserve">
+    <value>Chargement en cours...</value>
+  </data>
 </root>

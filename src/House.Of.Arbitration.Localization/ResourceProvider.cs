@@ -487,26 +487,106 @@ LocalizationResourceManager.Instance.GetValue(nameof(DATA_CLEARED));
     /// </summary>
     public string DATA_GENERATED =>
 LocalizationResourceManager.Instance.GetValue(nameof(DATA_GENERATED));
-
-    public string TAOLU_CODES => LocalizationResourceManager.Instance.GetValue(nameof(TAOLU_CODES));
-    public string ADD_CODE => LocalizationResourceManager.Instance.GetValue(nameof(ADD_CODE));
-    public string EDIT_CODE => LocalizationResourceManager.Instance.GetValue(nameof(EDIT_CODE));
-    public string DELETE_CODE => LocalizationResourceManager.Instance.GetValue(nameof(DELETE_CODE));
-    public string RESET_DEFAULT_CODES => LocalizationResourceManager.Instance.GetValue(nameof(RESET_DEFAULT_CODES));
-    public string CONFIRM_RESET_CODES => LocalizationResourceManager.Instance.GetValue(nameof(CONFIRM_RESET_CODES));
-    public string CONFIRM_DELETE_CODE => LocalizationResourceManager.Instance.GetValue(nameof(CONFIRM_DELETE_CODE));
-    public string CODE_LABEL => LocalizationResourceManager.Instance.GetValue(nameof(CODE_LABEL));
-    public string GROUP_LABEL => LocalizationResourceManager.Instance.GetValue(nameof(GROUP_LABEL));
-    public string MOVEMENT_LABEL => LocalizationResourceManager.Instance.GetValue(nameof(MOVEMENT_LABEL));
-    public string DESCRIPTION_LABEL => LocalizationResourceManager.Instance.GetValue(nameof(DESCRIPTION_LABEL));
-    public string DEDUCTION_VALUE => LocalizationResourceManager.Instance.GetValue(nameof(DEDUCTION_VALUE));
-    public string RECOGNIZED_CODES => LocalizationResourceManager.Instance.GetValue(nameof(RECOGNIZED_CODES));
-    public string KEYPAD => LocalizationResourceManager.Instance.GetValue(nameof(KEYPAD));
-    public string ALL_GROUPS => LocalizationResourceManager.Instance.GetValue(nameof(ALL_GROUPS));
-    public string SEARCH_CODES => LocalizationResourceManager.Instance.GetValue(nameof(SEARCH_CODES));
-    public string CODE_INPUT_MODE => LocalizationResourceManager.Instance.GetValue(nameof(CODE_INPUT_MODE));
-    public string POINT_INPUT_MODE => LocalizationResourceManager.Instance.GetValue(nameof(POINT_INPUT_MODE));
-    public string GROUP_CODES_MODE => LocalizationResourceManager.Instance.GetValue(nameof(GROUP_CODES_MODE));
+    /// <summary>
+    /// Gets the translated "TAOLU_CODES" string.
+    /// </summary>
+    public string TAOLU_CODES =>
+LocalizationResourceManager.Instance.GetValue(nameof(TAOLU_CODES));
+    /// <summary>
+    /// Gets the translated "ADD_CODE" string.
+    /// </summary>
+    public string ADD_CODE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ADD_CODE));
+    /// <summary>
+    /// Gets the translated "EDIT_CODE" string.
+    /// </summary>
+    public string EDIT_CODE =>
+LocalizationResourceManager.Instance.GetValue(nameof(EDIT_CODE));
+    /// <summary>
+    /// Gets the translated "DELETE_CODE" string.
+    /// </summary>
+    public string DELETE_CODE =>
+LocalizationResourceManager.Instance.GetValue(nameof(DELETE_CODE));
+    /// <summary>
+    /// Gets the translated "RESET_DEFAULT_CODES" string.
+    /// </summary>
+    public string RESET_DEFAULT_CODES =>
+LocalizationResourceManager.Instance.GetValue(nameof(RESET_DEFAULT_CODES));
+    /// <summary>
+    /// Gets the translated "CONFIRM_RESET_CODES" string.
+    /// </summary>
+    public string CONFIRM_RESET_CODES =>
+LocalizationResourceManager.Instance.GetValue(nameof(CONFIRM_RESET_CODES));
+    /// <summary>
+    /// Gets the translated "CONFIRM_DELETE_CODE" string.
+    /// </summary>
+    public string CONFIRM_DELETE_CODE =>
+LocalizationResourceManager.Instance.GetValue(nameof(CONFIRM_DELETE_CODE));
+    /// <summary>
+    /// Gets the translated "CODE_LABEL" string.
+    /// </summary>
+    public string CODE_LABEL =>
+LocalizationResourceManager.Instance.GetValue(nameof(CODE_LABEL));
+    /// <summary>
+    /// Gets the translated "GROUP_LABEL" string.
+    /// </summary>
+    public string GROUP_LABEL =>
+LocalizationResourceManager.Instance.GetValue(nameof(GROUP_LABEL));
+    /// <summary>
+    /// Gets the translated "MOVEMENT_LABEL" string.
+    /// </summary>
+    public string MOVEMENT_LABEL =>
+LocalizationResourceManager.Instance.GetValue(nameof(MOVEMENT_LABEL));
+    /// <summary>
+    /// Gets the translated "DESCRIPTION_LABEL" string.
+    /// </summary>
+    public string DESCRIPTION_LABEL =>
+LocalizationResourceManager.Instance.GetValue(nameof(DESCRIPTION_LABEL));
+    /// <summary>
+    /// Gets the translated "DEDUCTION_VALUE" string.
+    /// </summary>
+    public string DEDUCTION_VALUE =>
+LocalizationResourceManager.Instance.GetValue(nameof(DEDUCTION_VALUE));
+    /// <summary>
+    /// Gets the translated "RECOGNIZED_CODES" string.
+    /// </summary>
+    public string RECOGNIZED_CODES =>
+LocalizationResourceManager.Instance.GetValue(nameof(RECOGNIZED_CODES));
+    /// <summary>
+    /// Gets the translated "KEYPAD" string.
+    /// </summary>
+    public string KEYPAD =>
+LocalizationResourceManager.Instance.GetValue(nameof(KEYPAD));
+    /// <summary>
+    /// Gets the translated "ALL_GROUPS" string.
+    /// </summary>
+    public string ALL_GROUPS =>
+LocalizationResourceManager.Instance.GetValue(nameof(ALL_GROUPS));
+    /// <summary>
+    /// Gets the translated "SEARCH_CODES" string.
+    /// </summary>
+    public string SEARCH_CODES =>
+LocalizationResourceManager.Instance.GetValue(nameof(SEARCH_CODES));
+    /// <summary>
+    /// Gets the translated "CODE_INPUT_MODE" string.
+    /// </summary>
+    public string CODE_INPUT_MODE =>
+LocalizationResourceManager.Instance.GetValue(nameof(CODE_INPUT_MODE));
+    /// <summary>
+    /// Gets the translated "POINT_INPUT_MODE" string.
+    /// </summary>
+    public string POINT_INPUT_MODE =>
+LocalizationResourceManager.Instance.GetValue(nameof(POINT_INPUT_MODE));
+    /// <summary>
+    /// Gets the translated "GROUP_CODES_MODE" string.
+    /// </summary>
+    public string GROUP_CODES_MODE =>
+LocalizationResourceManager.Instance.GetValue(nameof(GROUP_CODES_MODE));
+    /// <summary>
+    /// Gets the translated "LOADING" string.
+    /// </summary>
+    public string LOADING =>
+LocalizationResourceManager.Instance.GetValue(nameof(LOADING));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.
