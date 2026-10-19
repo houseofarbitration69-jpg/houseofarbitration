@@ -25,12 +25,12 @@ public partial class CategoryModel : ObservableObject
     /// <summary>
     /// Obtient ou définit le poids minimum de la catégorie
     /// </summary>
-    public int WeightMin { get; set; }
+    public double WeightMin { get; set; }
 
     /// <summary>
     /// Obtient ou définit le poids maximum de la catégorie
     /// </summary>
-    public int WeightMax { get; set; }
+    public double WeightMax { get; set; }
 
     /// <summary>
     /// Obtient ou définit l'identifiant de la plage d'age de la catégorie

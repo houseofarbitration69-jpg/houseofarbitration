@@ -27,7 +27,7 @@
                         <Label 
                             Text="{Binding Resources.COMPETITION_NAME}" 
                             Style="{StaticResource FormLabelStyle}"
-                            Margin="10,0" 
+                            TextColor="{DynamicResource InverseTextColor}"
                         />
 
                         <Border 
@@ -73,7 +73,7 @@
                         <Label 
                             Text="{Binding Resources.COMPETITION_TYPE}" 
                             Style="{StaticResource FormLabelStyle}"
-                            Margin="10,0" 
+                            TextColor="{DynamicResource InverseTextColor}"
                         />
 
                         <Border 
@@ -122,7 +122,7 @@
                         <Label 
                             Text="{Binding Resources.COMPETITION_DATE}" 
                             Style="{StaticResource FormLabelStyle}"
-                            Margin="4,0" 
+                            TextColor="{DynamicResource InverseTextColor}"
                         />
                         <Border 
                             x:Name="DateBorder"

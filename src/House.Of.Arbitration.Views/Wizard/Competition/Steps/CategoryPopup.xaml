@@ -13,9 +13,6 @@
     BackgroundColor="Transparent"
     Padding="0"
 >
-    <ContentView.Resources>
-    </ContentView.Resources>
-
     <Border 
         VerticalOptions="Center"
         BackgroundColor="{DynamicResource PageBackgroundColor}"
@@ -27,6 +24,7 @@
             <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
         </Border.StrokeShape>
         <VerticalStackLayout Spacing="10">
+            <!-- TITRE -->
             <Label 
                 Text="{Binding Title}" 
                 Style="{DynamicResource Headline}" 
@@ -34,15 +32,13 @@
                 TextColor="{DynamicResource ValidColor}"
             />
 
-            <!-- Style -->
+            <!-- SELECTION DU STYLE -->
             <VerticalStackLayout Spacing="5">
                 <Label 
                     Text="{Binding Resources.STYLE}" 
-                    FontAttributes="Bold" 
-                    FontSize="14" 
-                    Margin="4,0" 
-                    TextColor="LightGray"
+                    Style="{DynamicResource FormLabelStyle}"
                 />
+                
                 <Border 
                     Stroke="{DynamicResource ValidColor}"
                     StrokeThickness="1"
@@ -59,26 +55,25 @@
                             <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                         </DataTrigger>
                     </Border.Triggers>
+                    
                     <Picker
                         ItemsSource="{Binding CategoryTypes}"
                         SelectedItem="{Binding SelectedType}"
                         ItemDisplayBinding="{Binding DisplayName}"
-                        TextColor="Black"
-                        BackgroundColor="White"
+                        TextColor="{DynamicResource InverseTextColor}"
+                        BackgroundColor="{DynamicResource White}"
                         MinimumHeightRequest="30"
                     />
                 </Border>
             </VerticalStackLayout>
 
-            <!-- Round (Conditional) -->
+            <!-- SELECTION DU ROUND -->
             <VerticalStackLayout Spacing="5" IsVisible="False">
                 <Label 
                     Text="{Binding Resources.ROUND_TYPE}" 
-                    FontAttributes="Bold" 
-                    FontSize="14" 
-                    Margin="4,0" 
-                    TextColor="LightGray"
+                    Style="{DynamicResource FormLabelStyle}"
                 />
+                
                 <Border 
                     Stroke="{DynamicResource ValidColor}"
                     StrokeThickness="1"
@@ -99,11 +94,12 @@
                         ItemsSource="{Binding RoundTypes}"
                         SelectedItem="{Binding SelectedRoundType}"
                         ItemDisplayBinding="{Binding DisplayName}"
-                        TextColor="Black"
-                        BackgroundColor="White"
+                        TextColor="{DynamicResource InverseTextColor}"
+                        BackgroundColor="{DynamicResource White}"
                         MinimumHeightRequest="30"
                     />
                 </Border>
+                
                 <VerticalStackLayout.Triggers>
                     <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding SelectedType.Value}" Value="{x:Static models:CategoryType.Sanda}">
                         <Setter Property="IsVisible" Value="True" />
@@ -120,15 +116,13 @@
                 </VerticalStackLayout.Triggers>
             </VerticalStackLayout>
 
-            <!-- Genre & Age -->
+            <!-- SELECTION DU GENRE -->
             <VerticalStackLayout Spacing="5">
                 <Label 
                     Text="{Binding Resources.GENRE}" 
-                    FontAttributes="Bold" 
-                    FontSize="14" 
-                    Margin="4,0" 
-                    TextColor="LightGray"
+                    Style="{DynamicResource FormLabelStyle}"
                 />
+
                 <Border 
                     Stroke="{DynamicResource ValidColor}"
                     StrokeThickness="1"
@@ -145,25 +139,25 @@
                             <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                         </DataTrigger>
                     </Border.Triggers>
+                    
                     <Picker 
                         ItemsSource="{Binding Genres}"
                         SelectedItem="{Binding SelectedGenre}"
                         ItemDisplayBinding="{Binding DisplayName}"
-                        TextColor="Black"
-                        BackgroundColor="White"
+                        TextColor="{DynamicResource InverseTextColor}"
+                        BackgroundColor="{DynamicResource White}"
                         MinimumHeightRequest="30"
                     />
                 </Border>
             </VerticalStackLayout>
 
+            <!-- SELECTION DE LA TRANCHE D'AGE -->
             <VerticalStackLayout Spacing="5">
                 <Label 
                     Text="{Binding Resources.OLD}" 
-                    FontAttributes="Bold" 
-                    FontSize="14" 
-                    Margin="4,0" 
-                    TextColor="LightGray"
+                    Style="{DynamicResource FormLabelStyle}"
                 />
+                
                 <Border 
                     Stroke="{DynamicResource ValidColor}"
                     StrokeThickness="1"
@@ -180,46 +174,52 @@
                             <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                         </DataTrigger>
                     </Border.Triggers>
+                    
                     <Picker 
                         ItemsSource="{Binding AgeRanges}"
                         SelectedItem="{Binding SelectedAgeRange}"
                         ItemDisplayBinding="{Binding Label}"
-                        TextColor="Black"
-                        BackgroundColor="White"
+                        TextColor="{DynamicResource InverseTextColor}"
+                        BackgroundColor="{DynamicResource White}"
                         MinimumHeightRequest="30"
                     />
                 </Border>
             </VerticalStackLayout>
 
-            <!-- Weight Min & Weight Max -->
+            <!-- SELECTION DU POIDS MAXIMUM & MINIMUM -->
             <Grid ColumnDefinitions="*, *" ColumnSpacing="15" IsVisible="False">
                 <VerticalStackLayout Spacing="5">
                     <Label 
                         Text="{Binding Resources.WEIGHT_MIN}" 
-                        FontAttributes="Bold" 
-                        FontSize="14" 
-                        Margin="4,0" 
-                        TextColor="LightGray"
+                        Style="{DynamicResource FormLabelStyle}"
                     />
+    
                     <Border 
-                        Stroke="LightGray"
+                        Stroke="{DynamicResource BorderColor}"
                         StrokeThickness="1"
-                        BackgroundColor="White"
+                        BackgroundColor="{DynamicResource White}"
                         Padding="0"
                         Margin="0"
                     >
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                         </Border.StrokeShape>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding HasWeightError}" Value="True">
+                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        
                         <Entry 
                             Grid.Column="1"
                             Margin="0"
-                            Text="{Binding WeightMin}" 
+                            Text="{Binding WeightMin, Converter={StaticResource DoubleToStringConverter}}" 
                             Placeholder="{Binding Resources.WEIGHT_MIN}"
-                            PlaceholderColor="Gray"
-                            TextColor="Black"
+                            PlaceholderColor="{DynamicResource PlaceholderColor}"
+                            TextColor="{DynamicResource InverseTextColor}"
                             VerticalOptions="Center" 
                             MinimumHeightRequest="30"
+                            Keyboard="Numeric"
                         />
                     </Border>
                 </VerticalStackLayout>
@@ -227,30 +227,35 @@
                 <VerticalStackLayout Grid.Column="1" Spacing="5">
                     <Label 
                         Text="{Binding Resources.WEIGHT_MAX}" 
-                        FontAttributes="Bold" 
-                        FontSize="14" 
-                        Margin="4,0" 
-                        TextColor="LightGray"
+                        Style="{DynamicResource FormLabelStyle}"
                     />
+
                     <Border 
-                        Stroke="LightGray"
+                        Stroke="{DynamicResource BorderColor}"
                         StrokeThickness="1"
-                        BackgroundColor="White"
+                        BackgroundColor="{DynamicResource White}"
                         Padding="0"
                         Margin="0"
                     >
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
                         </Border.StrokeShape>
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding HasWeightError}" Value="True">
+                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        
                         <Entry 
                             Grid.Column="1"
                             Margin="0"
-                            Text="{Binding WeightMax}" 
+                            Text="{Binding WeightMax, Converter={StaticResource DoubleToStringConverter}}" 
                             Placeholder="{Binding Resources.WEIGHT_MAX}"
-                            PlaceholderColor="Gray"
-                            TextColor="Black"
+                            PlaceholderColor="{DynamicResource PlaceholderColor}"
+                            TextColor="{DynamicResource InverseTextColor}"
                             VerticalOptions="Center" 
                             MinimumHeightRequest="30"
+                            Keyboard="Numeric"
                         />
                     </Border>
                 </VerticalStackLayout>
@@ -270,7 +275,7 @@
                 </Grid.Triggers>
             </Grid>
 
-            <!-- Buttons -->
+            <!-- BUTTONS -->
             <Grid ColumnDefinitions="*, *" ColumnSpacing="15">
                 <controls:IconButton
                     Grid.Column="0" 

@@ -55,8 +55,7 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontAttributes" Value="Bold"/>
         <Setter Property="FontFamily" Value="{x:Static helpers:FontHelper.OPENSANS_REGULAR_NAME}"/>
-        <!--<Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>-->
-        <Setter Property="TextColor" Value="{DynamicResource InverseTextColor}"/>
+        <Setter Property="TextColor" Value="{DynamicResource PrimaryTextColor}"/>
     </Style>
     <!-- END FORM -->
 

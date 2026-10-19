@@ -93,6 +93,11 @@ namespace House.Of.Arbitration.App
             {
 #if ANDROID
                 handler.PlatformView.BackgroundTintList = Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+                if (view.Keyboard == Keyboard.Numeric)
+                {
+                    handler.PlatformView.InputType = Android.Text.InputTypes.ClassNumber | Android.Text.InputTypes.NumberFlagDecimal;
+                    handler.PlatformView.KeyListener = Android.Text.Method.DigitsKeyListener.GetInstance("0123456789.,");
+                }
 #elif WINDOWS
                 handler.PlatformView.BorderThickness = new Microsoft.UI.Xaml.Thickness(0);
                 handler.PlatformView.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(Microsoft.UI.Colors.Transparent);

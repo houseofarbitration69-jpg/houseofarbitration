@@ -3,6 +3,7 @@ using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Localization;
+using House.Of.Arbitration.Models.Helpers;
 using Microsoft.Extensions.Logging;
 using System.Globalization;
 #endregion
@@ -116,6 +117,20 @@ public partial class BaseViewModel : ObservableObject
 
             return status;
         });
+    }
+
+    /// <summary>
+    /// Méthode permettant de traduire une chaine
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="prefix"></param>
+    /// <returns></returns>
+    protected List<LocalizedEnum<T>> LocalizeEnum<T>(string prefix) where T : Enum
+    {
+        return Enum.GetValues(typeof(T))
+            .Cast<T>()
+            .Select(e => new LocalizedEnum<T>(e, LocalizationResourceManager.Instance.GetValue($"{prefix}{e.ToString().ToUpper()}")))
+            .ToList();
     }
     #endregion
 
