@@ -3,6 +3,7 @@ using House.Of.Arbitration.Views;
 using House.Of.Arbitration.Views.Competition;
 using House.Of.Arbitration.Views.Wizard.Competition;
 using House.Of.Arbitration.Views.Wizard.Competition.Steps;
+using House.Of.Arbitration.Models;
 #endregion
 
 namespace House.Of.Arbitration.App;
@@ -13,21 +14,20 @@ public partial class AppShell : Shell
     {
         InitializeComponent();
 
-        Routing.RegisterRoute("HomePage", typeof(HomePage));
+        Routing.RegisterRoute(Constants.Navigation.Page.HOME, typeof(HomePage));
 
-        Routing.RegisterRoute("MasterPage", typeof(MasterPage));
-        Routing.RegisterRoute("JudgePage", typeof(JudgePage));
+        Routing.RegisterRoute(Constants.Navigation.Page.MASTER, typeof(MasterPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.JUDGE, typeof(JudgePage));
 
-        Routing.RegisterRoute("CompetitionWizard", typeof(WizardPage));
-        Routing.RegisterRoute("Competitions", typeof(CompetitionsPage));
-        Routing.RegisterRoute("DrawsManagementPage", typeof(DrawsManagementPage));
-        Routing.RegisterRoute("CompetitorsPage", typeof(CompetitorsPage));
-        Routing.RegisterRoute("DrawPage", typeof(DrawPage));
-        //Routing.RegisterRoute("Test", typeof(DragDropPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.COMPETITION_WIZARD, typeof(WizardPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.COMPETITIONS, typeof(CompetitionsPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.DRAWS_MANAGEMENT, typeof(DrawsManagementPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.COMPETITORS, typeof(CompetitorsPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.DRAWS, typeof(DrawPage));
 
-        Routing.RegisterRoute("Server", typeof(ServerPage));
-        Routing.RegisterRoute("ServerTaolu", typeof(ServerTaoluPage));
-        Routing.RegisterRoute("RefereeDataPage", typeof(RefereeDataPage));
-        Routing.RegisterRoute("TaoluCodesPage", typeof(TaoluCodesPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.SERVER_SANDA, typeof(ServerPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.SERVER_TAOLU, typeof(ServerTaoluPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.REFEREE_DATA, typeof(RefereeDataPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.TAOLU_CODES, typeof(TaoluCodesPage));
     }
 }

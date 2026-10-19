@@ -26,6 +26,25 @@ public partial class BaseViewModel : ObservableObject
 
     #region Properties
     /// <summary>
+    /// Obtient ou définit le titre de la page
+    /// </summary>
+    [ObservableProperty]
+    protected string _title = String.Empty;
+
+
+    /// <summary>
+    /// Obtient si on est en mode Debug
+    /// </summary>
+    public bool IsDebug =>
+#if DEBUG
+        true;
+#else
+        false;
+#endif
+    #endregion
+
+    #region Properties
+    /// <summary>
     /// Gets the provider for localized string resources.
     /// </summary>
     public ResourceProvider Resources { get; }

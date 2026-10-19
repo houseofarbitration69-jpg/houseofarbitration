@@ -8,17 +8,15 @@
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
-    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     x:TypeArguments="vm:HomeViewModel"
     x:Class="House.Of.Arbitration.Views.HomePage"
     x:DataType="vm:HomeViewModel"
     x:Name="this"
 >
-    <base:BasePage.Behaviors>
-        <toolkit:StatusBarBehavior StatusBarColor="Gray" StatusBarStyle="LightContent" />
-    </base:BasePage.Behaviors>
-    
-    <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,250,*">
+    <Grid 
+        RowDefinitions="*,Auto,*" 
+        ColumnDefinitions="*,250,*"
+    >
         <Label 
             Grid.Row="0" 
             Grid.ColumnSpan="3" 
@@ -26,38 +24,50 @@
             Style="{StaticResource ApplicationNameStyle}"
         />
         
-        <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
+        <VerticalStackLayout 
+            Grid.Row="1" 
+            Grid.Column="1" 
+            Spacing="10"
+            VerticalOptions="Center"
+        >
             <controls:IconButton 
                 Text="{Binding Resources.MASTER}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding NavigateToCommand}"
-                CommandParameter="MasterPage"
+                CommandParameter="{x:Static models:Constants+Navigation+Page.MASTER}"
             />
+            
             <controls:IconButton 
                 Text="{Binding Resources.JUDGE}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding NavigateToCommand}"
-                CommandParameter="JudgePage"
+                CommandParameter="{x:Static models:Constants+Navigation+Page.JUDGE}"
             />
+            
             <controls:IconButton 
                 Text="{Binding Resources.HISTORICS}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding NavigateToCommand}"
-                CommandParameter="RefereeDataPage"
+                CommandParameter="{x:Static models:Constants+Navigation+Page.REFEREE_DATA}"
             />
+            
             <controls:IconButton 
                 Text="{Binding Resources.TAOLU_CODES}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding NavigateToCommand}"
-                CommandParameter="TaoluCodesPage"
+                CommandParameter="{x:Static models:Constants+Navigation+Page.TAOLU_CODES}"
             />
+            
             <controls:IconButton 
+                IsVisible="{Binding IsDebug}"
                 Text="{Binding Resources.GENERATE_DATA}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding SeedDataCommand}"
                 Margin="0,20,0,0"
             />
+            
             <controls:IconButton 
+                IsVisible="{Binding IsDebug}"
                 Text="{Binding Resources.CLEAR_DATA}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding ClearDataCommand}"

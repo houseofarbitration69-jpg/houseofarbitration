@@ -10,6 +10,8 @@ namespace House.Of.Arbitration.Views.Core.Helpers
 
     public static class ThemeHelper
     {
+        public static event Action? ThemeChanged;
+
         public static void SetTheme(AppThemeType themeType)
         {
             var mergedDictionaries = Application.Current?.Resources.MergedDictionaries;
@@ -34,6 +36,8 @@ namespace House.Of.Arbitration.Views.Core.Helpers
                         mergedDictionaries.Add(new PastelTheme());
                         break;
                 }
+
+                ThemeChanged?.Invoke();
             }
         }
     }

@@ -7,8 +7,14 @@ namespace House.Of.Arbitration.Views;
 
 public partial class MasterPage : BasePage<MasterViewModel>
 {
-	public MasterPage(MasterViewModel viewModel) : base(viewModel)
+    #region Constructors
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="viewModel"></param>
+    public MasterPage(MasterViewModel viewModel) : base(viewModel)
 	{
 		InitializeComponent();
 	}
+	#endregion
 }

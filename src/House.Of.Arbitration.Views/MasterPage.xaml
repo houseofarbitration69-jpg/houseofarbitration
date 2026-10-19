@@ -98,6 +98,7 @@
                             ColumnSpacing="10"
                             RowDefinitions="{OnIdiom Tablet='Auto, Auto', Phone='35,Auto,Auto'}"
                         >
+                            <!-- ICON SANDA -->
                             <Label 
                                 Grid.Column="0" 
                                 Grid.RowSpan="2" 
@@ -110,6 +111,7 @@
                                 HorizontalOptions="Center"
                             />
 
+                            <!-- ICON TAOLU -->
                             <Label 
                                 Grid.Column="0" 
                                 Grid.RowSpan="2" 
@@ -122,6 +124,7 @@
                                 HorizontalOptions="Center"
                             />
 
+                            <!-- DATE DE LA COMPETITION -->
                             <Label 
                                 Grid.Column="1" 
                                 Grid.Row="0" 
@@ -131,6 +134,7 @@
                                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                             />
 
+                            <!-- NOM DE LA COMPETITION - TABLET -->
                             <controls:ScrollingText 
                                 Grid.Column="2" 
                                 Grid.Row="0"
@@ -144,6 +148,7 @@
                                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                             />
 
+                            <!-- NOMBRE DE CATEGORIE - TABLET -->
                             <HorizontalStackLayout 
                                 Grid.Column="1" 
                                 Grid.Row="1" 
@@ -162,15 +167,19 @@
                                     Text="{Binding Categories.Count}" 
                                     FontSize="12" 
                                     TextColor="{DynamicResource SecondaryTextColor}" 
+                                    VerticalOptions="Center"
                                 />
 
                                 <Label 
                                     Text="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=Resources.CATEGORIES}" 
                                     FontSize="12" 
+                                    Padding="0,0,0,0"
+                                    VerticalOptions="Center"
                                     TextColor="{DynamicResource SecondaryTextColor}" 
                                 />
                             </HorizontalStackLayout>
 
+                            <!-- NOM DE LA COMPETITION - PHONE -->
                             <controls:ScrollingText 
                                 Grid.Column="1"
                                 Grid.Row="0"
@@ -183,12 +192,14 @@
                                 IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                             />
 
+                            <!-- NOMBRE DE CATEGORIE - PHONE -->
                             <HorizontalStackLayout
                                 Grid.Column="1"
                                 Grid.Row="1"
                                 IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                                 Spacing="10"
                                 HorizontalOptions="Start"
+                                VerticalOptions="Center"
                             >
                                 <Label 
                                     Text="{Binding Date, StringFormat='{0:dd/MM/yyyy}'}" 
@@ -198,33 +209,46 @@
 
                                 <Label 
                                     Text="{Binding Categories.Count}" 
-                                    TextColor="{DynamicResource InverseTextColor}" 
+                                    FontSize="12" 
+                                    TextColor="{DynamicResource SecondaryTextColor}" 
+                                    VerticalOptions="Center"
                                 />
 
                                 <Label 
                                     Text="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=Resources.CATEGORIES}" 
                                     FontSize="12" 
+                                    Padding="-5,0,0,0"
+                                    VerticalOptions="Center"
                                     TextColor="{DynamicResource SecondaryTextColor}" 
                                 />
                             </HorizontalStackLayout>
 
+                            <!-- LISTE DES ACTIONS -->
                             <HorizontalStackLayout 
-                                Grid.Column="{OnIdiom Tablet='2', Phone='1'}" 
-                                Grid.ColumnSpan="{OnIdiom Tablet='0', Phone='2'}"
+                                Grid.Column="{OnIdiom Tablet='2', Phone='0'}" 
+                                Grid.ColumnSpan="{OnIdiom Tablet='0', Phone='3'}"
                                 Grid.Row="{OnIdiom Tablet='0', Phone='2'}"
                                 Grid.RowSpan="{OnIdiom Tablet='2', Phone='0'}"
                                 Margin="{OnIdiom Tablet='0,0,0,0', Phone='0,10,0,0'}"
                                 Spacing="8" 
                                 VerticalOptions="Center"
-                                HorizontalOptions="End"
+                                HorizontalOptions="{OnIdiom Tablet='End', Phone='Center'}"
                             >
-                                <!-- En BindableLayout, x:Reference sur la page racine fonctionne parfaitement -->
+                                <!-- EDITION -->
                                 <controls:IconButton
                                     Style="{StaticResource ListActionEditButtonStyle}"
                                     Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=EditCompetitionCommand}"
                                     CommandParameter="{Binding}"
                                 />
 
+                                <!-- SUPPRESSION -->
+                                <controls:IconButton
+                                    Style="{StaticResource ListActionDeleteButtonStyle}"
+                                    Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=DeleteCompetitionCommand}"
+                                    CommandParameter="{Binding .}"
+                                />
+
+                                <!-- TIRAGE -->
                                 <controls:IconButton
                                     Style="{StaticResource ListActionPlayButtonStyle}"
                                     Icon="{x:Static helpers:FontCustomIcons.DRAWS}"
@@ -232,12 +256,7 @@
                                     CommandParameter="{Binding}"
                                 />
 
-                                <controls:IconButton
-                                    Style="{StaticResource ListActionDeleteButtonStyle}"
-                                    Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=DeleteCompetitionCommand}"
-                                    CommandParameter="{Binding .}"
-                                />
-
+                                <!-- DEMARRER -->
                                 <controls:IconButton
                                     Style="{StaticResource ListActionPlayButtonStyle}"
                                     Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=StartCompetitionCommand}"
@@ -277,7 +296,8 @@
             StrokeThickness="0"
             HorizontalOptions="Fill" 
             VerticalOptions="Fill"
-            InputTransparent="False">
+            InputTransparent="False"
+        >
             <Border 
                 BackgroundColor="{DynamicResource SurfaceColor}" 
                 Stroke="{DynamicResource Primary}" 

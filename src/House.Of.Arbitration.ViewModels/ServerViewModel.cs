@@ -1171,7 +1171,7 @@ public partial class ServerViewModel : BaseViewModel
         if (CurrentDraw != null)
         {
             CurrentMatchNumber = sortedDraws.IndexOf(CurrentDraw) + 1;
-            
+
             if (!string.IsNullOrEmpty(CurrentDraw.RoundResultsJson))
             {
                 try
@@ -1305,71 +1305,42 @@ public partial class ServerViewModel : BaseViewModel
     #region Commands Timer
 
     /// <summary>
-
     /// Commande permettant de démarrer le timer
-
     /// </summary>
-
     /// <returns></returns>
-
     [RelayCommand]
-
     private async Task StartTimer()
-
     {
 
         if (!IsTimerRunning && _timeLeft.TotalSeconds > 0)
-
         {
-
             _timer?.Start();
 
             IsTimerRunning = true;
 
             await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_START);
-
         }
-
     }
 
-
-
     /// <summary>
-
     /// Commande permettant de mettre en pause le timer
-
     /// </summary>
-
     /// <returns></returns>
-
     [RelayCommand]
-
     private async Task PauseTimer()
-
     {
-
         StopTimer();
 
         await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
-
     }
 
-
-
     /// <summary>
-
     /// Commande permettant de réinitialiser le timer
-
     /// </summary>
-
     /// <returns></returns>
-
     [RelayCommand]
-
     private async Task ResetTimer()
-
     {
-
         StopTimer();
 
         _timeLeft = TimeSpan.FromMinutes(2); // Default reset
@@ -1377,49 +1348,32 @@ public partial class ServerViewModel : BaseViewModel
         OnPropertyChanged(nameof(TimeLeftDisplay));
 
         await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
-
     }
 
-
-
     /// <summary>
-
     /// Commande permettant de définir un temps pour le timer
-
     /// </summary>
-
     /// <returns></returns>
-
     [RelayCommand]
-
     private async Task SetTimer()
-
     {
 
         string result = await Shell.Current.DisplayActionSheetAsync("Définir le temps", "Annuler", null, "1:00", "1:30", "2:00", "3:00", "5:00");
 
         if (result != null && result != "Annuler")
-
         {
-
             StopTimer();
 
             if (TimeSpan.TryParseExact(result, @"m\:ss", null, out var newTime))
-
             {
-
                 _timeLeft = newTime;
 
                 OnPropertyChanged(nameof(TimeLeftDisplay));
 
                 await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
-
             }
-
         }
-
     }
-
     #endregion
 
 
@@ -1516,19 +1470,19 @@ public partial class ServerViewModel : BaseViewModel
                 WinnerColor = roundWinner
             });
             CurrentDraw.RoundResultsJson = JsonSerializer.Serialize(RoundResults, _jsonOptions);
-            
+
             // Check if match is finished (best of 3 logic for Sanda)
             if (CurrentDraw.Type != RoundType.Order)
             {
                 int redWins = RoundResults.Count(r => r.WinnerColor == "Red");
                 int blueWins = RoundResults.Count(r => r.WinnerColor == "Blue");
-                
+
                 if (redWins < 2 && blueWins < 2 && CurrentDraw.CurrentRound < 3)
                 {
                     CurrentDraw.CurrentRound++;
                     if (CurrentDraw is DrawKnockoutModel k1) await _drawKnockoutService.UpdateAsync(k1);
                     else if (CurrentDraw is DrawPoolsModel p1) await _drawPoolsModel.UpdateAsync(p1);
-                    
+
                     ResetJudgeScores();
                     await ResetTimer();
                     await BroadcastMatchInfo();

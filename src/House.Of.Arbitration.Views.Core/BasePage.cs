@@ -1,5 +1,10 @@
-﻿#region Imports
+#region Imports
+#if ANDROID || IOS || MACCATALYST
+using CommunityToolkit.Maui.Behaviors;
+using CommunityToolkit.Maui.Core;
+#endif
 using House.Of.Arbitration.ViewModels.Core;
+using House.Of.Arbitration.Views.Core.Helpers;
 using System.Diagnostics;
 #endregion
 
@@ -16,6 +21,9 @@ public partial class BasePage<T> : ContentPage
     private static readonly ActivitySource ActivitySource = new ActivitySource("[REPLACE]");
 
     private readonly Stopwatch _pageLoadStopwatch;
+#if ANDROID || IOS || MACCATALYST
+    private readonly StatusBarBehavior _statusBarBehavior;
+#endif
 
     private Activity? _pageActivity;
 
@@ -30,6 +38,13 @@ public partial class BasePage<T> : ContentPage
         _pageLoadStopwatch = new Stopwatch();
 
         Shell.SetNavBarIsVisible(this, false);
+
+#if ANDROID || IOS || MACCATALYST
+        _statusBarBehavior = new StatusBarBehavior();
+        SetupStatusBar();
+        Behaviors.Add(_statusBarBehavior);
+#endif
+        PropertyChanged += OnPagePropertyChanged;
     }
     #endregion
 
@@ -40,6 +55,9 @@ public partial class BasePage<T> : ContentPage
     protected override async void OnAppearing()
     {
         _pageLoadStopwatch.Start();
+
+        SyncStatusBar();
+        ThemeHelper.ThemeChanged += OnThemeChanged;
 
         base.OnAppearing();
         if (BindingContext is BaseViewModel vm)
@@ -58,6 +76,8 @@ public partial class BasePage<T> : ContentPage
     /// </summary>
     protected override async void OnDisappearing()
     {
+        ThemeHelper.ThemeChanged -= OnThemeChanged;
+
         _pageLoadStopwatch.Stop();
 
         _pageActivity?.SetTag("page.duration_ms", _pageLoadStopwatch.ElapsedMilliseconds);
@@ -118,5 +138,84 @@ public partial class BasePage<T> : ContentPage
             }
         }
     }
+    #endregion
+
+    #region Status Bar
+    private void SetupStatusBar()
+    {
+        SyncStatusBar();
+    }
+
+    private void SyncStatusBar()
+    {
+#if ANDROID || IOS || MACCATALYST
+        var color = GetScreenBackgroundColor();
+        if (color != null)
+        {
+            _statusBarBehavior.StatusBarColor = color;
+            UpdateStatusBarStyle(color);
+        }
+#endif
+    }
+
+    private Color? GetScreenBackgroundColor()
+    {
+        var effectiveColor = GetEffectiveBackgroundColor();
+        if (effectiveColor != null)
+        {
+            return effectiveColor;
+        }
+
+        if (Application.Current?.Resources.TryGetValue("PageBackgroundColor", out var resColor) == true && resColor is Color color)
+        {
+            return color;
+        }
+
+        return null;
+    }
+
+    private Color? GetEffectiveBackgroundColor()
+    {
+        if (BackgroundColor != null && BackgroundColor != Colors.Transparent)
+        {
+            return BackgroundColor;
+        }
+
+        if (Background is SolidColorBrush brush && brush.Color != null && brush.Color != Colors.Transparent)
+        {
+            return brush.Color;
+        }
+
+        return null;
+    }
+
+    private void OnPagePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(BackgroundColor) || e.PropertyName == nameof(Background))
+        {
+            SyncStatusBar();
+        }
+    }
+
+    private void OnThemeChanged()
+    {
+        SyncStatusBar();
+    }
+
+#if ANDROID || IOS || MACCATALYST
+    private void UpdateStatusBarStyle(Color? color)
+    {
+        if (color == null || color == Colors.Transparent)
+        {
+            return;
+        }
+
+        // Standard ITU-R BT.601 formula for relative perceived luminance
+        var luminance = (0.299 * color.Red) + (0.587 * color.Green) + (0.114 * color.Blue);
+        _statusBarBehavior.StatusBarStyle = luminance > 0.5
+            ? StatusBarStyle.DarkContent
+            : StatusBarStyle.LightContent;
+    }
+#endif
     #endregion
 }

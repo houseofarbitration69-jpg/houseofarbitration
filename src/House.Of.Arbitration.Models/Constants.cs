@@ -30,4 +30,28 @@ public static class Constants
         public static string PONG = "PONG";
         public static string SERVER_STOPPED = "SERVER_STOPPED";
     }
+
+    public static class Navigation
+    {
+        public static class Parameter
+        {
+            public const string COMPETITION_ID = "COMPETITION_ID";
+        }
+
+        public static class Page
+        {
+            public const string COMPETITION_WIZARD = "COMPETITION_WIZARD";
+            public const string DRAWS_MANAGEMENT = "DRAWS_MANAGEMENT";
+            public const string SERVER_TAOLU = "SERVER_TAOLU";
+            public const string SERVER_SANDA = "SERVER_SANDA";
+            public const string HOME = "HOME";
+            public const string MASTER = "MASTER";
+            public const string JUDGE = "JUDGE";
+            public const string COMPETITIONS = "COMPETITIONS";
+            public const string COMPETITORS = "COMPETITORS";
+            public const string DRAWS = "DRAWS";
+            public const string REFEREE_DATA = "REFEREE_DATA";
+            public const string TAOLU_CODES = "TAOLU_CODES";
+        }
+    }
 }
