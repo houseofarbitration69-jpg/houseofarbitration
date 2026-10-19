@@ -21,6 +21,8 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 
     #region Attributs
     private ObservableCollection<CategoryModel> _categories = new();
+    private readonly HashSet<CategoryModel> _busyCategories = new();
+    private readonly HashSet<int> _busyCategoryIds = new();
     #endregion
 
     #region Properties
@@ -148,6 +150,30 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     #endregion
 
     #region Commands
+    /// <summary>
+    /// Vérifie si une action peut être exécutée sur la catégorie spécifiée
+    /// </summary>
+    /// <param name="category">Catégorie cible</param>
+    /// <returns>True si aucune action n'est en cours sur cette catégorie</returns>
+    private bool CanExecuteCategoryAction(CategoryModel? category)
+    {
+        if (category == null) return false;
+        if (_busyCategories.Contains(category)) return false;
+        if (category.Id > 0 && _busyCategoryIds.Contains(category.Id)) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Notifie le changement d'état d'exécution pour toutes les commandes de catégorie
+    /// </summary>
+    private void NotifyCategoryCommandsCanExecuteChanged()
+    {
+        EditCategoryCommand.NotifyCanExecuteChanged();
+        ShowCompetitorsCommand.NotifyCanExecuteChanged();
+        ShowDrawCommand.NotifyCanExecuteChanged();
+        DeleteCategoryCommand.NotifyCanExecuteChanged();
+    }
+
     [RelayCommand]
     private async Task AddCategory()
     {
@@ -174,87 +200,141 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecuteCategoryAction), AllowConcurrentExecutions = true)]
     private async Task EditCategory(CategoryModel category)
     {
-        var queryAttributes = new Dictionary<string, object>
+        if (category == null) return;
+        if (!_busyCategories.Add(category)) return;
+        if (category.Id > 0) _busyCategoryIds.Add(category.Id);
+        NotifyCategoryCommandsCanExecuteChanged();
+
+        try
         {
-            [nameof(CategoryPopupViewModel.Category)] = category,
-            [nameof(CategoryPopupViewModel.CompetitionType)] = Model?.Type ?? category.Competition?.Type ?? CompetitionType.None
-        };
-
-        // On passe une action vide pour satisfaire la signature de la méthode
-        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(
-            Shell.Current, 
-            options: new PopupOptions() { Shadow = null }, 
-            shellParameters: queryAttributes
-        );
-
-        if (result != null && result.Result != null)
-        {
-            var editCategory = result.Result;
-            editCategory.CompetitionId = Model?.Id;
-            var cat = Categories.FirstOrDefault(c => c.Id == result.Result.Id);
-
-            if (cat != null)
+            var queryAttributes = new Dictionary<string, object>
             {
-                var index = Categories.IndexOf(cat);
-                if (index >= 0)
+                [nameof(CategoryPopupViewModel.Category)] = category,
+                [nameof(CategoryPopupViewModel.CompetitionType)] = Model?.Type ?? category.Competition?.Type ?? CompetitionType.None
+            };
+
+            // On passe une action vide pour satisfaire la signature de la méthode
+            var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(
+                Shell.Current, 
+                options: new PopupOptions() { Shadow = null }, 
+                shellParameters: queryAttributes
+            );
+
+            if (result != null && result.Result != null)
+            {
+                var editCategory = result.Result;
+                editCategory.CompetitionId = Model?.Id;
+                var cat = Categories.FirstOrDefault(c => c.Id == result.Result.Id);
+
+                if (cat != null)
                 {
-                    await _repository.UpdateAsync(editCategory);
-                    await _warningService.UpdateWarningsForCategoryAsync(editCategory.Id);
-                    await DeleteDrawAsync(editCategory.Id);
-                    
-                    // Reload to get updated warnings in the object graph
-                    await OnAppearing();
+                    var index = Categories.IndexOf(cat);
+                    if (index >= 0)
+                    {
+                        await _repository.UpdateAsync(editCategory);
+                        await _warningService.UpdateWarningsForCategoryAsync(editCategory.Id);
+                        await DeleteDrawAsync(editCategory.Id);
+                        
+                        // Reload to get updated warnings in the object graph
+                        await OnAppearing();
+                    }
                 }
             }
         }
-    }
-
-    [RelayCommand]
-    private async Task DeleteCategory(CategoryModel category)
-    {
-        if (category == null) return;
-
-        bool confirm = await DisplayConfirmation(
-            Resources.CONFIRM_DELETE,
-            Resources.DELETE_CATEGORY_MESSAGE,
-            Resources.YES,
-            Resources.NO);
-
-        if (confirm)
+        finally
         {
-            var searchCategory = Categories.FirstOrDefault(c => c.Id == category.Id);
-
-            if( searchCategory != null)
-            {
-                await _repository.DeleteAsync(category);
-                Categories.Remove(searchCategory);
-            }
+            _busyCategories.Remove(category);
+            if (category.Id > 0) _busyCategoryIds.Remove(category.Id);
+            NotifyCategoryCommandsCanExecuteChanged();
         }
     }
 
-    [RelayCommand]
-    private async Task ShowCompetitors(CategoryModel category)
+    [RelayCommand(CanExecute = nameof(CanExecuteCategoryAction), AllowConcurrentExecutions = true)]
+    private async Task DeleteCategory(CategoryModel category)
     {
-        var queryAttributes = new Dictionary<string, object>
-        {
-            [nameof(CompetitorsPageViewModel.Category)] = category
-        };
+        if (category == null) return;
+        if (!_busyCategories.Add(category)) return;
+        if (category.Id > 0) _busyCategoryIds.Add(category.Id);
+        NotifyCategoryCommandsCanExecuteChanged();
 
-        await Shell.Current.GoToAsync("CompetitorsPage", queryAttributes);
+        try
+        {
+            bool confirm = await DisplayConfirmation(
+                Resources.CONFIRM_DELETE,
+                Resources.DELETE_CATEGORY_MESSAGE,
+                Resources.YES,
+                Resources.NO);
+
+            if (confirm)
+            {
+                var searchCategory = Categories.FirstOrDefault(c => c.Id == category.Id);
+
+                if (searchCategory != null)
+                {
+                    await _repository.DeleteAsync(category);
+                    Categories.Remove(searchCategory);
+                }
+            }
+        }
+        finally
+        {
+            _busyCategories.Remove(category);
+            if (category.Id > 0) _busyCategoryIds.Remove(category.Id);
+            NotifyCategoryCommandsCanExecuteChanged();
+        }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanExecuteCategoryAction), AllowConcurrentExecutions = true)]
+    private async Task ShowCompetitors(CategoryModel category)
+    {
+        if (category == null) return;
+        if (!_busyCategories.Add(category)) return;
+        if (category.Id > 0) _busyCategoryIds.Add(category.Id);
+        NotifyCategoryCommandsCanExecuteChanged();
+
+        try
+        {
+            var queryAttributes = new Dictionary<string, object>
+            {
+                [nameof(CompetitorsPageViewModel.Category)] = category
+            };
+
+            await Shell.Current.GoToAsync("CompetitorsPage", queryAttributes);
+        }
+        finally
+        {
+            _busyCategories.Remove(category);
+            if (category.Id > 0) _busyCategoryIds.Remove(category.Id);
+            NotifyCategoryCommandsCanExecuteChanged();
+        }
+    }
+
+    [RelayCommand(CanExecute = nameof(CanExecuteCategoryAction), AllowConcurrentExecutions = true)]
     private async Task ShowDraw(CategoryModel category)
     {
-        var queryAttributes = new Dictionary<string, object>
-        {
-            [nameof(DrawPageViewModel.Category)] = category
-        };
+        if (category == null) return;
+        if (!_busyCategories.Add(category)) return;
+        if (category.Id > 0) _busyCategoryIds.Add(category.Id);
+        NotifyCategoryCommandsCanExecuteChanged();
 
-        await Shell.Current.GoToAsync("DrawPage", queryAttributes);
+        try
+        {
+            var queryAttributes = new Dictionary<string, object>
+            {
+                [nameof(DrawPageViewModel.Category)] = category
+            };
+
+            await Shell.Current.GoToAsync("DrawPage", queryAttributes);
+        }
+        finally
+        {
+            _busyCategories.Remove(category);
+            if (category.Id > 0) _busyCategoryIds.Remove(category.Id);
+            NotifyCategoryCommandsCanExecuteChanged();
+        }
     }
     #endregion
 
