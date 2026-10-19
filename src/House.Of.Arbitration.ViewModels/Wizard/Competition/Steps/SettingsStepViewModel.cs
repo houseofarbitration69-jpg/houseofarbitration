@@ -21,8 +21,14 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
     #endregion
 
     #region Properties
+    /// <summary>
+    /// Définit le titre de la page
+    /// </summary>
     public override string Title => Resources.SETTINGS;
 
+    /// <summary>
+    /// Obtient ou définit le nom de la compétition
+    /// </summary>
     public string Name
     {
         get => _name;
@@ -30,12 +36,19 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
         {
             if (SetProperty(ref _name, value))
             {
-                if (Model != null) Model.Name = value;
+                if (Model != null)
+                {
+                    Model.Name = value;
+                }
+
                 Validate();
             }
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit la date de la compétition
+    /// </summary>
     public DateTime Date
     {
         get => _date;
@@ -43,12 +56,19 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
         {
             if (SetProperty(ref _date, value))
             {
-                if (Model != null) Model.Date = value;
+                if (Model != null)
+                {
+                    Model.Date = value;
+                }
+
                 Validate();
             }
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit le type de la compétition
+    /// </summary>
     public LocalizedEnum<CompetitionType>? SelectedType
     {
         get => _selectedType;
@@ -56,17 +76,34 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
         {
             if (SetProperty(ref _selectedType, value))
             {
-                if (Model != null) Model.Type = value?.Value ?? CompetitionType.None;
+                if (Model != null)
+                {
+                    Model.Type = value?.Value ?? CompetitionType.None;
+                }
+
                 Validate();
             }
         }
     }
 
+    /// <summary>
+    /// Obtient la liste des types de compétition
+    /// </summary>
     public List<LocalizedEnum<CompetitionType>> CompetitionTypes { get; }
     #endregion
 
     #region Constructors
-    public SettingsStepViewModel(ResourceProvider resourceProvider, IPopupService popupService, IRepository<CompetitionModel> repository) : base(resourceProvider, popupService)
+    /// <summary>
+    /// Constructeur permettant d'initialiser les services
+    /// </summary>
+    /// <param name="resourceProvider">Service de traduction</param>
+    /// <param name="popupService">Service de popup</param>
+    /// <param name="repository">Service d'accès aux données</param>
+    public SettingsStepViewModel(
+        ResourceProvider resourceProvider, 
+        IPopupService popupService, 
+        IRepository<CompetitionModel> repository
+    ) : base(resourceProvider, popupService)
     {
         _repository = repository;
         CompetitionTypes = LocalizeEnum<CompetitionType>("ENUM_COMPETITION_");
@@ -75,6 +112,9 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
     #endregion
 
     #region Override Methods
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public override async Task Save()
     {
         if (Model.Id > 0)
@@ -87,6 +127,9 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
         }
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     protected override void OnModelUpdated(CompetitionModel value)
     {
         if (value != null)
@@ -107,6 +150,12 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
     #endregion
 
     #region Private Methods
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="prefix"></param>
+    /// <returns></returns>
     private List<LocalizedEnum<T>> LocalizeEnum<T>(string prefix) where T : Enum
     {
         return Enum.GetValues(typeof(T))
@@ -115,6 +164,9 @@ public partial class SettingsStepViewModel : WizardStepViewModel<CompetitionMode
             .ToList();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     private void Validate()
     {
         IsValid = !string.IsNullOrWhiteSpace(Name) && SelectedType != null && SelectedType.Value != CompetitionType.None;

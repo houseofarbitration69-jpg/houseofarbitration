@@ -14,7 +14,10 @@
 >
     <Grid RowDefinitions="Auto,*" Padding="20" RowSpacing="20">
         <!-- HEADER -->
-        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+        <Grid 
+            Grid.Row="0" 
+            ColumnDefinitions="*,Auto"
+        >
             <Label 
                 Grid.Column="0"
                 Text="{Binding Resources.CATEGORY_LIST}"
@@ -30,29 +33,40 @@
                 <controls:IconButton.Icons>
                     <controls:IconInfo 
                         Icon="{x:Static helpers:FontCustomIcons.ADD}" 
-                        Color="{StaticResource PrimaryTextColor}" 
+                        Color="{StaticResource InverseTextColor}" 
                         FontSize="16" 
                     />
                     
                     <controls:IconInfo 
                         Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
-                        Color="{StaticResource PrimaryTextColor}" 
+                        Color="{StaticResource InverseTextColor}" 
                         FontSize="24" 
                     />
                 </controls:IconButton.Icons>
             </controls:IconButton>
         </Grid>
 
-        <!-- Categories List -->
-        <CollectionView Grid.Row="1" ItemsSource="{Binding Categories}">
+        <!-- LISTE DES CATEGORIES -->
+        <CollectionView 
+            Grid.Row="1" 
+            ItemsSource="{Binding Categories}"
+        >
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:CategoryModel">
                     <controls:Card CardPadding="15" CardColor="White">
-                        <Grid RowDefinitions="Auto,*" ColumnDefinitions="*,Auto">
-                            <HorizontalStackLayout Grid.Row="0" Grid.Column="0" VerticalOptions="Center" Spacing="10">
+                        <Grid 
+                            RowDefinitions="Auto,*" 
+                            ColumnDefinitions="*,Auto"
+                        >
+                            <HorizontalStackLayout 
+                                Grid.Row="0" 
+                                Grid.Column="0" 
+                                VerticalOptions="Center" 
+                                Spacing="10"
+                            >
                                 <Label 
                                     Text="{x:Static helpers:FontCustomIcons.WARNING}" 
                                     FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
@@ -160,8 +174,19 @@
             <CollectionView.EmptyView>
                 <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*" RowSpacing="10">
                     <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
-                        <Label Text="{x:Static helpers:FontCustomIcons.CATEGORY}" FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" FontSize="48" HorizontalOptions="Center" />
-                        <Label Text="{Binding Resources.NO_CATEGORIES}" FontAttributes="Italic" Opacity="0.6" HorizontalOptions="Center"/>
+                        <Label 
+                            Text="{x:Static helpers:FontCustomIcons.CATEGORY}" 
+                            FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                            FontSize="48" 
+                            HorizontalOptions="Center" 
+                        />
+                        
+                        <Label 
+                            Text="{Binding Resources.NO_CATEGORIES}" 
+                            FontAttributes="Italic" 
+                            Opacity="0.6" 
+                            HorizontalOptions="Center"
+                        />
                     </VerticalStackLayout>
                 </Grid>
             </CollectionView.EmptyView>

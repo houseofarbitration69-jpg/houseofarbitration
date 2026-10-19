@@ -10,6 +10,14 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition;
 
 public class CompetitionWizardViewModel : WizardViewModel<CompetitionModel>
 {
+    #region Constructors
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="logger"></param>
+    /// <param name="resourceProvider"></param>
+    /// <param name="repository"></param>
+    /// <param name="popupService"></param>
     public CompetitionWizardViewModel(
         ILogger<CompetitionWizardViewModel> logger, 
         ResourceProvider resourceProvider, 
@@ -18,7 +26,12 @@ public class CompetitionWizardViewModel : WizardViewModel<CompetitionModel>
         : base(logger, resourceProvider, repository, popupService)
     {
     }
+    #endregion
 
+    #region Override Methods
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public override async Task OnAppearing()
     {
         IsBusy = true;
@@ -46,5 +59,5 @@ public class CompetitionWizardViewModel : WizardViewModel<CompetitionModel>
             IsBusy = false;
         }
     }
-
+    #endregion
 }
