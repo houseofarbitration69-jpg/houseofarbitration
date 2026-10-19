@@ -14,8 +14,19 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionModel>
 {
     #region Services
+    /// <summary>
+    /// Service d'accès aux données (categorieà
+    /// </summary>
     private readonly IRepository<CategoryModel> _repository;
+
+    /// <summary>
+    /// Service d'accès aux données (tirage)
+    /// </summary>
     private readonly IRepository<DrawModel> _drawsRepository;
+
+    /// <summary>
+    /// Service de gestion des alertes
+    /// </summary>
     private readonly IWarningService _warningService;
     #endregion
 
@@ -28,6 +39,9 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     #region Properties
     public override string Title => Resources.CATEGORIES;
 
+    /// <summary>
+    /// Obtient ou définit la liste des catégories
+    /// </summary>
     public ObservableCollection<CategoryModel> Categories
     {
         get => _categories;
@@ -36,9 +50,17 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
     #endregion
 
     #region Constructors
+    /// <summary>
+    /// Constructeur permettant d'initialiser les services
+    /// </summary>
+    /// <param name="popupService">Service de gestion des popups</param>
+    /// <param name="resourceProvider">Service de traductions</param>
+    /// <param name="repository">Service d'accès aux données (categorie)</param>
+    /// <param name="drawRepository">Service d'accès aux données (tirage)</param>
+    /// <param name="warningService">Service de gestion des alertes</param>
     public CategoriesStepViewModel(
-        IPopupService popupService, 
-        ResourceProvider resourceProvider, 
+        IPopupService popupService,
+        ResourceProvider resourceProvider,
         IRepository<CategoryModel> repository,
         IRepository<DrawModel> drawRepository,
         IWarningService warningService
@@ -49,12 +71,17 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         _warningService = warningService;
 
         Categories.CollectionChanged += OnCategoriesCollectionChanged;
-        
+
         Validate();
     }
     #endregion
 
     #region Private Methods
+    /// <summary>
+    /// Méthode appellée lorsque la collection des catégories change
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
     private void OnCategoriesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (Model != null)
@@ -65,17 +92,25 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         Validate();
     }
 
-
+    /// <summary>
+    /// Méthode permettant de supprimer un tirage
+    /// </summary>
+    /// <param name="categoryId">Identifiant de la catégorie</param>
+    /// <returns></returns>
     private async Task DeleteDrawAsync(int categoryId)
     {
         var draws = await _drawsRepository.GetAllAsync();
         var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == categoryId);
+
         if (existingDraw != null)
         {
             await _drawsRepository.DeleteAsync(existingDraw);
         }
     }
 
+    /// <summary>
+    /// Méthode appellée pour valider
+    /// </summary>
     private void Validate()
     {
         bool allValid = Categories != null && Categories.Count > 0;
@@ -114,8 +149,20 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
             if (Model != null)
             {
                 // Reload categories with their competitors, warnings and draws to update UI
-                var categories = await _repository.GetAllAsync("AgeRange", "Competitors.Competitor", "Competitors.Warnings", "Draw.DrawKnockouts", "Draw.DrawPools", "Draw.DrawOrders");
-                var allDraws = await _drawsRepository.GetAllAsync("DrawKnockouts", "DrawPools", "DrawOrders");
+                var categories = await _repository.GetAllAsync(
+                    "AgeRange",
+                    "Competitors.Competitor",
+                    "Competitors.Warnings",
+                    "Draw.DrawKnockouts",
+                    "Draw.DrawPools",
+                    "Draw.DrawOrders"
+                );
+
+                var allDraws = await _drawsRepository.GetAllAsync(
+                    "DrawKnockouts",
+                    "DrawPools",
+                    "DrawOrders"
+                );
 
                 if (categories != null)
                 {
@@ -146,7 +193,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         {
             IsBusy = false;
         }
-    }    
+    }
     #endregion
 
     #region Commands
@@ -174,6 +221,10 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         DeleteCategoryCommand.NotifyCanExecuteChanged();
     }
 
+    /// <summary>
+    /// Commande permettant d'ajouter une catégorie
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task AddCategory()
     {
@@ -183,8 +234,8 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         };
 
         var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(
-            Shell.Current, 
-            options: new PopupOptions() { Shadow = null }, 
+            Shell.Current,
+            options: new PopupOptions() { Shadow = null },
             shellParameters: queryAttributes
         );
 
@@ -200,12 +251,29 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         }
     }
 
+    /// <summary>
+    /// Commande permettant de modifier une catégorie
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
     [RelayCommand(CanExecute = nameof(CanExecuteCategoryAction), AllowConcurrentExecutions = true)]
     private async Task EditCategory(CategoryModel category)
     {
-        if (category == null) return;
-        if (!_busyCategories.Add(category)) return;
-        if (category.Id > 0) _busyCategoryIds.Add(category.Id);
+        if (category == null)
+        {
+            return;
+        }
+
+        if (!_busyCategories.Add(category))
+        {
+            return;
+        }
+
+        if (category.Id > 0)
+        {
+            _busyCategoryIds.Add(category.Id);
+        }
+
         NotifyCategoryCommandsCanExecuteChanged();
 
         try
@@ -218,8 +286,8 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
 
             // On passe une action vide pour satisfaire la signature de la méthode
             var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(
-                Shell.Current, 
-                options: new PopupOptions() { Shadow = null }, 
+                Shell.Current,
+                options: new PopupOptions() { Shadow = null },
                 shellParameters: queryAttributes
             );
 
@@ -237,7 +305,7 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
                         await _repository.UpdateAsync(editCategory);
                         await _warningService.UpdateWarningsForCategoryAsync(editCategory.Id);
                         await DeleteDrawAsync(editCategory.Id);
-                        
+
                         // Reload to get updated warnings in the object graph
                         await OnAppearing();
                     }
@@ -247,17 +315,39 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         finally
         {
             _busyCategories.Remove(category);
-            if (category.Id > 0) _busyCategoryIds.Remove(category.Id);
+
+            if (category.Id > 0)
+            {
+                _busyCategoryIds.Remove(category.Id);
+            }
+
             NotifyCategoryCommandsCanExecuteChanged();
         }
     }
 
+    /// <summary>
+    /// Commande permettant de supprimer une catégorie
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
     [RelayCommand(CanExecute = nameof(CanExecuteCategoryAction), AllowConcurrentExecutions = true)]
     private async Task DeleteCategory(CategoryModel category)
     {
-        if (category == null) return;
-        if (!_busyCategories.Add(category)) return;
-        if (category.Id > 0) _busyCategoryIds.Add(category.Id);
+        if (category == null)
+        {
+            return;
+        }
+
+        if (!_busyCategories.Add(category))
+        {
+            return;
+        }
+
+        if (category.Id > 0)
+        {
+            _busyCategoryIds.Add(category.Id);
+        }
+
         NotifyCategoryCommandsCanExecuteChanged();
 
         try
@@ -287,12 +377,29 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         }
     }
 
+    /// <summary>
+    /// Commande permettant d'afficher les compétiteurs d'une catégorie
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
     [RelayCommand(CanExecute = nameof(CanExecuteCategoryAction), AllowConcurrentExecutions = true)]
     private async Task ShowCompetitors(CategoryModel category)
     {
-        if (category == null) return;
-        if (!_busyCategories.Add(category)) return;
-        if (category.Id > 0) _busyCategoryIds.Add(category.Id);
+        if (category == null)
+        {
+            return;
+        }
+
+        if (!_busyCategories.Add(category))
+        {
+            return;
+        }
+
+        if (category.Id > 0)
+        {
+            _busyCategoryIds.Add(category.Id);
+        }
+
         NotifyCategoryCommandsCanExecuteChanged();
 
         try
@@ -302,22 +409,44 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
                 [nameof(CompetitorsPageViewModel.Category)] = category
             };
 
-            await Shell.Current.GoToAsync("CompetitorsPage", queryAttributes);
+            await Shell.Current.GoToAsync(Constants.Navigation.Page.COMPETITORS, queryAttributes);
         }
         finally
         {
             _busyCategories.Remove(category);
-            if (category.Id > 0) _busyCategoryIds.Remove(category.Id);
+
+            if (category.Id > 0)
+            {
+                _busyCategoryIds.Remove(category.Id);
+            }
+
             NotifyCategoryCommandsCanExecuteChanged();
         }
     }
 
+    /// <summary>
+    /// Commande permettant d'afficher les tirages de la catégorie
+    /// </summary>
+    /// <param name="category"></param>
+    /// <returns></returns>
     [RelayCommand(CanExecute = nameof(CanExecuteCategoryAction), AllowConcurrentExecutions = true)]
     private async Task ShowDraw(CategoryModel category)
     {
-        if (category == null) return;
-        if (!_busyCategories.Add(category)) return;
-        if (category.Id > 0) _busyCategoryIds.Add(category.Id);
+        if (category == null)
+        {
+            return;
+        }
+
+        if (!_busyCategories.Add(category))
+        {
+            return;
+        }
+
+        if (category.Id > 0)
+        {
+            _busyCategoryIds.Add(category.Id);
+        }
+
         NotifyCategoryCommandsCanExecuteChanged();
 
         try
@@ -327,18 +456,26 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
                 [nameof(DrawPageViewModel.Category)] = category
             };
 
-            await Shell.Current.GoToAsync("DrawPage", queryAttributes);
+            await Shell.Current.GoToAsync(Constants.Navigation.Page.DRAWS, queryAttributes);
         }
         finally
         {
             _busyCategories.Remove(category);
-            if (category.Id > 0) _busyCategoryIds.Remove(category.Id);
+
+            if (category.Id > 0)
+            {
+                _busyCategoryIds.Remove(category.Id);
+            }
+
             NotifyCategoryCommandsCanExecuteChanged();
         }
     }
     #endregion
 
     #region Override Methods
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     protected override void OnModelUpdated(CompetitionModel value)
     {
         if (value != null)
