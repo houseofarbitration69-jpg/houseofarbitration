@@ -139,7 +139,11 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             [nameof(CompetitorPopupViewModel.Category)] = Category,
         };
 
-        var result = await _popupService.ShowPopupAsync<CompetitorPopupViewModel, CompetitorModel?>(Shell.Current, shellParameters: queryAttributes);
+        var result = await _popupService.ShowPopupAsync<CompetitorPopupViewModel, CompetitorModel?>(
+            Shell.Current, 
+            options: new PopupOptions() { Shadow = null },
+            shellParameters: queryAttributes
+        );
 
         if (result != null && result.Result != null)
         {
@@ -222,7 +226,11 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
             [nameof(CompetitorPopupViewModel.Category)] = Category,
         } as IDictionary<string, object>;
 
-        var result = await _popupService.ShowPopupAsync<CompetitorPopupViewModel, CompetitorModel?>(Shell.Current, shellParameters: queryAttributes);
+        var result = await _popupService.ShowPopupAsync<CompetitorPopupViewModel, CompetitorModel?>(
+            Shell.Current, 
+            options: new PopupOptions() { Shadow = null },
+            shellParameters: queryAttributes
+        );
 
         if (result != null && result.Result != null)
         {

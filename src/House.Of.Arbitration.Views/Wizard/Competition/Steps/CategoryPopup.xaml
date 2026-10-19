@@ -23,6 +23,7 @@
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="{DynamicResource ButtonCornerRadius}"/>
         </Border.StrokeShape>
+        
         <VerticalStackLayout Spacing="10">
             <!-- TITRE -->
             <Label 

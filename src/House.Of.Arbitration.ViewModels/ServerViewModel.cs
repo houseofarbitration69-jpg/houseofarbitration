@@ -1378,7 +1378,11 @@ public partial class ServerViewModel : BaseViewModel
             var parameters = new Dictionary<string, object>();
             parameters.Add("Competition", _currentCompetition);
 
-            var result = await _popupService.ShowPopupAsync<ServerSetupPopupViewModel, ServerSetupResult>(Shell.Current, shellParameters: parameters);
+            var result = await _popupService.ShowPopupAsync<ServerSetupPopupViewModel, ServerSetupResult>(
+                Shell.Current,
+                options: new PopupOptions() { Shadow = null },
+                shellParameters: parameters
+            );
 
             if (result.Result != null)
             {
@@ -1564,39 +1568,28 @@ public partial class ServerViewModel : BaseViewModel
 
 
     [RelayCommand]
-
     private async Task OpenJudgePopup(JudgeModel? judge)
-
     {
-
         if (judge != null)
-
         {
-
             var parameters = new Dictionary<string, object> { { "Judge", judge } };
 
-
-
-            var result = await _popupService.ShowPopupAsync<JudgePointsPopupViewModel, JudgeModel>(Shell.Current, shellParameters: parameters);
-
-
+            var result = await _popupService.ShowPopupAsync<JudgePointsPopupViewModel, JudgeModel>(
+                Shell.Current, 
+                options: new PopupOptions() { Shadow = null },
+                shellParameters: parameters
+            );
 
             if (result.Result != null && judge != null)
-
             {
-
                 judge.RedPoints = result.Result.RedPoints;
-
                 judge.BluePoints = result.Result.BluePoints;
 
                 UpdateCurrentRoundVotes();
 
                 await SendJudgeStateAsync(judge);
-
             }
-
         }
-
     }
 
 

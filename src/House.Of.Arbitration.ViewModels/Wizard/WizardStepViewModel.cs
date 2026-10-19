@@ -109,7 +109,12 @@ public abstract partial class WizardStepViewModel<T> : ObservableObject where T 
             { Constants.QueryParameter.CANCEL, cancel }
         };
 
-        var result = await _popupService.ShowPopupAsync<ConfirmationPopupViewModel, bool>(Shell.Current, shellParameters: queryAttributes);
+        var result = await _popupService.ShowPopupAsync<ConfirmationPopupViewModel, bool>(
+            Shell.Current, 
+            options: new PopupOptions() { Shadow = null },
+            shellParameters: queryAttributes
+        );
+
         return result.Result;
     }
     #endregion

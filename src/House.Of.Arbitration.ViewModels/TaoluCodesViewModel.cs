@@ -219,7 +219,11 @@ public partial class TaoluCodesViewModel : BaseViewModel
             [nameof(MvtCodeModel)] = newCode
         };
 
-        var result = await _popupService.ShowPopupAsync<TaoluCodePopupViewModel, MvtCodeModel?>(Shell.Current, shellParameters: query);
+        var result = await _popupService.ShowPopupAsync<TaoluCodePopupViewModel, MvtCodeModel?>(
+            Shell.Current, 
+            options: new PopupOptions() { Shadow = null },
+            shellParameters: query
+        );
 
         if (result != null && result.Result != null)
         {
@@ -255,7 +259,11 @@ public partial class TaoluCodesViewModel : BaseViewModel
             [nameof(MvtCodeModel)] = code
         };
 
-        var result = await _popupService.ShowPopupAsync<TaoluCodePopupViewModel, MvtCodeModel?>(Shell.Current, shellParameters: query);
+        var result = await _popupService.ShowPopupAsync<TaoluCodePopupViewModel, MvtCodeModel?>(
+            Shell.Current, 
+            options: new PopupOptions() { Shadow = null }, 
+            shellParameters: query
+        );
 
         if (result != null && result.Result != null)
         {

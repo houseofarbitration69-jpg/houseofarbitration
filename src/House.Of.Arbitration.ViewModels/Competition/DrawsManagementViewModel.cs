@@ -68,9 +68,9 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
 
     #region Constructors
     public DrawsManagementViewModel(
-        IPopupService popupService, 
-        ILogger<DrawsManagementViewModel> logger, 
-        ResourceProvider resourceProvider, 
+        IPopupService popupService,
+        ILogger<DrawsManagementViewModel> logger,
+        ResourceProvider resourceProvider,
         IRepository<CompetitionModel> competitionRepository,
         IRepository<CategoryModel> categoryRepository,
         IRepository<DrawModel> drawRepository)
@@ -122,13 +122,13 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         IsBusy = true;
         try
         {
-            Competition = await _competitionRepository.GetByIdAsync(CompetitionId, 
-                "Categories.AgeRange", 
+            Competition = await _competitionRepository.GetByIdAsync(CompetitionId,
+                "Categories.AgeRange",
                 "Categories.Competitors.Competitor.Country");
 
             var allCategories = await _categoryRepository.GetAllAsync(
-                "AgeRange", 
-                "Competitors.Competitor.Country", 
+                "AgeRange",
+                "Competitors.Competitor.Country",
                 "Competitors.Warnings");
 
             var compCategories = allCategories?.Where(c => c.CompetitionId == CompetitionId).ToList() ?? new List<CategoryModel>();
@@ -550,7 +550,11 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                 { "TotalMatches", _allMatches.Count }
             };
 
-            var popupResult = await _popupService.ShowPopupAsync<ChangeOrderPopupViewModel, int?>(Shell.Current, shellParameters: parameters);
+            var popupResult = await _popupService.ShowPopupAsync<ChangeOrderPopupViewModel, int?>(
+                Shell.Current,
+                options: new PopupOptions() { Shadow = null },
+                shellParameters: parameters
+            );
 
             if (popupResult != null && popupResult.Result.HasValue)
             {

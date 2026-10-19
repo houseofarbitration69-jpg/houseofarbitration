@@ -156,7 +156,11 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
             [nameof(CategoryPopupViewModel.CompetitionType)] = Model?.Type ?? CompetitionType.None
         };
 
-        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(Shell.Current, options: PopupOptions.Empty, shellParameters: queryAttributes);
+        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(
+            Shell.Current, 
+            options: new PopupOptions() { Shadow = null }, 
+            shellParameters: queryAttributes
+        );
 
         if (result != null && result.Result != null)
         {
@@ -180,7 +184,11 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         };
 
         // On passe une action vide pour satisfaire la signature de la méthode
-        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(Shell.Current, options: PopupOptions.Empty, shellParameters: queryAttributes);
+        var result = await _popupService.ShowPopupAsync<CategoryPopupViewModel, CategoryModel?>(
+            Shell.Current, 
+            options: new PopupOptions() { Shadow = null }, 
+            shellParameters: queryAttributes
+        );
 
         if (result != null && result.Result != null)
         {

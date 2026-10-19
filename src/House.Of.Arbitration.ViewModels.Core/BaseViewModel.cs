@@ -158,7 +158,12 @@ public partial class BaseViewModel : ObservableObject
             { "Cancel", cancel }
         };
 
-        var result = await _popupService.ShowPopupAsync<ConfirmationPopupViewModel, bool>(Shell.Current, shellParameters: queryAttributes);
+        var result = await _popupService.ShowPopupAsync<ConfirmationPopupViewModel, bool>(
+            Shell.Current,
+            options: new PopupOptions() { Shadow = null },
+            shellParameters: queryAttributes
+        );
+
         return result.Result;
     }
     #endregion
