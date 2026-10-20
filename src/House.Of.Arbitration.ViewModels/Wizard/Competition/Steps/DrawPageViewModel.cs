@@ -16,6 +16,9 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
+    /// <summary>
+    /// Service d'accès aux données concernant les tirages
+    /// </summary>
     private readonly IRepository<DrawModel> _repository;
     #endregion
 
@@ -28,19 +31,28 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     private bool _isDragging;
     #endregion
 
-    #region Properties    
+    #region Properties
+    /// <summary>
+    /// Obtient ou définit les slot de drag & drop
+    /// </summary>
     public BracketSlotViewModel? DraggedSlot
     {
         get => _draggedSlot;
         set => SetProperty(ref _draggedSlot, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit si on est en cours du drag & drop
+    /// </summary>
     public bool IsDragging
     {
         get => _isDragging;
         set => SetProperty(ref _isDragging, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit la catégorie courante
+    /// </summary>
     public CategoryModel? Category
     {
         get => _category;
@@ -70,25 +82,54 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit la liste des compétiteurs
+    /// </summary>
     public ObservableCollection<CompetitorModel?> Competitors
     {
         get => _competitors;
         set => SetProperty(ref _competitors, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit la liste des tours
+    /// </summary>
     public ObservableCollection<BracketRoundViewModel> Rounds
     {
         get => _rounds;
         set => SetProperty(ref _rounds, value);
     }
 
+    /// <summary>
+    /// Indique si c'est un tirage eliminatoire
+    /// </summary>
     public bool IsKnockouts => Category?.RoundType == RoundType.Knockouts;
+
+    /// <summary>
+    /// Indique si c'est un tirage par poule
+    /// </summary>
     public bool IsPools => Category?.RoundType == RoundType.Pools;
+
+    /// <summary>
+    /// Indique si c'est un tirage par ordre
+    /// </summary>
     public bool IsOrder => Category?.RoundType == RoundType.Order;
     #endregion
 
     #region Constructors
-    public DrawPageViewModel(IPopupService popupService, ILogger<DrawPageViewModel> logger, ResourceProvider resourceProvider, IRepository<DrawModel> repository)
+    /// <summary>
+    /// Constructeur permettant d'initialiser les services
+    /// </summary>
+    /// <param name="popupService">Service de gestion des popup</param>
+    /// <param name="logger">Service de log</param>
+    /// <param name="resourceProvider">Service de traduction</param>
+    /// <param name="repository">Service d'accès aux données pour les tirage</param>
+    public DrawPageViewModel(
+        IPopupService popupService,
+        ILogger<DrawPageViewModel> logger,
+        ResourceProvider resourceProvider,
+        IRepository<DrawModel> repository
+    )
         : base(logger, resourceProvider, popupService)
     {
         _repository = repository;
@@ -96,6 +137,10 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     #endregion
 
     #region Implement IQueryAttributable
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <param name="query"></param>
     public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey(nameof(Category)))
@@ -107,6 +152,10 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     #endregion
 
     #region Private Methods
+    /// <summary>
+    /// Chargement des données
+    /// </summary>
+    /// <returns></returns>
     private async Task LoadDrawAsync()
     {
         if (Category == null) return;
@@ -146,6 +195,10 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
+    /// <summary>
+    /// Initialisation des tirages eliminatoire
+    /// </summary>
+    /// <param name="existingDraw"></param>
     private void InitializeKnockout(DrawModel? existingDraw = null)
     {
         if (Category == null) return;
@@ -243,11 +296,13 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
     {
         if (Rounds.Count == 0) return;
         var round1 = Rounds[0];
+
         foreach (var match in round1.Matches)
         {
             int count = (match.Slot1.Competitor != null ? 1 : 0) + (match.Slot2.Competitor != null ? 1 : 0);
             match.IsBye = count < 2;
         }
+
         // Round 2+ are never byes for order selection
         for (int r = 1; r < Rounds.Count; r++)
         {
@@ -258,6 +313,9 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
+    /// <summary>
+    /// Rafraichis les tirages eliminatoire
+    /// </summary>
     private void RefreshAdvancements()
     {
         if (Rounds.Count < 2 || (!IsKnockouts && !IsPools)) return;
@@ -286,7 +344,11 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                 for (int i = 0; i < currentRound.Matches.Count; i++)
                 {
                     var match = currentRound.Matches[i];
-                    if (match.IsWinnerSlot) continue;
+
+                    if (match.IsWinnerSlot)
+                    {
+                        continue;
+                    }
 
                     int competitorsCount = (match.Slot1.Competitor != null ? 1 : 0) + (match.Slot2.Competitor != null ? 1 : 0);
                     CompetitorModel? winner = match.Slot1.Competitor ?? match.Slot2.Competitor;
@@ -308,9 +370,13 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                     if (r == 0)
                     {
                         if (competitorsCount > 0)
+                        {
                             match.GlobalOrder = globalMatchOrder++;
+                        }
                         else
+                        {
                             match.GlobalOrder = 0;
+                        }
                     }
                     else
                     {
@@ -324,17 +390,22 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                         if (nextRound.Matches.Count > 0)
                         {
                             var nextMatch = nextRound.Matches[0]; // Default for Winner slot
-                            
+
                             if (!nextMatch.IsWinnerSlot)
                             {
                                 int nextMatchIndex = i / 2;
                                 if (nextMatchIndex < nextRound.Matches.Count)
                                 {
                                     nextMatch = nextRound.Matches[nextMatchIndex];
+
                                     if (i % 2 == 0)
+                                    {
                                         nextMatch.Slot1.Competitor = winner;
+                                    }
                                     else
+                                    {
                                         nextMatch.Slot2.Competitor = winner;
+                                    }
                                 }
                             }
                             else
@@ -362,6 +433,10 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
+    /// <summary>
+    /// Initialisation des tirages en poule
+    /// </summary>
+    /// <param name="existingDraw"></param>
     private void InitializePools(DrawModel? existingDraw = null)
     {
         if (Category == null) return;
@@ -398,8 +473,16 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                         match.Slot2 = new BracketSlotViewModel { Competitor = savedMatch.Competitor2 };
                         match.Order = savedMatch.Order;
                         match.GlobalOrder = savedMatch.GlobalOrder;
-                        if (match.Order >= matchOrder) matchOrder = match.Order + 1;
-                        if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
+
+                        if (match.Order >= matchOrder)
+                        {
+                            matchOrder = match.Order + 1;
+                        }
+
+                        if (match.GlobalOrder >= globalMatchOrder)
+                        {
+                            globalMatchOrder = match.GlobalOrder + 1;
+                        }
                     }
                     else
                     {
@@ -433,9 +516,16 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
+    /// <summary>
+    /// Initialisation des tirages par ordre
+    /// </summary>
+    /// <param name="existingDraw"></param>
     private void InitializeOrder(DrawModel? existingDraw = null)
     {
-        if (Category == null) return;
+        if (Category == null)
+        {
+            return;
+        }
 
         var newRounds = new ObservableCollection<BracketRoundViewModel>();
         var orderRound = new BracketRoundViewModel { Name = "Ordre de passage" };
@@ -461,7 +551,11 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
                 match.Height = 100;
                 match.Margin = new Thickness(0, 5, 0, 5);
                 orderRound.Matches.Add(match);
-                if (match.GlobalOrder >= globalMatchOrder) globalMatchOrder = match.GlobalOrder + 1;
+
+                if (match.GlobalOrder >= globalMatchOrder)
+                {
+                    globalMatchOrder = match.GlobalOrder + 1;
+                }
             }
         }
         else
@@ -485,6 +579,10 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         Rounds = newRounds;
     }
 
+    /// <summary>
+    /// Méthode permettant de calculer les marges pour les tirages eliminatoire
+    /// </summary>
+    /// <param name="targetRounds"></param>
     private void CalculateMargins(ObservableCollection<BracketRoundViewModel> targetRounds)
     {
         double matchHeight = 140;
@@ -525,9 +623,70 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             currentSpacing = (currentSpacing * 2) + matchHeight;
         }
     }
+
+    /// <summary>
+    /// Méthode permettant de mettre à jour la catégorie du compétiteur
+    /// </summary>
+    private void UpdateCategoryCompetitors()
+    {
+        if (Category == null) return;
+
+        var newLinks = new List<CompetitorCategoryModel>();
+
+        if (IsKnockouts && Rounds.Count > 0)
+        {
+            var round1 = Rounds[0];
+
+            foreach (var match in round1.Matches)
+            {
+                if (match.Slot1.Competitor != null)
+                {
+                    newLinks.Add(new CompetitorCategoryModel
+                    {
+                        CompetitorId = match.Slot1.Competitor.Id,
+                        Competitor = match.Slot1.Competitor,
+                        CategoryId = Category.Id,
+                        Category = Category
+                    });
+                }
+                if (match.Slot2.Competitor != null)
+                {
+                    newLinks.Add(new CompetitorCategoryModel
+                    {
+                        CompetitorId = match.Slot2.Competitor.Id,
+                        Competitor = match.Slot2.Competitor,
+                        CategoryId = Category.Id,
+                        Category = Category
+                    });
+                }
+            }
+        }
+        else if (IsPools || IsOrder)
+        {
+            foreach (var slot in _pouleSlots)
+            {
+                if (slot.Competitor != null)
+                {
+                    newLinks.Add(new CompetitorCategoryModel
+                    {
+                        CompetitorId = slot.Competitor.Id,
+                        Competitor = slot.Competitor,
+                        CategoryId = Category.Id,
+                        Category = Category
+                    });
+                }
+            }
+        }
+
+        Category.Competitors = newLinks;
+    }
     #endregion
 
     #region Commands
+    /// <summary>
+    /// Commande permettant de sauvegarder le tirage
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Save()
     {
@@ -640,12 +799,20 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
+    /// <summary>
+    /// Commande permettant de fermer le tirage
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Close()
     {
         await Shell.Current.GoToAsync("..");
     }
 
+    /// <summary>
+    /// Commande permettant de démarrer le drag & drop
+    /// </summary>
+    /// <param name="slot"></param>
     [RelayCommand]
     private void DragStarting(BracketSlotViewModel slot)
     {
@@ -653,12 +820,20 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         IsDragging = true;
     }
 
+    /// <summary>
+    /// Commande lors du déplacement du drag & drop
+    /// </summary>
+    /// <param name="e"></param>
     [RelayCommand]
     private void DragOver(DragEventArgs e)
     {
         e.AcceptedOperation = DataPackageOperation.Copy;
     }
 
+    /// <summary>
+    /// Commande permettant le drop
+    /// </summary>
+    /// <param name="targetSlot"></param>
     [RelayCommand]
     private void Drop(BracketSlotViewModel targetSlot)
     {
@@ -686,60 +861,6 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
 
         // Notify changes to ensure UI refresh on all platforms
         OnPropertyChanged(nameof(Rounds));
-    }
-
-    private void UpdateCategoryCompetitors()
-    {
-        if (Category == null) return;
-
-        var newLinks = new List<CompetitorCategoryModel>();
-
-        if (IsKnockouts && Rounds.Count > 0)
-        {
-            var round1 = Rounds[0];
-            
-            foreach (var match in round1.Matches)
-            {
-                if (match.Slot1.Competitor != null)
-                {
-                    newLinks.Add(new CompetitorCategoryModel 
-                    { 
-                        CompetitorId = match.Slot1.Competitor.Id, 
-                        Competitor = match.Slot1.Competitor,
-                        CategoryId = Category.Id, 
-                        Category = Category 
-                    });
-                }
-                if (match.Slot2.Competitor != null)
-                {
-                    newLinks.Add(new CompetitorCategoryModel 
-                    { 
-                        CompetitorId = match.Slot2.Competitor.Id, 
-                        Competitor = match.Slot2.Competitor,
-                        CategoryId = Category.Id, 
-                        Category = Category 
-                    });
-                }
-            }
-        }
-        else if (IsPools || IsOrder)
-        {
-            foreach (var slot in _pouleSlots)
-            {
-                if (slot.Competitor != null)
-                {
-                    newLinks.Add(new CompetitorCategoryModel 
-                    { 
-                        CompetitorId = slot.Competitor.Id, 
-                        Competitor = slot.Competitor,
-                        CategoryId = Category.Id, 
-                        Category = Category 
-                    });
-                }
-            }
-        }
-
-        Category.Competitors = newLinks;
     }
     #endregion
 }

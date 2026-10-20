@@ -56,7 +56,10 @@
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:CategoryModel">
-                    <controls:Card CardPadding="15" CardColor="White">
+                    <controls:Card 
+                        CardPadding="15" 
+                        CardColor="{StaticResource White}"
+                    >
                         <Grid 
                             RowDefinitions="Auto,*" 
                             ColumnDefinitions="*,Auto"
@@ -93,7 +96,7 @@
                                 <VerticalStackLayout>
                                     <Label 
                                         Text="{Binding ., Converter={StaticResource CategoryToNameConverter}}" 
-                                        TextColor="Black"
+                                        TextColor="{StaticResource InverseTextColor}"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
                                     />
@@ -101,7 +104,7 @@
                                     <HorizontalStackLayout Spacing="10">
                                         <Label 
                                             Text="{Binding RoundType, Converter={StaticResource RoundTypeToStringConverter}}"
-                                            TextColor="Black"
+                                            TextColor="{StaticResource InverseTextColor}"
                                             VerticalOptions="Center"
                                             FontSize="12"
                                         />
@@ -115,7 +118,7 @@
 
                                         <Label 
                                             Text="{Binding Competitors.Count, Converter={StaticResource NbCompetitorConverter}}"
-                                            TextColor="Black"
+                                            TextColor="{StaticResource InverseTextColor}"
                                             VerticalOptions="Center"
                                             FontAttributes="Italic"
                                             FontSize="12"
