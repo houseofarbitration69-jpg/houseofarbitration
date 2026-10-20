@@ -20,20 +20,18 @@
 
     <Grid RowDefinitions="Auto, *, Auto" Padding="20" RowSpacing="20">
         
-        <!-- Header -->
+        <!-- HEADER -->
         <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
             <VerticalStackLayout Grid.Column="0">
                 <Label 
                     Text="{Binding Resources.COMPETITORS}" 
-                    TextColor="{DynamicResource PageTitleColor}"
-                    FontSize="28" 
-                    VerticalOptions="Center"
-                    HorizontalOptions="Start"
+                    Style="{StaticResource PageTitleStyle}"
                 />
+                
                 <Label 
                     Text="{Binding Category, Converter={StaticResource CategoryToNameConverter}}"
                     FontSize="14"
-                    TextColor="White"
+                    TextColor="{StaticResource PrimaryTextColor}"
                     VerticalOptions="Center"
                     HorizontalOptions="Start"
                 />
@@ -42,19 +40,25 @@
             <controls:IconButton 
                 Grid.Column="1"
                 Text="{Binding Resources.ADD_COMPETITOR}"
-                ButtonBackgroundColor="LightGreen"
-                TextColor="Black"
+                Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding AddCommand}"
-                VerticalOptions="Center"
             >
                 <controls:IconButton.Icons>
-                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.ADD}" Color="Black" FontSize="16" />
-                    <controls:IconInfo Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" Color="Black" FontSize="24" />
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.ADD}" 
+                        Color="{StaticResource InverseTextColor}" 
+                        FontSize="16" 
+                    />
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
+                        Color="{StaticResource InverseTextColor}" 
+                        FontSize="24" 
+                    />
                 </controls:IconButton.Icons>
             </controls:IconButton>
         </Grid>
 
-        <!-- Competitors List -->
+        <!-- LISTE DES COMPETITORS -->
         <CollectionView Grid.Row="1" ItemsSource="{Binding Competitors}">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
@@ -63,46 +67,66 @@
                 <DataTemplate x:DataType="models:CompetitorCategoryModel">
                     <controls:Card CardPadding="15" CardColor="White">
                         <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto, *, Auto" ColumnSpacing="15">
-                            <!-- Flag -->
-                            <Image Grid.Column="0" Grid.RowSpan="2"
-                                   Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                   WidthRequest="32" 
-                                   HeightRequest="24" 
-                                   VerticalOptions="Center" 
-                                   Aspect="AspectFit"/>
+                            <!-- DRAPEAU -->
+                            <Image 
+                                Grid.Column="0" 
+                                Grid.RowSpan="2"
+                                Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                WidthRequest="32" 
+                                HeightRequest="24" 
+                                VerticalOptions="Center" 
+                                Aspect="AspectFit"
+                            />
 
                             <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                                <!-- NOM / PRENOM -->
                                 <HorizontalStackLayout Spacing="9">
-                                    <Label Text="{Binding Competitor.LastName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
-                                    <Label Text="{Binding Competitor.FirstName}" FontSize="18" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                    <Label 
+                                        Text="{Binding Competitor.LastName}" 
+                                        FontSize="18" 
+                                        FontAttributes="Bold" 
+                                        TextColor="{DynamicResource InverseTextColor}" 
+                                    />
+                                    
+                                    <Label 
+                                        Text="{Binding Competitor.FirstName}" 
+                                        FontSize="18" 
+                                        FontAttributes="Bold" 
+                                        TextColor="{DynamicResource InverseTextColor}" 
+                                    />
                                 </HorizontalStackLayout>
-                                <Label Text="{Binding Competitor.Club}" FontSize="13" TextColor="Gray" />
                                 
-                                <!-- Warnings -->
-                                <Label Text="{Binding Warnings, Converter={StaticResource WarningsToStringConverter}}"
-                                       TextColor="{DynamicResource ErrorColor}"
-                                       FontSize="12"
-                                       Margin="0,5,0,0">
-                                </Label>
+                                <!-- CLUB -->
+                                <Label 
+                                    Text="{Binding Competitor.Club}" 
+                                    FontSize="13" 
+                                    TextColor="{DynamicResource SecondaryTextColor}" 
+                                />
+                                
+                                <!-- ERREURS -->
+                                <Label 
+                                    Text="{Binding Warnings, Converter={StaticResource WarningsToStringConverter}}"
+                                    TextColor="{DynamicResource ErrorColor}"
+                                    FontSize="12"
+                                    Margin="0,5,0,0"
+                                />
                             </VerticalStackLayout>
 
+                            <!-- LISTE DES ACTIONS -->
                             <HorizontalStackLayout Grid.Row="0" Grid.Column="2" Spacing="8">
+                                <!-- EDITION -->
                                 <controls:IconButton
-                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                            Icon="{x:Static helpers:FontCustomIcons.PEN}"
-                                            ButtonBackgroundColor="{DynamicResource EditColor}"
-                                            IconColor="Black"
-                                            Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=EditCommand}"
-                                            CommandParameter="{Binding}"
-                                        />
+                                    Style="{StaticResource ListActionEditButtonStyle}"
+                                    Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=EditCommand}"
+                                    CommandParameter="{Binding}"
+                                />
+                                
+                                <!-- SUPPRESSION -->
                                 <controls:IconButton
-                                            IconFontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
-                                            Icon="{x:Static helpers:FontCustomIcons.TRASH}"
-                                            ButtonBackgroundColor="{DynamicResource ErrorColor}"
-                                            IconColor="Black"
-                                            Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=DeleteCommand}"
-                                            CommandParameter="{Binding}"
-                                        />
+                                    Style="{StaticResource ListActionDeleteButtonStyle}"
+                                    Command="{Binding x:DataType='vm:CompetitorsPageViewModel', Source={RelativeSource AncestorType={x:Type vm:CompetitorsPageViewModel}}, Path=DeleteCommand}"
+                                    CommandParameter="{Binding}"
+                                />
                             </HorizontalStackLayout>
                         </Grid>
                     </controls:Card>
@@ -110,15 +134,30 @@
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
                 <Grid RowDefinitions="*,Auto,*" ColumnDefinitions="*,Auto,*" RowSpacing="10">
-                    <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
-                        <Label Text="🥋" FontSize="48" HorizontalOptions="Center" Opacity="0.5" />
-                        <Label Text="{Binding Resources.NO_COMPETITORS}" FontAttributes="Italic" Opacity="0.6"  HorizontalOptions="Center" />
+                    <VerticalStackLayout 
+                        Grid.Row="1" 
+                        Grid.Column="1" 
+                        Spacing="10"
+                    >
+                        <Label 
+                            Text="🥋" 
+                            FontSize="48" 
+                            HorizontalOptions="Center" 
+                            Opacity="0.5" 
+                        />
+                        
+                        <Label 
+                            Text="{Binding Resources.NO_COMPETITORS}" 
+                            FontAttributes="Italic" 
+                            Opacity="0.6" 
+                            HorizontalOptions="Center" 
+                        />
                     </VerticalStackLayout>
                 </Grid>
             </CollectionView.EmptyView>
         </CollectionView>
 
-        <!-- Actions -->
+        <!-- ACTIONS -->
         <Grid Grid.Row="2" ColumnDefinitions="*, 200, *" ColumnSpacing="20">
             <Button 
                 Grid.Column="1" 
@@ -130,7 +169,7 @@
             />
         </Grid>
 
-        <!-- Loading Indicator Overlay -->
+        <!-- INDICATEUR DE CHARGEMENT -->
         <Border 
             Grid.RowSpan="3"
             IsVisible="{Binding IsBusy}" 
@@ -138,7 +177,8 @@
             StrokeThickness="0"
             HorizontalOptions="Fill" 
             VerticalOptions="Fill"
-            InputTransparent="False">
+            InputTransparent="False"
+        >
             <Border 
                 BackgroundColor="{DynamicResource SurfaceColor}" 
                 Stroke="{DynamicResource Primary}" 
@@ -147,12 +187,26 @@
                 Padding="24, 20" 
                 HorizontalOptions="Center" 
                 VerticalOptions="Center">
+
                 <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
-                    <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
-                    <Label Text="Chargement des compétiteurs..." TextColor="{DynamicResource PrimaryTextColor}" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                    <ActivityIndicator 
+                        IsRunning="True" 
+                        Color="{DynamicResource Primary}" 
+                        WidthRequest="44" 
+                        HeightRequest="44"
+                    />
+
+                    <Label 
+                        Text="{Binding Resources.LOADING}" 
+                        TextColor="{DynamicResource PrimaryTextColor}" 
+                        FontSize="13" 
+                        FontAttributes="Bold" 
+                        HorizontalOptions="Center"
+                    />
                 </VerticalStackLayout>
             </Border>
         </Border>
+
     </Grid>
 
 </base:BasePage>

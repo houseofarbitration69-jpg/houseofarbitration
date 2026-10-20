@@ -70,15 +70,16 @@
         >
             <controls:IconButton.Icons>
                 <controls:IconInfo 
-                        Icon="{x:Static helpers:FontCustomIcons.ADD}" 
-                        Color="{StaticResource InverseTextColor}" 
-                        FontSize="16" 
-                    />
+                    Icon="{x:Static helpers:FontCustomIcons.ADD}" 
+                    Color="{StaticResource InverseTextColor}" 
+                    FontSize="16" 
+                />
+                
                 <controls:IconInfo 
-                        Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
-                        Color="{StaticResource InverseTextColor}" 
-                        FontSize="24" 
-                    />
+                    Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
+                    Color="{StaticResource InverseTextColor}" 
+                    FontSize="24" 
+                />
             </controls:IconButton.Icons>
         </controls:IconButton>
 

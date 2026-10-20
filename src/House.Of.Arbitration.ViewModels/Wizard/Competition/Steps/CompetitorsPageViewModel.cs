@@ -15,9 +15,24 @@ namespace House.Of.Arbitration.ViewModels.Wizard.Competition.Steps;
 public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
+    /// <summary>
+    /// Service d'accès aux données des compétiteurs
+    /// </summary>
     private readonly IRepository<CompetitorModel> _repository;
+
+    /// <summary>
+    /// Service d'accès aux données des catégories des compétiteurs
+    /// </summary>
     private readonly IRepository<CompetitorCategoryModel> _competitorCategoryRepository;
+
+    /// <summary>
+    /// Service d'accès aux données des tirages
+    /// </summary>
     private readonly IRepository<DrawModel> _drawsRepository;
+
+    /// <summary>
+    /// Service de gestion des alertes
+    /// </summary>
     private readonly IWarningService _warningService;
     #endregion
 
@@ -25,8 +40,11 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     private CategoryModel? _category;
     private ObservableCollection<CompetitorCategoryModel> _competitors = new();
     #endregion
-
-    #region Properties    
+    
+    #region Properties
+    /// <summary>
+    /// Obtient ou définit la catégorie
+    /// </summary>
     public CategoryModel? Category
     {
         get => _category;
@@ -41,6 +59,9 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit la liste des compétiteurs
+    /// </summary>
     public ObservableCollection<CompetitorCategoryModel> Competitors
     {
         get => _competitors;
@@ -49,6 +70,16 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Constructors
+    /// <summary>
+    /// Constructeur permettant d'initialiser les différents service
+    /// </summary>
+    /// <param name="popupService">Service de gestion des popups</param>
+    /// <param name="logger">Service de log</param>
+    /// <param name="resourceProvider">Service de traduction</param>
+    /// <param name="repository">Service d'accès aux données des compétiteurs</param>
+    /// <param name="competitorCategoryRepository">Service d'accès aux données des catégories des compétiteurs</param>
+    /// <param name="drawsRepository">Service d'accès aux données pour les tirages</param>
+    /// <param name="warningService">Service de gestion des alertes</param>
     public CompetitorsPageViewModel(
         IPopupService popupService,
         ILogger<CompetitorsPageViewModel> logger,
@@ -67,6 +98,9 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Implement IQueryAttributable
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.ContainsKey(nameof(Category)))
@@ -77,11 +111,20 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Private Methods
+    /// <summary>
+    /// Méthode appellée pour supprimer les tirages du compétiteur
+    /// </summary>
+    /// <returns></returns>
     private async Task DeleteDrawAsync()
     {
-        if (Category == null) return;
+        if (Category == null)
+        {
+            return;
+        }
+
         var draws = await _drawsRepository.GetAllAsync();
         var existingDraw = draws?.FirstOrDefault(d => d.CategoryId == Category.Id);
+        
         if (existingDraw != null)
         {
             await _drawsRepository.DeleteAsync(existingDraw);
@@ -90,6 +133,10 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Virtual Methods
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <returns></returns>
     public override async Task OnAppearing()
     {
         IsBusy = true;
@@ -116,12 +163,20 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Commands
+    /// <summary>
+    /// Command pour fermer la liste des compétiteurs
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Close()
     {
         await Shell.Current.GoToAsync("..");
     }
 
+    /// <summary>
+    /// Command permettant d'ajouter un compétiteur
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Add()
     {
@@ -154,7 +209,8 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
                 cc.Competitor != null &&
                 string.Equals(cc.Competitor.FirstName, competitor.FirstName, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(cc.Competitor.LastName, competitor.LastName, StringComparison.OrdinalIgnoreCase) &&
-                cc.Competitor.BirthDate.Date == competitor.BirthDate.Date)?.Competitor;
+                cc.Competitor.BirthDate.Date == competitor.BirthDate.Date
+            )?.Competitor;
 
             if (existingCompetitor == null)
             {
@@ -174,6 +230,7 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
                 competitor.Club = result.Result.Club;
                 competitor.Weight = (result.Result.Weight > 0) ? result.Result.Weight : existingCompetitor.Weight;
                 competitor.CountryIsoCode = result.Result.CountryIsoCode;
+
                 await _repository.UpdateAsync(competitor);
             }
             else
@@ -215,10 +272,18 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Commande permettant de modifier la catégorie d'un compétiteur
+    /// </summary>
+    /// <param name="link"></param>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Edit(CompetitorCategoryModel link)
     {
-        if (Category == null || link.Competitor == null) return;
+        if (Category == null || link.Competitor == null)
+        {
+            return;
+        }
 
         var queryAttributes = new Dictionary<string, object>
         {
@@ -269,6 +334,11 @@ public partial class CompetitorsPageViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Commande permettant de supprimer un compétiteur
+    /// </summary>
+    /// <param name="link"></param>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Delete(CompetitorCategoryModel link)
     {
