@@ -587,6 +587,21 @@ LocalizationResourceManager.Instance.GetValue(nameof(GROUP_CODES_MODE));
     /// </summary>
     public string LOADING =>
 LocalizationResourceManager.Instance.GetValue(nameof(LOADING));
+    /// <summary>
+    /// Gets the translated "CLUB_PLACEHOLDER" string.
+    /// </summary>
+    public string CLUB_PLACEHOLDER =>
+LocalizationResourceManager.Instance.GetValue(nameof(CLUB_PLACEHOLDER));
+    /// <summary>
+    /// Gets the translated "COUNTRY" string.
+    /// </summary>
+    public string COUNTRY =>
+LocalizationResourceManager.Instance.GetValue(nameof(COUNTRY));
+    /// <summary>
+    /// Gets the translated "COUNTRY_PLACEHOLDER" string.
+    /// </summary>
+    public string COUNTRY_PLACEHOLDER =>
+LocalizationResourceManager.Instance.GetValue(nameof(COUNTRY_PLACEHOLDER));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

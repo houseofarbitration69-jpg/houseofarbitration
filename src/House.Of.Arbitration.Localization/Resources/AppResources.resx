@@ -456,4 +456,13 @@
   <data name="LOADING" xml:space="preserve">
     <value>[LOADING]</value>
   </data>
+  <data name="CLUB_PLACEHOLDER" xml:space="preserve">
+    <value>[CLUB PLACEHOLDER]</value>
+  </data>
+  <data name="COUNTRY" xml:space="preserve">
+    <value>[COUNTRY]</value>
+  </data>
+  <data name="COUNTRY_PLACEHOLDER" xml:space="preserve">
+    <value>[COUNTRY PLACEHOLDER]</value>
+  </data>
 </root>

@@ -456,4 +456,13 @@
   <data name="LOADING" xml:space="preserve">
     <value>Chargement en cours...</value>
   </data>
+  <data name="CLUB_PLACEHOLDER" xml:space="preserve">
+    <value>Tapez le nom d'un club</value>
+  </data>
+  <data name="COUNTRY" xml:space="preserve">
+    <value>Pays</value>
+  </data>
+  <data name="COUNTRY_PLACEHOLDER" xml:space="preserve">
+    <value>Tapez le nom d'un pays</value>
+  </data>
 </root>

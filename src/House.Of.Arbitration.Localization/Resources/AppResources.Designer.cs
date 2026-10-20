@@ -178,6 +178,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [CLUB PLACEHOLDER].
+        /// </summary>
+        public static string CLUB_PLACEHOLDER {
+            get {
+                return ResourceManager.GetString("CLUB_PLACEHOLDER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [CODE].
         /// </summary>
         public static string CODE_INPUT_MODE {
@@ -300,6 +309,24 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string CONNECT_TO_SERVER {
             get {
                 return ResourceManager.GetString("CONNECT_TO_SERVER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [COUNTRY].
+        /// </summary>
+        public static string COUNTRY {
+            get {
+                return ResourceManager.GetString("COUNTRY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [COUNTRY PLACEHOLDER].
+        /// </summary>
+        public static string COUNTRY_PLACEHOLDER {
+            get {
+                return ResourceManager.GetString("COUNTRY_PLACEHOLDER", resourceCulture);
             }
         }
         

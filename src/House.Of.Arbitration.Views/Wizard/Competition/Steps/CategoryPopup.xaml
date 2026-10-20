@@ -91,6 +91,7 @@
                             <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
                         </DataTrigger>
                     </Border.Triggers>
+                    
                     <Picker 
                         ItemsSource="{Binding RoundTypes}"
                         SelectedItem="{Binding SelectedRoundType}"
@@ -215,9 +216,9 @@
                             Grid.Column="1"
                             Margin="0"
                             Text="{Binding WeightMin, Converter={StaticResource DoubleToStringConverter}}" 
+                            TextColor="{DynamicResource InverseTextColor}"
                             Placeholder="{Binding Resources.WEIGHT_MIN}"
                             PlaceholderColor="{DynamicResource PlaceholderColor}"
-                            TextColor="{DynamicResource InverseTextColor}"
                             VerticalOptions="Center" 
                             MinimumHeightRequest="30"
                             Keyboard="Numeric"
