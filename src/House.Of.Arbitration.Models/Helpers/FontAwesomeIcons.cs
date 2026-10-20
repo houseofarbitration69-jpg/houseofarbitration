@@ -32,4 +32,7 @@ public static class FontAwesomeIcons
     public const string YIN_YANG = "\uf6ad";
     public const string DRAGON = "\uf6d5";
     public const string BARS = "\uf0c9";
+    public const string ARROWS_SPIN = "\ue4bb";
+    public const string SITEMAP = "\uf0e8";
+    public const string ARROW_DOWN_1_9 = "\uf162";
 }

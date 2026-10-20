@@ -78,15 +78,24 @@
                                     VerticalOptions="Center"
                                     IsVisible="{Binding ., Converter={StaticResource CategoryToWarningBoolConverter}}"
                                 />
-
+                               
                                 <Label 
-                                    Text="{x:Static helpers:FontCustomIcons.DRAWS}" 
-                                    FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}"
+                                    Text="{Binding RoundType}"
                                     TextColor="{DynamicResource ErrorColor}"
+                                    FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
                                     FontSize="24"
                                     VerticalOptions="Center"
                                 >
                                     <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding RoundType}" Value="Pools">
+                                            <Setter Property="Text" Value="{x:Static helpers:FontAwesomeIcons.ARROWS_SPIN}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding RoundType}" Value="Knockouts">
+                                            <Setter Property="Text" Value="{x:Static helpers:FontAwesomeIcons.SITEMAP}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding RoundType}" Value="Order">
+                                            <Setter Property="Text" Value="{x:Static helpers:FontAwesomeIcons.ARROW_DOWN_1_9}" />
+                                        </DataTrigger>
                                         <DataTrigger TargetType="Label" Binding="{Binding HasDraw}" Value="True">
                                             <Setter Property="TextColor" Value="{DynamicResource ValidColor}" />
                                         </DataTrigger>
