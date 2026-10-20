@@ -465,4 +465,34 @@
   <data name="COUNTRY_PLACEHOLDER" xml:space="preserve">
     <value>[COUNTRY PLACEHOLDER]</value>
   </data>
+  <data name="UPDATE_DRAW_ORDER" xml:space="preserve">
+    <value>[UPDATE DRAW ORDER]</value>
+  </data>
+  <data name="MATCHES" xml:space="preserve">
+    <value>[MATCHES]</value>
+  </data>
+  <data name="EMPTY_CATEGORY_MATCH" xml:space="preserve">
+    <value>[EMPTY CATEGORY MATCH]</value>
+  </data>
+  <data name="UPDATE_ORDER" xml:space="preserve">
+    <value>[UPDATE ORDER]</value>
+  </data>
+  <data name="GO_TO_ORDER" xml:space="preserve">
+    <value>[GO TO ORDER]</value>
+  </data>
+  <data name="GO_TO_START" xml:space="preserve">
+    <value>[GO TO START]</value>
+  </data>
+  <data name="GO_TO_END" xml:space="preserve">
+    <value>[GO TO END]</value>
+  </data>
+  <data name="ENTER_ORDER_NUM" xml:space="preserve">
+    <value>[ENTER ORDER NUM]</value>
+  </data>
+  <data name="GO_TO" xml:space="preserve">
+    <value>[GO TO]</value>
+  </data>
+  <data name="CANCEL" xml:space="preserve">
+    <value>[CANCEL]</value>
+  </data>
 </root>

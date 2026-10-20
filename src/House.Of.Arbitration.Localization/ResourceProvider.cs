@@ -602,6 +602,56 @@ LocalizationResourceManager.Instance.GetValue(nameof(COUNTRY));
     /// </summary>
     public string COUNTRY_PLACEHOLDER =>
 LocalizationResourceManager.Instance.GetValue(nameof(COUNTRY_PLACEHOLDER));
+    /// <summary>
+    /// Gets the translated "UPDATE_DRAW_ORDER" string.
+    /// </summary>
+    public string UPDATE_DRAW_ORDER =>
+LocalizationResourceManager.Instance.GetValue(nameof(UPDATE_DRAW_ORDER));
+    /// <summary>
+    /// Gets the translated "MATCHES" string.
+    /// </summary>
+    public string MATCHES =>
+LocalizationResourceManager.Instance.GetValue(nameof(MATCHES));
+    /// <summary>
+    /// Gets the translated "EMPTY_CATEGORY_MATCH" string.
+    /// </summary>
+    public string EMPTY_CATEGORY_MATCH =>
+LocalizationResourceManager.Instance.GetValue(nameof(EMPTY_CATEGORY_MATCH));
+    /// <summary>
+    /// Gets the translated "UPDATE_ORDER" string.
+    /// </summary>
+    public string UPDATE_ORDER =>
+LocalizationResourceManager.Instance.GetValue(nameof(UPDATE_ORDER));
+    /// <summary>
+    /// Gets the translated "GO_TO_ORDER" string.
+    /// </summary>
+    public string GO_TO_ORDER =>
+LocalizationResourceManager.Instance.GetValue(nameof(GO_TO_ORDER));
+    /// <summary>
+    /// Gets the translated "GO_TO_START" string.
+    /// </summary>
+    public string GO_TO_START =>
+LocalizationResourceManager.Instance.GetValue(nameof(GO_TO_START));
+    /// <summary>
+    /// Gets the translated "GO_TO_END" string.
+    /// </summary>
+    public string GO_TO_END =>
+LocalizationResourceManager.Instance.GetValue(nameof(GO_TO_END));
+    /// <summary>
+    /// Gets the translated "ENTER_ORDER_NUM" string.
+    /// </summary>
+    public string ENTER_ORDER_NUM =>
+LocalizationResourceManager.Instance.GetValue(nameof(ENTER_ORDER_NUM));
+    /// <summary>
+    /// Gets the translated "GO_TO" string.
+    /// </summary>
+    public string GO_TO =>
+LocalizationResourceManager.Instance.GetValue(nameof(GO_TO));
+    /// <summary>
+    /// Gets the translated "CANCEL" string.
+    /// </summary>
+    public string CANCEL =>
+LocalizationResourceManager.Instance.GetValue(nameof(CANCEL));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

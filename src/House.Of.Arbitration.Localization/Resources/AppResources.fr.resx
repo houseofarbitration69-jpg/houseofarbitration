@@ -465,4 +465,34 @@
   <data name="COUNTRY_PLACEHOLDER" xml:space="preserve">
     <value>Tapez le nom d'un pays</value>
   </data>
+  <data name="UPDATE_DRAW_ORDER" xml:space="preserve">
+    <value>GESTION DES TIRAGES &amp; ORDRE DES PASSAGES</value>
+  </data>
+  <data name="MATCHES" xml:space="preserve">
+    <value>rencontres</value>
+  </data>
+  <data name="EMPTY_CATEGORY_MATCH" xml:space="preserve">
+    <value>Aucune rencontre ou catégorie configurée pour cette compétition.</value>
+  </data>
+  <data name="UPDATE_ORDER" xml:space="preserve">
+    <value>Mise à jour de l'ordre...</value>
+  </data>
+  <data name="GO_TO_ORDER" xml:space="preserve">
+    <value>🔍 Aller au passage...</value>
+  </data>
+  <data name="GO_TO_START" xml:space="preserve">
+    <value>⏮ Début (1)</value>
+  </data>
+  <data name="GO_TO_END" xml:space="preserve">
+    <value>Dernier ⏭</value>
+  </data>
+  <data name="ENTER_ORDER_NUM" xml:space="preserve">
+    <value>Entrez le numéro d'ordre de passage</value>
+  </data>
+  <data name="GO_TO" xml:space="preserve">
+    <value>Atteindre</value>
+  </data>
+  <data name="CANCEL" xml:space="preserve">
+    <value>Annuler</value>
+  </data>
 </root>

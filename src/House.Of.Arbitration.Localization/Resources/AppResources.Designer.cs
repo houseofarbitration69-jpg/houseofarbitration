@@ -124,6 +124,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [CANCEL].
+        /// </summary>
+        public static string CANCEL {
+            get {
+                return ResourceManager.GetString("CANCEL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [CATEGORIES].
         /// </summary>
         public static string CATEGORIES {
@@ -421,6 +430,24 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [EMPTY CATEGORY MATCH].
+        /// </summary>
+        public static string EMPTY_CATEGORY_MATCH {
+            get {
+                return ResourceManager.GetString("EMPTY_CATEGORY_MATCH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [ENTER ORDER NUM].
+        /// </summary>
+        public static string ENTER_ORDER_NUM {
+            get {
+                return ResourceManager.GetString("ENTER_ORDER_NUM", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [ENUM AGE CADETS].
         /// </summary>
         public static string ENUM_AGE_CADETS {
@@ -682,6 +709,42 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [GO TO].
+        /// </summary>
+        public static string GO_TO {
+            get {
+                return ResourceManager.GetString("GO_TO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [GO TO END].
+        /// </summary>
+        public static string GO_TO_END {
+            get {
+                return ResourceManager.GetString("GO_TO_END", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [GO TO ORDER].
+        /// </summary>
+        public static string GO_TO_ORDER {
+            get {
+                return ResourceManager.GetString("GO_TO_ORDER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [GO TO START].
+        /// </summary>
+        public static string GO_TO_START {
+            get {
+                return ResourceManager.GetString("GO_TO_START", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [GRADE].
         /// </summary>
         public static string GRADE {
@@ -804,6 +867,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string MASTER {
             get {
                 return ResourceManager.GetString("MASTER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [MATCHES].
+        /// </summary>
+        public static string MATCHES {
+            get {
+                return ResourceManager.GetString("MATCHES", resourceCulture);
             }
         }
         
@@ -1047,6 +1119,24 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string UPDATE_CATEGORY {
             get {
                 return ResourceManager.GetString("UPDATE_CATEGORY", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [UPDATE DRAW ORDER].
+        /// </summary>
+        public static string UPDATE_DRAW_ORDER {
+            get {
+                return ResourceManager.GetString("UPDATE_DRAW_ORDER", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [UPDATE ORDER].
+        /// </summary>
+        public static string UPDATE_ORDER {
+            get {
+                return ResourceManager.GetString("UPDATE_ORDER", resourceCulture);
             }
         }
         

@@ -13,12 +13,23 @@ using System.Collections.ObjectModel;
 
 namespace House.Of.Arbitration.ViewModels.Competition;
 
-[QueryProperty(nameof(CompetitionId), "CompetitionId")]
+[QueryProperty(nameof(CompetitionId), Constants.Navigation.Parameter.COMPETITION_ID)]
 public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
+    /// <summary>
+    /// Service d'accès aux données pour les compétitions
+    /// </summary>
     private readonly IRepository<CompetitionModel> _competitionRepository;
+    
+    /// <summary>
+    /// Service d'accès aux données pour les catégories
+    /// </summary>
     private readonly IRepository<CategoryModel> _categoryRepository;
+    
+    /// <summary>
+    /// Service d'accès aux données pour les tirages
+    /// </summary>
     private readonly IRepository<DrawModel> _drawRepository;
     #endregion
 
@@ -33,40 +44,67 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Properties
+    /// <summary>
+    /// Obtient ou définit l'identifiant de la compétition
+    /// </summary>
     public int CompetitionId
     {
         get => _competitionId;
         set => SetProperty(ref _competitionId, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit la compétition
+    /// </summary>
     public CompetitionModel? Competition
     {
         get => _competition;
         set => SetProperty(ref _competition, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit la liste des items a afficher
+    /// </summary>
     public ObservableCollection<object> DisplayItems
     {
         get => _displayItems;
         set => SetProperty(ref _displayItems, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le nombre total de rencontre
+    /// </summary>
     public int TotalMatchesCount
     {
         get => _totalMatchesCount;
         set => SetProperty(ref _totalMatchesCount, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le nombre total de catégories
+    /// </summary>
     public int TotalCategoriesCount
     {
         get => _totalCategoriesCount;
         set => SetProperty(ref _totalCategoriesCount, value);
     }
 
+    /// <summary>
+    /// Indique s'il reste au moins une rencontre
+    /// </summary>
     public bool HasMatches => TotalMatchesCount > 0;
     #endregion
 
     #region Constructors
+    /// <summary>
+    /// Constructeur permettant d'initialiser les services
+    /// </summary>
+    /// <param name="popupService">Service de gestion des popups</param>
+    /// <param name="logger">Service des logs</param>
+    /// <param name="resourceProvider">Service de traduction</param>
+    /// <param name="competitionRepository">Service d'accès aux données pour les compétitions</param>
+    /// <param name="categoryRepository">Service d'accès aux données pour les catégories</param>
+    /// <param name="drawRepository">Services d'accès aux données pour les tirages</param>
     public DrawsManagementViewModel(
         IPopupService popupService,
         ILogger<DrawsManagementViewModel> logger,
@@ -83,11 +121,15 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Implement IQueryAttributable
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (query.TryGetValue(nameof(CompetitionId), out var compIdObj) || query.TryGetValue("CompetitionId", out compIdObj))
+        if (query.TryGetValue(nameof(CompetitionId), out var compIdObj) || query.TryGetValue(Constants.Navigation.Parameter.COMPETITION_ID, out compIdObj))
         {
             int newId = 0;
+
             if (compIdObj is int id)
             {
                 newId = id;
@@ -98,15 +140,20 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
             }
 
             CompetitionId = newId;
+
             MainThread.BeginInvokeOnMainThread(async () => await LoadCompetitionAsync());
         }
     }
     #endregion
 
     #region Override Methods
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public override async Task OnAppearing()
     {
         await base.OnAppearing();
+
         if (CompetitionId > 0 && (_categories == null || _categories.Count == 0 || _allMatches.Count == 0))
         {
             await LoadCompetitionAsync();
@@ -115,9 +162,16 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Private Methods
+    /// <summary>
+    /// Méthode permettant de récupérer les données de la compétition
+    /// </summary>
+    /// <returns></returns>
     private async Task LoadCompetitionAsync()
     {
-        if (CompetitionId <= 0) return;
+        if (CompetitionId <= 0)
+        {
+            return;
+        }
 
         IsBusy = true;
         try
@@ -260,16 +314,31 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Méthode permettant de générer les rencontres d'une catégorie
+    /// </summary>
+    /// <param name="category">Catégorie dont on veut les rencontres</param>
     private void GenerateMatchesForCategory(CategoryModel category)
     {
-        if (category.Competitors == null || category.Competitors.Count == 0) return;
+        if (category.Competitors == null || category.Competitors.Count == 0)
+        {
+            return;
+        }
 
         if (category.RoundType == RoundType.Knockouts)
         {
             int n = category.Competitors.Count;
             int m = 1;
-            while (m < n) m *= 2;
-            if (m < 2) m = 2;
+
+            while (m < n)
+            {
+                m *= 2;
+            }
+
+            if (m < 2)
+            {
+                m = 2;
+            }
 
             int matchesInRound = m / 2;
             int matchOffset = 0;
@@ -397,6 +466,9 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Méthode permettant de rafraichir la liste
+    /// </summary>
     private void RefreshDisplayList()
     {
         // Re-index all matches sequentially: 1, 2, 3, ..., N and wire commands
@@ -443,16 +515,23 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
     public event Action<object>? ScrollToItemRequested;
     public event Action<int>? ScrollToRequested;
 
+    /// <summary>
+    /// Commande permettant d'aller a un ordre précis
+    /// </summary>
     [RelayCommand]
     private async Task ScrollToOrder()
     {
-        if (_allMatches.Count == 0) return;
+        if (_allMatches.Count == 0)
+        {
+            return;
+        }
 
+        
         string? result = await Shell.Current.DisplayPromptAsync(
-            "Accéder à un ordre",
-            $"Entrez le numéro d'ordre de passage (1 à {_allMatches.Count}) :",
-            "Atteindre",
-            "Annuler",
+            Resources.GO_TO_ORDER,
+            $"{Resources.ENTER_ORDER_NUM} (1 à {_allMatches.Count}) :",
+            Resources.GO_TO,
+            Resources.CANCEL,
             placeholder: "1",
             keyboard: Keyboard.Numeric);
 
@@ -462,10 +541,17 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Commande permettant d'aller un ordre précis
+    /// </summary>
+    /// <param name="param"></param>
     [RelayCommand]
     private void ScrollToTargetOrder(object? param)
     {
-        if (param == null || _allMatches.Count == 0) return;
+        if (param == null || _allMatches.Count == 0)
+        {
+            return;
+        }
 
         int targetOrder = 1;
         if (param is int i)
@@ -493,6 +579,9 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
     #endregion
 
     #region Commands
+    /// <summary>
+    /// Commande pour déplacer la rencontre vers le haut
+    /// </summary>
     [RelayCommand]
     private async Task MoveUp(DrawMatchItemViewModel match)
     {
@@ -515,15 +604,23 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Commande pour déplcaer la rencontre vers le base
+    /// </summary>
     [RelayCommand]
     private async Task MoveDown(DrawMatchItemViewModel match)
     {
-        if (match == null) return;
+        if (match == null)
+        {
+            return;
+        }
+
         int index = _allMatches.IndexOf(match);
         if (index >= 0 && index < _allMatches.Count - 1)
         {
             IsBusy = true;
             await Task.Yield();
+
             try
             {
                 _allMatches.RemoveAt(index);
@@ -537,10 +634,16 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Commander permettant d'editer l'ordre de la rencontre
+    /// </summary>
     [RelayCommand]
     private async Task EditOrder(DrawMatchItemViewModel match)
     {
-        if (match == null || _allMatches.Count == 0) return;
+        if (match == null || _allMatches.Count == 0)
+        {
+            return;
+        }
 
         try
         {
@@ -560,13 +663,18 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
             {
                 int newOrder = popupResult.Result.Value;
                 int currentIndex = _allMatches.IndexOf(match);
-                if (currentIndex < 0) return;
+                
+                if (currentIndex < 0)
+                {
+                    return;
+                }
 
                 int targetIndex = Math.Clamp(newOrder - 1, 0, _allMatches.Count - 1);
                 if (targetIndex != currentIndex)
                 {
                     IsBusy = true;
                     await Task.Yield();
+                
                     try
                     {
                         _allMatches.RemoveAt(currentIndex);
@@ -587,6 +695,9 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Commande permettant de sauvegarder l'ordre des rencontres
+    /// </summary>
     [RelayCommand]
     private async Task Save()
     {
@@ -621,7 +732,10 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                 var finishedPools = existingDraw?.DrawPools?.Where(p => p.IsFinished).ToList() ?? new List<DrawPoolsModel>();
                 var finishedOrders = existingDraw?.DrawOrders?.Where(o => o.IsFinished).ToList() ?? new List<DrawOrderModel>();
 
-                if (categoryMatches.Count == 0 && finishedKnockouts.Count == 0 && finishedPools.Count == 0 && finishedOrders.Count == 0) continue;
+                if (categoryMatches.Count == 0 && finishedKnockouts.Count == 0 && finishedPools.Count == 0 && finishedOrders.Count == 0)
+                {
+                    continue;
+                }
 
                 var draw = new DrawModel
                 {
@@ -688,11 +802,13 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                             Competitor2Id = match.Competitor2?.Id,
                             IsFinished = match.IsFinished
                         };
+
                         if (match.IsBye)
                         {
                             k.WinnerId = match.Competitor1?.Id ?? match.Competitor2?.Id;
                             k.IsFinished = true;
                         }
+                        
                         draw.DrawKnockouts.Add(k);
                     }
                     else if (match.RoundType == RoundType.Pools)
@@ -742,6 +858,10 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         }
     }
 
+    /// <summary>
+    /// Commande permettant de fermer l'edition des ordres des rencontres
+    /// </summary>
+    /// <returns></returns>
     [RelayCommand]
     private async Task Close()
     {
