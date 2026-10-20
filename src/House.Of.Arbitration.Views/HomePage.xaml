@@ -8,6 +8,8 @@
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:droid="clr-namespace:CommunityToolkit.Maui.PlatformConfiguration.AndroidSpecific;assembly=CommunityToolkit.Maui"
+    droid:NavigationBar.Color="#121212"
     x:TypeArguments="vm:HomeViewModel"
     x:Class="House.Of.Arbitration.Views.HomePage"
     x:DataType="vm:HomeViewModel"
@@ -57,7 +59,15 @@
                 Command="{Binding NavigateToCommand}"
                 CommandParameter="{x:Static models:Constants+Navigation+Page.TAOLU_CODES}"
             />
-            
+
+            <controls:IconButton 
+                IsVisible="{Binding IsDebug}"
+                Text="Test"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding TestCommand}"
+                Margin="0,20,0,0"
+            />
+
             <controls:IconButton 
                 IsVisible="{Binding IsDebug}"
                 Text="{Binding Resources.GENERATE_DATA}"

@@ -2,6 +2,7 @@ using Android.App;
 using Android.Content.PM;
 using Android.OS;
 using Android.Views;
+using House.Of.Arbitration.App.Platforms.Android;
 using Microsoft.Maui.Platform;
 
 namespace House.Of.Arbitration.App
@@ -19,25 +20,18 @@ namespace House.Of.Arbitration.App
         {
             base.OnCreate(savedInstanceState);
 
-            // 1. Définir la couleur souhaitée (Exemple ici : un gris foncé)
-            var CustomColor = Microsoft.Maui.Graphics.Color.FromArgb("#121212").ToPlatform();
+            ModalDialogFragmentLifecycleCallbacks.ApplyToWindow(Window);
 
-            if (Window != null)
-            {
-                // 2. Changer la couleur de la barre de navigation du bas
-                Window.SetNavigationBarColor(CustomColor);
+            SupportFragmentManager.RegisterFragmentLifecycleCallbacks(
+                new ModalDialogFragmentLifecycleCallbacks(), 
+                true);
+        }
 
-                // 3. Optionnel : Adapter la couleur des icônes de la barre (boutons retour/accueil)
-                // Si votre fond est clair, passez à 'true' pour que les boutons deviennent sombres.
-                // Si votre fond est sombre, passez à 'false' pour que les boutons restent blancs.
-                var windowInsetsController = Window.DecorView.WindowInsetsController;
-                if (windowInsetsController != null)
-                {
-                    windowInsetsController.SetSystemBarsAppearance(
-                        0, // Utilisez WindowInsetsControllerAppearance.LightNavigationBars si fond clair
-                        (int)WindowInsetsControllerAppearance.LightNavigationBars);
-                }
-            }
+        protected override void OnResume()
+        {
+            base.OnResume();
+
+            ModalDialogFragmentLifecycleCallbacks.ApplyToWindow(Window);
         }
     }
 }

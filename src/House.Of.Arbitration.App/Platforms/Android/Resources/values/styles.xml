@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+  <!-- Thème principal de l'application -->
+  <style name="Maui.SplashTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <item name="android:navigationBarColor">#121212</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+
+    <!-- Thèmes des dialogues et popups -->
+    <item name="android:dialogTheme">@style/AppDialogTheme</item>
+    <item name="dialogTheme">@style/AppDialogTheme</item>
+    <item name="android:alertDialogTheme">@style/AppDialogTheme</item>
+    <item name="alertDialogTheme">@style/AppDialogTheme</item>
+    <item name="materialAlertDialogTheme">@style/AppDialogTheme</item>
+  </style>
+
+  <!-- Thème appliqué aux dialogues / popups -->
+  <style name="AppDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
+    <item name="android:navigationBarColor">#121212</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+  </style>
+</resources>

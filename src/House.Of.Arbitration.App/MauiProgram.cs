@@ -1,7 +1,5 @@
 #region Imports
 using CommunityToolkit.Maui;
-using CommunityToolkit.Maui.Core;
-using CommunityToolkit.Maui.Views;
 using House.Of.Arbitration.Data;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models.Helpers;

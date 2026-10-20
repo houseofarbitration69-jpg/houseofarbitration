@@ -35,19 +35,10 @@
 
 	<ItemGroup>
 		<!-- App Icon -->
-		<MauiIcon 
-			Include="Resources\AppIcon\appicon.svg" 
-			ForegroundFile="Resources\Images\hoa.svg" 
-			Color="#808080" 
-		/>
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\Images\hoa.svg" Color="#808080" />
 
 		<!-- Splash Screen -->
-		<MauiSplashScreen 
-			Include="Resources\Images\hoa_splash_256.png" 
-			Color="#808080" 
-			BaseSize="512,512"
-			Resize="False"
-		/>
+		<MauiSplashScreen Include="Resources\Images\hoa_splash_256.png" Color="#808080" BaseSize="512,512" Resize="False" />
 
 		<!-- Images -->
 		<MauiImage Include="Resources\Images\**\*" />

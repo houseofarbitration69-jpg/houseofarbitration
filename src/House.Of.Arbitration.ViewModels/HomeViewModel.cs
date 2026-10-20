@@ -188,6 +188,24 @@ public partial class HomeViewModel : BaseViewModel
             IsBusy = false;
         }
     }
+
+    [RelayCommand]
+    private async Task Test()
+    {
+        var queryAttributes = new Dictionary<string, object>
+        {
+            { Constants.QueryParameter.TITLE, "title" },
+            { Constants.QueryParameter.MESSAGE, "message" },
+            { Constants.QueryParameter.ACCEPT, "accept" },
+            { Constants.QueryParameter.CANCEL, "cancel" }
+        };
+
+        await _popupService.ShowPopupAsync<ConfirmationPopupViewModel, bool>(
+            Shell.Current,
+            options: new PopupOptions() { Shadow = null },
+            shellParameters: queryAttributes
+        );
+    }
     #endregion
 
     #region Private 
