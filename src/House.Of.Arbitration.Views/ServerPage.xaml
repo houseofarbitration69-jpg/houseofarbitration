@@ -400,13 +400,14 @@
                                     FontSize="13"
                                     VerticalOptions="Center"
                                 />
-                                <Label
-                                    Text="{Binding ServerName, StringFormat='({0})'}"
-                                    TextColor="{DynamicResource SuccessVeryLight}"
+                                
+                                <!--<Label
+                                    Text="{Binding ServerName}"
+                                    TextColor="{DynamicResource PrimaryTextColor}"
                                     FontSize="12"
                                     VerticalOptions="Center"
                                     IsVisible="{Binding ServerName, Converter={StaticResource EmptyToBoolConverter}}"
-                                />
+                                />-->
                             </HorizontalStackLayout>
 
                             <!-- Texte statut ARRETE -->
@@ -2456,10 +2457,17 @@
         >
             <controls:SideSheetControl.SheetContent>
                 <VerticalStackLayout Spacing="20">
-                    <Label Text="CONTRÔLE" FontSize="24" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" HorizontalOptions="Center" Margin="0,0,0,10" />
+                    <Label 
+                        Text="MENU" 
+                        FontSize="24" 
+                        FontAttributes="Bold" 
+                        TextColor="{DynamicResource PrimaryTextColor}" 
+                        HorizontalOptions="Center" 
+                        Margin="0,0,0,10" 
+                    />
 
                     <!-- Statut du serveur dans la feuille latérale -->
-                    <Border
+                    <!--<Border
                         StrokeShape="RoundRectangle 12"
                         Padding="14,10"
                         StrokeThickness="1.5"
@@ -2509,7 +2517,7 @@
                                 IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
                             />
                         </HorizontalStackLayout>
-                    </Border>
+                    </Border>-->
 
                     <Button 
                         Text="DÉMARRER" 

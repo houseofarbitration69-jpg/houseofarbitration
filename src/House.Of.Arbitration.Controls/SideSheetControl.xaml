@@ -6,30 +6,21 @@
     x:Class="House.Of.Arbitration.Controls.SideSheetControl"
     x:DataType="local:SideSheetControl"
     x:Name="this"
+    IsVisible="False"
+    InputTransparent="True"
 >
-    <Grid>
+    <Grid IsClippedToBounds="True">
         <!-- Side Sheet Overlay -->
         <BoxView 
             x:Name="Overlay" 
             BackgroundColor="Black" 
             Opacity="0" 
             IsVisible="False"
-            InputTransparent="{Binding IsOpen, Source={x:Reference this}, Converter={StaticResource InvertBoolConverter}}"
+            InputTransparent="True"
         >
             <BoxView.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding CloseCommand, Source={x:Reference this}}" />
             </BoxView.GestureRecognizers>
-            <BoxView.Triggers>
-                <DataTrigger TargetType="BoxView" Binding="{Binding IsOpen, Source={x:Reference this}}" Value="True">
-                    <DataTrigger.EnterActions>
-                        <local:FadeAction Opacity="0.5" Duration="300" />
-                    </DataTrigger.EnterActions>
-                    <DataTrigger.ExitActions>
-                        <local:FadeAction Opacity="0" Duration="300" />
-                    </DataTrigger.ExitActions>
-                    <Setter Property="IsVisible" Value="True" />
-                </DataTrigger>
-            </BoxView.Triggers>
         </BoxView>
 
         <!-- Side Sheet -->
@@ -38,25 +29,15 @@
             WidthRequest="{Binding SheetWidth, Source={x:Reference this}}" 
             HorizontalOptions="Start" 
             TranslationX="-300" 
+            Margin="-4,0,0,0"
             IsVisible="False"
+            InputTransparent="True"
             BackgroundColor="{Binding SheetBackgroundColor, Source={x:Reference this}}" 
-            Stroke="White" 
+            Stroke="{Binding SheetBorderColor, Source={x:Reference this}}" 
             StrokeThickness="1"
             StrokeShape="RoundRectangle 0,15,0,15"
-            Padding="20"
+            Padding="24,20,20,20"
         >
-            <Border.Triggers>
-                <DataTrigger TargetType="Border" Binding="{Binding IsOpen, Source={x:Reference this}}" Value="True">
-                    <DataTrigger.EnterActions>
-                        <local:TranslateAction X="0" Duration="300" Easing="{x:Static Easing.CubicOut}" />
-                    </DataTrigger.EnterActions>
-                    <DataTrigger.ExitActions>
-                        <local:TranslateAction X="-300" Duration="300" Easing="{x:Static Easing.CubicIn}" />
-                    </DataTrigger.ExitActions>
-                    <Setter Property="IsVisible" Value="True" />
-                </DataTrigger>
-            </Border.Triggers>
-            
             <ContentView Content="{Binding SheetContent, Source={x:Reference this}}" />
         </Border>
     </Grid>

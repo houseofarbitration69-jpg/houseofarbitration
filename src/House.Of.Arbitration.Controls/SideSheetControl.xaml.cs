@@ -1,4 +1,7 @@
+using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Microsoft.Maui.Controls;
 
 namespace House.Of.Arbitration.Controls;
 
@@ -9,7 +12,8 @@ public partial class SideSheetControl : ContentView
         typeof(bool), 
         typeof(SideSheetControl), 
         false, 
-        BindingMode.TwoWay
+        BindingMode.TwoWay,
+        propertyChanged: OnIsOpenChanged
     );
 
     public static readonly BindableProperty SheetContentProperty = BindableProperty.Create(
@@ -36,6 +40,13 @@ public partial class SideSheetControl : ContentView
         typeof(Color), 
         typeof(SideSheetControl), 
         Color.FromArgb("#222")
+    );
+
+    public static readonly BindableProperty SheetBorderColorProperty = BindableProperty.Create(
+        nameof(SheetBorderColor), 
+        typeof(Color), 
+        typeof(SideSheetControl), 
+        Colors.White
     );
 
     public bool IsOpen
@@ -68,8 +79,84 @@ public partial class SideSheetControl : ContentView
         set => SetValue(SheetBackgroundColorProperty, value);
     }
 
+    public Color SheetBorderColor
+    {
+        get => (Color)GetValue(SheetBorderColorProperty);
+        set => SetValue(SheetBorderColorProperty, value);
+    }
+
     public SideSheetControl()
-	{
-		InitializeComponent();
-	}
+    {
+        InitializeComponent();
+    }
+
+    private static void OnIsOpenChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is SideSheetControl control && newValue is bool isOpen)
+        {
+            control.UpdateState(isOpen);
+        }
+    }
+
+    private async void UpdateState(bool isOpen)
+    {
+        if (SidePane == null || Overlay == null)
+            return;
+
+        double width = SheetWidth > 0 ? SheetWidth : 300.0;
+
+        if (isOpen)
+        {
+            IsVisible = true;
+            InputTransparent = false;
+
+            Overlay.IsVisible = true;
+            SidePane.IsVisible = true;
+            Overlay.InputTransparent = false;
+            SidePane.InputTransparent = false;
+
+            if (SidePane.TranslationX >= 0)
+            {
+                SidePane.TranslationX = -width;
+                Overlay.Opacity = 0;
+            }
+
+            try
+            {
+                await Task.WhenAll(
+                    SidePane.TranslateToAsync(0, 0, 300, Easing.CubicOut),
+                    Overlay.FadeToAsync(0.5, 300)
+                );
+            }
+            catch
+            {
+                // Animation interrupted
+            }
+        }
+        else
+        {
+            Overlay.InputTransparent = true;
+            SidePane.InputTransparent = true;
+
+            try
+            {
+                await Task.WhenAll(
+                    SidePane.TranslateToAsync(-width, 0, 300, Easing.CubicIn),
+                    Overlay.FadeToAsync(0, 300)
+                );
+            }
+            catch
+            {
+                // Animation interrupted
+            }
+
+            if (!IsOpen)
+            {
+                SidePane.IsVisible = false;
+                Overlay.IsVisible = false;
+                IsVisible = false;
+                InputTransparent = true;
+            }
+        }
+    }
 }
