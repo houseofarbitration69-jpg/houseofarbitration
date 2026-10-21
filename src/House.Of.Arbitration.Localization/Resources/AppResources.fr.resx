@@ -495,4 +495,16 @@
   <data name="CANCEL" xml:space="preserve">
     <value>Annuler</value>
   </data>
+  <data name="WAITING" xml:space="preserve">
+    <value>En attente...</value>
+  </data>
+  <data name="VS" xml:space="preserve">
+    <value>VS</value>
+  </data>
+  <data name="EMPTY_MATCH" xml:space="preserve">
+    <value>Tous les matchs sont terminés</value>
+  </data>
+  <data name="WINNER" xml:space="preserve">
+    <value>VAINQUEUR</value>
+  </data>
 </root>

@@ -120,6 +120,14 @@
     <Color x:Key="EditColor">#4CAF50</Color>
     <Color x:Key="InfoColor">#1976D2</Color>
     <Color x:Key="ActionColor">#ADD8E6</Color>
+    <Color x:Key="ConnectedBackground">Green</Color>
+    <Color x:Key="ConnectedStroke">Lime</Color>
+    <Color x:Key="RedSide">Red</Color>
+    <Color x:Key="MoreRedSide">Red</Color>
+    <Color x:Key="LessRedSide">DarkRed</Color>
+    <Color x:Key="BlueSide">Blue</Color>
+    <Color x:Key="MoreBlueSide">Blue</Color>
+    <Color x:Key="LessBlueSide">DarkBlue</Color>
 
     <!-- ========================================================================= -->
     <!-- BORDERS                                                                   -->

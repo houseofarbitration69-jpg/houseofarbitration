@@ -652,6 +652,26 @@ LocalizationResourceManager.Instance.GetValue(nameof(GO_TO));
     /// </summary>
     public string CANCEL =>
 LocalizationResourceManager.Instance.GetValue(nameof(CANCEL));
+    /// <summary>
+    /// Gets the translated "WAITING" string.
+    /// </summary>
+    public string WAITING =>
+LocalizationResourceManager.Instance.GetValue(nameof(WAITING));
+    /// <summary>
+    /// Gets the translated "VS" string.
+    /// </summary>
+    public string VS =>
+LocalizationResourceManager.Instance.GetValue(nameof(VS));
+    /// <summary>
+    /// Gets the translated "EMPTY_MATCH" string.
+    /// </summary>
+    public string EMPTY_MATCH =>
+LocalizationResourceManager.Instance.GetValue(nameof(EMPTY_MATCH));
+    /// <summary>
+    /// Gets the translated "WINNER" string.
+    /// </summary>
+    public string WINNER =>
+LocalizationResourceManager.Instance.GetValue(nameof(WINNER));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

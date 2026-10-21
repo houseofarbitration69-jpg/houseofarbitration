@@ -439,6 +439,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [EMPTY MATCH].
+        /// </summary>
+        public static string EMPTY_MATCH {
+            get {
+                return ResourceManager.GetString("EMPTY_MATCH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [ENTER ORDER NUM].
         /// </summary>
         public static string ENTER_ORDER_NUM {
@@ -1150,6 +1159,24 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [VS].
+        /// </summary>
+        public static string VS {
+            get {
+                return ResourceManager.GetString("VS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [WAITING].
+        /// </summary>
+        public static string WAITING {
+            get {
+                return ResourceManager.GetString("WAITING", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [WEIGHT].
         /// </summary>
         public static string WEIGHT {
@@ -1182,6 +1209,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string WEIGHT_UNIT {
             get {
                 return ResourceManager.GetString("WEIGHT_UNIT", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [WINNER].
+        /// </summary>
+        public static string WINNER {
+            get {
+                return ResourceManager.GetString("WINNER", resourceCulture);
             }
         }
         
