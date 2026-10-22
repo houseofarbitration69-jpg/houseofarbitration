@@ -31,6 +31,12 @@
   <PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
     <RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
     <AndroidSupportedAbis>armeabi-v7a;arm64-v8a;x86;x86_64</AndroidSupportedAbis>
+    <!-- Désactivation du trimming et de l'AOT pour éviter les crashs natifs (SIGSEGV) liés à EF Core et la réflexion dynamique -->
+    <PublishTrimmed>false</PublishTrimmed>
+    <RunAOTCompilation Condition="'$(Configuration)' == 'Release'">false</RunAOTCompilation>
+    <AndroidEnableProfiledAot Condition="'$(Configuration)' == 'Release'">false</AndroidEnableProfiledAot>
+    <!-- Désactivation des Marshal Methods pour éviter l'UnsatisfiedLinkError sur n_onCreate en Release -->
+    <AndroidEnableMarshalMethods>false</AndroidEnableMarshalMethods>
   </PropertyGroup>
 
 	<ItemGroup>

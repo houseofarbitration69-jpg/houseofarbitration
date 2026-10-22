@@ -137,7 +137,7 @@ public class JudgeTaoluModeTests
     {
         // Arrange
         var vm = CreateViewModel();
-        vm.CompetitionType = CompetitionType.Taolu;
+        vm.CurrentCompetition?.Type = CompetitionType.Taolu;
         vm.Score = 5.0;
 
         // Act: Type 0.3
@@ -161,7 +161,7 @@ public class JudgeTaoluModeTests
     {
         // Arrange
         var vm = CreateViewModel();
-        vm.CompetitionType = CompetitionType.Taolu;
+        vm.CurrentCompetition?.Type = CompetitionType.Taolu;
         vm.Score = 5.0;
 
         // Act: Quick deduction chip 0.2
@@ -520,7 +520,7 @@ public class JudgeTaoluModeTests
     {
         // Arrange
         var vm = CreateViewModel();
-        vm.CompetitionType = CompetitionType.Sanda;
+        vm.CurrentCompetition?.Type = CompetitionType.Sanda;
         vm.SelectedJudge = new JudgeModel { Name = "JUGE 1", Number = 1 };
         vm.Competitor1 = new CompetitorModel { Id = 1, FirstName = "John", LastName = "Red" };
         vm.Competitor2 = new CompetitorModel { Id = 2, FirstName = "Jane", LastName = "Blue" };

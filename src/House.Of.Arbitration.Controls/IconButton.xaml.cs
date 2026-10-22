@@ -36,6 +36,27 @@ public partial class IconButton : ContentView
         set => SetValue(TextFontSizeProperty, value);
     }
 
+    public static readonly BindableProperty FontSizeProperty = BindableProperty.Create(
+        nameof(FontSize), 
+        typeof(double), 
+        typeof(IconButton), 
+        14.0,
+        propertyChanged: (bindable, oldValue, newValue) =>
+        {
+            if (bindable is IconButton control && newValue is double size)
+            {
+                control.TextFontSize = size;
+                control.IconFontSize = size;
+            }
+        }
+    );
+
+    public double FontSize
+    {
+        get => (double)GetValue(FontSizeProperty);
+        set => SetValue(FontSizeProperty, value);
+    }
+
     public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
         nameof(TextColor),
         typeof(Color),

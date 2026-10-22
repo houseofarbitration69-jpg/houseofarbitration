@@ -59,9 +59,9 @@ public partial class ServerSetupPopupViewModel : BaseViewModel, IQueryAttributab
     #region Implement IQueryAttributable
     public void ApplyQueryAttributes(IDictionary<string, object?> query)
     {
-        if (query.ContainsKey("Competition"))
+        if (query.ContainsKey(Constants.Navigation.Parameter.COMPETITION))
         {
-            Competition = query["Competition"] as CompetitionModel;
+            Competition = query[Constants.Navigation.Parameter.COMPETITION] as CompetitionModel;
 
             if (Competition != null)
             {

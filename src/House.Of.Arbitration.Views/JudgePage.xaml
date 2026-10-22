@@ -270,48 +270,52 @@
     <Grid Padding="20">
         <!-- Main Content -->
         <Grid>
-            <!-- 1. Connection (Not Connected) -->
+            <!-- 1. CONNECTION -->
             <VerticalStackLayout 
                 Spacing="15" 
                 IsVisible="{Binding ShowConnectionScreen}" 
                 VerticalOptions="Center" 
                 HorizontalOptions="Center"
             >
+                <!-- TITRE -->
                 <Label 
                     Text="{Binding Resources.CONNECT_TO_SERVER}" 
                     HorizontalOptions="Center" 
                     FontSize="32" 
                     FontAttributes="Bold" 
-                    TextColor="White" 
+                    TextColor="{StaticResource PrimaryTextColor}" 
                     Margin="0,0,0,20"
                     HorizontalTextAlignment="Center"
                 />
 
+                <!-- BOUTON SCANNE -->
                 <Button 
                     Text="{Binding Resources.SCAN_SERVER}" 
                     Command="{Binding StartScanCommand}" 
                     BackgroundColor="{DynamicResource ValidColor}"
-                    TextColor="Black" 
+                    TextColor="{StaticResource InverseTextColor}" 
                     FontAttributes="Bold" 
                     CornerRadius="20" 
                     HeightRequest="60" 
                     WidthRequest="300"
                 />
 
+                <!-- INDICATEUR DE CHARGEMENT -->
                 <ActivityIndicator 
                     IsRunning="{Binding IsScanning}"
-                    Color="White" 
+                    Color="{StaticResource PrimaryTextColor}" 
                     HorizontalOptions="Center" 
                     Margin="0,20"
                 />
 
                 <Label 
                     Text="{Binding Resources.FIND_SERVERS}" 
-                    TextColor="White" 
+                    TextColor="{StaticResource PrimaryTextColor}" 
                     FontSize="18" 
                     IsVisible="{Binding DiscoveredDevices.Count, Converter={mct:IntToBoolConverter}}"
                 />
 
+                <!-- LISTE DES SERVEURS -->
                 <CollectionView 
                     ItemsSource="{Binding DiscoveredDevices}" 
                     HeightRequest="300" 
@@ -319,31 +323,87 @@
                 >
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:DiscoveredDeviceModel">
-                            <Border Stroke="White" StrokeThickness="1" BackgroundColor="{DynamicResource SurfaceElevation5}" Margin="5" Padding="15">
+                            <Border 
+                                Stroke="{StaticResource PrimaryTextColor}"
+                                StrokeThickness="1" 
+                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
+                                Margin="5" 
+                                Padding="15"
+                            >
                                 <Border.StrokeShape>
                                     <RoundRectangle CornerRadius="10"/>
                                 </Border.StrokeShape>
+
                                 <Grid ColumnDefinitions="*, Auto">
                                     <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
-                                        <Label Text="{Binding DisplayName}" TextColor="White" FontSize="22" FontAttributes="Bold"/>
-                                        <Label Text="{Binding DeviceId}" TextColor="LightGray" FontSize="14"/>
+                                        <Label 
+                                            Text="{Binding DisplayName}" 
+                                            TextColor="{StaticResource PrimaryTextColor}" 
+                                            FontSize="22" 
+                                            FontAttributes="Bold"
+                                        />
+
+                                        <Label 
+                                            Text="{Binding DeviceId}" 
+                                            TextColor="{StaticResource Gray200}" 
+                                            FontSize="14"
+                                        />
                                     </VerticalStackLayout>
 
-                                    <HorizontalStackLayout Grid.Column="1" Spacing="12" VerticalOptions="Center">
-                                        <!-- Visual Signal Bars -->
-                                        <Grid ColumnDefinitions="6,6,6,6" ColumnSpacing="3" HeightRequest="30" VerticalOptions="End">
-                                            <BoxView Grid.Column="0" HeightRequest="8" WidthRequest="6" VerticalOptions="End" 
-                                                     Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=1}"/>
-                                            <BoxView Grid.Column="1" HeightRequest="15" WidthRequest="6" VerticalOptions="End" 
-                                                     Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=2}"/>
-                                            <BoxView Grid.Column="2" HeightRequest="22" WidthRequest="6" VerticalOptions="End" 
-                                                     Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=3}"/>
-                                            <BoxView Grid.Column="3" HeightRequest="30" WidthRequest="6" VerticalOptions="End" 
-                                                     Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=4}"/>
+                                    <!-- INDICATEUR DE SIGNAL -->
+                                    <HorizontalStackLayout 
+                                        Grid.Column="1" 
+                                        Spacing="12" 
+                                        VerticalOptions="Center"
+                                    >
+                                        <Grid 
+                                            ColumnDefinitions="6,6,6,6" 
+                                            ColumnSpacing="3" 
+                                            HeightRequest="30" 
+                                            VerticalOptions="End"
+                                        >
+                                            <BoxView 
+                                                Grid.Column="0" 
+                                                HeightRequest="8" 
+                                                WidthRequest="6" 
+                                                VerticalOptions="End" 
+                                                Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=1}"
+                                            />
+
+                                            <BoxView 
+                                                Grid.Column="1" 
+                                                HeightRequest="15" 
+                                                WidthRequest="6" 
+                                                VerticalOptions="End" 
+                                                Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=2}"
+                                            />
+
+                                            <BoxView 
+                                                Grid.Column="2" 
+                                                HeightRequest="22" 
+                                                WidthRequest="6" 
+                                                VerticalOptions="End" 
+                                                Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=3}"
+                                            />
+
+                                            <BoxView 
+                                                Grid.Column="3" 
+                                                HeightRequest="30" 
+                                                WidthRequest="6" 
+                                                VerticalOptions="End" 
+                                                Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=4}"
+                                            />
                                         </Grid>
-                                        <Label Text="{Binding Rssi, StringFormat='{0} dBm'}" TextColor="Gray" FontSize="14" VerticalOptions="Center"/>
+
+                                        <Label 
+                                            Text="{Binding Rssi, StringFormat='{0} dBm'}" 
+                                            TextColor="{StaticResource Gray200}" 
+                                            FontSize="14" 
+                                            VerticalOptions="Center"
+                                        />
                                     </HorizontalStackLayout>
                                 </Grid>
+
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer 
                                         Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=ConnectCommand}" 
@@ -356,180 +416,183 @@
                 </CollectionView>
             </VerticalStackLayout>
 
-            <!-- 2. Position Selection (Connected, competition received, but no judge selected) -->
+            <!-- 2. SELECTION DE LA POSITION -->
             <VerticalStackLayout 
                 Spacing="30" 
                 IsVisible="{Binding ShowPositionScreen}" 
                 VerticalOptions="Center" 
                 HorizontalOptions="Center"
             >
-                    <!-- A.1 SANDA Position Selection -->
-                    <VerticalStackLayout 
+                <!-- A.1 SANDA -->
+                <VerticalStackLayout 
                         Spacing="30" 
                         IsVisible="{Binding IsSanda}"
                         VerticalOptions="Center" 
                         HorizontalOptions="Center"
                     >
-                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                            <Label 
-                                Text="{Binding Resources.SELECT_POSITION}" 
-                                HorizontalOptions="Center" 
-                                FontSize="32" 
-                                FontAttributes="Bold" 
-                                TextColor="White"
-                                HorizontalTextAlignment="Center"
-                            />
-                            <Label 
-                                Text="COMPÉTITION SANDA" 
-                                HorizontalOptions="Center" 
-                                FontSize="18" 
-                                FontAttributes="Bold" 
-                                TextColor="{DynamicResource Primary}"
-                                HorizontalTextAlignment="Center"
-                            />
-                        </VerticalStackLayout>
+                    <Label 
+                            Text="{Binding Resources.SELECT_POSITION}" 
+                            HorizontalOptions="Center" 
+                            FontSize="32" 
+                            FontAttributes="Bold" 
+                            TextColor="{StaticResource PrimaryTextColor}"
+                            HorizontalTextAlignment="Center"
+                        />
 
-                        <Grid 
+                    <Grid 
                             RowDefinitions="{OnIdiom Tablet='80,300,80', Phone='40,150,40'}" 
                             ColumnDefinitions="{OnIdiom Tablet='100,100,300,100,100', Phone='40,40,150,40,40'}"
                             RowSpacing="10" 
                             ColumnSpacing="10"
                         >
-                            <!-- JUGE 1 -->
-                            <Border 
+                        <!-- JUGE 1 -->
+                        <Border 
                                 Grid.Row="0" 
                                 Grid.Column="0" 
                                 Grid.ColumnSpan="2" 
-                                Background="LightGray" 
+                                Background="{StaticResource Gray200}" 
                                 StrokeShape="RoundRectangle 10"
                             >
-                                <Label 
+                            <Label 
                                     Text="{Binding Resources.JUDGE_1}" 
                                     VerticalOptions="Center" 
                                     HorizontalOptions="Center" 
                                     FontSize="24" 
                                     FontAttributes="Bold" 
-                                    TextColor="Black"
+                                    TextColor="{StaticResource InverseTextColor}"
                                 />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[0]}"/>
-                                </Border.GestureRecognizers>
-                            </Border>
 
-                            <!-- JUGE 2 -->
-                            <Border 
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[0]}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                        <!-- JUGE 2 -->
+                        <Border 
                                 Grid.Row="0" 
                                 Grid.Column="3" 
                                 Grid.ColumnSpan="2"
-                                Background="LightGray" 
+                                Background="{StaticResource Gray200}" 
                                 StrokeShape="RoundRectangle 10"
                             >
-                                <Label 
+                            <Label 
                                     Text="{Binding Resources.JUDGE_2}" 
                                     VerticalOptions="Center" 
                                     HorizontalOptions="Center" 
                                     FontSize="24" 
                                     FontAttributes="Bold" 
-                                    TextColor="Black"
+                                    TextColor="{StaticResource InverseTextColor}"
                                 />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[1]}"/>
-                                </Border.GestureRecognizers>
-                            </Border>
 
-                            <!-- JUGE 5 -->
-                            <Border 
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[1]}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                        <!-- JUGE 5 -->
+                        <Border 
                                 Grid.Row="0" 
                                 Grid.Column="2" 
                                 MinimumWidthRequest="{OnIdiom Tablet='200', Phone='100'}"
-                                Background="LightGray" 
+                                Background="{StaticResource Gray200}" 
                                 StrokeShape="RoundRectangle 10" 
                                 HorizontalOptions="Center"
                             >
-                                <Label 
+                            <Label 
                                     Text="{Binding Resources.JUDGE_5}" 
                                     VerticalOptions="Center" 
                                     HorizontalOptions="Center" 
                                     FontSize="24" 
                                     FontAttributes="Bold" 
-                                    TextColor="Black"
+                                    TextColor="{StaticResource InverseTextColor}"
                                 />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[4]}"/>
-                                </Border.GestureRecognizers>
-                            </Border>
 
-                            <!-- RING -->
-                            <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Background="{DynamicResource SurfaceElevation6}" Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 15">
-                                <Label 
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[4]}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                        <!-- RING -->
+                        <Border 
+                                Grid.Row="1" 
+                                Grid.Column="1" 
+                                Grid.ColumnSpan="3" 
+                                Background="{DynamicResource SurfaceElevation6}" 
+                                Stroke="{StaticResource PrimaryTextColor}" 
+                                StrokeThickness="2" 
+                                StrokeShape="RoundRectangle 15"
+                            >
+                            <Label 
                                     Text="{Binding Resources.RING}" 
                                     VerticalOptions="Center" 
                                     HorizontalOptions="Center" 
                                     FontSize="48" 
                                     FontAttributes="Bold" 
-                                    TextColor="White"
+                                    TextColor="{StaticResource PrimaryTextColor}"
                                 />
-                            </Border>
+                        </Border>
 
-                            <!-- JUGE 3 -->
-                            <Border 
+                        <!-- JUGE 3 -->
+                        <Border 
                                 Grid.Row="2" 
                                 Grid.Column="3" 
                                 Grid.ColumnSpan="2" 
-                                Background="LightGray" 
+                                Background="{StaticResource Gray200}" 
                                 StrokeShape="RoundRectangle 10"
                             >
-                                <Label 
+                            <Label 
                                     Text="{Binding Resources.JUDGE_3}" 
                                     VerticalOptions="Center" 
                                     HorizontalOptions="Center" 
                                     FontSize="24" 
                                     FontAttributes="Bold" 
-                                    TextColor="Black"
+                                    TextColor="{StaticResource InverseTextColor}"
                                 />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[2]}"/>
-                                </Border.GestureRecognizers>
-                            </Border>
 
-                            <!-- JUGE 4 -->
-                            <Border 
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[2]}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                        <!-- JUGE 4 -->
+                        <Border 
                                 Grid.Row="2" 
                                 Grid.Column="0" 
                                 Grid.ColumnSpan="2" 
-                                Background="LightGray" 
+                                Background="{StaticResource Gray200}" 
                                 StrokeShape="RoundRectangle 10"
                             >
-                                <Label 
+                            <Label 
                                     Text="{Binding Resources.JUDGE_4}" 
                                     VerticalOptions="Center" 
                                     HorizontalOptions="Center" 
                                     FontSize="24" 
                                     FontAttributes="Bold" 
-                                    TextColor="Black"
+                                    TextColor="{StaticResource InverseTextColor}"
                                 />
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[3]}"/>
-                                </Border.GestureRecognizers>
-                            </Border>
-                        </Grid>
-                    </VerticalStackLayout>
 
-                    <!-- A.2 TAOLU Position Selection -->
-                    <ScrollView 
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[3]}"/>
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- A.2 TAOLU -->
+                <ScrollView 
                         IsVisible="{Binding IsTaolu}"
                         VerticalOptions="Center"
                         HorizontalOptions="Center"
                         Orientation="Vertical"
                     >
-                        <VerticalStackLayout 
+                    <VerticalStackLayout 
                             Spacing="20" 
                             Padding="{OnIdiom Tablet='20,10', Phone='10,5'}"
                             MaximumWidthRequest="{OnIdiom Tablet='850', Phone='450'}"
                             HorizontalOptions="Center"
                         >
-                            <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                                <Label 
+                        <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                            <Label 
                                     Text="{Binding Resources.SELECT_POSITION}" 
                                     HorizontalOptions="Center" 
                                     FontSize="{OnIdiom Tablet='32', Phone='24'}" 
@@ -537,7 +600,7 @@
                                     TextColor="White"
                                     HorizontalTextAlignment="Center"
                                 />
-                                <Label 
+                            <Label 
                                     Text="COMPÉTITION TAOLU" 
                                     HorizontalOptions="Center" 
                                     FontSize="{OnIdiom Tablet='18', Phone='14'}" 
@@ -545,462 +608,485 @@
                                     TextColor="{DynamicResource Secondary}"
                                     HorizontalTextAlignment="Center"
                                 />
-                            </VerticalStackLayout>
+                        </VerticalStackLayout>
 
-                            <!-- GROUPE A : Qualité des mouvements -->
-                            <Border 
+                        <!-- GROUPE A : Qualité des mouvements -->
+                        <Border 
                                 BackgroundColor="{DynamicResource SurfaceElevation2}" 
                                 Stroke="{DynamicResource Primary}" 
                                 StrokeThickness="2" 
                                 StrokeShape="RoundRectangle 12"
                                 Padding="15"
                             >
-                                <VerticalStackLayout Spacing="12">
-                                    <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label Text="GROUPE A" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="{DynamicResource Primary}" />
-                                            <Label Text="Qualité des mouvements" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
-                                        </VerticalStackLayout>
-                                    </Grid>
+                            <VerticalStackLayout Spacing="12">
+                                <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="GROUPE A" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="{DynamicResource Primary}" />
+                                        <Label Text="Qualité des mouvements" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
+                                    </VerticalStackLayout>
+                                </Grid>
 
-                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                                        <!-- Juge 1 -->
-                                        <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[0]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                        <!-- Juge 2 -->
-                                        <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[1]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                        <!-- Juge 3 -->
-                                        <Border Grid.Column="2" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_3}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[2]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                    </Grid>
-                                </VerticalStackLayout>
-                            </Border>
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                                    <!-- Juge 1 -->
+                                    <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[0]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                    <!-- Juge 2 -->
+                                    <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[1]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                    <!-- Juge 3 -->
+                                    <Border Grid.Column="2" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_3}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[2]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
 
-                            <!-- GROUPE B : Performance globale -->
-                            <Border 
+                        <!-- GROUPE B : Performance globale -->
+                        <Border 
                                 BackgroundColor="{DynamicResource SurfaceElevation2}" 
                                 Stroke="{DynamicResource Secondary}" 
                                 StrokeThickness="2" 
                                 StrokeShape="RoundRectangle 12"
                                 Padding="15"
                             >
-                                <VerticalStackLayout Spacing="12">
-                                    <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label Text="GROUPE B" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="{DynamicResource Secondary}" />
-                                            <Label Text="Performance globale" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
-                                        </VerticalStackLayout>
-                                    </Grid>
+                            <VerticalStackLayout Spacing="12">
+                                <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="GROUPE B" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="{DynamicResource Secondary}" />
+                                        <Label Text="Performance globale" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
+                                    </VerticalStackLayout>
+                                </Grid>
 
-                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                                        <!-- Juge 1 -->
-                                        <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[0]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                        <!-- Juge 2 -->
-                                        <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[1]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                        <!-- Juge 3 -->
-                                        <Border Grid.Column="2" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_3}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[2]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                    </Grid>
-                                </VerticalStackLayout>
-                            </Border>
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                                    <!-- Juge 1 -->
+                                    <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[0]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                    <!-- Juge 2 -->
+                                    <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[1]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                    <!-- Juge 3 -->
+                                    <Border Grid.Column="2" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_3}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[2]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </Grid>
+                            </VerticalStackLayout>
+                        </Border>
 
-                            <!-- GROUPE C : Degré de difficulté -->
-                            <Border 
+                        <!-- GROUPE C : Degré de difficulté -->
+                        <Border 
                                 BackgroundColor="{DynamicResource SurfaceElevation2}" 
                                 Stroke="{DynamicResource SuccessColor}" 
                                 StrokeThickness="2" 
                                 StrokeShape="RoundRectangle 12"
                                 Padding="15"
                             >
-                                <VerticalStackLayout Spacing="12">
-                                    <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
-                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                            <Label Text="GROUPE C" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="{DynamicResource SuccessColor}" />
-                                            <Label Text="Degré de difficulté" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
-                                        </VerticalStackLayout>
-                                    </Grid>
+                            <VerticalStackLayout Spacing="12">
+                                <Grid ColumnDefinitions="*, Auto" VerticalOptions="Center">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                        <Label Text="GROUPE C" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="{DynamicResource SuccessColor}" />
+                                        <Label Text="Degré de difficulté" FontSize="{OnIdiom Tablet='14', Phone='12'}" TextColor="LightGray" />
+                                    </VerticalStackLayout>
+                                </Grid>
 
-                                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
-                                        <!-- Juge 1 -->
-                                        <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[0]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                        <!-- Juge 2 -->
-                                        <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[1]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                        <!-- Juge 3 -->
-                                        <Border Grid.Column="2" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
-                                            <Label Text="{Binding Resources.JUDGE_3}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[2]}"/>
-                                            </Border.GestureRecognizers>
-                                        </Border>
-                                    </Grid>
-                                </VerticalStackLayout>
-                            </Border>
-                        </VerticalStackLayout>
-                    </ScrollView>
-                </VerticalStackLayout>
-
-                <!-- 3. Match Info & Timer (Judge selected, online or offline) -->
-                <Grid 
-                    IsVisible="{Binding IsJudging}" 
-                    RowDefinitions="Auto, Auto, *, Auto" 
-                    RowSpacing="15"
-                >
-                    <!-- Row 0: Offline Status Banner -->
-                    <Border 
-                        Grid.Row="0"
-                        IsVisible="{Binding IsServerOffline}" 
-                        BackgroundColor="{DynamicResource ErrorBg}" 
-                        Stroke="{DynamicResource ErrorColor}" 
-                        StrokeThickness="1.5" 
-                        Padding="15,10" 
-                        StrokeShape="RoundRectangle 12">
-                        <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
-                            <Label Grid.Column="0" Text="⚠️" FontSize="22" VerticalOptions="Center"/>
-                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                <Label Text="Serveur déconnecté - Mode hors-ligne actif" TextColor="White" FontSize="15" FontAttributes="Bold"/>
-                                <Label Text="{Binding OfflineSyncStatusText}" TextColor="{DynamicResource ErrorLight}" FontSize="12"/>
+                                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                                    <!-- Juge 1 -->
+                                    <Border Grid.Column="0" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_1}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[0]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                    <!-- Juge 2 -->
+                                    <Border Grid.Column="1" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_2}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[1]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                    <!-- Juge 3 -->
+                                    <Border Grid.Column="2" HeightRequest="{OnIdiom Tablet='70', Phone='50'}" Background="LightGray" StrokeShape="RoundRectangle 10">
+                                        <Label Text="{Binding Resources.JUDGE_3}" VerticalOptions="Center" HorizontalOptions="Center" FontSize="{OnIdiom Tablet='20', Phone='16'}" FontAttributes="Bold" TextColor="Black"/>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[2]}"/>
+                                        </Border.GestureRecognizers>
+                                    </Border>
+                                </Grid>
                             </VerticalStackLayout>
-                            <Button 
-                                Grid.Column="2" 
-                                Text="{Binding ReconnectButtonText}" 
-                                Command="{Binding ReconnectCommand}" 
-                                IsEnabled="{Binding IsReconnecting, Converter={StaticResource InvertBoolConverter}}"
-                                BackgroundColor="White" 
-                                TextColor="{DynamicResource ErrorColor}" 
-                                FontAttributes="Bold" 
-                                HeightRequest="38" 
-                                Padding="14,0" 
-                                CornerRadius="19"/>
-                        </Grid>
-                    </Border>
+                        </Border>
+                    </VerticalStackLayout>
+                </ScrollView>
+            </VerticalStackLayout>
 
-                    <!-- Row 1: Category Name Header -->
-                    <Border 
-                        Grid.Row="1" 
-                        HorizontalOptions="Center" 
-                        Padding="10,10,10,10" 
-                        BackgroundColor="{DynamicResource SurfaceElevation6}" 
-                        Stroke="White" 
-                        StrokeThickness="2" 
-                        StrokeShape="RoundRectangle 15"
-                    >
-                        <controls:ScrollingText 
-                            Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE MATCH'}" 
-                            TextColor="White" 
-                            FontSize="36" 
-                            FontAttributes="Bold" 
+            <!-- 3. MATCH -->
+            <Grid 
+                IsVisible="{Binding IsJudging}" 
+                RowDefinitions="Auto, Auto, *, Auto" 
+                RowSpacing="15"
+            >
+                <!-- Row 0: Offline Status Banner -->
+                <Border 
+                    Grid.Row="0"
+                    IsVisible="{Binding IsServerOffline}" 
+                    BackgroundColor="{DynamicResource ErrorBg}" 
+                    Stroke="{DynamicResource ErrorColor}" 
+                    StrokeThickness="1.5" 
+                    Padding="15,10" 
+                    StrokeShape="RoundRectangle 12"
+                >
+                    <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="12">
+                        <Label 
+                            Grid.Column="0" 
+                            Text="⚠️" 
+                            FontSize="22" 
+                            VerticalOptions="Center"
                         />
-                    </Border>
 
-                    <!-- Row 2: Main Match Display (The Ring) -->
+                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                            <Label 
+                                Text="Serveur déconnecté - Mode hors-ligne actif" 
+                                TextColor="White" 
+                                FontSize="15" 
+                                FontAttributes="Bold"
+                            />
+
+                            <Label 
+                                Text="{Binding OfflineSyncStatusText}" 
+                                TextColor="{DynamicResource ErrorLight}" 
+                                FontSize="12"
+                            />
+                        </VerticalStackLayout>
+
+                        <Button 
+                            Grid.Column="2" 
+                            Text="{Binding ReconnectButtonText}" 
+                            Command="{Binding ReconnectCommand}" 
+                            IsEnabled="{Binding IsReconnecting, Converter={StaticResource InvertBoolConverter}}"
+                            BackgroundColor="White" 
+                            TextColor="{DynamicResource ErrorColor}" 
+                            FontAttributes="Bold" 
+                            HeightRequest="38" 
+                            Padding="14,0" 
+                            CornerRadius="19"
+                        />
+                    </Grid>
+                </Border>
+
+                <!-- Row 1: Category Name Header -->
+                <Border 
+                    Grid.Row="1" 
+                    HorizontalOptions="Center" 
+                    Padding="10,10,10,10" 
+                    BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                    Stroke="White" 
+                    StrokeThickness="2" 
+                    StrokeShape="RoundRectangle 15"
+                >
+                    <controls:ScrollingText 
+                        Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE MATCH'}" 
+                        TextColor="White" 
+                        FontSize="36" 
+                        FontAttributes="Bold" 
+                    />
+                </Border>
+
+                <!-- Row 2: Main Match Display (The Ring) -->
+                <Grid 
+                    Grid.Row="2"
+                >
+                    <!-- Active Match -->
                     <Grid 
-                        Grid.Row="2"
+                        BindingContext="{Binding CurrentDraw}"
+                        IsVisible="{Binding CurrentDraw, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                        x:DataType="{x:Null}"
                     >
-
-                        <!-- Active Match -->
+                        <!-- Background Colors -->
                         <Grid 
-                            BindingContext="{Binding CurrentDraw}"
-                            IsVisible="{Binding CurrentDraw, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
-                            x:DataType="{x:Null}"
+                            x:DataType="models:IDrawModel"
+                            ColumnDefinitions="*,*"
                         >
-                            <!-- Background Colors -->
-                            <Grid 
-                                x:DataType="models:IDrawModel"
-                                ColumnDefinitions="*,*"
+                            <Border
+                                Grid.Column="0" 
+                                Background="Red" 
+                                StrokeThickness="0" 
+                                Opacity="0.8" 
+                                StrokeShape="RoundRectangle 8,0,8,0"
+                                IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}"
+                            />
+
+                            <Border 
+                                Grid.Column="1" 
+                                Background="Blue" 
+                                StrokeThickness="0" 
+                                Opacity="0.8" 
+                                StrokeShape="RoundRectangle 0,8,0,8"
+                                IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" 
+                            />
+
+                            <!-- For Order mode, red covers full width -->
+                            <Border 
+                                Grid.ColumnSpan="2" 
+                                Background="{DynamicResource SurfaceElevation6}" 
+                                StrokeThickness="0" 
+                                Opacity="0.8"
+                                StrokeShape="RoundRectangle 8"
+                                IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" 
+                            />
+                        </Grid>
+
+                        <!-- Knockout / Round Robin Mode -->
+                        <Grid 
+                            ColumnDefinitions="*,*" 
+                            IsVisible="False"
+                        >
+                            <!--Competitor 1 (Red Side)-->
+                            <VerticalStackLayout 
+                                Grid.Column="0" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                Spacing="10" 
+                                Padding="0,5,0,0"
                             >
-                                <Border
-                                    Grid.Column="0" 
-                                    Background="Red" 
-                                    StrokeThickness="0" 
-                                    Opacity="0.8" 
-                                    StrokeShape="RoundRectangle 8,0,8,0"
-                                    IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}"
-                                />
-
+                                <!--Circular Photo / Icon-->
                                 <Border 
-                                    Grid.Column="1" 
-                                    Background="Blue" 
-                                    StrokeThickness="0" 
-                                    Opacity="0.8" 
-                                    StrokeShape="RoundRectangle 0,8,0,8"
-                                    IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" 
-                                />
-
-                                <!-- For Order mode, red covers full width -->
-                                <Border 
-                                    Grid.ColumnSpan="2" 
-                                    Background="{DynamicResource SurfaceElevation6}" 
-                                    StrokeThickness="0" 
-                                    Opacity="0.8"
-                                    StrokeShape="RoundRectangle 8"
-                                    IsVisible="{Binding Type, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" 
-                                />
-                            </Grid>
-
-                            <!-- Knockout / Round Robin Mode -->
-                            <Grid 
-                                ColumnDefinitions="*,*" 
-                                IsVisible="False"
-                            >
-                                <!--Competitor 1 (Red Side)-->
-                                <VerticalStackLayout 
-                                    Grid.Column="0" 
-                                    VerticalOptions="Center" 
+                                    StrokeShape="RoundRectangle 50" 
+                                    HeightRequest="100" 
+                                    WidthRequest="100" 
                                     HorizontalOptions="Center" 
+                                    Stroke="White" 
+                                    BackgroundColor="White"
+                                    StrokeThickness="3"
+                                    IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                                >
+                                    <Image 
+                                        Source="{Binding Competitor1, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
+                                        Aspect="AspectFill" 
+                                    />
+                                </Border>
+
+                                <Border 
+                                    StrokeShape="RoundRectangle 50" 
+                                    HeightRequest="100" 
+                                    WidthRequest="100" 
+                                    HorizontalOptions="Center" 
+                                    Stroke="White" 
+                                    StrokeThickness="3"
+                                    BackgroundColor="White"
+                                    IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
+                                >
+                                    <Label 
+                                        Text="{Binding Competitor1.Genre, Converter={StaticResource GenreToFontConverter}}" 
+                                        FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                                        FontSize="95" 
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        HorizontalTextAlignment="Center"
+                                        VerticalTextAlignment="Center"
+                                    />
+                                </Border>
+
+                                <!--Name on two lines-->
+                                <VerticalStackLayout 
+                                    HorizontalOptions="Center" 
+                                    Padding="5,0,5,0"
+                                >
+                                    <controls:ScrollingText 
+                                        Text="{Binding Competitor1.LastName}" 
+                                        Style="{StaticResource MainCompetitorNameStyle}" 
+                                        FontSize="28" 
+                                    />
+
+                                    <controls:ScrollingText 
+                                        Text="{Binding Competitor1.FirstName}" 
+                                        Style="{StaticResource MainCompetitorNameStyle}"
+                                        FontSize="32" 
+                                        Margin="0,-5,0,0" 
+                                    />
+                                </VerticalStackLayout>
+
+                                <!--Club & Country-->
+                                <VerticalStackLayout 
+                                    Spacing="2" 
+                                    Padding="5,0,5,0"
+                                >
+                                    <controls:ScrollingText 
+                                        Text="{Binding Competitor1.Club}" 
+                                        TextColor="White" 
+                                        FontSize="18" 
+                                        HorizontalOptions="Center" 
+                                    />
+
+                                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                                        <Image 
+                                            Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                            WidthRequest="25" 
+                                            HeightRequest="15" 
+                                            VerticalOptions="Center" 
+                                        />
+
+                                        <Label 
+                                            Text="{Binding Competitor1.Country.Name}" 
+                                            TextColor="White" 
+                                            FontSize="16" 
+                                            FontAttributes="Italic" 
+                                            VerticalOptions="Center" 
+                                        />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AddRedScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"/>
+                                </VerticalStackLayout.GestureRecognizers>
+                            </VerticalStackLayout>
+
+                            <!--Competitor 2 (Blue Side) -->
+                            <VerticalStackLayout 
+                                Grid.Column="1" 
+                                VerticalOptions="Center" 
+                                HorizontalOptions="Center" 
+                                Spacing="10" 
+                                Padding="0,5,0,0"
+                            >
+                                <!--Circular Photo / Icon-->
+                                <Border 
+                                    StrokeShape="RoundRectangle 50" 
+                                    HeightRequest="100" 
+                                    WidthRequest="100" 
+                                    HorizontalOptions="Center" 
+                                    Stroke="White" 
+                                    BackgroundColor="White"
+                                    StrokeThickness="3"
+                                    IsVisible="{Binding Competitor2.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                                >
+                                    <Image 
+                                        Source="{Binding Competitor2, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
+                                        Aspect="AspectFill" 
+                                    />
+                                </Border>
+
+                                <Border 
+                                    StrokeShape="RoundRectangle 50" 
+                                    HeightRequest="100" 
+                                    WidthRequest="100" 
+                                    HorizontalOptions="Center" 
+                                    Stroke="White" 
+                                    StrokeThickness="3"
+                                    BackgroundColor="White"
+                                    IsVisible="{Binding Competitor2.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
+                                >
+                                    <Label 
+                                        Text="{Binding Competitor2.Genre, Converter={StaticResource GenreToFontConverter}}" 
+                                        FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
+                                        FontSize="95" 
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center"
+                                        HorizontalTextAlignment="Center"
+                                        VerticalTextAlignment="Center"
+                                    />
+                                </Border>
+
+                                <!--Name on two lines-->
+                                <VerticalStackLayout 
+                                    HorizontalOptions="Center" 
+                                    Padding="5,0,5,0"
+                                >
+                                    <controls:ScrollingText 
+                                        Text="{Binding Competitor2.LastName}" 
+                                        Style="{StaticResource MainCompetitorNameStyle}" 
+                                        FontSize="28" 
+                                    />
+
+                                    <controls:ScrollingText 
+                                        Text="{Binding Competitor2.FirstName}" 
+                                        Style="{StaticResource MainCompetitorNameStyle}"
+                                        FontSize="32" 
+                                        Margin="0,-5,0,0" 
+                                    />
+                                </VerticalStackLayout>
+
+                                <!--Club & Country-->
+                                <VerticalStackLayout 
+                                    Spacing="2" 
+                                    Padding="5,0,5,0"
+                                >
+                                    <controls:ScrollingText 
+                                        Text="{Binding Competitor2.Club}" 
+                                        TextColor="White" 
+                                        FontSize="18" 
+                                        HorizontalOptions="Fill"
+                                    />
+
+                                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
+                                        <Image 
+                                            Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                            WidthRequest="25" 
+                                            HeightRequest="15" 
+                                            VerticalOptions="Center" 
+                                        />
+
+                                        <Label 
+                                            Text="{Binding Competitor2.Country.Name}"
+                                            TextColor="White" 
+                                            FontSize="16" 
+                                            FontAttributes="Italic" 
+                                            VerticalOptions="Center" 
+                                            HorizontalOptions="Fill" 
+                                        />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+
+                                <VerticalStackLayout.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding AddBlueScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"/>
+                                </VerticalStackLayout.GestureRecognizers>
+                            </VerticalStackLayout>
+
+                            <Grid.Triggers>
+                                <DataTrigger TargetType="Grid" Binding="{Binding ., Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" Value="True">
+                                    <Setter Property="IsVisible" Value="True"/>
+                                </DataTrigger>
+                            </Grid.Triggers>
+                        </Grid>
+
+                        <!-- Order Mode (Taolu) -->
+                        <Grid 
+                            IsVisible="False"
+                            ColumnDefinitions="400,*,400"
+                            ColumnSpacing="10"
+                        >
+                            <!-- Info -->
+                            <Grid 
+                                Grid.Column="0" 
+                                RowDefinitions="*,Auto"
+                                Padding="10,20,10,20"
+                            >
+                                <VerticalStackLayout 
+                                    HorizontalOptions="Fill" 
+                                    VerticalOptions="Fill"
                                     Spacing="10" 
-                                    Padding="0,5,0,0"
                                 >
                                     <!--Circular Photo / Icon-->
                                     <Border 
-                                        StrokeShape="RoundRectangle 50" 
-                                        HeightRequest="100" 
-                                        WidthRequest="100" 
-                                        HorizontalOptions="Center" 
-                                        Stroke="White" 
-                                        BackgroundColor="White"
-                                        StrokeThickness="3"
-                                        IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
-                                    >
-                                        <Image 
-                                            Source="{Binding Competitor1, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
-                                            Aspect="AspectFill" 
-                                        />
-                                    </Border>
-
-                                    <Border 
-                                        StrokeShape="RoundRectangle 50" 
-                                        HeightRequest="100" 
-                                        WidthRequest="100" 
-                                        HorizontalOptions="Center" 
-                                        Stroke="White" 
-                                        StrokeThickness="3"
-                                        BackgroundColor="White"
-                                        IsVisible="{Binding Competitor1.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
-                                    >
-                                        <Label 
-                                            Text="{Binding Competitor1.Genre, Converter={StaticResource GenreToFontConverter}}" 
-                                            FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                            FontSize="95" 
-                                            HorizontalOptions="Center"
-                                            VerticalOptions="Center"
-                                            HorizontalTextAlignment="Center"
-                                            VerticalTextAlignment="Center"
-                                        />
-                                    </Border>
-
-                                    <!--Name on two lines-->
-                                    <VerticalStackLayout 
-                                        HorizontalOptions="Center" 
-                                        Padding="5,0,5,0"
-                                    >
-                                        <controls:ScrollingText 
-                                            Text="{Binding Competitor1.LastName}" 
-                                            Style="{StaticResource MainCompetitorNameStyle}" 
-                                            FontSize="28" 
-                                        />
-
-                                        <controls:ScrollingText 
-                                            Text="{Binding Competitor1.FirstName}" 
-                                            Style="{StaticResource MainCompetitorNameStyle}"
-                                            FontSize="32" 
-                                            Margin="0,-5,0,0" 
-                                        />
-                                    </VerticalStackLayout>
-
-                                    <!--Club & Country-->
-                                    <VerticalStackLayout 
-                                        Spacing="2" 
-                                        Padding="5,0,5,0"
-                                    >
-                                        <controls:ScrollingText 
-                                            Text="{Binding Competitor1.Club}" 
-                                            TextColor="White" 
-                                            FontSize="18" 
-                                            HorizontalOptions="Center" 
-                                        />
-                                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
-                                            <Image 
-                                                Source="{Binding Competitor1.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                                WidthRequest="25" 
-                                                HeightRequest="15" 
-                                                VerticalOptions="Center" 
-                                            />
-                                            <Label 
-                                                Text="{Binding Competitor1.Country.Name}" 
-                                                TextColor="White" 
-                                                FontSize="16" 
-                                                FontAttributes="Italic" 
-                                                VerticalOptions="Center" 
-                                            />
-                                        </HorizontalStackLayout>
-                                    </VerticalStackLayout>
-
-                                    <VerticalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding AddRedScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"/>
-                                    </VerticalStackLayout.GestureRecognizers>
-                                </VerticalStackLayout>
-
-                                <!--Competitor 2 (Blue Side) -->
-                                <VerticalStackLayout 
-                                    Grid.Column="1" 
-                                    VerticalOptions="Center" 
-                                    HorizontalOptions="Center" 
-                                    Spacing="10" 
-                                    Padding="0,5,0,0"
-                                >
-                                    <!--Circular Photo / Icon-->
-                                    <Border 
-                                        StrokeShape="RoundRectangle 50" 
-                                        HeightRequest="100" 
-                                        WidthRequest="100" 
-                                        HorizontalOptions="Center" 
-                                        Stroke="White" 
-                                        BackgroundColor="White"
-                                        StrokeThickness="3"
-                                        IsVisible="{Binding Competitor2.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
-                                    >
-                                        <Image 
-                                            Source="{Binding Competitor2, Converter={StaticResource GenreToImageConverter}, ConverterParameter=10}" 
-                                            Aspect="AspectFill" 
-                                        />
-                                    </Border>
-
-                                    <Border 
-                                        StrokeShape="RoundRectangle 50" 
-                                        HeightRequest="100" 
-                                        WidthRequest="100" 
-                                        HorizontalOptions="Center" 
-                                        Stroke="White" 
-                                        StrokeThickness="3"
-                                        BackgroundColor="White"
-                                        IsVisible="{Binding Competitor2.Photo, Converter={StaticResource IsNullOrEmptyConverter}}"
-                                    >
-                                        <Label 
-                                            Text="{Binding Competitor2.Genre, Converter={StaticResource GenreToFontConverter}}" 
-                                            FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                            FontSize="95" 
-                                            HorizontalOptions="Center"
-                                            VerticalOptions="Center"
-                                            HorizontalTextAlignment="Center"
-                                            VerticalTextAlignment="Center"
-                                        />
-                                    </Border>
-
-                                    <!--Name on two lines-->
-                                    <VerticalStackLayout 
-                                        HorizontalOptions="Center" 
-                                        Padding="5,0,5,0"
-                                    >
-                                        <controls:ScrollingText 
-                                            Text="{Binding Competitor2.LastName}" 
-                                            Style="{StaticResource MainCompetitorNameStyle}" 
-                                            FontSize="28" 
-                                        />
-                                        <controls:ScrollingText 
-                                            Text="{Binding Competitor2.FirstName}" 
-                                            Style="{StaticResource MainCompetitorNameStyle}"
-                                            FontSize="32" 
-                                            Margin="0,-5,0,0" 
-                                        />
-                                    </VerticalStackLayout>
-
-                                    <!--Club & Country-->
-                                    <VerticalStackLayout 
-                                        Spacing="2" 
-                                        Padding="5,0,5,0"
-                                    >
-                                        <controls:ScrollingText 
-                                            Text="{Binding Competitor2.Club}" 
-                                            TextColor="White" 
-                                            FontSize="18" 
-                                            HorizontalOptions="Fill"
-                                        />
-                                        <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
-                                            <Image 
-                                                Source="{Binding Competitor2.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                                WidthRequest="25" 
-                                                HeightRequest="15" 
-                                                VerticalOptions="Center" 
-                                            />
-                                            <Label 
-                                                Text="{Binding Competitor2.Country.Name}"
-                                                TextColor="White" 
-                                                FontSize="16" 
-                                                FontAttributes="Italic" 
-                                                VerticalOptions="Center" 
-                                                HorizontalOptions="Fill" 
-                                            />
-                                        </HorizontalStackLayout>
-                                    </VerticalStackLayout>
-
-                                    <VerticalStackLayout.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding AddBlueScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"/>
-                                    </VerticalStackLayout.GestureRecognizers>
-                                </VerticalStackLayout>
-
-                                <Grid.Triggers>
-                                    <DataTrigger TargetType="Grid" Binding="{Binding ., Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='NotOrder'}" Value="True">
-                                        <Setter Property="IsVisible" Value="True"/>
-                                    </DataTrigger>
-                                </Grid.Triggers>
-                            </Grid>
-
-                            <!-- Order Mode (Taolu) -->
-                            <Grid 
-                                IsVisible="False"
-                                ColumnDefinitions="400,*,400"
-                                ColumnSpacing="10"
-                            >
-                                <!-- Info -->
-                                <Grid 
-                                    Grid.Column="0" 
-                                    RowDefinitions="*,Auto"
-                                    Padding="10,20,10,20"
-                                >
-                                    <VerticalStackLayout 
-                                        HorizontalOptions="Fill" 
-                                        VerticalOptions="Fill"
-                                        Spacing="10" 
-                                    >
-                                        <!--Circular Photo / Icon-->
-                                        <Border 
                                         StrokeShape="RoundRectangle 50" 
                                         HeightRequest="100" 
                                         WidthRequest="100" 
@@ -1015,8 +1101,8 @@
                                             Aspect="AspectFill" 
                                         />
                                     </Border>
-    
-                                        <Border 
+
+                                    <Border 
                                         StrokeShape="RoundRectangle 50" 
                                         HeightRequest="100" 
                                         WidthRequest="100" 
@@ -1036,9 +1122,9 @@
                                             VerticalTextAlignment="Center"
                                         />
                                     </Border>
-    
-                                        <!--Name on two lines-->
-                                        <VerticalStackLayout 
+
+                                    <!--Name on two lines-->
+                                    <VerticalStackLayout 
                                         HorizontalOptions="Center" 
                                         Padding="5,0,5,0"
                                     >
@@ -1047,6 +1133,7 @@
                                             Style="{StaticResource MainCompetitorNameStyle}" 
                                             FontSize="28" 
                                         />
+
                                         <controls:ScrollingText 
                                             Text="{Binding Competitor.FirstName}" 
                                             Style="{StaticResource MainCompetitorNameStyle}"
@@ -1054,9 +1141,9 @@
                                             Margin="0,-5,0,0" 
                                         />
                                     </VerticalStackLayout>
-    
-                                        <!--Club & Country-->
-                                        <VerticalStackLayout 
+
+                                    <!--Club & Country-->
+                                    <VerticalStackLayout 
                                         Spacing="2" 
                                         Padding="5,0,5,0"
                                     >
@@ -1066,6 +1153,7 @@
                                             FontSize="18" 
                                             HorizontalOptions="Fill"
                                         />
+
                                         <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
                                             <Image 
                                                 Source="{Binding Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
@@ -1073,6 +1161,7 @@
                                                 HeightRequest="15" 
                                                 VerticalOptions="Center" 
                                             />
+
                                             <Label 
                                                 Text="{Binding Competitor.Country.Name}"
                                                 TextColor="White" 
@@ -1083,428 +1172,218 @@
                                             />
                                         </HorizontalStackLayout>
                                     </VerticalStackLayout>
-    
-                                        <VerticalStackLayout.GestureRecognizers>
-                                            <TapGestureRecognizer Command="{Binding AddScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" CommandParameter="{Binding Competitor2.Id}"/>
-                                        </VerticalStackLayout.GestureRecognizers>
-                                    </VerticalStackLayout>
 
-                                    <!-- SCORE -->
-                                    <Grid 
-                                        Grid.Row="1"
-                                        ColumnDefinitions="*,115,10,Auto,*"
-                                        ColumnSpacing="10"
+                                    <VerticalStackLayout.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding AddScoreCommand, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" CommandParameter="{Binding Competitor2.Id}"/>
+                                    </VerticalStackLayout.GestureRecognizers>
+                                </VerticalStackLayout>
+
+                                <!-- SCORE -->
+                                <Grid 
+                                    Grid.Row="1"
+                                    ColumnDefinitions="*,115,10,Auto,*"
+                                    ColumnSpacing="10"
+                                >
+                                    <Label 
+                                        Grid.Column="1"
+                                        Text="Score"
+                                        FontSize="40"
+                                        TextColor="White"
+                                    />
+
+                                    <Label 
+                                        Grid.Column="2"
+                                        Text=":"
+                                        FontSize="40"
+                                        TextColor="White"
+                                    />
+
+                                    <Label
+                                        Grid.Column="3"
+                                        Text="{Binding Score, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
+                                        FontSize="40"
+                                        TextColor="White"
+                                        HorizontalOptions="Start"
+                                    />
+                                </Grid>
+                            </Grid>
+
+                            <!-- Code Input & Recognized Codes Section -->
+                            <Grid 
+                                Grid.Column="1"
+                                RowDefinitions="45, *"
+                                RowSpacing="10"
+                                Margin="0,15,0,15"
+                                BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                x:DataType="vm:JudgeViewModel"
+                            >
+                                <!-- Mode Toggle Bar + Settings Button -->
+                                <Grid
+                                    Grid.Row="0" 
+                                    ColumnDefinitions="*, *, *, Auto" 
+                                    ColumnSpacing="6"
+                                >
+                                    <Button 
+                                        Grid.Column="0"
+                                        Text="{Binding Resources.CODE_INPUT_MODE, FallbackValue='Code'}"
+                                        FontSize="{OnIdiom Tablet='14', Phone='11'}"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        Command="{Binding SwitchModeCommand}"
+                                        CommandParameter="Code"
+                                        BackgroundColor="White"
+                                        TextColor="Black"
+                                        Padding="2,0"
                                     >
-                                        <Label 
-                                            Grid.Column="1"
-                                            Text="Score"
-                                            FontSize="40"
-                                            TextColor="White"
-                                        />
-                                        <Label 
-                                            Grid.Column="2"
-                                            Text=":"
-                                            FontSize="40"
-                                            TextColor="White"
-                                        />
-                                        <Label
-                                            Grid.Column="3"
-                                            Text="{Binding Score, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
-                                            FontSize="40"
-                                            TextColor="White"
-                                            HorizontalOptions="Start"
-                                        />
-                                    </Grid>
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsCodeMode}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
+                                                <Setter Property="TextColor" Value="White" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+
+                                    <Button 
+                                        Grid.Column="1"
+                                        Text="{Binding Resources.POINT_INPUT_MODE, FallbackValue='Points'}"
+                                        FontSize="{OnIdiom Tablet='14', Phone='11'}"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        Command="{Binding SwitchModeCommand}"
+                                        CommandParameter="Points"
+                                        BackgroundColor="White"
+                                        TextColor="Black"
+                                        Padding="2,0"
+                                    >
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsPointMode}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
+                                                <Setter Property="TextColor" Value="White" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+
+                                    <Button 
+                                        Grid.Column="2"
+                                        Text="{Binding GroupCodesButtonText}"
+                                        FontSize="{OnIdiom Tablet='14', Phone='11'}"
+                                        FontAttributes="Bold"
+                                        CornerRadius="8"
+                                        Command="{Binding SwitchModeCommand}"
+                                        CommandParameter="GroupCodes"
+                                        BackgroundColor="White"
+                                        TextColor="Black"
+                                        Padding="2,0"
+                                    >
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button" Binding="{Binding IsGroupCodesMode}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
+                                                <Setter Property="TextColor" Value="White" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
+                                    </Button>
+
+                                    <controls:IconButton 
+                                        Grid.Column="3"
+                                        Text="⚙"
+                                        TextFontSize="16"
+                                        ButtonBackgroundColor="{DynamicResource SurfaceElevation5}"
+                                        TextColor="White"
+                                        Command="{Binding OpenTaoluSettingsCommand}"
+                                        ToolTipProperties.Text="Gérer les codes Taolu"
+                                    />
                                 </Grid>
 
-                                <!-- Code Input & Recognized Codes Section -->
+                                <!-- View 1: Numeric Keypad with Matching Suggestions (Code Mode) -->
                                 <Grid 
-                                    Grid.Column="1"
-                                    RowDefinitions="45, *"
-                                    RowSpacing="10"
-                                    Margin="0,15,0,15"
-                                    BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                    x:DataType="vm:JudgeViewModel"
+                                    Grid.Row="1"
+                                    IsVisible="{Binding IsCodeMode}"
+                                    RowDefinitions="55, Auto, *, *, *, *"
+                                    ColumnDefinitions="*, *, *"
+                                    RowSpacing="8"
+                                    ColumnSpacing="8"
                                 >
-                                    <!-- Mode Toggle Bar + Settings Button -->
-                                    <Grid Grid.Row="0" ColumnDefinitions="*, *, *, Auto" ColumnSpacing="6">
-                                        <Button 
-                                            Grid.Column="0"
-                                            Text="{Binding Resources.CODE_INPUT_MODE, FallbackValue='Code'}"
-                                            FontSize="{OnIdiom Tablet='14', Phone='11'}"
-                                            FontAttributes="Bold"
-                                            CornerRadius="8"
-                                            Command="{Binding SwitchModeCommand}"
-                                            CommandParameter="Code"
-                                            BackgroundColor="White"
-                                            TextColor="Black"
-                                            Padding="2,0"
-                                        >
-                                            <Button.Triggers>
-                                                <DataTrigger TargetType="Button" Binding="{Binding IsCodeMode}" Value="True">
-                                                    <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
-                                                    <Setter Property="TextColor" Value="White" />
-                                                </DataTrigger>
-                                            </Button.Triggers>
-                                        </Button>
-
-                                        <Button 
-                                            Grid.Column="1"
-                                            Text="{Binding Resources.POINT_INPUT_MODE, FallbackValue='Points'}"
-                                            FontSize="{OnIdiom Tablet='14', Phone='11'}"
-                                            FontAttributes="Bold"
-                                            CornerRadius="8"
-                                            Command="{Binding SwitchModeCommand}"
-                                            CommandParameter="Points"
-                                            BackgroundColor="White"
-                                            TextColor="Black"
-                                            Padding="2,0"
-                                        >
-                                            <Button.Triggers>
-                                                <DataTrigger TargetType="Button" Binding="{Binding IsPointMode}" Value="True">
-                                                    <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
-                                                    <Setter Property="TextColor" Value="White" />
-                                                </DataTrigger>
-                                            </Button.Triggers>
-                                        </Button>
-
-                                        <Button 
-                                            Grid.Column="2"
-                                            Text="{Binding GroupCodesButtonText}"
-                                            FontSize="{OnIdiom Tablet='14', Phone='11'}"
-                                            FontAttributes="Bold"
-                                            CornerRadius="8"
-                                            Command="{Binding SwitchModeCommand}"
-                                            CommandParameter="GroupCodes"
-                                            BackgroundColor="White"
-                                            TextColor="Black"
-                                            Padding="2,0"
-                                        >
-                                            <Button.Triggers>
-                                                <DataTrigger TargetType="Button" Binding="{Binding IsGroupCodesMode}" Value="True">
-                                                    <Setter Property="BackgroundColor" Value="{DynamicResource Primary}" />
-                                                    <Setter Property="TextColor" Value="White" />
-                                                </DataTrigger>
-                                            </Button.Triggers>
-                                        </Button>
-
-                                        <controls:IconButton 
-                                            Grid.Column="3"
-                                            Text="⚙"
-                                            FontSize="16"
-                                            ButtonBackgroundColor="{DynamicResource SurfaceElevation5}"
-                                            TextColor="White"
-                                            Command="{Binding OpenTaoluSettingsCommand}"
-                                            ToolTipProperties.Text="Gérer les codes Taolu"
-                                        />
-                                    </Grid>
-
-                                    <!-- View 1: Numeric Keypad with Matching Suggestions (Code Mode) -->
-                                    <Grid 
-                                        Grid.Row="1"
-                                        IsVisible="{Binding IsCodeMode}"
-                                        RowDefinitions="55, Auto, *, *, *, *"
-                                        ColumnDefinitions="*, *, *"
-                                        RowSpacing="8"
-                                        ColumnSpacing="8"
+                                    <!-- Code Display Box with Clear, Backspace, and Validate Buttons -->
+                                    <Border
+                                        Grid.Row="0" 
+                                        Grid.ColumnSpan="3" 
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="White"
+                                        Padding="10,0"
                                     >
-                                        <!-- Code Display Box with Clear, Backspace, and Validate Buttons -->
-                                        <Border
-                                            Grid.Row="0" 
-                                            Grid.ColumnSpan="3" 
-                                            StrokeShape="RoundRectangle 10"
-                                            BackgroundColor="White"
-                                            Padding="10,0"
-                                        >
-                                            <Grid ColumnDefinitions="*, Auto, Auto, Auto">
-                                                <Label 
-                                                    Grid.Column="0"
-                                                    Text="{Binding Code}" 
-                                                    TextColor="Black"
-                                                    HorizontalOptions="Center"
-                                                    VerticalOptions="Center"
-                                                    FontSize="26"
-                                                    FontAttributes="Bold"
-                                                />
-                                                <Button
-                                                    Grid.Column="1"
-                                                    Text="⌫"
-                                                    TextColor="{DynamicResource SubtleTextColor}"
-                                                    BackgroundColor="Transparent"
-                                                    FontSize="18"
-                                                    FontAttributes="Bold"
-                                                    Padding="0"
-                                                    HeightRequest="36"
-                                                    WidthRequest="36"
-                                                    IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
-                                                    Command="{Binding BackspaceCodeCommand}"
-                                                />
-                                                <Button
-                                                    Grid.Column="2"
-                                                    Text="✕"
-                                                    TextColor="{DynamicResource MutedTextColor}"
-                                                    BackgroundColor="Transparent"
-                                                    FontSize="16"
-                                                    FontAttributes="Bold"
-                                                    Padding="0"
-                                                    HeightRequest="36"
-                                                    WidthRequest="36"
-                                                    IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
-                                                    Command="{Binding ClearCodeCommand}"
-                                                />
-                                                <Button
-                                                    Grid.Column="3"
-                                                    Text="✓"
-                                                    TextColor="{DynamicResource SuccessColor}"
-                                                    BackgroundColor="{DynamicResource SuccessBg}"
-                                                    CornerRadius="18"
-                                                    FontSize="18"
-                                                    FontAttributes="Bold"
-                                                    Padding="0"
-                                                    HeightRequest="36"
-                                                    WidthRequest="36"
-                                                    IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
-                                                    Command="{Binding ValidateCodeCommand}"
-                                                />
-                                            </Grid>
-                                        </Border>
+                                        <Grid ColumnDefinitions="*, Auto, Auto, Auto">
+                                            <Label 
+                                                Grid.Column="0"
+                                                Text="{Binding Code}" 
+                                                TextColor="Black"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center"
+                                                FontSize="26"
+                                                FontAttributes="Bold"
+                                            />
 
-                                        <!-- Suggestions Chips (When typing code digits) -->
-                                        <ScrollView 
-                                            Grid.Row="1" 
-                                            Grid.ColumnSpan="3" 
-                                            Orientation="Horizontal" 
-                                            HorizontalScrollBarVisibility="Never"
-                                            IsVisible="{Binding MatchingCodes.Count, Converter={StaticResource IntToBoolConverter}}"
-                                        >
-                                            <HorizontalStackLayout BindableLayout.ItemsSource="{Binding MatchingCodes}" Spacing="6" Padding="0,2">
-                                                <BindableLayout.ItemTemplate>
-                                                    <DataTemplate x:DataType="models:MvtCodeModel">
-                                                        <Border 
-                                                            BackgroundColor="{DynamicResource SurfaceElevation6}" 
-                                                            Stroke="{DynamicResource Primary}" 
-                                                            StrokeThickness="1" 
-                                                            StrokeShape="RoundRectangle 6"
-                                                            Padding="8,5"
-                                                        >
-                                                            <Border.GestureRecognizers>
-                                                                <TapGestureRecognizer 
-                                                                    Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=ApplyCodeCommand}"
-                                                                    CommandParameter="{Binding .}"
-                                                                />
-                                                            </Border.GestureRecognizers>
-                                                            <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
-                                                                <Label Text="{Binding Code}" TextColor="Yellow" FontAttributes="Bold" FontSize="14"/>
-                                                                <Label Text="{Binding Movement}" TextColor="White" FontSize="13"/>
-                                                                <Label Text="{Binding Value, StringFormat='-{0:F1}'}" TextColor="{DynamicResource RedCornerLight}" FontAttributes="Bold" FontSize="13"/>
-                                                            </HorizontalStackLayout>
-                                                        </Border>
-                                                    </DataTemplate>
-                                                </BindableLayout.ItemTemplate>
-                                            </HorizontalStackLayout>
-                                        </ScrollView>
+                                            <Button
+                                                Grid.Column="1"
+                                                Text="⌫"
+                                                TextColor="{DynamicResource SubtleTextColor}"
+                                                BackgroundColor="Transparent"
+                                                FontSize="18"
+                                                FontAttributes="Bold"
+                                                Padding="0"
+                                                HeightRequest="36"
+                                                WidthRequest="36"
+                                                IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
+                                                Command="{Binding BackspaceCodeCommand}"
+                                            />
 
-                                        <!-- Keypad Buttons -->
-                                        <Button Grid.Row="2" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="7" Command="{Binding TypeNumberCommand}" CommandParameter="7" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="2" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="8" Command="{Binding TypeNumberCommand}" CommandParameter="8" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="2" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="9" Command="{Binding TypeNumberCommand}" CommandParameter="9" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                            <Button
+                                                Grid.Column="2"
+                                                Text="✕"
+                                                TextColor="{DynamicResource MutedTextColor}"
+                                                BackgroundColor="Transparent"
+                                                FontSize="16"
+                                                FontAttributes="Bold"
+                                                Padding="0"
+                                                HeightRequest="36"
+                                                WidthRequest="36"
+                                                IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
+                                                Command="{Binding ClearCodeCommand}"
+                                            />
 
-                                        <Button Grid.Row="3" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="4" Command="{Binding TypeNumberCommand}" CommandParameter="4" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="3" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="5" Command="{Binding TypeNumberCommand}" CommandParameter="5" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="3" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="6" Command="{Binding TypeNumberCommand}" CommandParameter="6" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-
-                                        <Button Grid.Row="4" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="1" Command="{Binding TypeNumberCommand}" CommandParameter="1" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="4" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="2" Command="{Binding TypeNumberCommand}" CommandParameter="2" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="4" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="3" Command="{Binding TypeNumberCommand}" CommandParameter="3" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-
-                                        <Button Grid.Row="5" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="A" Command="{Binding TypeNumberCommand}" CommandParameter="A" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="5" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="0" Command="{Binding TypeNumberCommand}" CommandParameter="0" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="5" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="B" Command="{Binding TypeNumberCommand}" CommandParameter="B" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                    </Grid>
-
-                                    <!-- View 2: Points Deduction Keypad Mode -->
-                                    <Grid 
-                                        Grid.Row="1"
-                                        IsVisible="{Binding IsPointMode}"
-                                        RowDefinitions="55, Auto, *, *, *, *, 46"
-                                        ColumnDefinitions="*, *, *"
-                                        RowSpacing="8"
-                                        ColumnSpacing="8"
-                                    >
-                                        <!-- Points Display Box -->
-                                        <Border
-                                            Grid.Row="0" 
-                                            Grid.ColumnSpan="3" 
-                                            StrokeShape="RoundRectangle 10"
-                                            BackgroundColor="White"
-                                            Padding="10,0"
-                                        >
-                                            <Grid ColumnDefinitions="*, Auto, Auto">
-                                                <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center" VerticalOptions="Center" Spacing="4">
-                                                    <Label 
-                                                        Text="-" 
-                                                        TextColor="{DynamicResource RedCornerColor}" 
-                                                        FontSize="26" 
-                                                        FontAttributes="Bold" 
-                                                        VerticalOptions="Center"
-                                                        IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
-                                                    />
-                                                    <Label 
-                                                        Text="{Binding PointsInput}" 
-                                                        TextColor="Black"
-                                                        VerticalOptions="Center"
-                                                        FontSize="26"
-                                                        FontAttributes="Bold"
-                                                        IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
-                                                    />
-                                                    <Label 
-                                                        Text="0.0 pt" 
-                                                        TextColor="{DynamicResource MutedTextColor}" 
-                                                        VerticalOptions="Center"
-                                                        FontSize="24"
-                                                        IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
-                                                    />
-                                                </HorizontalStackLayout>
-                                                <Button
-                                                    Grid.Column="1"
-                                                    Text="⌫"
-                                                    TextColor="{DynamicResource SubtleTextColor}"
-                                                    BackgroundColor="Transparent"
-                                                    FontSize="18"
-                                                    FontAttributes="Bold"
-                                                    Padding="0"
-                                                    HeightRequest="36"
-                                                    WidthRequest="36"
-                                                    IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
-                                                    Command="{Binding BackspacePointsCommand}"
-                                                />
-                                                <Button
-                                                    Grid.Column="2"
-                                                    Text="✕"
-                                                    TextColor="{DynamicResource MutedTextColor}"
-                                                    BackgroundColor="Transparent"
-                                                    FontSize="16"
-                                                    FontAttributes="Bold"
-                                                    Padding="0"
-                                                    HeightRequest="36"
-                                                    WidthRequest="36"
-                                                    IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
-                                                    Command="{Binding ClearPointsCommand}"
-                                                />
-                                            </Grid>
-                                        </Border>
-
-                                        <!-- Quick points deduction chips -->
-                                        <Grid Grid.Row="1" Grid.ColumnSpan="3" ColumnDefinitions="*, *, *, *, *" ColumnSpacing="6">
-                                            <Button Grid.Column="0" Text="-0.1" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.1"/>
-                                            <Button Grid.Column="1" Text="-0.2" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.2"/>
-                                            <Button Grid.Column="2" Text="-0.3" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.3"/>
-                                            <Button Grid.Column="3" Text="-0.5" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.5"/>
-                                            <Button Grid.Column="4" Text="-1.0" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="1.0"/>
+                                            <Button
+                                                Grid.Column="3"
+                                                Text="✓"
+                                                TextColor="{DynamicResource SuccessColor}"
+                                                BackgroundColor="{DynamicResource SuccessBg}"
+                                                CornerRadius="18"
+                                                FontSize="18"
+                                                FontAttributes="Bold"
+                                                Padding="0"
+                                                HeightRequest="36"
+                                                WidthRequest="36"
+                                                IsVisible="{Binding Code, Converter={StaticResource EmptyToBoolConverter}}"
+                                                Command="{Binding ValidateCodeCommand}"
+                                            />
                                         </Grid>
+                                    </Border>
 
-                                        <!-- Keypad Buttons -->
-                                        <Button Grid.Row="2" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="7" Command="{Binding TypePointCommand}" CommandParameter="7" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="2" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="8" Command="{Binding TypePointCommand}" CommandParameter="8" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="2" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="9" Command="{Binding TypePointCommand}" CommandParameter="9" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-
-                                        <Button Grid.Row="3" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="4" Command="{Binding TypePointCommand}" CommandParameter="4" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="3" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="5" Command="{Binding TypePointCommand}" CommandParameter="5" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="3" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="6" Command="{Binding TypePointCommand}" CommandParameter="6" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-
-                                        <Button Grid.Row="4" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="1" Command="{Binding TypePointCommand}" CommandParameter="1" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="4" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="2" Command="{Binding TypePointCommand}" CommandParameter="2" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="4" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="3" Command="{Binding TypePointCommand}" CommandParameter="3" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-
-                                        <Button Grid.Row="5" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="." Command="{Binding TypePointCommand}" CommandParameter="." FontSize="24" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="5" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="0" Command="{Binding TypePointCommand}" CommandParameter="0" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
-                                        <Button Grid.Row="5" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="⌫" Command="{Binding BackspacePointsCommand}" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
-
-                                        <!-- Validate Deduction Button -->
-                                        <Button 
-                                            Grid.Row="6" 
-                                            Grid.ColumnSpan="3" 
-                                            Text="➖ Retirer de la note" 
-                                            BackgroundColor="{DynamicResource Primary}" 
-                                            TextColor="White" 
-                                            FontAttributes="Bold" 
-                                            FontSize="16" 
-                                            CornerRadius="10" 
-                                            Command="{Binding DeductPointsCommand}"
-                                        />
-                                    </Grid>
-
-                                    <!-- View 3: Recognized Codes List (Direct tap to apply!) -->
-                                    <Grid 
-                                        Grid.Row="1"
-                                        IsVisible="{Binding IsGroupCodesMode}"
-                                        RowDefinitions="Auto, Auto, *"
-                                        RowSpacing="8"
+                                    <!-- Suggestions Chips (When typing code digits) -->
+                                    <ScrollView 
+                                        Grid.Row="1" 
+                                        Grid.ColumnSpan="3" 
+                                        Orientation="Horizontal" 
+                                        HorizontalScrollBarVisibility="Never"
+                                        IsVisible="{Binding MatchingCodes.Count, Converter={StaticResource IntToBoolConverter}}"
                                     >
-                                        <!-- Search bar -->
-                                        <Border 
-                                            Grid.Row="0"
-                                            Stroke="{DynamicResource ValidColor}"
-                                            StrokeThickness="1"
-                                            BackgroundColor="White"
-                                            Padding="10,0"
-                                        >
-                                            <Border.StrokeShape>
-                                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
-                                            </Border.StrokeShape>
-                                            <Entry 
-                                                Text="{Binding SearchRecognizedText}" 
-                                                Placeholder="{Binding Resources.SEARCH_CODES}"
-                                                PlaceholderColor="Gray"
-                                                TextColor="Black"
-                                                ClearButtonVisibility="WhileEditing"
-                                                MinimumHeightRequest="36"
-                                            />
-                                        </Border>
-
-                                        <!-- Group Filter Picker -->
-                                        <Border 
-                                            Grid.Row="1"
-                                            Stroke="{DynamicResource ValidColor}"
-                                            StrokeThickness="1"
-                                            BackgroundColor="White"
-                                            Padding="8,0"
-                                        >
-                                            <Border.StrokeShape>
-                                                <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
-                                            </Border.StrokeShape>
-                                            <Picker 
-                                                ItemsSource="{Binding RecognizedGroups}"
-                                                SelectedItem="{Binding SelectedRecognizedGroup}"
-                                                TextColor="Black"
-                                                BackgroundColor="White"
-                                                MinimumHeightRequest="36"
-                                            />
-                                        </Border>
-
-                                        <!-- Codes CollectionView -->
-                                        <CollectionView 
-                                            Grid.Row="2"
-                                            ItemsSource="{Binding FilteredRecognizedCodes}"
-                                        >
-                                            <CollectionView.EmptyView>
-                                                <Label 
-                                                    Text="Aucun code correspondant" 
-                                                    TextColor="LightGray" 
-                                                    HorizontalOptions="Center" 
-                                                    VerticalOptions="Center" 
-                                                    Margin="0,20"
-                                                />
-                                            </CollectionView.EmptyView>
-                                            <CollectionView.ItemsLayout>
-                                                <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
-                                            </CollectionView.ItemsLayout>
-                                            <CollectionView.ItemTemplate>
+                                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding MatchingCodes}" Spacing="6" Padding="0,2">
+                                            <BindableLayout.ItemTemplate>
                                                 <DataTemplate x:DataType="models:MvtCodeModel">
                                                     <Border 
-                                                        BackgroundColor="White"
-                                                        StrokeShape="RoundRectangle 8"
-                                                        Padding="10,8"
+                                                        BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                                                        Stroke="{DynamicResource Primary}" 
+                                                        StrokeThickness="1" 
+                                                        StrokeShape="RoundRectangle 6"
+                                                        Padding="8,5"
                                                     >
                                                         <Border.GestureRecognizers>
                                                             <TapGestureRecognizer 
@@ -1512,147 +1391,392 @@
                                                                 CommandParameter="{Binding .}"
                                                             />
                                                         </Border.GestureRecognizers>
-                                                        <Grid ColumnDefinitions="45, *, Auto" ColumnSpacing="10" VerticalOptions="Center">
-                                                            <!-- Code Badge -->
-                                                            <Border 
-                                                                Grid.Column="0"
-                                                                BackgroundColor="{DynamicResource SurfaceElevation2}"
-                                                                StrokeShape="RoundRectangle 6"
-                                                                Padding="4,6"
-                                                                HorizontalOptions="Fill"
-                                                                VerticalOptions="Center"
-                                                            >
-                                                                <Label 
-                                                                    Text="{Binding Code}" 
-                                                                    TextColor="White" 
-                                                                    FontSize="17" 
-                                                                    FontAttributes="Bold"
-                                                                    HorizontalTextAlignment="Center"
-                                                                />
-                                                            </Border>
 
-                                                            <!-- Movement, Group & Description -->
-                                                            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                                                <HorizontalStackLayout Spacing="6">
-                                                                    <Label 
-                                                                        Text="{Binding Movement}" 
-                                                                        TextColor="Black" 
-                                                                        FontSize="14" 
-                                                                        FontAttributes="Bold" 
-                                                                        LineBreakMode="TailTruncation"
-                                                                    />
-                                                                    <Label 
-                                                                        Text="{Binding GroupLabel, StringFormat='• {0}'}" 
-                                                                        TextColor="{DynamicResource SubtleTextColor}" 
-                                                                        FontSize="11" 
-                                                                        VerticalOptions="Center"
-                                                                    />
-                                                                </HorizontalStackLayout>
-                                                                <Label 
-                                                                    Text="{Binding Description}" 
-                                                                    TextColor="{DynamicResource SubtleTextColor}" 
-                                                                    FontSize="12" 
-                                                                    LineBreakMode="WordWrap"
-                                                                    MaxLines="2"
-                                                                />
-                                                            </VerticalStackLayout>
+                                                        <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                                            <Label 
+                                                                Text="{Binding Code}" 
+                                                                TextColor="Yellow" 
+                                                                FontAttributes="Bold" 
+                                                                FontSize="14"
+                                                            />
 
-                                                            <!-- Deduction Badge -->
-                                                            <Border 
-                                                                Grid.Column="2"
-                                                                BackgroundColor="{DynamicResource RedCornerBadgeBg}"
-                                                                Stroke="{DynamicResource RedCornerColor}"
-                                                                StrokeThickness="1"
-                                                                StrokeShape="RoundRectangle 6"
-                                                                Padding="8,4"
-                                                                VerticalOptions="Center"
-                                                            >
-                                                                <Label 
-                                                                    Text="{Binding Value, StringFormat='-{0:F1}'}" 
-                                                                    TextColor="{DynamicResource RedCornerColor}" 
-                                                                    FontSize="14" 
-                                                                    FontAttributes="Bold"
-                                                                />
-                                                            </Border>
-                                                        </Grid>
+                                                            <Label 
+                                                                Text="{Binding Movement}" 
+                                                                TextColor="White" 
+                                                                FontSize="13"
+                                                            />
+
+                                                            <Label 
+                                                                Text="{Binding Value, StringFormat='-{0:F1}'}"
+                                                                TextColor="{DynamicResource RedCornerLight}" 
+                                                                FontAttributes="Bold" 
+                                                                FontSize="13"
+                                                            />
+                                                        </HorizontalStackLayout>
                                                     </Border>
                                                 </DataTemplate>
-                                            </CollectionView.ItemTemplate>
-                                        </CollectionView>
-                                    </Grid>
+                                            </BindableLayout.ItemTemplate>
+                                        </HorizontalStackLayout>
+                                    </ScrollView>
+
+                                    <!-- Keypad Buttons -->
+                                    <Button Grid.Row="2" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="7" Command="{Binding TypeNumberCommand}" CommandParameter="7" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="2" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="8" Command="{Binding TypeNumberCommand}" CommandParameter="8" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="2" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="9" Command="{Binding TypeNumberCommand}" CommandParameter="9" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                    <Button Grid.Row="3" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="4" Command="{Binding TypeNumberCommand}" CommandParameter="4" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="3" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="5" Command="{Binding TypeNumberCommand}" CommandParameter="5" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="3" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="6" Command="{Binding TypeNumberCommand}" CommandParameter="6" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                    <Button Grid.Row="4" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="1" Command="{Binding TypeNumberCommand}" CommandParameter="1" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="4" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="2" Command="{Binding TypeNumberCommand}" CommandParameter="2" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="4" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="3" Command="{Binding TypeNumberCommand}" CommandParameter="3" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                    <Button Grid.Row="5" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="A" Command="{Binding TypeNumberCommand}" CommandParameter="A" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="5" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="0" Command="{Binding TypeNumberCommand}" CommandParameter="0" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="5" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="B" Command="{Binding TypeNumberCommand}" CommandParameter="B" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
                                 </Grid>
 
-                                <!-- Codes Applied History -->
-                                <CollectionView
-                                    Grid.Column="2"
-                                    BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                    ItemsSource="{Binding Codes}"
-                                    HorizontalOptions="Fill"
-                                    VerticalOptions="Fill"
-                                    Margin="5,15,5,15"
+                                <!-- View 2: Points Deduction Keypad Mode -->
+                                <Grid 
+                                    Grid.Row="1"
+                                    IsVisible="{Binding IsPointMode}"
+                                    RowDefinitions="55, Auto, *, *, *, *, 46"
+                                    ColumnDefinitions="*, *, *"
+                                    RowSpacing="8"
+                                    ColumnSpacing="8"
                                 >
-                                    <CollectionView.Behaviors>
-                                        <behaviors:ScrollOnNewItemBehavior/>
-                                    </CollectionView.Behaviors>
-                                    <CollectionView.ItemsLayout>
-                                        <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
-                                    </CollectionView.ItemsLayout>
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:MvtTimeCodeModel">
-                                            <Border
-                                                Padding="8,6"
-                                                StrokeShape="RoundRectangle 6"
-                                                BackgroundColor="White"
-                                            >
-                                                <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="8" VerticalOptions="Center">
-                                                    <!-- Code & Time -->
-                                                    <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="2">
-                                                        <Border BackgroundColor="{DynamicResource SurfaceElevation2}" StrokeShape="RoundRectangle 4" Padding="6,2" HorizontalOptions="Center">
-                                                            <Label Text="{Binding Code.Code}" TextColor="White" FontSize="13" FontAttributes="Bold"/>
+                                    <!-- Points Display Box -->
+                                    <Border
+                                        Grid.Row="0" 
+                                        Grid.ColumnSpan="3" 
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="White"
+                                        Padding="10,0"
+                                    >
+                                        <Grid ColumnDefinitions="*, Auto, Auto">
+                                            <HorizontalStackLayout Grid.Column="0" HorizontalOptions="Center" VerticalOptions="Center" Spacing="4">
+                                                <Label 
+                                                    Text="-" 
+                                                    TextColor="{DynamicResource RedCornerColor}" 
+                                                    FontSize="26" 
+                                                    FontAttributes="Bold" 
+                                                    VerticalOptions="Center"
+                                                    IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
+                                                />
+
+                                                <Label 
+                                                    Text="{Binding PointsInput}" 
+                                                    TextColor="Black"
+                                                    VerticalOptions="Center"
+                                                    FontSize="26"
+                                                    FontAttributes="Bold"
+                                                    IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
+                                                />
+
+                                                <Label 
+                                                    Text="0.0 pt" 
+                                                    TextColor="{DynamicResource MutedTextColor}" 
+                                                    VerticalOptions="Center"
+                                                    FontSize="24"
+                                                    IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                                                />
+                                            </HorizontalStackLayout>
+
+                                            <Button
+                                                Grid.Column="1"
+                                                Text="⌫"
+                                                TextColor="{DynamicResource SubtleTextColor}"
+                                                BackgroundColor="Transparent"
+                                                FontSize="18"
+                                                FontAttributes="Bold"
+                                                Padding="0"
+                                                HeightRequest="36"
+                                                WidthRequest="36"
+                                                IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
+                                                Command="{Binding BackspacePointsCommand}"
+                                            />
+
+                                            <Button
+                                                Grid.Column="2"
+                                                Text="✕"
+                                                TextColor="{DynamicResource MutedTextColor}"
+                                                BackgroundColor="Transparent"
+                                                FontSize="16"
+                                                FontAttributes="Bold"
+                                                Padding="0"
+                                                HeightRequest="36"
+                                                WidthRequest="36"
+                                                IsVisible="{Binding PointsInput, Converter={StaticResource EmptyToBoolConverter}}"
+                                                Command="{Binding ClearPointsCommand}"
+                                            />
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Quick points deduction chips -->
+                                    <Grid Grid.Row="1" Grid.ColumnSpan="3" ColumnDefinitions="*, *, *, *, *" ColumnSpacing="6">
+                                        <Button Grid.Column="0" Text="-0.1" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.1"/>
+                                        <Button Grid.Column="1" Text="-0.2" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.2"/>
+                                        <Button Grid.Column="2" Text="-0.3" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.3"/>
+                                        <Button Grid.Column="3" Text="-0.5" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="0.5"/>
+                                        <Button Grid.Column="4" Text="-1.0" BackgroundColor="{DynamicResource KeypadButtonBackground}" TextColor="White" FontAttributes="Bold" FontSize="13" CornerRadius="6" HeightRequest="38" Padding="0" Command="{Binding DeductPointsCommand}" CommandParameter="1.0"/>
+                                    </Grid>
+
+                                    <!-- Keypad Buttons -->
+                                    <Button Grid.Row="2" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="7" Command="{Binding TypePointCommand}" CommandParameter="7" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="2" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="8" Command="{Binding TypePointCommand}" CommandParameter="8" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="2" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="9" Command="{Binding TypePointCommand}" CommandParameter="9" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                    <Button Grid.Row="3" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="4" Command="{Binding TypePointCommand}" CommandParameter="4" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="3" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="5" Command="{Binding TypePointCommand}" CommandParameter="5" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="3" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="6" Command="{Binding TypePointCommand}" CommandParameter="6" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                    <Button Grid.Row="4" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="1" Command="{Binding TypePointCommand}" CommandParameter="1" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="4" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="2" Command="{Binding TypePointCommand}" CommandParameter="2" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="4" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="3" Command="{Binding TypePointCommand}" CommandParameter="3" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+
+                                    <Button Grid.Row="5" Grid.Column="0" BackgroundColor="White" CornerRadius="10" Text="." Command="{Binding TypePointCommand}" CommandParameter="." FontSize="24" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="5" Grid.Column="1" BackgroundColor="White" CornerRadius="10" Text="0" Command="{Binding TypePointCommand}" CommandParameter="0" FontSize="22" FontAttributes="Bold" TextColor="Black"/>
+                                    <Button Grid.Row="5" Grid.Column="2" BackgroundColor="White" CornerRadius="10" Text="⌫" Command="{Binding BackspacePointsCommand}" FontSize="20" FontAttributes="Bold" TextColor="Black"/>
+
+                                    <!-- Validate Deduction Button -->
+                                    <Button 
+                                        Grid.Row="6" 
+                                        Grid.ColumnSpan="3" 
+                                        Text="➖ Retirer de la note" 
+                                        BackgroundColor="{DynamicResource Primary}" 
+                                        TextColor="White" 
+                                        FontAttributes="Bold" 
+                                        FontSize="16" 
+                                        CornerRadius="10" 
+                                        Command="{Binding DeductPointsCommand}"
+                                    />
+                                </Grid>
+
+                                <!-- View 3: Recognized Codes List (Direct tap to apply!) -->
+                                <Grid 
+                                    Grid.Row="1"
+                                    IsVisible="{Binding IsGroupCodesMode}"
+                                    RowDefinitions="Auto, Auto, *"
+                                    RowSpacing="8"
+                                >
+                                    <!-- Search bar -->
+                                    <Border 
+                                        Grid.Row="0"
+                                        Stroke="{DynamicResource ValidColor}"
+                                        StrokeThickness="1"
+                                        BackgroundColor="White"
+                                        Padding="10,0"
+                                    >
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                                        </Border.StrokeShape>
+
+                                        <Entry 
+                                            Text="{Binding SearchRecognizedText}" 
+                                            Placeholder="{Binding Resources.SEARCH_CODES}"
+                                            PlaceholderColor="Gray"
+                                            TextColor="Black"
+                                            ClearButtonVisibility="WhileEditing"
+                                            MinimumHeightRequest="36"
+                                        />
+                                    </Border>
+
+                                    <!-- Group Filter Picker -->
+                                    <Border 
+                                        Grid.Row="1"
+                                        Stroke="{DynamicResource ValidColor}"
+                                        StrokeThickness="1"
+                                        BackgroundColor="White"
+                                        Padding="8,0"
+                                    >
+                                        <Border.StrokeShape>
+                                            <RoundRectangle CornerRadius="{DynamicResource EntryCornerRadius}"/>
+                                        </Border.StrokeShape>
+
+                                        <Picker 
+                                            ItemsSource="{Binding RecognizedGroups}"
+                                            SelectedItem="{Binding SelectedRecognizedGroup}"
+                                            TextColor="Black"
+                                            BackgroundColor="White"
+                                            MinimumHeightRequest="36"
+                                        />
+                                    </Border>
+
+                                    <!-- Codes CollectionView -->
+                                    <CollectionView 
+                                        Grid.Row="2"
+                                        ItemsSource="{Binding FilteredRecognizedCodes}"
+                                    >
+                                        <CollectionView.EmptyView>
+                                            <Label 
+                                                Text="Aucun code correspondant" 
+                                                TextColor="LightGray" 
+                                                HorizontalOptions="Center" 
+                                                VerticalOptions="Center" 
+                                                Margin="0,20"
+                                            />
+                                        </CollectionView.EmptyView>
+                                        <CollectionView.ItemsLayout>
+                                            <LinearItemsLayout Orientation="Vertical" ItemSpacing="6" />
+                                        </CollectionView.ItemsLayout>
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="models:MvtCodeModel">
+                                                <Border 
+                                                    BackgroundColor="White"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    Padding="10,8"
+                                                >
+                                                    <Border.GestureRecognizers>
+                                                        <TapGestureRecognizer 
+                                                            Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=ApplyCodeCommand}"
+                                                            CommandParameter="{Binding .}"
+                                                        />
+                                                    </Border.GestureRecognizers>
+
+                                                    <Grid ColumnDefinitions="45, *, Auto" ColumnSpacing="10" VerticalOptions="Center">
+                                                        <!-- Code Badge -->
+                                                        <Border 
+                                                            Grid.Column="0"
+                                                            BackgroundColor="{DynamicResource SurfaceElevation2}"
+                                                            StrokeShape="RoundRectangle 6"
+                                                            Padding="4,6"
+                                                            HorizontalOptions="Fill"
+                                                            VerticalOptions="Center"
+                                                        >
+                                                            <Label 
+                                                                Text="{Binding Code}" 
+                                                                TextColor="White" 
+                                                                FontSize="17" 
+                                                                FontAttributes="Bold"
+                                                                HorizontalTextAlignment="Center"
+                                                            />
                                                         </Border>
-                                                        <Label Text="{Binding Date, StringFormat='{0:HH:mm:ss}'}" TextColor="Gray" FontSize="10" HorizontalOptions="Center"/>
-                                                    </VerticalStackLayout>
 
-                                                    <!-- Movement & Description -->
-                                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
-                                                        <Label Text="{Binding Code.Movement}" TextColor="Black" FontSize="13" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
-                                                        <Label Text="{Binding Code.Description}" TextColor="{DynamicResource SubtleTextColor}" FontSize="11" LineBreakMode="WordWrap" MaxLines="2"/>
-                                                    </VerticalStackLayout>
+                                                        <!-- Movement, Group & Description -->
+                                                        <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                                            <HorizontalStackLayout Spacing="6">
+                                                                <Label 
+                                                                    Text="{Binding Movement}" 
+                                                                    TextColor="Black" 
+                                                                    FontSize="14" 
+                                                                    FontAttributes="Bold" 
+                                                                    LineBreakMode="TailTruncation"
+                                                                />
 
-                                                    <!-- Deduction Value -->
-                                                    <Label 
-                                                        Grid.Column="2"
-                                                        Text="{Binding Code.Value, StringFormat='-{0:F1}'}"
-                                                        TextColor="{DynamicResource RedCornerColor}"
-                                                        FontSize="14"
-                                                        FontAttributes="Bold"
-                                                        VerticalOptions="Center"
-                                                    />
+                                                                <Label 
+                                                                    Text="{Binding GroupLabel, StringFormat='• {0}'}" 
+                                                                    TextColor="{DynamicResource SubtleTextColor}" 
+                                                                    FontSize="11" 
+                                                                    VerticalOptions="Center"
+                                                                />
+                                                            </HorizontalStackLayout>
 
-                                                    <!-- Delete Button -->
-                                                    <controls:IconButton
-                                                        Grid.Column="3"
-                                                        Style="{StaticResource ListActionDeleteButtonStyle}"
-                                                        IsVisible="{Binding CanDelete}"
-                                                        Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=DeleteCodeCommand}"
-                                                        CommandParameter="{Binding .}"
-                                                        VerticalOptions="Center"
-                                                    />
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
+                                                            <Label 
+                                                                Text="{Binding Description}" 
+                                                                TextColor="{DynamicResource SubtleTextColor}" 
+                                                                FontSize="12" 
+                                                                LineBreakMode="WordWrap"
+                                                                MaxLines="2"
+                                                            />
+                                                        </VerticalStackLayout>
 
-                                <Grid.Triggers>
-                                    <DataTrigger TargetType="Grid" Binding="{Binding ., Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                        <Setter Property="IsVisible" Value="True"/>
-                                    </DataTrigger>
-                                </Grid.Triggers>
+                                                        <!-- Deduction Badge -->
+                                                        <Border 
+                                                            Grid.Column="2"
+                                                            BackgroundColor="{DynamicResource RedCornerBadgeBg}"
+                                                            Stroke="{DynamicResource RedCornerColor}"
+                                                            StrokeThickness="1"
+                                                            StrokeShape="RoundRectangle 6"
+                                                            Padding="8,4"
+                                                            VerticalOptions="Center"
+                                                        >
+                                                            <Label 
+                                                                Text="{Binding Value, StringFormat='-{0:F1}'}" 
+                                                                TextColor="{DynamicResource RedCornerColor}" 
+                                                                FontSize="14" 
+                                                                FontAttributes="Bold"
+                                                            />
+                                                        </Border>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </Grid>
                             </Grid>
 
-                            <!-- Timer Overlay -->
-                            <Border 
+                            <!-- Codes Applied History -->
+                            <CollectionView
+                                Grid.Column="2"
+                                BindingContext="{Binding BindingContext, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                ItemsSource="{Binding Codes}"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Fill"
+                                Margin="5,15,5,15"
+                            >
+                                <CollectionView.Behaviors>
+                                    <behaviors:ScrollOnNewItemBehavior/>
+                                </CollectionView.Behaviors>
+                                <CollectionView.ItemsLayout>
+                                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="6"/>
+                                </CollectionView.ItemsLayout>
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate x:DataType="models:MvtTimeCodeModel">
+                                        <Border
+                                            Padding="8,6"
+                                            StrokeShape="RoundRectangle 6"
+                                            BackgroundColor="White"
+                                        >
+                                            <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="8" VerticalOptions="Center">
+                                                <!-- Code & Time -->
+                                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" Spacing="2">
+                                                    <Border BackgroundColor="{DynamicResource SurfaceElevation2}" StrokeShape="RoundRectangle 4" Padding="6,2" HorizontalOptions="Center">
+                                                        <Label Text="{Binding Code.Code}" TextColor="White" FontSize="13" FontAttributes="Bold"/>
+                                                    </Border>
+                                                    <Label Text="{Binding Date, StringFormat='{0:HH:mm:ss}'}" TextColor="Gray" FontSize="10" HorizontalOptions="Center"/>
+                                                </VerticalStackLayout>
+
+                                                <!-- Movement & Description -->
+                                                <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="2">
+                                                    <Label Text="{Binding Code.Movement}" TextColor="Black" FontSize="13" FontAttributes="Bold" LineBreakMode="TailTruncation"/>
+                                                    <Label Text="{Binding Code.Description}" TextColor="{DynamicResource SubtleTextColor}" FontSize="11" LineBreakMode="WordWrap" MaxLines="2"/>
+                                                </VerticalStackLayout>
+
+                                                <!-- Deduction Value -->
+                                                <Label 
+                                                    Grid.Column="2"
+                                                    Text="{Binding Code.Value, StringFormat='-{0:F1}'}"
+                                                    TextColor="{DynamicResource RedCornerColor}"
+                                                    FontSize="14"
+                                                    FontAttributes="Bold"
+                                                    VerticalOptions="Center"
+                                                />
+
+                                                <!-- Delete Button -->
+                                                <controls:IconButton
+                                                    Grid.Column="3"
+                                                    Style="{StaticResource ListActionDeleteButtonStyle}"
+                                                    IsVisible="{Binding CanDelete}"
+                                                    Command="{Binding x:DataType='vm:JudgeViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}, Path=DeleteCodeCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    VerticalOptions="Center"
+                                                />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+
+                            <Grid.Triggers>
+                                <DataTrigger TargetType="Grid" Binding="{Binding ., Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                    <Setter Property="IsVisible" Value="True"/>
+                                </DataTrigger>
+                            </Grid.Triggers>
+                        </Grid>
+
+                        <!-- Timer Overlay -->
+                        <Border 
                                 HorizontalOptions="Center" 
                                 VerticalOptions="End" 
                                 Padding="25,10,25,10" 
@@ -1663,7 +1787,7 @@
                                 StrokeShape="RoundRectangle 20"
                                 IsVisible="True"
                             >
-                                <Label 
+                            <Label 
                                     Text="{Binding TimeLeftDisplay, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" 
                                     TextColor="White" 
                                     FontSize="72" 
@@ -1671,49 +1795,50 @@
                                     FontFamily="Monospace"
                                 />
 
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border" Binding="{Binding ., Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
-                                        <Setter Property="IsVisible" Value="False"/>
-                                    </DataTrigger>
-                                </Border.Triggers>
-                            </Border>
-                        </Grid>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding ., Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                                    <Setter Property="IsVisible" Value="False"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                        </Border>
                     </Grid>
+                </Grid>
 
-                    <!-- Footer Info (Judge Position & Connection Status) -->
-                    <HorizontalStackLayout 
-                        Grid.Row="3" 
-                        HorizontalOptions="Center" 
-                        Spacing="30"
-                    >
-                        <HorizontalStackLayout Spacing="10">
-                            <BoxView 
-                                Color="{Binding ConnectionStatusColor}" 
-                                WidthRequest="20" 
-                                HeightRequest="20" 
-                                CornerRadius="10" 
-                                VerticalOptions="Center"
-                                BackgroundColor="Transparent"
-                            />
-                            <Label 
-                                Text="{Binding ConnectionStatusText}" 
-                                TextColor="{Binding ConnectionStatusColor}" 
-                                FontSize="18" 
-                                FontAttributes="Bold" 
-                                VerticalOptions="Center"
-                            />
-                        </HorizontalStackLayout>
-
+                <!-- Footer Info (Judge Position & Connection Status) -->
+                <HorizontalStackLayout 
+                    Grid.Row="3" 
+                    HorizontalOptions="Center" 
+                    Spacing="30"
+                >
+                    <HorizontalStackLayout Spacing="10">
+                        <BoxView 
+                            Color="{Binding ConnectionStatusColor}" 
+                            WidthRequest="20" 
+                            HeightRequest="20" 
+                            CornerRadius="10" 
+                            VerticalOptions="Center"
+                            BackgroundColor="Transparent"
+                        />
+                        
                         <Label 
-                            Text="{Binding SelectedJudge.Name, StringFormat='{0}'}" 
-                            TextColor="White" 
+                            Text="{Binding ConnectionStatusText}" 
+                            TextColor="{Binding ConnectionStatusColor}" 
                             FontSize="18" 
-                            FontAttributes="Bold"
+                            FontAttributes="Bold" 
                             VerticalOptions="Center"
                         />
                     </HorizontalStackLayout>
-                </Grid>
+
+                    <Label 
+                        Text="{Binding SelectedJudge.Name, StringFormat='{0}'}" 
+                        TextColor="White" 
+                        FontSize="18" 
+                        FontAttributes="Bold"
+                        VerticalOptions="Center"
+                    />
+                </HorizontalStackLayout>
             </Grid>
+        </Grid>
 
         <!-- Data Reception Overlays -->
         <Grid BackgroundColor="{DynamicResource OverlayHeavyColor}" IsVisible="{Binding IsReceivingCompetition}">

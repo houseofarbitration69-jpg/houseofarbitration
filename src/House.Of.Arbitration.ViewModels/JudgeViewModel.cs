@@ -17,14 +17,50 @@ namespace House.Of.Arbitration.ViewModels;
 public partial class JudgeViewModel : BaseViewModel
 {
     #region Services
+    /// <summary>
+    /// Service de gestion des alertes
+    /// </summary>
     private readonly IAlertService _alertService;
+
+    /// <summary>
+    /// Service pour le client bluetooth
+    /// </summary>
     private readonly IBluetoothClient _bluetoothClient;
+
+    /// <summary>
+    /// Service de gestion du bluetooth
+    /// </summary>
     private readonly IBluetoothService _bluetoothService;
+
+    /// <summary>
+    /// Service d'accès aux données pour les compétitions
+    /// </summary>
     private readonly IRepository<CompetitionModel> _competitionRepository;
+
+    /// <summary>
+    /// Service d'accès aux données pour les tirages éliminatoire
+    /// </summary>
     private readonly IRepository<DrawKnockoutModel> _drawKnockoutService;
+
+    /// <summary>
+    /// Service d'accès aux données pour les tirages par ordre
+    /// </summary>
     private readonly IRepository<DrawOrderModel> _drawOrderService;
+
+    /// <summary>
+    /// Service d'accès aux données pour les tirages par poule
+    /// </summary>
     private readonly IRepository<DrawPoolsModel> _drawPoolsService;
+
+    /// <summary>
+    /// Service d'accès aux données pour les codes de mouvement
+    /// </summary>
     private readonly IRepository<MvtCodeModel> _mvtCodesService;
+
+    /// <summary>
+    /// Service de gestion de la base de données
+    /// </summary>
+    private readonly IDatabaseService? _databaseService;
     #endregion
 
     #region Attributs
@@ -40,25 +76,18 @@ public partial class JudgeViewModel : BaseViewModel
     private string? _categoryName;
     private int _matchNumber;
     private string _timeLeftDisplay = "02:00";
-
     private double _score = 7.0;
-
     private string _code = "";
     private CancellationTokenSource? _typeNumberCts;
-
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private IDispatcherTimer? _timer;
-
     private string? _serverDeviceId;
-
     private readonly Dictionary<string, (string Type, string?[] Chunks)> _pendingChunks = new();
-
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
         PropertyNameCaseInsensitive = true
     };
-
     private IDrawModel? _currentDraw;
     private CompetitionModel? _currentCompetition;
     private CompetitionType _competitionType = CompetitionType.None;
@@ -78,6 +107,9 @@ public partial class JudgeViewModel : BaseViewModel
     #endregion
 
     #region Properties
+    /// <summary>
+    /// Obtient ou définit la compétition courante
+    /// </summary>
     public CompetitionModel? CurrentCompetition
     {
         get => _currentCompetition;
@@ -87,32 +119,34 @@ public partial class JudgeViewModel : BaseViewModel
             {
                 OnPropertyChanged(nameof(CanSelectPosition));
                 OnPropertyChanged(nameof(ShowPositionScreen));
-            }
-        }
-    }
-
-    public CompetitionType CompetitionType
-    {
-        get => _competitionType;
-        set
-        {
-            if (SetProperty(ref _competitionType, value))
-            {
                 OnPropertyChanged(nameof(IsTaolu));
                 OnPropertyChanged(nameof(IsSanda));
             }
         }
     }
 
-    public bool IsTaolu => CompetitionType == CompetitionType.Taolu;
-    public bool IsSanda => CompetitionType == CompetitionType.Sanda;
+    /// <summary>
+    /// Obtient si la compétition courante est de type TAOLU
+    /// </summary>
+    public bool IsTaolu => CurrentCompetition?.Type == CompetitionType.Taolu;
 
+    /// <summary>
+    /// Obtient si la compétition courante est de type SANDA
+    /// </summary>
+    public bool IsSanda => CurrentCompetition?.Type == CompetitionType.Sanda;
+
+    /// <summary>
+    /// Obtient ou définit si le scan est en court
+    /// </summary>
     public bool IsScanning
     {
         get => _isScanning;
         set => SetProperty(ref _isScanning, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit si le client est connecté
+    /// </summary>
     public bool IsConnected
     {
         get => _isConnected;
@@ -131,6 +165,9 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit s'il y a des modifications hors lignes
+    /// </summary>
     public bool HasUnsyncedChanges
     {
         get => _hasUnsyncedChanges;
@@ -143,8 +180,14 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Obtient s'il y a des scores non syncrhonizé
+    /// </summary>
     public IReadOnlyList<TransfertScoreModel> UnsyncedScores => _unsyncedScores.AsReadOnly();
 
+    /// <summary>
+    /// Obtient ou définit si on est entrain de se reconnecter
+    /// </summary>
     public bool IsReconnecting
     {
         get => _isReconnecting;
@@ -157,36 +200,69 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Obtient si on doit afficher l'écran de connection
+    /// </summary>
     public bool ShowConnectionScreen => SelectedJudge == null && !IsConnected;
 
+    /// <summary>
+    /// Obtient si on doit afficher l'écran de sélection de la position
+    /// </summary>
     public bool ShowPositionScreen => CanSelectPosition;
 
+    /// <summary>
+    /// Obtient si on doit afficher la compétition
+    /// </summary>
     public bool IsJudging => SelectedJudge != null;
 
+    /// <summary>
+    /// Obtient si le serveur est hors ligne
+    /// </summary>
     public bool IsServerOffline => SelectedJudge != null && !IsConnected;
 
+    /// <summary>
+    /// Obtient le status de la connection
+    /// </summary>
     public string ConnectionStatusText => IsConnected ? "CONNECTÉ" : "DÉCONNECTÉ (HORS-LIGNE)";
 
+    /// <summary>
+    /// Obtient la couleur de l'état de la connection
+    /// </summary>
     public string ConnectionStatusColor => IsConnected ? "#4CAF50" : "#FF5252";
 
+    /// <summary>
+    /// Obtient le message hors ligne
+    /// </summary>
     public string OfflineSyncStatusText => HasUnsyncedChanges
         ? "⚠️ Notations locales non synchronisées. En attente de reconnexion..."
         : "Vos notations sont conservées localement et seront synchronisées dès reconnexion.";
 
+    /// <summary>
+    /// Obtient le text pour le bouton de reconnection
+    /// </summary>
     public string ReconnectButtonText => IsReconnecting ? "Connexion..." : "Reconnecter";
 
+    /// <summary>
+    /// Obtient ou définit la dernière date de contact avec le serveur
+    /// </summary>
     public DateTime LastServerContactTime
     {
         get => _lastServerContactTime;
         set => _lastServerContactTime = value;
     }
 
+    /// <summary>
+    /// Obtient ou définit le nombre de pings avec le serveur qui on échoué
+    /// </summary>
     public int ConsecutiveFailedPings
     {
         get => _consecutiveFailedPings;
         set => _consecutiveFailedPings = value;
     }
 
+    /// <summary>
+    /// Obtient ou définit si on est encours de récupération d'une compétition
+    /// </summary>
     public bool IsReceivingCompetition
     {
         get => _isReceivingCompetition;
@@ -200,12 +276,18 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Obtient ou définit si on est en cours de réception d'un match
+    /// </summary>
     public bool IsReceivingMatch
     {
         get => _isReceivingMatch;
         set => SetProperty(ref _isReceivingMatch, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le juge selectionné
+    /// </summary>
     public JudgeModel? SelectedJudge
     {
         get => _selectedJudge;
@@ -224,74 +306,145 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Obtient si on peut selectionner une position
+    /// </summary>
     public bool CanSelectPosition => IsConnected && !IsReceivingCompetition && CurrentCompetition != null && SelectedJudge == null;
 
+    /// <summary>
+    /// Obtient ou définit les informations du match courant
+    /// </summary>
     public string? CurrentMatchInfo
     {
         get => _currentMatchInfo;
         set => SetProperty(ref _currentMatchInfo, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le nom de la catégorie
+    /// </summary>
     public string? CategoryName
     {
         get => _categoryName;
         set => SetProperty(ref _categoryName, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le numéro du match
+    /// </summary>
     public int MatchNumber
     {
         get => _matchNumber;
         set => SetProperty(ref _matchNumber, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le temps restant a afficher
+    /// </summary>
     public string TimeLeftDisplay
     {
         get => _timeLeftDisplay;
         set => SetProperty(ref _timeLeftDisplay, value);
     }
 
+    /// <summary>
+    /// Obtient la liste des devices découvert
+    /// </summary>
     public ObservableCollection<DiscoveredDeviceModel> DiscoveredDevices { get; } = new();
+
+    /// <summary>
+    /// Obtient la liste des codes
+    /// </summary>
     public ObservableCollection<MvtTimeCodeModel> Codes { get; } = new ObservableCollection<MvtTimeCodeModel>();
+
+    /// <summary>
+    /// Obtient la liste des positions
+    /// </summary>
     public ObservableCollection<JudgeModel> JudgePositions { get; } = new();
+
+    /// <summary>
+    /// Obtient la liste des positions pour le groupe A
+    /// </summary>
     public ObservableCollection<JudgeModel> JudgePositionsGroupA { get; } = new();
+
+    /// <summary>
+    /// Obtient la liste des positions pour le groupe B
+    /// </summary>
     public ObservableCollection<JudgeModel> JudgePositionsGroupB { get; } = new();
+
+    /// <summary>
+    /// Obtient la liste des positions pour le groupe C
+    /// </summary>
     public ObservableCollection<JudgeModel> JudgePositionsGroupC { get; } = new();
 
+    /// <summary>
+    /// Obtient ou définit le compétiteur 1
+    /// </summary>
     public CompetitorModel? Competitor1
     {
         get => _competitor1;
         set => SetProperty(ref _competitor1, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le compétiteur 2
+    /// </summary>
     public CompetitorModel? Competitor2
     {
         get => _competitor2;
         set => SetProperty(ref _competitor2, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le tirage courant
+    /// </summary>
     public IDrawModel? CurrentDraw
     {
         get => _currentDraw;
         set => SetProperty(ref _currentDraw, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le code
+    /// </summary>
     public string Code
     {
         get => _code;
         set => SetProperty(ref _code, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit le score
+    /// </summary>
     public double Score
     {
         get => _score;
         set => SetProperty(ref _score, value);
     }
 
+    /// <summary>
+    /// Obtient ou définit la liste des codes reconnues
+    /// </summary>
     public ObservableCollection<MvtCodeModel> RecognizedCodes { get; } = new();
+
+    /// <summary>
+    /// Obtient ou définit la liste des codes reconnues filtré
+    /// </summary>
     public ObservableCollection<MvtCodeModel> FilteredRecognizedCodes { get; } = new();
+
+    /// <summary>
+    /// Obtient ou définit la liste des groupes reconnue
+    /// </summary>
     public ObservableCollection<string> RecognizedGroups { get; } = new();
+
+    /// <summary>
+    /// Obtient ou définit la liste des codes reconnues
+    /// </summary>
     public ObservableCollection<MvtCodeModel> MatchingCodes { get; } = new();
 
+    /// <summary>
+    /// Obtient ou définit le group reconnue
+    /// </summary>
     public string SelectedRecognizedGroup
     {
         get => _selectedRecognizedGroup;
@@ -304,6 +457,9 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string SearchRecognizedText
     {
         get => _searchRecognizedText;
@@ -316,6 +472,9 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public TaoluInputMode CurrentTaoluInputMode
     {
         get => _currentTaoluInputMode;
@@ -332,24 +491,47 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool IsCodeMode => CurrentTaoluInputMode == TaoluInputMode.Code;
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool IsPointMode => CurrentTaoluInputMode == TaoluInputMode.Points;
+    
+    /// <summary>
+    /// 
+    /// </summary>
     public bool IsGroupCodesMode => CurrentTaoluInputMode == TaoluInputMode.GroupCodes;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool IsCodesListMode
     {
         get => IsGroupCodesMode;
         set => CurrentTaoluInputMode = value ? TaoluInputMode.GroupCodes : TaoluInputMode.Code;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public bool IsKeypadMode => IsCodeMode;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string PointsInput
     {
         get => _pointsInput;
         set => SetProperty(ref _pointsInput, value);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public string GroupCodesButtonText
     {
         get
@@ -364,6 +546,20 @@ public partial class JudgeViewModel : BaseViewModel
     #endregion
 
     #region Constructors
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="logger"></param>
+    /// <param name="resourceProvider"></param>
+    /// <param name="popupService"></param>
+    /// <param name="alertService"></param>
+    /// <param name="bluetoothClient"></param>
+    /// <param name="bluetoothService"></param>
+    /// <param name="competitionRepository"></param>
+    /// <param name="drawKnockoutService"></param>
+    /// <param name="drawOrderService"></param>
+    /// <param name="drawPoolsService"></param>
+    /// <param name="mvtCodesService"></param>
     public JudgeViewModel(
         ILogger<JudgeViewModel> logger,
         ResourceProvider resourceProvider,
@@ -375,7 +571,8 @@ public partial class JudgeViewModel : BaseViewModel
         IRepository<DrawKnockoutModel> drawKnockoutService,
         IRepository<DrawOrderModel> drawOrderService,
         IRepository<DrawPoolsModel> drawPoolsService,
-        IRepository<MvtCodeModel> mvtCodesService
+        IRepository<MvtCodeModel> mvtCodesService,
+        IDatabaseService? databaseService = null
     ) : base(logger, resourceProvider, popupService)
     {
         _alertService = alertService;
@@ -388,6 +585,7 @@ public partial class JudgeViewModel : BaseViewModel
         _drawOrderService = drawOrderService;
         _drawPoolsService = drawPoolsService;
         _mvtCodesService = mvtCodesService;
+        _databaseService = databaseService;
 
         _title = "JUDGE";
 
@@ -401,10 +599,12 @@ public partial class JudgeViewModel : BaseViewModel
         {
             JudgePositionsGroupA.Add(new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "A" });
         }
+
         for (int i = 1; i <= 3; i++)
         {
             JudgePositionsGroupB.Add(new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "B" });
         }
+
         for (int i = 1; i <= 3; i++)
         {
             JudgePositionsGroupC.Add(new JudgeModel { Name = $"JUGE {i}", Number = i, Group = "C" });
@@ -432,15 +632,18 @@ public partial class JudgeViewModel : BaseViewModel
     #endregion
 
     #region Event Handlers
+    /// <summary>
+    /// Méthode appellée pour découvrir les serveur possible
+    /// </summary>
     private void OnDeviceDiscovered(object? sender, (string DeviceId, string Name, int Rssi) device)
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            var existing = DiscoveredDevices.FirstOrDefault(d => d.DeviceId == device.DeviceId);
+            var existing = DiscoveredDevices.FirstOrDefault(d => d.Name == device.Name);
             if (existing != null)
             {
+                existing.DeviceId = device.DeviceId;
                 existing.Rssi = device.Rssi;
-                existing.Name = device.Name;
             }
             else
             {
@@ -454,6 +657,9 @@ public partial class JudgeViewModel : BaseViewModel
         });
     }
 
+    /// <summary>
+    /// Méthode appellée lorsqu'on se connect sur un serveur
+    /// </summary>
     private void OnDeviceConnected(object? sender, string deviceId)
     {
         MainThread.BeginInvokeOnMainThread(async () =>
@@ -462,53 +668,11 @@ public partial class JudgeViewModel : BaseViewModel
         });
     }
 
-    public async Task HandleDeviceConnectedAsync(string deviceId)
-    {
-        _serverDeviceId = deviceId;
-        _lastServerDeviceId = deviceId;
-        IsConnected = true;
-        IsScanning = false;
-        _lastServerContactTime = DateTime.UtcNow;
-        _consecutiveFailedPings = 0;
-        StopAutoReconnect();
-        StartWatchdog();
-
-        if (SelectedJudge == null)
-        {
-            IsReceivingCompetition = true;
-            try
-            {
-                await _bluetoothClient.SendMessage(_serverDeviceId, Constants.Message.GET_COMPETITION);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error requesting competition from server");
-            }
-        }
-        else
-        {
-            // Reconnecting with an active judge
-            try
-            {
-                string positionCode = !string.IsNullOrEmpty(SelectedJudge.Group)
-                    ? $"{SelectedJudge.Group}_{SelectedJudge.Number}"
-                    : SelectedJudge.Number.ToString();
-                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{positionCode}");
-
-                await Task.Delay(150);
-
-                if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
-                {
-                    await SyncUnsyncedScoresAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error re-registering judge position upon reconnection");
-            }
-        }
-    }
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="deviceId"></param>
     private void OnDeviceDisconnected(object? sender, string deviceId)
     {
         MainThread.BeginInvokeOnMainThread(async () =>
@@ -517,45 +681,32 @@ public partial class JudgeViewModel : BaseViewModel
         });
     }
 
-    public async Task HandleDeviceDisconnectedAsync(string? deviceId = null)
+    /// <summary>
+    /// Méthode appellée lorsqu'on recoit un message
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="message"></param>
+    private void OnMessageReceived(object? sender, string message)
     {
-        bool wasAlreadyOffline = !IsConnected && SelectedJudge != null;
-
-        StopWatchdog();
-        _consecutiveFailedPings = 0;
-
-        if (!string.IsNullOrEmpty(deviceId))
+        MainThread.BeginInvokeOnMainThread(async () =>
         {
-            _lastServerDeviceId = deviceId;
-        }
-        else if (!string.IsNullOrEmpty(_serverDeviceId))
-        {
-            _lastServerDeviceId = _serverDeviceId;
-        }
-
-        _serverDeviceId = null;
-        IsConnected = false;
-        IsReceivingCompetition = false;
-        IsReceivingMatch = false;
-
-        if (SelectedJudge == null)
-        {
-            CurrentCompetition = null;
-            CompetitionType = CompetitionType.None;
-            _lastMatchId = 0;
-            Codes.Clear();
-            _timer?.Stop();
-            _pendingChunks.Clear();
-
-            await _alertService.ShowToast("Le serveur s'est déconnecté.");
-        }
-        else if (!wasAlreadyOffline)
-        {
-            // Judge is actively in a match: keep local data, activate offline mode and background auto-reconnect
-            StartAutoReconnect();
-            await _alertService.ShowToast("Serveur déconnecté. Mode hors-ligne actif : continuez à noter.");
-        }
+            await HandleMessageAsync(message);
+        });
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public void StartWatchdog()
     {
@@ -739,14 +890,66 @@ public partial class JudgeViewModel : BaseViewModel
         }
     }
 
-    private void OnMessageReceived(object? sender, string message)
+    #endregion
+
+    #region Public Methods
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="deviceId"></param>
+    /// <returns></returns>
+    public async Task HandleDeviceConnectedAsync(string deviceId)
     {
-        MainThread.BeginInvokeOnMainThread(async () =>
+        _serverDeviceId = deviceId;
+        _lastServerDeviceId = deviceId;
+        IsConnected = true;
+        IsScanning = false;
+        _lastServerContactTime = DateTime.UtcNow;
+        _consecutiveFailedPings = 0;
+        StopAutoReconnect();
+        StartWatchdog();
+
+        if (SelectedJudge == null)
         {
-            await HandleMessageAsync(message);
-        });
+            IsReceivingCompetition = true;
+            try
+            {
+                await _bluetoothClient.SendMessage(_serverDeviceId, Constants.Message.GET_COMPETITION);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error requesting competition from server");
+            }
+        }
+        else
+        {
+            // Reconnecting with an active judge
+            try
+            {
+                string positionCode = !string.IsNullOrEmpty(SelectedJudge.Group)
+                    ? $"{SelectedJudge.Group}_{SelectedJudge.Number}"
+                    : SelectedJudge.Number.ToString();
+                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_POSITION}{positionCode}");
+
+                await Task.Delay(150);
+
+                if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
+                {
+                    await SyncUnsyncedScoresAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error re-registering judge position upon reconnection");
+            }
+        }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
     public async Task HandleMessageAsync(string message)
     {
         try
@@ -797,23 +1000,29 @@ public partial class JudgeViewModel : BaseViewModel
                 return;
             }
 
-            if (message.StartsWith(Constants.Message.COMPETITION_DATA))
+                        if (message.StartsWith(Constants.Message.COMPETITION_DATA))
             {
                 var content = message.Substring(Constants.Message.COMPETITION_DATA.Length);
                 var competition = JsonSerializer.Deserialize<CompetitionModel>(content, _jsonOptions);
                 if (competition != null)
                 {
                     CurrentCompetition = competition;
-                    CompetitionType = competition.Type;
 
-                    // Clean the graph to avoid EF Core key/seed conflicts
-                    CleanCompetitionGraph(competition);
-
-                    var existing = await _competitionRepository.GetByIdAsync(competition.Id);
-                    if (existing != null)
-                        await _competitionRepository.UpdateAsync(competition);
+                    if (_databaseService != null)
+                    {
+                        await _databaseService.ImportCompetitionDataAsync(competition);
+                    }
                     else
-                        await _competitionRepository.AddAsync(competition);
+                    {
+                        // Clean the graph to avoid EF Core key/seed conflicts
+                        CleanCompetitionGraph(competition);
+
+                        var existing = await _competitionRepository.GetByIdAsync(competition.Id);
+                        if (existing != null)
+                            await _competitionRepository.UpdateAsync(competition);
+                        else
+                            await _competitionRepository.AddAsync(competition);
+                    }
 
                     await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
                 }
@@ -873,7 +1082,7 @@ public partial class JudgeViewModel : BaseViewModel
                         Competitor2 = null;
                     }
 
-                    if (isNewMatch && SelectedJudge != null && CompetitionType == CompetitionType.Taolu && !HasUnsyncedChanges)
+                    if (isNewMatch && SelectedJudge != null && CurrentCompetition?.Type == CompetitionType.Taolu && !HasUnsyncedChanges)
                     {
                         if (SelectedJudge.Group == "A") Score = 5.0;
                         else if (SelectedJudge.Group == "B") Score = 3.0;
@@ -929,6 +1138,10 @@ public partial class JudgeViewModel : BaseViewModel
     #endregion
 
     #region Private Methods
+
+
+
+
     private void CleanCompetitionGraph(CompetitionModel competition)
     {
         if (competition.Categories == null) return;
@@ -1063,7 +1276,7 @@ public partial class JudgeViewModel : BaseViewModel
     {
         SelectedJudge = judge;
 
-        if (CompetitionType == CompetitionType.Taolu)
+        if (CurrentCompetition?.Type == CompetitionType.Taolu)
         {
             if (judge.Group == "A") Score = 5.0;
             else if (judge.Group == "B") Score = 3.0;
@@ -1714,7 +1927,6 @@ public partial class JudgeViewModel : BaseViewModel
         IsReceivingCompetition = false;
         IsReceivingMatch = false;
         CurrentCompetition = null;
-        CompetitionType = CompetitionType.None;
         SelectedJudge = null;
         _timer?.Stop();
         _pendingChunks.Clear();
@@ -1725,6 +1937,52 @@ public partial class JudgeViewModel : BaseViewModel
         StopAutoReconnect();
 
         await base.OnDisappearing();
+    }
+    #endregion
+
+    #region Private Methods
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="deviceId"></param>
+    /// <returns></returns>
+    public async Task HandleDeviceDisconnectedAsync(string? deviceId = null)
+    {
+        bool wasAlreadyOffline = !IsConnected && SelectedJudge != null;
+
+        StopWatchdog();
+        _consecutiveFailedPings = 0;
+
+        if (!string.IsNullOrEmpty(deviceId))
+        {
+            _lastServerDeviceId = deviceId;
+        }
+        else if (!string.IsNullOrEmpty(_serverDeviceId))
+        {
+            _lastServerDeviceId = _serverDeviceId;
+        }
+
+        _serverDeviceId = null;
+        IsConnected = false;
+        IsReceivingCompetition = false;
+        IsReceivingMatch = false;
+
+        if (SelectedJudge == null)
+        {
+            CurrentCompetition = null;
+            _lastMatchId = 0;
+            Codes.Clear();
+            _timer?.Stop();
+            _pendingChunks.Clear();
+
+            await _alertService.ShowToast("Le serveur s'est déconnecté.");
+        }
+        else if (!wasAlreadyOffline)
+        {
+            // Judge is actively in a match: keep local data, activate offline mode and background auto-reconnect
+            StartAutoReconnect();
+            await _alertService.ShowToast("Serveur déconnecté. Mode hors-ligne actif : continuez à noter.");
+        }
     }
     #endregion
 }

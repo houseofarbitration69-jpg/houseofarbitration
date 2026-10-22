@@ -28,6 +28,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<DrawPage>();
         //builder.Services.AddTransient<DragDropPage>();
         builder.Services.AddTransient<ServerPage>();
+        builder.Services.AddTransient<ServerTaoluPage>();
         builder.Services.AddTransient<RefereeDataPage>();
         builder.Services.AddTransient<TaoluCodesPage>();
 

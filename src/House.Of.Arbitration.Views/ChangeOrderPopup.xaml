@@ -243,7 +243,7 @@
                         >
                             <Image 
                                 Grid.Column="0" 
-                                source="{Binding Match.Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                Source="{Binding Match.Competitor.CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
                                 WidthRequest="20" 
                                 HeightRequest="14" 
                                 VerticalOptions="Center" 

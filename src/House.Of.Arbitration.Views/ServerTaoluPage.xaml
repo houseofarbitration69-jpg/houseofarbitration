@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <base:BasePage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -153,7 +153,7 @@
                                     />
                                 </HorizontalStackLayout>
                                 <Label 
-                                    Text="En attente match précédent" 
+                                    Text="En attente match prÃ©cÃ©dent" 
                                     IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                                     FontAttributes="Italic" 
                                     TextColor="Gray" 
@@ -200,7 +200,7 @@
                                     />
                                 </HorizontalStackLayout>
                                 <Label 
-                                    Text="En attente match précédent" 
+                                    Text="En attente match prÃ©cÃ©dent" 
                                     IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                                     FontAttributes="Italic" 
                                     TextColor="Gray" 
@@ -393,7 +393,7 @@
 
                             <!-- Texte statut ARRETE -->
                             <Label
-                                Text="Serveur arrêté"
+                                Text="Serveur arrÃªtÃ©"
                                 TextColor="{DynamicResource ErrorLight}"
                                 FontAttributes="Bold"
                                 FontSize="13"
@@ -670,8 +670,8 @@
                         Spacing="20"
                         IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                     >
-                        <Label Text="ðŸ†" FontSize="64" HorizontalOptions="Center"/>
-                        <Label Text="Tous les matchs sont terminÃ©s" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
+                        <Label Text="Ã°Å¸Ââ€ " FontSize="64" HorizontalOptions="Center"/>
+                        <Label Text="Tous les matchs sont terminÃƒÂ©s" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
                     </VerticalStackLayout>
 
                     <!-- Current Match Area -->
@@ -700,7 +700,7 @@
 
 
                         <!-- Order Mode (Taolu) -->
-                        <Grid>
+                        <Grid x:DataType="models:DrawOrderModel">
                             <VerticalStackLayout 
                                 VerticalOptions="Center" 
                                 HorizontalOptions="Center" 
@@ -848,7 +848,7 @@
                         Margin="0,0,0,10" 
                     />
 
-                    <!-- Statut du serveur dans la feuille latérale -->
+                    <!-- Statut du serveur dans la feuille latÃ©rale -->
                     <!--<Border
                         StrokeShape="RoundRectangle 12"
                         Padding="14,10"
@@ -902,7 +902,7 @@
                     </Border>-->
 
                     <Button 
-                        Text="DÉMARRER" 
+                        Text="DÃ‰MARRER" 
                         Command="{Binding StartServerCommand}"
                         BackgroundColor="{DynamicResource ValidColor}"
                         TextColor="Black"
@@ -913,7 +913,7 @@
                     />
 
                     <Button 
-                        Text="ARRÉTER" 
+                        Text="ARRÃ‰TER" 
                         Command="{Binding StopServerCommand}"
                         BackgroundColor="Red"
                         TextColor="White"

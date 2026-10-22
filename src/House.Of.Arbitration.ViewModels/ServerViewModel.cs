@@ -1162,7 +1162,7 @@ public partial class ServerViewModel : BaseViewModel
         if (_currentCompetition != null)
         {
             var parameters = new Dictionary<string, object>();
-            parameters.Add("Competition", _currentCompetition);
+            parameters.Add(Constants.Navigation.Parameter.COMPETITION, _currentCompetition);
 
             var result = await _popupService.ShowPopupAsync<ServerSetupPopupViewModel, ServerSetupResult>(
                 Shell.Current,

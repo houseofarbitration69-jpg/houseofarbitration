@@ -34,6 +34,16 @@ public class AppDbContext : DbContext
     /// </summary>
     public AppDbContext()
     {
+        InitializeDatabase();
+    }
+
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+        InitializeDatabase();
+    }
+
+    private void InitializeDatabase()
+    {
         Database.EnsureCreated();
         try { Database.ExecuteSqlRaw("ALTER TABLE RefereeDatas ADD COLUMN Round INTEGER NOT NULL DEFAULT 1;"); } catch { }
         try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
@@ -53,8 +63,11 @@ public class AppDbContext : DbContext
     /// </summary>
     protected override void OnConfiguring(DbContextOptionsBuilder builder)
     {
-        var dbPath = GetDbPath(Constants.LocalDatabase.DATABASE_NAME);
-        builder.UseSqlite($"Filename={dbPath}");
+        if (!builder.IsConfigured)
+        {
+            var dbPath = GetDbPath(Constants.LocalDatabase.DATABASE_NAME);
+            builder.UseSqlite($"Filename={dbPath}");
+        }
     }
 
     /// <summary>

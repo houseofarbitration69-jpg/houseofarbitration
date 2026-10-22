@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
@@ -30,6 +30,7 @@
     <ProjectReference Include="..\House.Of.Arbitration.ViewModels\House.Of.Arbitration.ViewModels.csproj" />
     <ProjectReference Include="..\House.Of.Arbitration.Models\House.Of.Arbitration.Models.csproj" />
     <ProjectReference Include="..\House.Of.Arbitration.Data.Abstractions\House.Of.Arbitration.Data.Abstractions.csproj" />
+    <ProjectReference Include="..\House.Of.Arbitration.Data\House.Of.Arbitration.Data.csproj" />
     <ProjectReference Include="..\House.Of.Arbitration.Localization\House.Of.Arbitration.Localization.csproj" />
   </ItemGroup>
 

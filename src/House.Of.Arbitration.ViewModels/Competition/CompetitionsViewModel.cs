@@ -103,11 +103,11 @@ public partial class CompetitionsViewModel : BaseViewModel
 
         if (competition.Type == CompetitionType.Taolu)
         {
-            await Shell.Current.GoToAsync("ServerTaolu", navigationParameter);
+            await Shell.Current.GoToAsync(Constants.Navigation.Page.SERVER_TAOLU, navigationParameter);
         }
         else
         {
-            await Shell.Current.GoToAsync("Server", navigationParameter);
+            await Shell.Current.GoToAsync(Constants.Navigation.Page.SERVER_SANDA, navigationParameter);
         }
     }
 

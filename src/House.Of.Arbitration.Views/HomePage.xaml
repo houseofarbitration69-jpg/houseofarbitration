@@ -69,7 +69,6 @@
             />
 
             <controls:IconButton 
-                IsVisible="{Binding IsDebug}"
                 Text="{Binding Resources.GENERATE_DATA}"
                 Style="{StaticResource PrimaryButtonStyle}"
                 Command="{Binding SeedDataCommand}"

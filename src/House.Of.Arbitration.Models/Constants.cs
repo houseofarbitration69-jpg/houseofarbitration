@@ -44,6 +44,7 @@ public static class Constants
         public static class Parameter
         {
             public const string COMPETITION_ID = "COMPETITION_ID";
+            public const string COMPETITION = "COMPETITION";
         }
 
         public static class Page
