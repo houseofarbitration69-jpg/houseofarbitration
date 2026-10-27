@@ -17,7 +17,11 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Constants.Navigation.Page.HOME, typeof(HomePage));
 
         Routing.RegisterRoute(Constants.Navigation.Page.MASTER, typeof(MasterPage));
-        Routing.RegisterRoute(Constants.Navigation.Page.JUDGE, typeof(JudgePage));
+
+        Routing.RegisterRoute(Constants.Navigation.Page.JUDGE_CONNECTION, typeof(JudgeConnectionPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.JUDGE_POSITION, typeof(JudgePositionPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.JUDGE_SANDA, typeof(JudgeSandaPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.JUDGE_TAOLU, typeof(JudgeTaoluPage));
 
         Routing.RegisterRoute(Constants.Navigation.Page.COMPETITION_WIZARD, typeof(WizardPage));
         Routing.RegisterRoute(Constants.Navigation.Page.COMPETITIONS, typeof(CompetitionsPage));
@@ -25,7 +29,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Constants.Navigation.Page.COMPETITORS, typeof(CompetitorsPage));
         Routing.RegisterRoute(Constants.Navigation.Page.DRAWS, typeof(DrawPage));
 
-        Routing.RegisterRoute(Constants.Navigation.Page.SERVER_SANDA, typeof(ServerPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.SERVER_SANDA, typeof(ServerSandaPage));
         Routing.RegisterRoute(Constants.Navigation.Page.SERVER_TAOLU, typeof(ServerTaoluPage));
         Routing.RegisterRoute(Constants.Navigation.Page.REFEREE_DATA, typeof(RefereeDataPage));
         Routing.RegisterRoute(Constants.Navigation.Page.TAOLU_CODES, typeof(TaoluCodesPage));

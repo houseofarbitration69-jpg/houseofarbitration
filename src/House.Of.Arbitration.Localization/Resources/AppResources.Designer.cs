@@ -322,6 +322,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [CONNECTION].
+        /// </summary>
+        public static string CONNECTION {
+            get {
+                return ResourceManager.GetString("CONNECTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [COUNTRY].
         /// </summary>
         public static string COUNTRY {
@@ -718,6 +727,24 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [GET COMPETITION].
+        /// </summary>
+        public static string GET_COMPETITION {
+            get {
+                return ResourceManager.GetString("GET_COMPETITION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [GET MATCH].
+        /// </summary>
+        public static string GET_MATCH {
+            get {
+                return ResourceManager.GetString("GET_MATCH", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [GO TO].
         /// </summary>
         public static string GO_TO {
@@ -961,11 +988,29 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [OFFLINE].
+        /// </summary>
+        public static string OFFLINE {
+            get {
+                return ResourceManager.GetString("OFFLINE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [OLD].
         /// </summary>
         public static string OLD {
             get {
                 return ResourceManager.GetString("OLD", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [ONLINE].
+        /// </summary>
+        public static string ONLINE {
+            get {
+                return ResourceManager.GetString("ONLINE", resourceCulture);
             }
         }
         
@@ -1015,6 +1060,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [RECONNECTION].
+        /// </summary>
+        public static string RECONNECTION {
+            get {
+                return ResourceManager.GetString("RECONNECTION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [RESET DEFAULT CODES].
         /// </summary>
         public static string RESET_DEFAULT_CODES {
@@ -1051,6 +1105,24 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [SCORE NOT SYNCHRONIZE].
+        /// </summary>
+        public static string SCORE_NOT_SYNCHRONIZE {
+            get {
+                return ResourceManager.GetString("SCORE_NOT_SYNCHRONIZE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SCORE OFFLINE].
+        /// </summary>
+        public static string SCORE_OFFLINE {
+            get {
+                return ResourceManager.GetString("SCORE_OFFLINE", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [SEARCH CODE, MOVEMENT, DESCRIPTION...].
         /// </summary>
         public static string SEARCH_CODES {
@@ -1065,6 +1137,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         public static string SELECT_POSITION {
             get {
                 return ResourceManager.GetString("SELECT_POSITION", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [SERVER OFFLINE].
+        /// </summary>
+        public static string SERVER_OFFLINE {
+            get {
+                return ResourceManager.GetString("SERVER_OFFLINE", resourceCulture);
             }
         }
         

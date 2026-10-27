@@ -507,4 +507,31 @@
   <data name="WINNER" xml:space="preserve">
     <value>VAINQUEUR</value>
   </data>
+  <data name="GET_COMPETITION" xml:space="preserve">
+    <value>RÉCEPTION DE LA COMPÉTITION...</value>
+  </data>
+  <data name="GET_MATCH" xml:space="preserve">
+    <value>RÉCEPTION DU MATCH...</value>
+  </data>
+  <data name="SCORE_OFFLINE" xml:space="preserve">
+    <value>Vos notations sont conservées localement et seront synchronisées dès reconnexion.</value>
+  </data>
+  <data name="SCORE_NOT_SYNCHRONIZE" xml:space="preserve">
+    <value>⚠️ Notations locales non synchronisées. En attente de reconnexion...</value>
+  </data>
+  <data name="ONLINE" xml:space="preserve">
+    <value>CONNECTÉ</value>
+  </data>
+  <data name="OFFLINE" xml:space="preserve">
+    <value>DÉCONNECTÉ (HORS-LIGNE)</value>
+  </data>
+  <data name="SERVER_OFFLINE" xml:space="preserve">
+    <value>Serveur déconnecté - Mode hors-ligne actif</value>
+  </data>
+  <data name="CONNECTION" xml:space="preserve">
+    <value>Connection</value>
+  </data>
+  <data name="RECONNECTION" xml:space="preserve">
+    <value>Reconnection</value>
+  </data>
 </root>

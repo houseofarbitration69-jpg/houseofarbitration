@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <resources>
-  <!-- Thème principal de l'application -->
-  <style name="Maui.MainTheme" parent="Maui.MainTheme.Base">
+  <!-- Thème principal : hérite explicitement de MaterialComponents pour garantir la compatibilité
+       des composants natifs Android (Picker, DatePicker, Snackbar, AlertDialog, etc.) -->
+  <style name="Maui.MainTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
     <item name="android:navigationBarColor">#121212</item>
     <item name="android:windowLightNavigationBar">false</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
@@ -23,7 +24,7 @@
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
   </style>
 
-  <!-- Thème des dialogues / alertes hérité de MAUI avec la couleur de la barre de navigation -->
+  <!-- Thème des dialogues / alertes avec la couleur de la barre de navigation -->
   <style name="MauiAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
     <item name="colorPrimary">?attr/colorOnSurface</item>
     <item name="android:navigationBarColor">#121212</item>

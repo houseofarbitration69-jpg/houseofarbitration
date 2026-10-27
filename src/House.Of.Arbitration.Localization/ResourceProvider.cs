@@ -672,6 +672,51 @@ LocalizationResourceManager.Instance.GetValue(nameof(EMPTY_MATCH));
     /// </summary>
     public string WINNER =>
 LocalizationResourceManager.Instance.GetValue(nameof(WINNER));
+    /// <summary>
+    /// Gets the translated "GET_COMPETITION" string.
+    /// </summary>
+    public string GET_COMPETITION =>
+LocalizationResourceManager.Instance.GetValue(nameof(GET_COMPETITION));
+    /// <summary>
+    /// Gets the translated "GET_MATCH" string.
+    /// </summary>
+    public string GET_MATCH =>
+LocalizationResourceManager.Instance.GetValue(nameof(GET_MATCH));
+    /// <summary>
+    /// Gets the translated "SCORE_OFFLINE" string.
+    /// </summary>
+    public string SCORE_OFFLINE =>
+LocalizationResourceManager.Instance.GetValue(nameof(SCORE_OFFLINE));
+    /// <summary>
+    /// Gets the translated "SCORE_NOT_SYNCHRONIZE" string.
+    /// </summary>
+    public string SCORE_NOT_SYNCHRONIZE =>
+LocalizationResourceManager.Instance.GetValue(nameof(SCORE_NOT_SYNCHRONIZE));
+    /// <summary>
+    /// Gets the translated "ONLINE" string.
+    /// </summary>
+    public string ONLINE =>
+LocalizationResourceManager.Instance.GetValue(nameof(ONLINE));
+    /// <summary>
+    /// Gets the translated "OFFLINE" string.
+    /// </summary>
+    public string OFFLINE =>
+LocalizationResourceManager.Instance.GetValue(nameof(OFFLINE));
+    /// <summary>
+    /// Gets the translated "SERVER_OFFLINE" string.
+    /// </summary>
+    public string SERVER_OFFLINE =>
+LocalizationResourceManager.Instance.GetValue(nameof(SERVER_OFFLINE));
+    /// <summary>
+    /// Gets the translated "CONNECTION" string.
+    /// </summary>
+    public string CONNECTION =>
+LocalizationResourceManager.Instance.GetValue(nameof(CONNECTION));
+    /// <summary>
+    /// Gets the translated "RECONNECTION" string.
+    /// </summary>
+    public string RECONNECTION =>
+LocalizationResourceManager.Instance.GetValue(nameof(RECONNECTION));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

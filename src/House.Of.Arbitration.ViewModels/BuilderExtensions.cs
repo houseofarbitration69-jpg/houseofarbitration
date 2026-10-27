@@ -19,7 +19,11 @@ public static class BuilderExtensions
         builder.Services.AddTransient<HomeViewModel>();
         builder.Services.AddTransient<MasterViewModel>();
         builder.Services.AddSingleton<ServerViewModel>();
+
+        builder.Services.AddTransient<JudgeConnectionViewModel>();
+        builder.Services.AddTransient<JudgePositionViewModel>();
         builder.Services.AddTransient<JudgeViewModel>();
+
         builder.Services.AddTransient<TaoluCodesViewModel>();
         builder.Services.AddTransient<TaoluCodePopupViewModel>();
         builder.Services.AddTransient<CompetitionsViewModel>();

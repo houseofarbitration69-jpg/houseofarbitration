@@ -6,11 +6,11 @@ using House.Of.Arbitration.Controls;
 
 namespace House.Of.Arbitration.Views;
 
-public partial class ServerPage : BasePage<ServerViewModel>
+public partial class ServerSandaPage : BasePage<ServerViewModel>
 {
-	public ServerPage(ServerViewModel viewModel) : base(viewModel)
+	public ServerSandaPage(ServerViewModel viewModel) : base(viewModel)
 	{
-	InitializeComponent();
+		InitializeComponent();
 
 	    // Dummy references to ensure custom actions are not stripped in Release mode
 	    _ = typeof(House.Of.Arbitration.Controls.FadeAction);

@@ -21,13 +21,18 @@ public static class BuilderExtensions
     {
         builder.Services.AddTransient<HomePage>();
         builder.Services.AddTransient<MasterPage>();
-        builder.Services.AddTransient<JudgePage>();
+
+        builder.Services.AddTransient<JudgeConnectionPage>();
+        builder.Services.AddTransient<JudgePositionPage>();
+        builder.Services.AddTransient<JudgeSandaPage>();
+        builder.Services.AddTransient<JudgeTaoluPage>();
+
         builder.Services.AddTransient<CompetitionsPage>();
         builder.Services.AddTransient<DrawsManagementPage>();
         builder.Services.AddTransient<CompetitorsPage>();
         builder.Services.AddTransient<DrawPage>();
         //builder.Services.AddTransient<DragDropPage>();
-        builder.Services.AddTransient<ServerPage>();
+        builder.Services.AddTransient<ServerSandaPage>();
         builder.Services.AddTransient<ServerTaoluPage>();
         builder.Services.AddTransient<RefereeDataPage>();
         builder.Services.AddTransient<TaoluCodesPage>();

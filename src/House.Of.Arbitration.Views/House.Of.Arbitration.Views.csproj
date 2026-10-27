@@ -35,8 +35,20 @@
     <Compile Update="Competition\CompetitionsPage.xaml.cs">
       <DependentUpon>CompetitionsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="ServerPage.xaml.cs">
-      <DependentUpon>ServerPage.xaml</DependentUpon>
+    <Compile Update="JudgeConnectionPage.xaml.cs">
+      <DependentUpon>JudgeConnectionPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="JudgeTaoluPage.xaml.cs">
+      <DependentUpon>JudgeTaoluPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="JudgeSandaPage.xaml.cs">
+      <DependentUpon>JudgeSandaPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="JudgePositionPage.xaml.cs">
+      <DependentUpon>JudgePositionPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="ServerSandaPage.xaml.cs">
+      <DependentUpon>ServerSandaPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="MasterPage.xaml.cs">
       <DependentUpon>MasterPage.xaml</DependentUpon>
@@ -65,7 +77,16 @@
     <MauiXaml Update="HomePage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="ServerPage.xaml">
+    <MauiXaml Update="JudgeConnectionPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="JudgeSandaPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="JudgePositionPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="ServerSandaPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="MasterPage.xaml">

@@ -11,7 +11,7 @@
     xmlns:selectors="clr-namespace:House.Of.Arbitration.Views.Selectors;assembly=House.Of.Arbitration.Views"
     xmlns:local="clr-namespace:House.Of.Arbitration.Views"
     x:TypeArguments="vm:ServerViewModel"
-    x:Class="House.Of.Arbitration.Views.ServerPage"
+    x:Class="House.Of.Arbitration.Views.ServerSandaPage"
     x:DataType="vm:ServerViewModel"
     x:Name="this"
     Title="{Binding Title}"

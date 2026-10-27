@@ -507,4 +507,31 @@
   <data name="WINNER" xml:space="preserve">
     <value>[WINNER]</value>
   </data>
+  <data name="GET_COMPETITION" xml:space="preserve">
+    <value>[GET COMPETITION]</value>
+  </data>
+  <data name="GET_MATCH" xml:space="preserve">
+    <value>[GET MATCH]</value>
+  </data>
+  <data name="SCORE_OFFLINE" xml:space="preserve">
+    <value>[SCORE OFFLINE]</value>
+  </data>
+  <data name="SCORE_NOT_SYNCHRONIZE" xml:space="preserve">
+    <value>[SCORE NOT SYNCHRONIZE]</value>
+  </data>
+  <data name="ONLINE" xml:space="preserve">
+    <value>[ONLINE]</value>
+  </data>
+  <data name="OFFLINE" xml:space="preserve">
+    <value>[OFFLINE]</value>
+  </data>
+  <data name="SERVER_OFFLINE" xml:space="preserve">
+    <value>[SERVER OFFLINE]</value>
+  </data>
+  <data name="CONNECTION" xml:space="preserve">
+    <value>[CONNECTION]</value>
+  </data>
+  <data name="RECONNECTION" xml:space="preserve">
+    <value>[RECONNECTION]</value>
+  </data>
 </root>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:selectors="clr-namespace:House.Of.Arbitration.Views.Selectors;assembly=House.Of.Arbitration.Views"
+    xmlns:behaviors="clr-namespace:House.Of.Arbitration.Views.Behaviors;assembly=House.Of.Arbitration.Views"
+    x:TypeArguments="vm:JudgeConnectionViewModel"
+    x:Class="House.Of.Arbitration.Views.JudgeConnectionPage"
+    x:Name="this"
+    x:DataType="vm:JudgeConnectionViewModel"
+    Title="{Binding Title}"
+>
+    <Grid Padding="20">
+        <!-- 1. CONNECTION -->
+        <VerticalStackLayout 
+            Spacing="15" 
+            VerticalOptions="Center" 
+            HorizontalOptions="Center"
+        >
+            <!-- TITRE -->
+            <Label 
+                Text="{Binding Resources.CONNECT_TO_SERVER}" 
+                HorizontalOptions="Center" 
+                FontSize="32" 
+                FontAttributes="Bold" 
+                TextColor="{StaticResource PrimaryTextColor}" 
+                Margin="0,0,0,20"
+                HorizontalTextAlignment="Center"
+            />
+
+            <!-- BOUTON SCANNE -->
+            <Button 
+                Text="{Binding Resources.SCAN_SERVER}" 
+                Command="{Binding StartScanCommand}" 
+                BackgroundColor="{DynamicResource ValidColor}"
+                TextColor="{StaticResource InverseTextColor}" 
+                FontAttributes="Bold" 
+                CornerRadius="20" 
+                HeightRequest="60" 
+                WidthRequest="300"
+            />
+
+            <!-- INDICATEUR DE CHARGEMENT -->
+            <ActivityIndicator 
+                IsRunning="{Binding IsScanning}"
+                Color="{StaticResource PrimaryTextColor}" 
+                HorizontalOptions="Center" 
+                Margin="0,20"
+            />
+
+            <Label 
+                Text="{Binding Resources.FIND_SERVERS}" 
+                TextColor="{StaticResource PrimaryTextColor}" 
+                FontSize="18" 
+                IsVisible="{Binding DiscoveredDevices.Count, Converter={mct:IntToBoolConverter}}"
+            />
+
+            <!-- LISTE DES SERVEURS -->
+            <CollectionView 
+                ItemsSource="{Binding DiscoveredDevices}" 
+                HeightRequest="300" 
+                Margin="0,10"
+            >
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:DiscoveredDeviceModel">
+                        <Border 
+                            Stroke="{StaticResource PrimaryTextColor}"
+                            StrokeThickness="1" 
+                            BackgroundColor="{DynamicResource SurfaceElevation5}" 
+                            Margin="5" 
+                            Padding="15"
+                        >
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10"/>
+                            </Border.StrokeShape>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding DisplayName}" 
+                                        TextColor="{StaticResource PrimaryTextColor}" 
+                                        FontSize="22" 
+                                        FontAttributes="Bold"
+                                    />
+
+                                    <Label 
+                                        Text="{Binding DeviceId}" 
+                                        TextColor="{StaticResource Gray200}" 
+                                        FontSize="14"
+                                    />
+                                </VerticalStackLayout>
+
+                                <!-- INDICATEUR DE SIGNAL -->
+                                <HorizontalStackLayout 
+                                    Grid.Column="1" 
+                                    Spacing="12" 
+                                    VerticalOptions="Center"
+                                >
+                                    <Grid 
+                                        ColumnDefinitions="6,6,6,6" 
+                                        ColumnSpacing="3" 
+                                        HeightRequest="30" 
+                                        VerticalOptions="End"
+                                    >
+                                        <BoxView 
+                                            Grid.Column="0" 
+                                            HeightRequest="8" 
+                                            WidthRequest="6" 
+                                            VerticalOptions="End" 
+                                            Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=1}"
+                                        />
+
+                                        <BoxView 
+                                            Grid.Column="1" 
+                                            HeightRequest="15" 
+                                            WidthRequest="6" 
+                                            VerticalOptions="End" 
+                                            Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=2}"
+                                        />
+
+                                        <BoxView 
+                                            Grid.Column="2" 
+                                            HeightRequest="22" 
+                                            WidthRequest="6" 
+                                            VerticalOptions="End" 
+                                            Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=3}"
+                                        />
+
+                                        <BoxView 
+                                            Grid.Column="3" 
+                                            HeightRequest="30" 
+                                            WidthRequest="6" 
+                                            VerticalOptions="End" 
+                                            Color="{Binding Rssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=4}"
+                                        />
+                                    </Grid>
+
+                                    <Label 
+                                        Text="{Binding Rssi, StringFormat='{0} dBm'}" 
+                                        TextColor="{StaticResource Gray200}" 
+                                        FontSize="14" 
+                                        VerticalOptions="Center"
+                                    />
+                                </HorizontalStackLayout>
+                            </Grid>
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer 
+                                    Command="{Binding x:DataType='vm:JudgeConnectionViewModel', Source={RelativeSource AncestorType={x:Type vm:JudgeConnectionViewModel}}, Path=ConnectCommand}" 
+                                    CommandParameter="{Binding .}"
+                                />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+
+        <!-- Data Reception Overlays -->
+        <Grid 
+            BackgroundColor="{DynamicResource OverlayHeavyColor}" 
+            IsVisible="{Binding IsReceivingCompetition}"
+        >
+            <VerticalStackLayout 
+                VerticalOptions="Center" 
+                HorizontalOptions="Center" 
+                Spacing="20"
+            >
+                <ActivityIndicator 
+                    IsRunning="True" 
+                    Color="{StaticResource PrimaryTextColor}" 
+                    WidthRequest="50"
+                    HeightRequest="50"
+                />
+                
+                <Label 
+                    Text="{Binding Resources.GET_COMPETITION}" 
+                    TextColor="{StaticResource PrimaryTextColor}" 
+                    FontSize="20" 
+                    FontAttributes="Bold" 
+                    HorizontalOptions="Center"
+                />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</base:BasePage>

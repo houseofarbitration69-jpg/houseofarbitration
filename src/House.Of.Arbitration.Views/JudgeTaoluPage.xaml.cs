@@ -5,9 +5,9 @@ using House.Of.Arbitration.Views.Core;
 
 namespace House.Of.Arbitration.Views;
 
-public partial class JudgePage : BasePage<JudgeViewModel>
+public partial class JudgeTaoluPage : BasePage<JudgeViewModel>
 {
-	public JudgePage(JudgeViewModel viewModel) : base(viewModel)
+	public JudgeTaoluPage(JudgeViewModel viewModel) : base(viewModel)
 	{
 		InitializeComponent();
 	}

@@ -345,8 +345,28 @@ public partial class ServerViewModel : BaseViewModel
                 await SendCompetitionDataToClientAsync(args.ClientId);
                 return;
             }
-
-            if (args.Message.StartsWith(Constants.Message.JUDGE_POSITION))
+            else if (args.Message.StartsWith(Constants.Message.GET_MATCH))
+            {
+                // Envoi du match courant
+                if (CurrentDraw != null)
+                {
+                    try
+                    {
+                        var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
+                        await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
+                        await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
+                    }
+                }
+                else
+                {
+                    await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
+                }
+            }
+            else if (args.Message.StartsWith(Constants.Message.JUDGE_POSITION))
             {
                 var posStr = args.Message.Substring(Constants.Message.JUDGE_POSITION.Length);
 
@@ -388,23 +408,23 @@ public partial class ServerViewModel : BaseViewModel
                     OnPropertyChanged(nameof(Judges));
 
                     // Envoi du match courant
-                    if (CurrentDraw != null)
-                    {
-                        try
-                        {
-                            var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
-                            await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
-                            await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
-                        }
-                    }
-                    else
-                    {
-                        await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
-                    }
+                    //if (CurrentDraw != null)
+                    //{
+                    //    try
+                    //    {
+                    //        var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
+                    //        await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
+                    //        await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
+                    //}
 
                     // Restore codes from repository if server in-memory codes are empty
                     if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order && judge.Codes.Count == 0)
@@ -471,8 +491,8 @@ public partial class ServerViewModel : BaseViewModel
                             var competitor1 = GetCompetitor(CurrentDraw, true);
                             var competitor2 = GetCompetitor(CurrentDraw, false);
 
-                            bool isRed = (competitor1 != null && scoreData.CompetitorId == competitor1.Id) || string.Equals(scoreData.Side, "Red", StringComparison.OrdinalIgnoreCase);
-                            bool isBlue = (competitor2 != null && scoreData.CompetitorId == competitor2.Id) || string.Equals(scoreData.Side, "Blue", StringComparison.OrdinalIgnoreCase);
+                            bool isRed = (competitor1 != null && scoreData.CompetitorId == competitor1.Id) || scoreData.Side == Constants.Side.Red;
+                            bool isBlue = (competitor2 != null && scoreData.CompetitorId == competitor2.Id) || scoreData.Side == Constants.Side.Blue;
 
                             if (isRed)
                             {
@@ -675,7 +695,7 @@ public partial class ServerViewModel : BaseViewModel
                 BluePoints = judge.BluePoints,
                 Codes = judge.Codes.ToList()
             };
-        
+
             var stateJson = JsonSerializer.Serialize(judgeState, _jsonOptions);
             await _bluetoothServer.SendToClientAsync($"{Constants.Message.JUDGE_STATE}{stateJson}", clientId);
         }
@@ -1052,10 +1072,12 @@ public partial class ServerViewModel : BaseViewModel
     /// <summary>
     /// 
     /// </summary>
-    private void StopTimer()
+    private async Task StopTimer()
     {
         _timer?.Stop();
         IsTimerRunning = false;
+
+        await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
     }
     #endregion
 
@@ -1106,8 +1128,6 @@ public partial class ServerViewModel : BaseViewModel
     private async Task PauseTimer()
     {
         StopTimer();
-
-        await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
     }
 
     /// <summary>
@@ -1369,7 +1389,7 @@ public partial class ServerViewModel : BaseViewModel
             var parameters = new Dictionary<string, object> { { "Judge", judge } };
 
             var result = await _popupService.ShowPopupAsync<JudgePointsPopupViewModel, JudgeModel>(
-                Shell.Current, 
+                Shell.Current,
                 options: new PopupOptions() { Shadow = null },
                 shellParameters: parameters
             );
