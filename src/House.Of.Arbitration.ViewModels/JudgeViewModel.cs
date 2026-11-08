@@ -45,6 +45,16 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// Service d'accès aux données pour les tirages par ordre
     /// </summary>
     private readonly IRepository<DrawOrderModel> _drawOrderService;
+
+    /// <summary>
+    /// Service d'accès aux données pour les codes de mouvement
+    /// </summary>
+    private readonly IRepository<MvtCodeModel> _mvtCodesService;
+
+    /// <summary>
+    /// Service d'accès aux données pour les compétitions
+    /// </summary>
+    private readonly IRepository<CompetitionModel> _competitionRepository;
     #endregion
 
     #region Attributs
@@ -83,6 +93,14 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     private IDispatcherTimer? _autoReconnectTimer;
     private double _redScore = 0;
     private double _blueScore = 0;
+    private TaoluInputMode _currentTaoluInputMode = TaoluInputMode.Code;
+    private string _selectedRecognizedGroup = string.Empty;
+    private string _searchRecognizedText = string.Empty;
+    private string _code = "";
+    private List<MvtCodeModel> _matchingCodes = new();
+    private CancellationTokenSource? _matchingCodesCts;
+    private IDispatcherTimer? _typeTimer;
+    private string _pointsInput = string.Empty;
     #endregion
 
     #region Properties
@@ -92,7 +110,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     public int JudgePosition
     {
         get => _judgePosition;
-        set => SetProperty(ref _judgePosition, value);
+        set
+        {
+            SetProperty(ref _judgePosition, value);
+            OnPropertyChanged(nameof(JudgeName));
+        }
     }
 
     /// <summary>
@@ -208,22 +230,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     }
 
     /// <summary>
-    /// Obtient ou définit la compétition courante
-    /// </summary>
-    public CompetitionModel? CurrentCompetition
-    {
-        get => _currentCompetition;
-        set
-        {
-            if (SetProperty(ref _currentCompetition, value))
-            {
-                OnPropertyChanged(nameof(IsTaolu));
-                OnPropertyChanged(nameof(IsSanda));
-            }
-        }
-    }
-
-    /// <summary>
     /// Obtient ou définit le score
     /// </summary>
     public double Score
@@ -282,7 +288,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     public string JudgeGroup
     {
         get => _judgeGroup;
-        set => SetProperty(ref _judgeGroup, value);
+        set
+        {
+            SetProperty(ref _judgeGroup, value);
+            OnPropertyChanged(nameof(JudgeName));
+        }
     }
 
     /// <summary>
@@ -322,6 +332,112 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         get => _blueScore;
         set => SetProperty(ref _blueScore, value);
     }
+
+    /// <summary>
+    /// Obtient le nom du juge
+    /// </summary>
+    public string JudgeName => $"{Resources.JUDGE} : {JudgeGroup}-{JudgePosition}";
+
+    /// <summary>
+    /// Obtient si on est en mode code
+    /// </summary>
+    public bool IsCodeMode => CurrentTaoluInputMode == TaoluInputMode.Code;
+
+    /// <summary>
+    /// Obtient ou définit le mode d'affichage
+    /// </summary>
+    public TaoluInputMode CurrentTaoluInputMode
+    {
+        get => _currentTaoluInputMode;
+        set
+        {
+            if (SetProperty(ref _currentTaoluInputMode, value))
+            {
+                OnPropertyChanged(nameof(IsCodeMode));
+                OnPropertyChanged(nameof(IsPointMode));
+                //OnPropertyChanged(nameof(IsGroupCodesMode));
+                //OnPropertyChanged(nameof(IsCodesListMode));
+                //OnPropertyChanged(nameof(IsKeypadMode));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Obtient ou définit la liste des groupes reconnue
+    /// </summary>
+    public ObservableCollection<string> RecognizedGroups { get; } = new();
+
+    /// <summary>
+    /// Obtient ou définit le group de code reconnus
+    /// </summary>
+    public string SelectedRecognizedGroup
+    {
+        get => _selectedRecognizedGroup;
+        set
+        {
+            if (SetProperty(ref _selectedRecognizedGroup, value))
+            {
+                ApplyRecognizedFilters();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Obtient ou définit la liste des codes reconnues filtré
+    /// </summary>
+    public ObservableCollection<MvtCodeModel> FilteredRecognizedCodes { get; } = new();
+
+    /// <summary>
+    /// Obtient ou définit la liste des codes reconnues
+    /// </summary>
+    public ObservableCollection<MvtCodeModel> RecognizedCodes { get; } = new();
+
+    /// <summary>
+    /// Obtient ou définit le code a rechercher
+    /// </summary>
+    public string SearchRecognizedText
+    {
+        get => _searchRecognizedText;
+        set
+        {
+            if (SetProperty(ref _searchRecognizedText, value))
+            {
+                ApplyRecognizedFilters();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Obtient si le mode de saisie est en mode point
+    /// </summary>
+    public bool IsPointMode => CurrentTaoluInputMode == TaoluInputMode.Points;
+
+    /// <summary>
+    /// Obtient ou définit le code
+    /// </summary>
+    public string Code
+    {
+        get => _code;
+        set => SetProperty(ref _code, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit la liste des codes reconnues
+    /// </summary>
+    public List<MvtCodeModel> MatchingCodes
+    {
+        get => _matchingCodes;
+        set => SetProperty(ref _matchingCodes, value);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public string PointsInput
+    {
+        get => _pointsInput;
+        set => SetProperty(ref _pointsInput, value);
+    }
     #endregion
 
     #region Constructors
@@ -359,11 +475,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         _bluetoothClient = bluetoothClient;
         //_bluetoothService = bluetoothService;
 
-        //_competitionRepository = competitionRepository;
+        _competitionRepository = competitionRepository;
         _drawKnockoutService = drawKnockoutService;
         _drawPoolsService = drawPoolsService;
         _drawOrderService = drawOrderService;
-        //_mvtCodesService = mvtCodesService;
+        _mvtCodesService = mvtCodesService;
         //_databaseService = databaseService;
 
         _title = "JUDGE";
@@ -442,6 +558,8 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             _logger.LogError(ex, "Error requesting competition from server");
         }
 
+        _ = LoadRecognizedCodesAsync();
+
         await base.OnAppearing();
     }
 
@@ -451,6 +569,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// <returns></returns>
     public override async Task OnDisappearing()
     {
+        _typeTimer?.Stop();
+        _matchingCodesCts?.Cancel();
+        _matchingCodesCts?.Dispose();
+        _matchingCodesCts = null;
+
         _bluetoothClient.DeviceConnected -= OnDeviceConnected;
         _bluetoothClient.MessageReceived -= OnMessageReceived;
 
@@ -566,7 +689,19 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                         Competitor2 = null;
                     }
 
-                    if (isNewMatch && !String.IsNullOrEmpty(JudgeGroup) && CurrentCompetition?.Type == CompetitionType.Taolu && !HasUnsyncedChanges)
+                    if (Competition == null && CompetitionId > 0)
+                    {
+                        try
+                        {
+                            Competition = await _competitionRepository.GetByIdAsync(CompetitionId);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error loading competition draws for competition {Id}", CompetitionId);
+                        }
+                    }
+
+                    if (isNewMatch && !String.IsNullOrEmpty(JudgeGroup) && Competition?.Type == CompetitionType.Taolu && !HasUnsyncedChanges)
                     {
                         if (JudgeGroup == "A")
                         {
@@ -714,7 +849,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// </summary>
     private async Task PerformWatchdogTickAsync()
     {
-        if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(20))
+        if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(12))
         {
             _logger.LogWarning("Server heartbeat timeout (>12s). Declaring server disconnected.");
             await HandleDeviceDisconnectedAsync();
@@ -937,7 +1072,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             default:
                 break;
         }
-        
+
         var scoreModel = new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId, Side = side };
 
         if (!IsConnected || ServerId == null)
@@ -958,6 +1093,299 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                 _unsyncedScores.Add(scoreModel);
                 HasUnsyncedChanges = true;
             }
+        }
+    }
+
+    /// <summary>
+    /// Méthode permettant de filtrer les codes par groupe
+    /// </summary>
+    private void ApplyJudgeGroupFilter()
+    {
+        if (!string.IsNullOrWhiteSpace(JudgeGroup))
+        {
+            string judgeGroupPrefix = $"Groupe {JudgeGroup.ToUpperInvariant()}";
+            var matching = RecognizedGroups.FirstOrDefault(g => g.StartsWith(judgeGroupPrefix, StringComparison.OrdinalIgnoreCase));
+            if (matching != null)
+            {
+                SelectedRecognizedGroup = matching;
+                return;
+            }
+        }
+
+        SelectedRecognizedGroup = Resources.ALL_GROUPS;
+    }
+
+    /// <summary>
+    /// Méthode permettant de filtrer les codes reconnus
+    /// </summary>
+    private void ApplyRecognizedFilters()
+    {
+        FilteredRecognizedCodes.Clear();
+        var query = RecognizedCodes.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(SelectedRecognizedGroup) && SelectedRecognizedGroup != Resources.ALL_GROUPS)
+        {
+            if (SelectedRecognizedGroup.StartsWith("Groupe A", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => CodeMatchesJudgeGroup(c, "A"));
+            }
+            else if (SelectedRecognizedGroup.StartsWith("Groupe B", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => CodeMatchesJudgeGroup(c, "B"));
+            }
+            else if (SelectedRecognizedGroup.StartsWith("Groupe C", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(c => CodeMatchesJudgeGroup(c, "C"));
+            }
+            else
+            {
+                query = query.Where(c => string.Equals(c.GroupLabel, SelectedRecognizedGroup, StringComparison.OrdinalIgnoreCase));
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(SearchRecognizedText))
+        {
+            var search = SearchRecognizedText.Trim().ToLowerInvariant();
+            query = query.Where(c =>
+                (c.Code != null && c.Code.ToLowerInvariant().Contains(search)) ||
+                (c.Movement != null && c.Movement.ToLowerInvariant().Contains(search)) ||
+                (c.Description != null && c.Description.ToLowerInvariant().Contains(search)) ||
+                (c.GroupLabel != null && c.GroupLabel.ToLowerInvariant().Contains(search)));
+        }
+
+        foreach (var c in query.OrderBy(c => c.Code))
+        {
+            FilteredRecognizedCodes.Add(c);
+        }
+    }
+
+    /// <summary>
+    /// Méthode permettant de récupérer les codes correspondant au groupe de l'utilisateur
+    /// </summary>
+    /// <param name="code"></param>
+    /// <param name="judgeGroup"></param>
+    /// <returns></returns>
+    private static bool CodeMatchesJudgeGroup(MvtCodeModel code, string? judgeGroup)
+    {
+        if (string.IsNullOrWhiteSpace(judgeGroup))
+        {
+            return true;
+        }
+
+        judgeGroup = judgeGroup.Trim().ToUpperInvariant();
+        if (judgeGroup == "A")
+        {
+            return string.Equals(code.GroupLabel, "Techniques de main", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Equilibres", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Techniques de jambe", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Positions", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Techniques spécifiques aux armes", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "A", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "Groupe A", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.Category, "Groupe A", StringComparison.OrdinalIgnoreCase);
+        }
+        else if (judgeGroup == "B")
+        {
+            return string.Equals(code.GroupLabel, "Autres erreurs", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Performance globale", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "B", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "Groupe B", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.Category, "Groupe B", StringComparison.OrdinalIgnoreCase);
+        }
+        else if (judgeGroup == "C")
+        {
+            return string.Equals(code.GroupLabel, "Techniques de saut", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Degré de difficulté", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupLabel, "Difficultés", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "C", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.GroupName, "Groupe C", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(code.Category, "Groupe C", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Méthode permettant de charger les codes 
+    /// </summary>
+    /// <returns></returns>
+    public async Task LoadRecognizedCodesAsync()
+    {
+        try
+        {
+            var list = await _mvtCodesService.GetAllAsync();
+            if (list == null || !list.Any() || list.All(c => string.IsNullOrEmpty(c.Movement) && string.IsNullOrEmpty(c.GroupName)))
+            {
+                foreach (var defaultCode in MvtCodeModel.DefaultCodes)
+                {
+                    await _mvtCodesService.AddAsync(new MvtCodeModel
+                    {
+                        Code = defaultCode.Code,
+                        GroupName = defaultCode.GroupName,
+                        Movement = defaultCode.Movement,
+                        Description = defaultCode.Description,
+                        Value = defaultCode.Value,
+                        Category = defaultCode.Category
+                    });
+                }
+                list = await _mvtCodesService.GetAllAsync();
+            }
+
+            RecognizedCodes.Clear();
+            if (list != null)
+            {
+                foreach (var c in list.OrderBy(c => c.Code))
+                {
+                    RecognizedCodes.Add(c);
+                }
+            }
+
+            UpdateRecognizedGroups();
+            ApplyRecognizedFilters();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading recognized codes in JudgeViewModel");
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    private void UpdateRecognizedGroups()
+    {
+        var current = SelectedRecognizedGroup;
+        RecognizedGroups.Clear();
+        RecognizedGroups.Add(Resources.ALL_GROUPS);
+
+        if (!string.IsNullOrWhiteSpace(JudgeGroup))
+        {
+            string judgeGroupTitle = JudgeGroup.ToUpperInvariant() switch
+            {
+                "A" => "Groupe A (Qualité des mouvements)",
+                "B" => "Groupe B (Performance globale)",
+                "C" => "Groupe C (Degré de difficulté)",
+                _ => $"Groupe {JudgeGroup}"
+            };
+            RecognizedGroups.Add(judgeGroupTitle);
+        }
+
+        var groups = RecognizedCodes
+            .Select(c => c.GroupLabel)
+            .Where(g => !string.IsNullOrWhiteSpace(g))
+            .Distinct()
+            .OrderBy(g => g);
+
+        foreach (var g in groups)
+        {
+            RecognizedGroups.Add(g);
+        }
+
+        if (!string.IsNullOrEmpty(current) && RecognizedGroups.Contains(current))
+        {
+            SelectedRecognizedGroup = current;
+        }
+        else
+        {
+            SelectedRecognizedGroup = RecognizedGroups.FirstOrDefault() ?? Resources.ALL_GROUPS;
+        }
+    }
+
+    /// <summary>
+    /// Recherche les codes correspondants au préfixe donné
+    /// </summary>
+    /// <param name="prefix">Préfixe du code saisi</param>
+    /// <param name="cancellationToken">Jeton d'annulation</param>
+    /// <returns>Liste des codes correspondants</returns>
+    private List<MvtCodeModel> UpdateMatchingCodes(string prefix, CancellationToken cancellationToken = default)
+    {
+        var matchingCodes = new List<MvtCodeModel>();
+
+        if (!string.IsNullOrWhiteSpace(prefix))
+        {
+            var matches = RecognizedCodes
+                .Where(c => !cancellationToken.IsCancellationRequested && c.Code.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .Take(6);
+
+            foreach (var m in matches)
+            {
+                if (cancellationToken.IsCancellationRequested) return matchingCodes;
+                matchingCodes.Add(m);
+            }
+        }
+
+        return matchingCodes;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="findCode"></param>
+    /// <returns></returns>
+    private async Task ProcessCode(MvtCodeModel findCode)
+    {
+        Score = Math.Round(Math.Max(0, Score - Math.Abs(findCode.Value)), 2);
+        int? competitorId = null;
+
+        if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+        {
+            competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
+        }
+
+        var data = new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode, Score = Score, IsSynced = false };
+        Codes.Insert(0, data);
+
+        _typeTimer?.Stop();
+        _matchingCodesCts?.Cancel();
+        Code = string.Empty;
+        MatchingCodes = new List<MvtCodeModel>();
+
+        var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data };
+
+        if (!IsConnected || ServerId == null)
+        {
+            _unsyncedScores.Add(scoreModel);
+            HasUnsyncedChanges = true;
+        }
+        else
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+                await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                data.IsSynced = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send code to server immediately; stored locally for future sync.");
+                _unsyncedScores.Add(scoreModel);
+                HasUnsyncedChanges = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="code"></param>
+    /// <returns></returns>
+    private async Task ProcessTypedCode(string code)
+    {
+        if (string.IsNullOrEmpty(code))
+        {
+            return;
+        }
+
+        var findCode = RecognizedCodes.FirstOrDefault(c => string.Equals(c.Code, code, StringComparison.OrdinalIgnoreCase))
+            ?? (await _mvtCodesService.GetAllAsync())?.FirstOrDefault(c => string.Equals(c.Code, code, StringComparison.OrdinalIgnoreCase));
+
+        if (findCode == null)
+        {
+            await _alertService.ShowToast("Code inconnu");
+        }
+        else
+        {
+            await ProcessCode(findCode);
         }
     }
     #endregion
@@ -1014,6 +1442,332 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
         await SendScore(compId, Constants.Side.Blue);
     }
+
+    /// <summary>
+    /// Commande permettant de modifier le mode de saisie des score
+    /// </summary>
+    /// <param name="mode"></param>
+    [RelayCommand]
+    private void SwitchMode(TaoluInputMode mode)
+    {
+        CurrentTaoluInputMode = mode;
+    }
+
+    /// <summary>
+    /// Délai d'attente avant de lancer la recherche (debounce) lorsque l'utilisateur cesse de taper
+    /// </summary>
+    private const int TypeDebounceMs = 350;
+
+    /// <summary>
+    /// Réinitialise le timer de saisie (debounce) : la recherche n'est appelée que si l'utilisateur s'arrête de taper
+    /// </summary>
+    private void RestartTypeTimer()
+    {
+        if (_typeTimer == null)
+        {
+            _typeTimer = Application.Current?.Dispatcher?.CreateTimer();
+            if (_typeTimer != null)
+            {
+                _typeTimer.Interval = TimeSpan.FromMilliseconds(TypeDebounceMs);
+                _typeTimer.Tick += OnTypeTimerTick;
+            }
+        }
+
+        if (_typeTimer != null)
+        {
+            _typeTimer.Stop();
+            _typeTimer.Start();
+        }
+        else
+        {
+            // Fallback si DispatcherTimer indisponible
+            if (!string.IsNullOrEmpty(Code))
+            {
+                SearchMatchingCodesAsync(Code);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Déclenché lorsque l'utilisateur s'arrête de taper pendant le délai du timer
+    /// </summary>
+    private void OnTypeTimerTick(object? sender, EventArgs e)
+    {
+        _typeTimer?.Stop();
+        if (!string.IsNullOrEmpty(Code))
+        {
+            SearchMatchingCodesAsync(Code);
+        }
+        else
+        {
+            MatchingCodes = new List<MvtCodeModel>();
+        }
+    }
+
+    /// <summary>
+    /// Recherche les codes correspondants en tâche de fond pour le code saisi
+    /// </summary>
+    /// <param name="currentCode">Code actuellement saisi</param>
+    private void SearchMatchingCodesAsync(string currentCode)
+    {
+        _matchingCodesCts?.Cancel();
+        _matchingCodesCts?.Dispose();
+        _matchingCodesCts = new CancellationTokenSource();
+        var token = _matchingCodesCts.Token;
+
+        if (string.IsNullOrWhiteSpace(currentCode))
+        {
+            MatchingCodes = new List<MvtCodeModel>();
+            return;
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                if (token.IsCancellationRequested) return;
+
+                if (!RecognizedCodes.Any())
+                {
+                    await LoadRecognizedCodesAsync();
+                }
+
+                if (token.IsCancellationRequested) return;
+
+                var matches = UpdateMatchingCodes(currentCode, token);
+
+                if (token.IsCancellationRequested) return;
+
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    if (token.IsCancellationRequested || Code != currentCode || matches == null)
+                        return;
+
+                    if (matches.Count == 1 && string.Equals(matches[0].Code, currentCode, StringComparison.OrdinalIgnoreCase))
+                    {
+                        await ProcessCode(matches[0]);
+                    }
+                    else
+                    {
+                        MatchingCodes = matches;
+                    }
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                // Recherche annulée
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching matching codes for '{Code}'", currentCode);
+            }
+        }, token);
+    }
+
+    /// <summary>
+    /// Commande lors du clique sur un bouton du clavier numérique
+    /// </summary>
+    /// <param name="val"></param>
+    [RelayCommand]
+    private void TypeNumber(object? val)
+    {
+        if (val == null) return;
+
+        try
+        {
+            string number = val.ToString() ?? string.Empty;
+
+            // 1. Mettre à jour l'affichage immédiatement
+            Code += number;
+
+            // 2. Réinitialiser le timer (la recherche ne sera appelée que si l'utilisateur s'arrête de saisir)
+            RestartTypeTimer();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in TypeNumber command");
+        }
+    }
+
+    /// <summary>
+    /// Commande permettant d'effacer le dernier caractère du code saisi
+    /// </summary>
+    [RelayCommand]
+    private void BackspaceCode()
+    {
+        _typeTimer?.Stop();
+
+        if (!string.IsNullOrEmpty(Code))
+        {
+            Code = Code.Substring(0, Code.Length - 1);
+
+            if (!string.IsNullOrEmpty(Code))
+            {
+                RestartTypeTimer();
+            }
+            else
+            {
+                _matchingCodesCts?.Cancel();
+                MatchingCodes = new List<MvtCodeModel>();
+            }
+        }
+        else
+        {
+            _matchingCodesCts?.Cancel();
+            MatchingCodes = new List<MvtCodeModel>();
+        }
+    }
+
+    /// <summary>
+    /// Commande permettant de supprimer le code saisi
+    /// </summary>
+    [RelayCommand]
+    private void ClearCode()
+    {
+        _typeTimer?.Stop();
+        _matchingCodesCts?.Cancel();
+        Code = string.Empty;
+        MatchingCodes = new List<MvtCodeModel>();
+    }
+
+    /// <summary>
+    /// Commande permettant de valider le code saisie
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task ValidateCode()
+    {
+        if (!string.IsNullOrWhiteSpace(Code))
+        {
+            await ProcessTypedCode(Code);
+        }
+    }
+
+    /// <summary>
+    /// Commande permettant de retirer des points pré-déterminé
+    /// </summary>
+    /// <param name="val">valeur a retirer</param>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task DeductPoints(object? val)
+    {
+        double pts = 0;
+        if (val is double d)
+        {
+            pts = d;
+        }
+        else if (val is string s && double.TryParse(s.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedVal))
+        {
+            pts = parsedVal;
+        }
+        else if (!string.IsNullOrWhiteSpace(PointsInput) && double.TryParse(PointsInput.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedInput))
+        {
+            pts = parsedInput;
+        }
+
+        if (pts <= 0) return;
+
+        pts = Math.Round(pts, 2);
+        Score = Math.Round(Math.Max(0, Score - pts), 2);
+
+        int? competitorId = null;
+        if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+        {
+            competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
+        }
+
+        var syntheticCode = new MvtCodeModel
+        {
+            Code = $"-{pts.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture)}",
+            Movement = "Déduction libre",
+            Description = $"Déduction de {pts.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture)} pt(s)",
+            Value = pts,
+            Category = "Points"
+        };
+
+        var data = new MvtTimeCodeModel { Date = DateTime.Now, Code = syntheticCode, Score = Score, IsSynced = false };
+        Codes.Insert(0, data);
+
+        PointsInput = string.Empty;
+
+        var scoreModel = new TransfertScoreModel { Score = Score, CompetitorId = competitorId, Code = data };
+
+        if (!IsConnected || ServerId == null)
+        {
+            _unsyncedScores.Add(scoreModel);
+            HasUnsyncedChanges = true;
+        }
+        else
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+                await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                data.IsSynced = true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send points deduction to server immediately; stored locally for future sync.");
+                _unsyncedScores.Add(scoreModel);
+                HasUnsyncedChanges = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Commande permettant de retirer des points
+    /// </summary>
+    /// <param name="val">Valeur a retirer</param>
+    [RelayCommand]
+    private void TypePoint(object? val)
+    {
+        if (val == null) return;
+
+        string s = val.ToString() ?? string.Empty;
+        if (s == "." || s == ",")
+        {
+            if (string.IsNullOrEmpty(PointsInput))
+            {
+                PointsInput = "0.";
+            }
+            else if (!PointsInput.Contains('.') && !PointsInput.Contains(','))
+            {
+                PointsInput += ".";
+            }
+        }
+        else
+        {
+            if (PointsInput == "0" && s != ".")
+            {
+                PointsInput = s;
+            }
+            else
+            {
+                PointsInput += s;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Commande permettant de réinitialiser la déduction de point
+    /// </summary>
+    [RelayCommand]
+    private void ClearPoints()
+    {
+        PointsInput = string.Empty;
+    }
+
+    /// <summary>
+    /// Commande permettant de revenir en arrière sur la saisie de déduction de point
+    /// </summary>
+    [RelayCommand]
+    private void BackspacePoints()
+    {
+        if (!string.IsNullOrEmpty(PointsInput))
+        {
+            PointsInput = PointsInput.Substring(0, PointsInput.Length - 1);
+        }
+    }
     #endregion
 
 
@@ -1061,11 +1815,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
 
     ///// <summary>
-    ///// Service d'accès aux données pour les codes de mouvement
-    ///// </summary>
-    //private readonly IRepository<MvtCodeModel> _mvtCodesService;
-
-    ///// <summary>
     ///// Service de gestion de la base de données
     ///// </summary>
     //private readonly IDatabaseService? _databaseService;
@@ -1077,7 +1826,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     //private bool _isReceivingCompetition;
     //private string? _currentMatchInfo;
     //private int _matchNumber;
-    //private string _code = "";
     //private CancellationTokenSource? _typeNumberCts;
     //private string? _serverDeviceId;
     //private readonly Dictionary<string, (string Type, string?[] Chunks)> _pendingChunks = new();
@@ -1087,10 +1835,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     //    PropertyNameCaseInsensitive = true
     //};
     //private CompetitionType _competitionType = CompetitionType.None;
-    //private string _selectedRecognizedGroup = string.Empty;
-    //private string _searchRecognizedText = string.Empty;
-    //private TaoluInputMode _currentTaoluInputMode = TaoluInputMode.Code;
-    //private string _pointsInput = string.Empty;
     //#endregion
 
     //#region Properties
@@ -1216,93 +1960,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     ///// </summary>
     //public ObservableCollection<JudgeModel> JudgePositionsGroupC { get; } = new();
 
-    ///// <summary>
-    ///// Obtient ou définit le code
-    ///// </summary>
-    //public string Code
-    //{
-    //    get => _code;
-    //    set => SetProperty(ref _code, value);
-    //}
-
-    ///// <summary>
-    ///// Obtient ou définit la liste des codes reconnues
-    ///// </summary>
-    //public ObservableCollection<MvtCodeModel> RecognizedCodes { get; } = new();
-
-    ///// <summary>
-    ///// Obtient ou définit la liste des codes reconnues filtré
-    ///// </summary>
-    //public ObservableCollection<MvtCodeModel> FilteredRecognizedCodes { get; } = new();
-
-    ///// <summary>
-    ///// Obtient ou définit la liste des groupes reconnue
-    ///// </summary>
-    //public ObservableCollection<string> RecognizedGroups { get; } = new();
-
-    ///// <summary>
-    ///// Obtient ou définit la liste des codes reconnues
-    ///// </summary>
-    //public ObservableCollection<MvtCodeModel> MatchingCodes { get; } = new();
-
-    ///// <summary>
-    ///// Obtient ou définit le group reconnue
-    ///// </summary>
-    //public string SelectedRecognizedGroup
-    //{
-    //    get => _selectedRecognizedGroup;
-    //    set
-    //    {
-    //        if (SetProperty(ref _selectedRecognizedGroup, value))
-    //        {
-    //            ApplyRecognizedFilters();
-    //        }
-    //    }
-    //}
-
-    ///// <summary>
-    ///// 
-    ///// </summary>
-    //public string SearchRecognizedText
-    //{
-    //    get => _searchRecognizedText;
-    //    set
-    //    {
-    //        if (SetProperty(ref _searchRecognizedText, value))
-    //        {
-    //            ApplyRecognizedFilters();
-    //        }
-    //    }
-    //}
-
-    ///// <summary>
-    ///// 
-    ///// </summary>
-    //public TaoluInputMode CurrentTaoluInputMode
-    //{
-    //    get => _currentTaoluInputMode;
-    //    set
-    //    {
-    //        if (SetProperty(ref _currentTaoluInputMode, value))
-    //        {
-    //            OnPropertyChanged(nameof(IsCodeMode));
-    //            OnPropertyChanged(nameof(IsPointMode));
-    //            OnPropertyChanged(nameof(IsGroupCodesMode));
-    //            OnPropertyChanged(nameof(IsCodesListMode));
-    //            OnPropertyChanged(nameof(IsKeypadMode));
-    //        }
-    //    }
-    //}
-
-    ///// <summary>
-    ///// 
-    ///// </summary>
-    //public bool IsCodeMode => CurrentTaoluInputMode == TaoluInputMode.Code;
-
-    ///// <summary>
-    ///// 
-    ///// </summary>
-    //public bool IsPointMode => CurrentTaoluInputMode == TaoluInputMode.Points;
 
     ///// <summary>
     ///// 
@@ -1322,15 +1979,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     ///// 
     ///// </summary>
     //public bool IsKeypadMode => IsCodeMode;
-
-    ///// <summary>
-    ///// 
-    ///// </summary>
-    //public string PointsInput
-    //{
-    //    get => _pointsInput;
-    //    set => SetProperty(ref _pointsInput, value);
-    //}
 
     //#endregion
 
@@ -1750,41 +2398,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
 
     //[RelayCommand]
-    //private async Task TypeNumber(object? val)
-    //{
-    //    if (val != null)
-    //    {
-    //        try
-    //        {
-    //            string number = val?.ToString() ?? string.Empty;
-
-    //            if (!RecognizedCodes.Any())
-    //            {
-    //                await LoadRecognizedCodesAsync();
-    //            }
-
-    //            // Append digit to current code
-    //            Code += number;
-    //            UpdateMatchingCodes(Code);
-
-    //            // Auto-validate when there is only one possible code remaining
-    //            var allMatches = RecognizedCodes
-    //                .Where(c => c.Code.StartsWith(Code, StringComparison.OrdinalIgnoreCase))
-    //                .ToList();
-
-    //            if (allMatches.Count == 1 && string.Equals(allMatches[0].Code, Code, StringComparison.OrdinalIgnoreCase))
-    //            {
-    //                await ProcessCode(allMatches[0]);
-    //            }
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            _logger.LogError(ex, "Error in TypeNumber command");
-    //        }
-    //    }
-    //}
-
-    //[RelayCommand]
     //private void BackspaceCode()
     //{
     //    if (!string.IsNullOrEmpty(Code))
@@ -1794,120 +2407,8 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     //    }
     //}
 
-    //[RelayCommand]
-    //private async Task ValidateCode()
-    //{
-    //    if (!string.IsNullOrWhiteSpace(Code))
-    //    {
-    //        await ProcessTypedCode(Code);
-    //    }
-    //}
 
-    //[RelayCommand]
-    //private void ClearCode()
-    //{
-    //    Code = string.Empty;
-    //    MatchingCodes.Clear();
-    //}
 
-    //[RelayCommand]
-    //private void SwitchMode(string mode)
-    //{
-    //    if (string.Equals(mode, "Points", StringComparison.OrdinalIgnoreCase) || string.Equals(mode, "Point", StringComparison.OrdinalIgnoreCase))
-    //    {
-    //        CurrentTaoluInputMode = TaoluInputMode.Points;
-    //    }
-    //    else if (string.Equals(mode, "GroupCodes", StringComparison.OrdinalIgnoreCase) || string.Equals(mode, "List", StringComparison.OrdinalIgnoreCase) || string.Equals(mode, "Group", StringComparison.OrdinalIgnoreCase))
-    //    {
-    //        CurrentTaoluInputMode = TaoluInputMode.GroupCodes;
-    //        ApplyJudgeGroupFilter();
-    //    }
-    //    else
-    //    {
-    //        CurrentTaoluInputMode = TaoluInputMode.Code;
-    //    }
-    //}
-
-    //[RelayCommand]
-    //private void TypePoint(object? val)
-    //{
-    //    if (val == null) return;
-    //    string s = val.ToString() ?? string.Empty;
-    //    if (s == "." || s == ",")
-    //    {
-    //        if (string.IsNullOrEmpty(PointsInput))
-    //        {
-    //            PointsInput = "0.";
-    //        }
-    //        else if (!PointsInput.Contains('.') && !PointsInput.Contains(','))
-    //        {
-    //            PointsInput += ".";
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if (PointsInput == "0" && s != ".")
-    //        {
-    //            PointsInput = s;
-    //        }
-    //        else
-    //        {
-    //            PointsInput += s;
-    //        }
-    //    }
-    //}
-
-    //[RelayCommand]
-    //private void ClearPoints()
-    //{
-    //    PointsInput = string.Empty;
-    //}
-
-    //[RelayCommand]
-    //private void BackspacePoints()
-    //{
-    //    if (!string.IsNullOrEmpty(PointsInput))
-    //    {
-    //        PointsInput = PointsInput.Substring(0, PointsInput.Length - 1);
-    //    }
-    //}
-
-    //[RelayCommand]
-    //private async Task DeductPoints(object? val)
-    //{
-    //    double pts = 0;
-    //    if (val is double d)
-    //    {
-    //        pts = d;
-    //    }
-    //    else if (val is string s && double.TryParse(s.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedVal))
-    //    {
-    //        pts = parsedVal;
-    //    }
-    //    else if (!string.IsNullOrWhiteSpace(PointsInput) && double.TryParse(PointsInput.Replace(',', '.'), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedInput))
-    //    {
-    //        pts = parsedInput;
-    //    }
-
-    //    if (pts <= 0) return;
-
-    //    pts = Math.Round(pts, 2);
-    //    Score = Math.Round(Math.Max(0, Score - pts), 2);
-
-    //    int? competitorId = null;
-    //    if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
-    //    {
-    //        competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
-    //    }
-
-    //    var syntheticCode = new MvtCodeModel
-    //    {
-    //        Code = $"-{pts.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture)}",
-    //        Movement = "Déduction libre",
-    //        Description = $"Déduction de {pts.ToString("0.0#", System.Globalization.CultureInfo.InvariantCulture)} pt(s)",
-    //        Value = pts,
-    //        Category = "Points"
-    //    };
 
     //    var data = new MvtTimeCodeModel { Date = DateTime.Now, Code = syntheticCode, Score = Score, IsSynced = false };
     //    Codes.Insert(0, data);
@@ -1990,250 +2491,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     //    }
     //}
 
-    //private async Task ProcessTypedCode(string code)
-    //{
-    //    if (string.IsNullOrEmpty(code)) return;
-
-    //    var findCode = RecognizedCodes.FirstOrDefault(c => string.Equals(c.Code, code, StringComparison.OrdinalIgnoreCase))
-    //        ?? (await _mvtCodesService.GetAllAsync())?.FirstOrDefault(c => string.Equals(c.Code, code, StringComparison.OrdinalIgnoreCase));
-
-    //    if (findCode == null)
-    //    {
-    //        await _alertService.ShowToast("Code inconnu");
-    //    }
-    //    else
-    //    {
-    //        await ProcessCode(findCode);
-    //    }
-    //}
-
-    //private async Task ProcessCode(MvtCodeModel findCode)
-    //{
-    //    Score = Math.Round(Math.Max(0, Score - Math.Abs(findCode.Value)), 2);
-    //    int? competitorId = null;
-
-    //    if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
-    //    {
-    //        competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
-    //    }
-
-    //    var data = new MvtTimeCodeModel() { Date = DateTime.Now, Code = findCode, Score = Score, IsSynced = false };
-    //    Codes.Insert(0, data);
-
-    //    Code = string.Empty;
-    //    MatchingCodes.Clear();
-
-    //    var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data };
-
-    //    if (!IsConnected || _serverDeviceId == null)
-    //    {
-    //        _unsyncedScores.Add(scoreModel);
-    //        HasUnsyncedChanges = true;
-    //    }
-    //    else
-    //    {
-    //        try
-    //        {
-    //            var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
-    //            await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
-    //            data.IsSynced = true;
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            _logger.LogWarning(ex, "Failed to send code to server immediately; stored locally for future sync.");
-    //            _unsyncedScores.Add(scoreModel);
-    //            HasUnsyncedChanges = true;
-    //        }
-    //    }
-    //}
-
-    //public async Task LoadRecognizedCodesAsync()
-    //{
-    //    try
-    //    {
-    //        var list = await _mvtCodesService.GetAllAsync();
-    //        if (list == null || !list.Any() || list.All(c => string.IsNullOrEmpty(c.Movement) && string.IsNullOrEmpty(c.GroupName)))
-    //        {
-    //            foreach (var defaultCode in MvtCodeModel.DefaultCodes)
-    //            {
-    //                await _mvtCodesService.AddAsync(new MvtCodeModel
-    //                {
-    //                    Code = defaultCode.Code,
-    //                    GroupName = defaultCode.GroupName,
-    //                    Movement = defaultCode.Movement,
-    //                    Description = defaultCode.Description,
-    //                    Value = defaultCode.Value,
-    //                    Category = defaultCode.Category
-    //                });
-    //            }
-    //            list = await _mvtCodesService.GetAllAsync();
-    //        }
-
-    //        RecognizedCodes.Clear();
-    //        if (list != null)
-    //        {
-    //            foreach (var c in list.OrderBy(c => c.Code))
-    //            {
-    //                RecognizedCodes.Add(c);
-    //            }
-    //        }
-
-    //        UpdateRecognizedGroups();
-    //        ApplyRecognizedFilters();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "Error loading recognized codes in JudgeViewModel");
-    //    }
-    //}
-
-    //private void UpdateRecognizedGroups()
-    //{
-    //    var current = SelectedRecognizedGroup;
-    //    RecognizedGroups.Clear();
-    //    RecognizedGroups.Add(Resources.ALL_GROUPS);
-
-    //    if (!string.IsNullOrWhiteSpace(SelectedJudge?.Group))
-    //    {
-    //        string judgeGroupTitle = SelectedJudge.Group.ToUpperInvariant() switch
-    //        {
-    //            "A" => "Groupe A (Qualité des mouvements)",
-    //            "B" => "Groupe B (Performance globale)",
-    //            "C" => "Groupe C (Degré de difficulté)",
-    //            _ => $"Groupe {SelectedJudge.Group}"
-    //        };
-    //        RecognizedGroups.Add(judgeGroupTitle);
-    //    }
-
-    //    var groups = RecognizedCodes
-    //        .Select(c => c.GroupLabel)
-    //        .Where(g => !string.IsNullOrWhiteSpace(g))
-    //        .Distinct()
-    //        .OrderBy(g => g);
-
-    //    foreach (var g in groups)
-    //    {
-    //        RecognizedGroups.Add(g);
-    //    }
-
-    //    if (!string.IsNullOrEmpty(current) && RecognizedGroups.Contains(current))
-    //    {
-    //        SelectedRecognizedGroup = current;
-    //    }
-    //    else
-    //    {
-    //        SelectedRecognizedGroup = RecognizedGroups.FirstOrDefault() ?? Resources.ALL_GROUPS;
-    //    }
-    //}
-
-    //private void ApplyJudgeGroupFilter()
-    //{
-    //    if (!string.IsNullOrWhiteSpace(SelectedJudge?.Group))
-    //    {
-    //        string judgeGroupPrefix = $"Groupe {SelectedJudge.Group.ToUpperInvariant()}";
-    //        var matching = RecognizedGroups.FirstOrDefault(g => g.StartsWith(judgeGroupPrefix, StringComparison.OrdinalIgnoreCase));
-    //        if (matching != null)
-    //        {
-    //            SelectedRecognizedGroup = matching;
-    //            return;
-    //        }
-    //    }
-    //    SelectedRecognizedGroup = Resources.ALL_GROUPS;
-    //}
-
-    //public void ApplyRecognizedFilters()
-    //{
-    //    FilteredRecognizedCodes.Clear();
-    //    var query = RecognizedCodes.AsEnumerable();
-
-    //    if (!string.IsNullOrWhiteSpace(SelectedRecognizedGroup) && SelectedRecognizedGroup != Resources.ALL_GROUPS)
-    //    {
-    //        if (SelectedRecognizedGroup.StartsWith("Groupe A", StringComparison.OrdinalIgnoreCase))
-    //        {
-    //            query = query.Where(c => CodeMatchesJudgeGroup(c, "A"));
-    //        }
-    //        else if (SelectedRecognizedGroup.StartsWith("Groupe B", StringComparison.OrdinalIgnoreCase))
-    //        {
-    //            query = query.Where(c => CodeMatchesJudgeGroup(c, "B"));
-    //        }
-    //        else if (SelectedRecognizedGroup.StartsWith("Groupe C", StringComparison.OrdinalIgnoreCase))
-    //        {
-    //            query = query.Where(c => CodeMatchesJudgeGroup(c, "C"));
-    //        }
-    //        else
-    //        {
-    //            query = query.Where(c => string.Equals(c.GroupLabel, SelectedRecognizedGroup, StringComparison.OrdinalIgnoreCase));
-    //        }
-    //    }
-
-    //    if (!string.IsNullOrWhiteSpace(SearchRecognizedText))
-    //    {
-    //        var search = SearchRecognizedText.Trim().ToLowerInvariant();
-    //        query = query.Where(c =>
-    //            (c.Code != null && c.Code.ToLowerInvariant().Contains(search)) ||
-    //            (c.Movement != null && c.Movement.ToLowerInvariant().Contains(search)) ||
-    //            (c.Description != null && c.Description.ToLowerInvariant().Contains(search)) ||
-    //            (c.GroupLabel != null && c.GroupLabel.ToLowerInvariant().Contains(search)));
-    //    }
-
-    //    foreach (var c in query.OrderBy(c => c.Code))
-    //    {
-    //        FilteredRecognizedCodes.Add(c);
-    //    }
-    //}
-
-    //private static bool CodeMatchesJudgeGroup(MvtCodeModel code, string? judgeGroup)
-    //{
-    //    if (string.IsNullOrWhiteSpace(judgeGroup)) return true;
-
-    //    judgeGroup = judgeGroup.Trim().ToUpperInvariant();
-    //    if (judgeGroup == "A")
-    //    {
-    //        return string.Equals(code.GroupLabel, "Techniques de main", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupLabel, "Equilibres", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupLabel, "Techniques de jambe", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupLabel, "Positions", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupLabel, "Techniques spécifiques aux armes", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupName, "A", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupName, "Groupe A", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.Category, "Groupe A", StringComparison.OrdinalIgnoreCase);
-    //    }
-    //    else if (judgeGroup == "B")
-    //    {
-    //        return string.Equals(code.GroupLabel, "Autres erreurs", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupLabel, "Performance globale", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupName, "B", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupName, "Groupe B", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.Category, "Groupe B", StringComparison.OrdinalIgnoreCase);
-    //    }
-    //    else if (judgeGroup == "C")
-    //    {
-    //        return string.Equals(code.GroupLabel, "Techniques de saut", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupLabel, "Degré de difficulté", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupLabel, "Difficultés", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupName, "C", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.GroupName, "Groupe C", StringComparison.OrdinalIgnoreCase)
-    //            || string.Equals(code.Category, "Groupe C", StringComparison.OrdinalIgnoreCase);
-    //    }
-
-    //    return true;
-    //}
-
-    //private void UpdateMatchingCodes(string prefix)
-    //{
-    //    MatchingCodes.Clear();
-    //    if (!string.IsNullOrWhiteSpace(prefix))
-    //    {
-    //        var matches = RecognizedCodes
-    //            .Where(c => c.Code.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-    //            .Take(6);
-
-    //        foreach (var m in matches)
-    //        {
-    //            MatchingCodes.Add(m);
-    //        }
-    //    }
-    //}
     //#endregion
 
     //#region Override Methods

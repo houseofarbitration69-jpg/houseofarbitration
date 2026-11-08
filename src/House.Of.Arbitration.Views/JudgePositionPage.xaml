@@ -100,6 +100,19 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[1]}"/>
                         </Border.GestureRecognizers>
+
+                        <Border.Triggers>
+                            <DataTrigger 
+                                    TargetType="Border" 
+                                    Binding="{Binding PositionCode}" 
+                                    Value="2"
+                                >
+                                <Setter 
+                                    Property="Background" 
+                                    Value="{DynamicResource ValidColor}"
+                                />
+                            </DataTrigger>
+                        </Border.Triggers>
                     </Border>
 
                     <!-- JUGE 5 --> 
@@ -123,6 +136,19 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[4]}"/>
                         </Border.GestureRecognizers>
+
+                        <Border.Triggers>
+                            <DataTrigger 
+                                    TargetType="Border" 
+                                    Binding="{Binding PositionCode}" 
+                                    Value="5"
+                                >
+                                <Setter 
+                                    Property="Background" 
+                                    Value="{DynamicResource ValidColor}"
+                                />
+                            </DataTrigger>
+                        </Border.Triggers>
                     </Border>
 
                     <!-- RING --> 
@@ -165,6 +191,19 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[2]}"/>
                         </Border.GestureRecognizers>
+
+                        <Border.Triggers>
+                            <DataTrigger 
+                                    TargetType="Border" 
+                                    Binding="{Binding PositionCode}" 
+                                    Value="3"
+                                >
+                                <Setter 
+                                    Property="Background" 
+                                    Value="{DynamicResource ValidColor}"
+                                />
+                            </DataTrigger>
+                        </Border.Triggers>
                     </Border>
 
                     <!-- JUGE 4 --> 
@@ -187,6 +226,19 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositions[3]}"/>
                         </Border.GestureRecognizers>
+
+                        <Border.Triggers>
+                            <DataTrigger 
+                                    TargetType="Border" 
+                                    Binding="{Binding PositionCode}" 
+                                    Value="4"
+                                >
+                                <Setter 
+                                    Property="Background" 
+                                    Value="{DynamicResource ValidColor}"
+                                />
+                            </DataTrigger>
+                        </Border.Triggers>
                     </Border>
                 </Grid>
             </VerticalStackLayout>
@@ -244,7 +296,7 @@
                                 <Border 
                                     Grid.Column="0" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -253,19 +305,32 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                         
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[0]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="A_1"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                                     
                                 <!-- JUGE 2 --> 
                                 <Border 
                                     Grid.Column="1" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -274,19 +339,32 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                     
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[1]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="A_2"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                                     
                                 <!-- JUGE 3 --> 
                                 <Border 
                                     Grid.Column="2" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -295,12 +373,25 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                     
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupA[2]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="A_3"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                             </Grid>
                         </VerticalStackLayout>
@@ -337,7 +428,7 @@
                                 <Border 
                                     Grid.Column="0" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -346,19 +437,32 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                     
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[0]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="B_1"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                                 
                                  <!-- JUGE 2 --> 
                                 <Border 
                                     Grid.Column="1" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -367,19 +471,32 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                     
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[1]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="B_2"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                                 
                                  <!-- JUGE 3 --> 
                                 <Border 
                                     Grid.Column="2" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -388,12 +505,25 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                     
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupB[2]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="B_3"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                             </Grid>
                         </VerticalStackLayout>
@@ -430,7 +560,7 @@
                                 <Border 
                                     Grid.Column="0" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -439,19 +569,32 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                     
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[0]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="C_1"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                                 
                                  <!-- JUGE 2 --> 
                                 <Border 
                                     Grid.Column="1" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -460,19 +603,32 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                     
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[1]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="C_2"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                                 
                                  <!-- JUGE 3 --> 
                                 <Border 
                                     Grid.Column="2" 
                                     HeightRequest="{OnIdiom Tablet='70', Phone='50'}" 
-                                    Background="LightGray" 
+                                    Background="{StaticResource Gray200}" 
                                     StrokeShape="RoundRectangle 10"
                                 >
                                     <Label 
@@ -481,12 +637,25 @@
                                         HorizontalOptions="Center" 
                                         FontSize="{OnIdiom Tablet='20', Phone='16'}" 
                                         FontAttributes="Bold" 
-                                        TextColor="Black"
+                                        TextColor="{DynamicResource InverseTextColor}"
                                     />
                                     
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer Command="{Binding SelectPositionCommand}" CommandParameter="{Binding JudgePositionsGroupC[2]}"/>
                                     </Border.GestureRecognizers>
+
+                                    <Border.Triggers>
+                                        <DataTrigger 
+                                            TargetType="Border" 
+                                            Binding="{Binding PositionCode}" 
+                                            Value="C_3"
+                                        >
+                                            <Setter 
+                                                Property="Background" 
+                                                Value="{DynamicResource ValidColor}"
+                                            />
+                                        </DataTrigger>
+                                    </Border.Triggers>
                                 </Border>
                             </Grid>
                         </VerticalStackLayout>

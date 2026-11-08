@@ -114,14 +114,8 @@ public partial class JudgePositionViewModel : BaseViewModel, IQueryAttributable
     /// <param name="logger"></param>
     /// <param name="resourceProvider"></param>
     /// <param name="popupService"></param>
-    /// <param name="alertService"></param>
     /// <param name="bluetoothClient"></param>
-    /// <param name="bluetoothService"></param>
     /// <param name="competitionRepository"></param>
-    /// <param name="drawKnockoutService"></param>
-    /// <param name="drawOrderService"></param>
-    /// <param name="drawPoolsService"></param>
-    /// <param name="mvtCodesService"></param>
     public JudgePositionViewModel(
         ILogger<JudgePositionViewModel> logger,
         ResourceProvider resourceProvider,

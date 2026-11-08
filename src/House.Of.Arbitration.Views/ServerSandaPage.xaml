@@ -2396,17 +2396,6 @@
                                     </Border.GestureRecognizers>
                                 </Border>
                             </HorizontalStackLayout>
-
-                            <Button 
-                                Text="ROUND SUIVANT" 
-                                Command="{Binding NextRoundCommand}"
-                                BackgroundColor="{DynamicResource SurfaceElevation7}"
-                                TextColor="{DynamicResource PrimaryTextColor}"
-                                FontAttributes="Bold"
-                                CornerRadius="20"
-                                HeightRequest="40"
-                                Margin="0,10,0,0" 
-                            />
                         </VerticalStackLayout>
                     </Border>
 

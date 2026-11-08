@@ -106,9 +106,9 @@ public class JudgeCompetitionDataTests
         await vm.HandleMessageAsync(message);
 
         // Assert
-        Assert.NotNull(vm.CurrentCompetition);
-        Assert.Equal(42, vm.CurrentCompetition.Id);
-        Assert.Equal("Championnat Test", vm.CurrentCompetition.Name);
+        Assert.NotNull(vm.Competition);
+        Assert.Equal(42, vm.Competition.Id);
+        Assert.Equal("Championnat Test", vm.Competition.Name);
 
         await _databaseService.Received(1).ImportCompetitionDataAsync(Arg.Is<CompetitionModel>(c =>
             c.Id == 42 &&
@@ -145,8 +145,8 @@ public class JudgeCompetitionDataTests
         await vm.HandleMessageAsync(message);
 
         // Assert
-        Assert.NotNull(vm.CurrentCompetition);
-        Assert.Equal(99, vm.CurrentCompetition.Id);
+        Assert.NotNull(vm.Competition);
+        Assert.Equal(99, vm.Competition.Id);
         await _competitionRepo.Received(1).AddAsync(Arg.Is<CompetitionModel>(c => c.Id == 99));
     }
 }

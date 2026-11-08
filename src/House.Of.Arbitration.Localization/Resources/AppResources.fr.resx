@@ -534,4 +534,7 @@
   <data name="RECONNECTION" xml:space="preserve">
     <value>Reconnection</value>
   </data>
+  <data name="NEXT_ROUND" xml:space="preserve">
+    <value>Round suivant</value>
+  </data>
 </root>

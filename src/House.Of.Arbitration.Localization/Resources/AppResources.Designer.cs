@@ -952,6 +952,15 @@ namespace House.Of.Arbitration.Localization.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [NEXT ROUND].
+        /// </summary>
+        public static string NEXT_ROUND {
+            get {
+                return ResourceManager.GetString("NEXT_ROUND", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [NO].
         /// </summary>
         public static string NO {

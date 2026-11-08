@@ -717,6 +717,11 @@ LocalizationResourceManager.Instance.GetValue(nameof(CONNECTION));
     /// </summary>
     public string RECONNECTION =>
 LocalizationResourceManager.Instance.GetValue(nameof(RECONNECTION));
+    /// <summary>
+    /// Gets the translated "NEXT_ROUND" string.
+    /// </summary>
+    public string NEXT_ROUND =>
+LocalizationResourceManager.Instance.GetValue(nameof(NEXT_ROUND));
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResourceProvider"/> class.

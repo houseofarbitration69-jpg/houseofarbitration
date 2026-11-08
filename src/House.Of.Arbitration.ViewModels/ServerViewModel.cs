@@ -1507,6 +1507,16 @@ public partial class ServerViewModel : BaseViewModel
             }
         }
     }
+
+    /// <summary>
+    /// Commande permettant de passer au round suivant
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task NextRound()
+    {
+
+    }
     #endregion
 
     #region SideSheet logic

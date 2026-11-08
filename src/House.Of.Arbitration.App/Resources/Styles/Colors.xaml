@@ -148,6 +148,7 @@
     <Color x:Key="KeypadButtonText">#FFFFFF</Color>
     <Color x:Key="KeypadDigitBg">#FFFFFF</Color>
     <Color x:Key="KeypadDigitText">#000000</Color>
+    <Color x:Key="ButtonBackgroundColor">#FFFFFF</Color>
 
     <!-- ========================================================================= -->
     <!-- OVERLAYS                                                                  -->
