@@ -204,7 +204,8 @@ public class BluetoothServer : IBluetoothServer
         await _sendSemaphore.WaitAsync();
         try
         {
-            var device = _connectedDevices.FirstOrDefault(d => d.Address == clientId);
+            var baseAddress = clientId.Contains('#') ? clientId.Split('#')[0] : clientId;
+            var device = _connectedDevices.FirstOrDefault(d => d.Address == baseAddress || d.Address == clientId);
 
             if (device != null && device.Address != null)
             {

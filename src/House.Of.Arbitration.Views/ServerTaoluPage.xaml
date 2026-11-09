@@ -382,18 +382,11 @@
                                     FontSize="13"
                                     VerticalOptions="Center"
                                 />
-                                <!--<Label
-                                    Text="{Binding ServerName}"
-                                    TextColor="{DynamicResource PrimaryTextColor}"
-                                    FontSize="12"
-                                    VerticalOptions="Center"
-                                    IsVisible="{Binding ServerName, Converter={StaticResource EmptyToBoolConverter}}"
-                                />-->
                             </HorizontalStackLayout>
 
                             <!-- Texte statut ARRETE -->
                             <Label
-                                Text="Serveur arrÃªtÃ©"
+                                Text="Serveur arrêté"
                                 TextColor="{DynamicResource ErrorLight}"
                                 FontAttributes="Bold"
                                 FontSize="13"
@@ -848,61 +841,8 @@
                         Margin="0,0,0,10" 
                     />
 
-                    <!-- Statut du serveur dans la feuille latÃ©rale -->
-                    <!--<Border
-                        StrokeShape="RoundRectangle 12"
-                        Padding="14,10"
-                        StrokeThickness="1.5"
-                        BackgroundColor="{DynamicResource SurfaceElevation4}"
-                        Stroke="{DynamicResource BorderMuted}"
-                    >
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
-                                <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
-                                <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
-                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
-                                <Setter Property="BackgroundColor" Value="{DynamicResource ErrorBg}" />
-                            </DataTrigger>
-                        </Border.Triggers>
-
-                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
-                            <BoxView
-                                WidthRequest="12"
-                                HeightRequest="12"
-                                CornerRadius="6"
-                                VerticalOptions="Center"
-                                Color="{DynamicResource ErrorColor}"
-                            >
-                                <BoxView.Triggers>
-                                    <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
-                                        <Setter Property="Color" Value="{DynamicResource SuccessColor}" />
-                                    </DataTrigger>
-                                </BoxView.Triggers>
-                            </BoxView>
-
-                            <Label
-                                Text="SERVEUR EN LIGNE"
-                                TextColor="{DynamicResource SuccessLight}"
-                                FontAttributes="Bold"
-                                FontSize="14"
-                                VerticalOptions="Center"
-                                IsVisible="{Binding IsServerStarted}"
-                            />
-                            <Label
-                                Text="SERVEUR HORS LIGNE"
-                                TextColor="{DynamicResource ErrorLight}"
-                                FontAttributes="Bold"
-                                FontSize="14"
-                                VerticalOptions="Center"
-                                IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
-                            />
-                        </HorizontalStackLayout>
-                    </Border>-->
-
                     <Button 
-                        Text="DÃ‰MARRER" 
+                        Text="DÉMARRER" 
                         Command="{Binding StartServerCommand}"
                         BackgroundColor="{DynamicResource ValidColor}"
                         TextColor="Black"
@@ -913,7 +853,7 @@
                     />
 
                     <Button 
-                        Text="ARRÃ‰TER" 
+                        Text="ARRÉTER" 
                         Command="{Binding StopServerCommand}"
                         BackgroundColor="Red"
                         TextColor="White"

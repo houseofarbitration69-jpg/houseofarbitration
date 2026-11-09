@@ -13,4 +13,9 @@ public partial class TransfertScoreModel : ObservableObject
     public Constants.Side? Side { get; set; }
 
     public MvtTimeCodeModel? Code { get; set; }
+
+    /// <summary>
+    /// Code de position du juge (ex: "1", "2", "A_1") pour identifier précisément le juge en multi-instances sur un même appareil.
+    /// </summary>
+    public string? JudgePosition { get; set; }
 }

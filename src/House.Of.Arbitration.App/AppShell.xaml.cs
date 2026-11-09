@@ -32,6 +32,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Constants.Navigation.Page.SERVER_SANDA, typeof(ServerSandaPage));
         Routing.RegisterRoute(Constants.Navigation.Page.SERVER_TAOLU, typeof(ServerTaoluPage));
         Routing.RegisterRoute(Constants.Navigation.Page.REFEREE_DATA, typeof(RefereeDataPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.RESULTS, typeof(ResultsPage));
         Routing.RegisterRoute(Constants.Navigation.Page.TAOLU_CODES, typeof(TaoluCodesPage));
     }
 }

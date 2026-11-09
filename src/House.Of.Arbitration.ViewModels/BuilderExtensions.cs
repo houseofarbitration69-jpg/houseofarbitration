@@ -27,6 +27,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<TaoluCodesViewModel>();
         builder.Services.AddTransient<TaoluCodePopupViewModel>();
         builder.Services.AddTransient<CompetitionsViewModel>();
+        builder.Services.AddTransient<ResultsViewModel>();
         builder.Services.AddTransient<DrawsManagementViewModel>();
         builder.Services.AddTransient<ChangeOrderPopupViewModel>();
 

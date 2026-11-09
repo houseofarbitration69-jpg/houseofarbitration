@@ -97,6 +97,7 @@ public partial class MasterViewModel : BaseViewModel
     {
         EditCompetitionCommand.NotifyCanExecuteChanged();
         DrawsCommand.NotifyCanExecuteChanged();
+        ResultsCommand.NotifyCanExecuteChanged();
         DeleteCompetitionCommand.NotifyCanExecuteChanged();
         StartCompetitionCommand.NotifyCanExecuteChanged();
     }
@@ -198,6 +199,34 @@ public partial class MasterViewModel : BaseViewModel
             };
 
             await Shell.Current.GoToAsync(Constants.Navigation.Page.DRAWS_MANAGEMENT, navigationParameter);
+        }
+        finally
+        {
+            _busyCompetitionIds.Remove(competition.Id);
+            NotifyCompetitionCommandsCanExecuteChanged();
+        }
+    }
+
+    /// <summary>
+    /// Commande permettant d'afficher les résultats d'une compétition
+    /// </summary>
+    /// <param name="competition">Compétition dont on veut afficher les résultats</param>
+    /// <returns></returns>
+    [RelayCommand(CanExecute = nameof(CanExecuteCompetitionAction), AllowConcurrentExecutions = true)]
+    private async Task Results(CompetitionModel competition)
+    {
+        if (competition == null) return;
+        if (!_busyCompetitionIds.Add(competition.Id)) return;
+        NotifyCompetitionCommandsCanExecuteChanged();
+
+        try
+        {
+            var navigationParameter = new Dictionary<string, object>
+            {
+                { Constants.Navigation.Parameter.COMPETITION_ID, competition.Id }
+            };
+
+            await Shell.Current.GoToAsync(Constants.Navigation.Page.RESULTS, navigationParameter);
         }
         finally
         {

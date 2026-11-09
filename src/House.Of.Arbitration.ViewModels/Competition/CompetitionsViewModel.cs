@@ -125,6 +125,19 @@ public partial class CompetitionsViewModel : BaseViewModel
     }
 
     [RelayCommand]
+    private async Task Results(CompetitionModel? competition)
+    {
+        if (competition == null) return;
+
+        var navigationParameter = new Dictionary<string, object>
+        {
+            { Constants.Navigation.Parameter.COMPETITION_ID, competition.Id }
+        };
+
+        await Shell.Current.GoToAsync(Constants.Navigation.Page.RESULTS, navigationParameter);
+    }
+
+    [RelayCommand]
     private async Task Create()
     {
         await Shell.Current.GoToAsync("WizardPage");

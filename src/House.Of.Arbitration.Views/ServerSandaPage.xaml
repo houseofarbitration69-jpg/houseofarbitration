@@ -400,14 +400,6 @@
                                     FontSize="13"
                                     VerticalOptions="Center"
                                 />
-                                
-                                <!--<Label
-                                    Text="{Binding ServerName}"
-                                    TextColor="{DynamicResource PrimaryTextColor}"
-                                    FontSize="12"
-                                    VerticalOptions="Center"
-                                    IsVisible="{Binding ServerName, Converter={StaticResource EmptyToBoolConverter}}"
-                                />-->
                             </HorizontalStackLayout>
 
                             <!-- Texte statut ARRETE -->
@@ -1494,101 +1486,124 @@
                             </VerticalStackLayout>
 
                             <!-- ROUND -->
-                            <VerticalStackLayout 
+                            <Grid 
                                 Grid.Column="1" 
-                                VerticalOptions="Start" 
+                                RowDefinitions="Auto,*,Auto"
                                 HorizontalOptions="Center" 
-                                Spacing="5" 
                                 Padding="10,0"
                             >
-                                <!-- Current Round Score (Real Time) -->
-                                <Border 
-                                    StrokeShape="RoundRectangle 8" 
-                                    BackgroundColor="{DynamicResource SurfaceElevation2}" 
-                                    Stroke="{DynamicResource PrimaryTextColor}" 
-                                    Padding="15,5" 
-                                    Margin="0,2,0,10"
+                                <!-- Top: Real time score and rounds -->
+                                <VerticalStackLayout 
+                                    Grid.Row="0"
+                                    VerticalOptions="Start" 
+                                    HorizontalOptions="Center" 
+                                    Spacing="5"
                                 >
-                                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                                        <Label 
-                                            Text="{Binding CurrentRound, StringFormat='R{0}'}" 
-                                            TextColor="{DynamicResource PrimaryTextColor}" 
-                                            FontAttributes="Bold" 
-                                            VerticalOptions="Center" 
-                                        />
+                                    <!-- Current Round Score (Real Time) -->
+                                    <Border 
+                                        StrokeShape="RoundRectangle 8" 
+                                        BackgroundColor="{DynamicResource SurfaceElevation2}" 
+                                        Stroke="{DynamicResource PrimaryTextColor}" 
+                                        Padding="15,5" 
+                                        Margin="0,2,0,10"
+                                    >
+                                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                                            <Label 
+                                                Text="{Binding CurrentRound, StringFormat='R{0}'}" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                                FontAttributes="Bold" 
+                                                VerticalOptions="Center" 
+                                            />
 
-                                        <Label 
-                                            Text="{Binding BindingContext.CurrentRedVotes, Source={x:Reference this}}" 
-                                            TextColor="{DynamicResource RedSide}" 
-                                            FontAttributes="Bold" 
-                                            FontSize="18" 
-                                            VerticalOptions="Center" 
-                                        />
+                                            <Label 
+                                                Text="{Binding BindingContext.CurrentRedVotes, Source={x:Reference this}}" 
+                                                TextColor="{DynamicResource RedSide}" 
+                                                FontAttributes="Bold" 
+                                                FontSize="18" 
+                                                VerticalOptions="Center" 
+                                            />
 
-                                        <Label 
-                                            Text="-" 
-                                            TextColor="{DynamicResource PrimaryTextColor}" 
-                                            VerticalOptions="Center" 
-                                        />
+                                            <Label 
+                                                Text="-" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                                VerticalOptions="Center" 
+                                            />
 
-                                        <Label 
-                                            Text="{Binding BindingContext.CurrentBlueVotes, Source={x:Reference this}}" 
-                                            TextColor="{DynamicResource BlueSide}" 
-                                            FontAttributes="Bold" 
-                                            FontSize="18" 
-                                            VerticalOptions="Center" 
-                                        />
-                                    </HorizontalStackLayout>
-                                </Border>
+                                            <Label 
+                                                Text="{Binding BindingContext.CurrentBlueVotes, Source={x:Reference this}}" 
+                                                TextColor="{DynamicResource BlueSide}" 
+                                                FontAttributes="Bold" 
+                                                FontSize="18" 
+                                                VerticalOptions="Center" 
+                                            />
+                                        </HorizontalStackLayout>
+                                    </Border>
 
-                                <!-- ROUNDS -->
-                                <CollectionView 
-                                    ItemsSource="{Binding BindingContext.RoundResults, Source={x:Reference this}}"
-                                >
-                                    <CollectionView.ItemTemplate>
-                                        <DataTemplate x:DataType="models:RoundResultModel">
-                                            <Border 
-                                                StrokeShape="RoundRectangle 8" 
-                                                BackgroundColor="{DynamicResource SurfaceElevation6}" 
-                                                Stroke="{DynamicResource Gray200}" 
-                                                Padding="15,5" 
-                                                Margin="0,2"
-                                            >
-                                                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
-                                                    <Label 
-                                                        Text="{Binding RoundNumber, StringFormat='R{0}'}" 
-                                                        TextColor="{DynamicResource PrimaryTextColor}" 
-                                                        FontAttributes="Bold" 
-                                                        VerticalOptions="Center" 
-                                                    />
-                                                    
-                                                    <Label 
-                                                        Text="{Binding RedVotes}" 
-                                                        TextColor="{DynamicResource RedCornerColor}" 
-                                                        FontAttributes="Bold" 
-                                                        FontSize="18" 
-                                                        VerticalOptions="Center" 
-                                                    />
-                                                    
-                                                    <Label 
-                                                        Text="-" 
-                                                        TextColor="{DynamicResource PrimaryTextColor}" 
-                                                        VerticalOptions="Center" 
-                                                    />
-                                                    
-                                                    <Label 
-                                                        Text="{Binding BlueVotes}" 
-                                                        TextColor="{DynamicResource BlueCornerColor}" 
-                                                        FontAttributes="Bold" 
-                                                        FontSize="18" 
-                                                        VerticalOptions="Center" 
-                                                    />
-                                                </HorizontalStackLayout>
-                                            </Border>
-                                        </DataTemplate>
-                                    </CollectionView.ItemTemplate>
-                                </CollectionView>
-                            </VerticalStackLayout>
+                                    <!-- ROUNDS -->
+                                    <CollectionView 
+                                        ItemsSource="{Binding BindingContext.RoundResults, Source={x:Reference this}}"
+                                    >
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="models:RoundResultModel">
+                                                <Border 
+                                                    StrokeShape="RoundRectangle 8" 
+                                                    BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                                                    Stroke="{DynamicResource Gray200}" 
+                                                    Padding="15,5" 
+                                                    Margin="0,2"
+                                                >
+                                                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                                                        <Label 
+                                                            Text="{Binding RoundNumber, StringFormat='R{0}'}" 
+                                                            TextColor="{DynamicResource PrimaryTextColor}" 
+                                                            FontAttributes="Bold" 
+                                                            VerticalOptions="Center" 
+                                                        />
+                                                        
+                                                        <Label 
+                                                            Text="{Binding RedVotes}" 
+                                                            TextColor="{DynamicResource RedCornerColor}" 
+                                                            FontAttributes="Bold" 
+                                                            FontSize="18" 
+                                                            VerticalOptions="Center" 
+                                                        />
+                                                        
+                                                        <Label 
+                                                            Text="-" 
+                                                            TextColor="{DynamicResource PrimaryTextColor}" 
+                                                            VerticalOptions="Center" 
+                                                        />
+                                                        
+                                                        <Label 
+                                                            Text="{Binding BlueVotes}" 
+                                                            TextColor="{DynamicResource BlueCornerColor}" 
+                                                            FontAttributes="Bold" 
+                                                            FontSize="18" 
+                                                            VerticalOptions="Center" 
+                                                        />
+                                                    </HorizontalStackLayout>
+                                                </Border>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </VerticalStackLayout>
+
+                                <!-- Bottom: Ex-Aequo Button just above the timer -->
+                                <Button 
+                                    Grid.Row="2"
+                                    Text="EX-ÆQUO" 
+                                    Command="{Binding BindingContext.SetExAequoCommand, Source={x:Reference this}}"
+                                    BackgroundColor="{DynamicResource SurfaceElevation6}"
+                                    BorderColor="{DynamicResource Gray400}"
+                                    TextColor="{StaticResource PrimaryTextColor}"
+                                    FontAttributes="Bold"
+                                    CornerRadius="20"
+                                    HeightRequest="40"
+                                    WidthRequest="130"
+                                    VerticalOptions="End"
+                                    Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
+                                />
+                            </Grid>
 
                             <!-- Competitor 2 (Blue Side) -->
                             <VerticalStackLayout 
@@ -2454,59 +2469,6 @@
                         HorizontalOptions="Center" 
                         Margin="0,0,0,10" 
                     />
-
-                    <!-- Statut du serveur dans la feuille latérale -->
-                    <!--<Border
-                        StrokeShape="RoundRectangle 12"
-                        Padding="14,10"
-                        StrokeThickness="1.5"
-                        BackgroundColor="{DynamicResource SurfaceElevation4}"
-                        Stroke="{DynamicResource BorderMuted}"
-                    >
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
-                                <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
-                                <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
-                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
-                                <Setter Property="BackgroundColor" Value="{DynamicResource ErrorBg}" />
-                            </DataTrigger>
-                        </Border.Triggers>
-
-                        <HorizontalStackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
-                            <BoxView
-                                WidthRequest="12"
-                                HeightRequest="12"
-                                CornerRadius="6"
-                                VerticalOptions="Center"
-                                Color="{DynamicResource ErrorColor}"
-                            >
-                                <BoxView.Triggers>
-                                    <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
-                                        <Setter Property="Color" Value="{DynamicResource SuccessColor}" />
-                                    </DataTrigger>
-                                </BoxView.Triggers>
-                            </BoxView>
-
-                            <Label
-                                Text="SERVEUR EN LIGNE"
-                                TextColor="{DynamicResource SuccessLight}"
-                                FontAttributes="Bold"
-                                FontSize="14"
-                                VerticalOptions="Center"
-                                IsVisible="{Binding IsServerStarted}"
-                            />
-                            <Label
-                                Text="SERVEUR HORS LIGNE"
-                                TextColor="{DynamicResource ErrorLight}"
-                                FontAttributes="Bold"
-                                FontSize="14"
-                                VerticalOptions="Center"
-                                IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
-                            />
-                        </HorizontalStackLayout>
-                    </Border>-->
 
                     <Button 
                         Text="DÉMARRER" 

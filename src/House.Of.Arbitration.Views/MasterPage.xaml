@@ -257,6 +257,14 @@
                                     CommandParameter="{Binding}"
                                 />
 
+                                <!-- RESULTATS -->
+                                <controls:IconButton
+                                    Style="{StaticResource ListActionPlayButtonStyle}"
+                                    Icon="{x:Static helpers:FontCustomIcons.COLOR_TROPHY}"
+                                    Command="{Binding x:DataType='vm:MasterViewModel', Source={RelativeSource AncestorType={x:Type vm:MasterViewModel}}, Path=ResultsCommand}"
+                                    CommandParameter="{Binding}"
+                                />
+
                                 <!-- DEMARRER -->
                                 <controls:IconButton
                                     Style="{StaticResource ListActionPlayButtonStyle}"

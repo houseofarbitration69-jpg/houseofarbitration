@@ -51,7 +51,7 @@
                                         </HorizontalStackLayout>
                                     </Border>
 
-                                    <Grid ColumnDefinitions="*, *, *" ColumnSpacing="10">
+                                    <Grid ColumnDefinitions="*, *, *, *" ColumnSpacing="8">
                                         <Button Grid.Column="0" 
                                                 Text="DÉTAILS"
                                                 BackgroundColor="Transparent"
@@ -69,8 +69,17 @@
                                                 BorderWidth="1"
                                                 Clicked="OnDrawsClicked"
                                                 CommandParameter="{Binding .}" />
-                                        
+
                                         <Button Grid.Column="2" 
+                                                Text="RÉSULTATS"
+                                                BackgroundColor="Transparent"
+                                                TextColor="{DynamicResource PrimaryTextColor}"
+                                                BorderColor="{DynamicResource BorderColor}"
+                                                BorderWidth="1"
+                                                Clicked="OnResultsClicked"
+                                                CommandParameter="{Binding .}" />
+                                        
+                                        <Button Grid.Column="3" 
                                                 Text="{Binding ServerButtonText}"
                                                 BackgroundColor="{DynamicResource MartialRed}"
                                                 TextColor="White"

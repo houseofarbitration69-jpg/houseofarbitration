@@ -308,10 +308,22 @@ public partial class ServerViewModel : BaseViewModel
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            if (_clientJudgeMapping.TryGetValue(clientId, out var judge))
+            var matchingKeys = _clientJudgeMapping
+                .Where(kvp => kvp.Key == clientId || kvp.Key.StartsWith(clientId + "#"))
+                .Select(kvp => kvp.Key)
+                .ToList();
+
+            foreach (var key in matchingKeys)
             {
-                judge.IsConnected = false;
-                _clientJudgeMapping.Remove(clientId);
+                if (_clientJudgeMapping.TryGetValue(key, out var judge))
+                {
+                    judge.IsConnected = false;
+                    _clientJudgeMapping.Remove(key);
+                }
+            }
+
+            if (matchingKeys.Count > 0)
+            {
                 OnPropertyChanged(nameof(Judges));
             }
         });
@@ -370,6 +382,15 @@ public partial class ServerViewModel : BaseViewModel
             {
                 var posStr = args.Message.Substring(Constants.Message.JUDGE_POSITION.Length);
 
+                // Support du session ID pour permettre plusieurs juges sur un même PC (ex: "1#instA")
+                string sessionKey = args.ClientId;
+                if (posStr.Contains('#'))
+                {
+                    var segs = posStr.Split('#', 2);
+                    posStr = segs[0];
+                    sessionKey = $"{args.ClientId}#{segs[1]}";
+                }
+
                 JudgeModel? judge = null;
 
                 var parts = posStr.Split('_');
@@ -390,21 +411,21 @@ public partial class ServerViewModel : BaseViewModel
 
                 if (judge != null)
                 {
-                    // Remove previous mapping for this client if any
-                    if (_clientJudgeMapping.TryGetValue(args.ClientId, out var oldJudge))
+                    // Remove previous mapping for this client session if any
+                    if (_clientJudgeMapping.TryGetValue(sessionKey, out var oldJudge) && oldJudge != judge)
                     {
                         oldJudge.IsConnected = false;
                     }
 
                     // Remove mapping for this judge if another client was using it
                     var existingMapping = _clientJudgeMapping.FirstOrDefault(x => x.Value == judge);
-                    if (existingMapping.Key != null)
+                    if (existingMapping.Key != null && existingMapping.Key != sessionKey)
                     {
                         _clientJudgeMapping.Remove(existingMapping.Key);
                     }
 
                     judge.IsConnected = true;
-                    _clientJudgeMapping[args.ClientId] = judge;
+                    _clientJudgeMapping[sessionKey] = judge;
                     OnPropertyChanged(nameof(Judges));
 
                     // Envoi du match courant
@@ -470,23 +491,99 @@ public partial class ServerViewModel : BaseViewModel
             }
             else if (args.Message.StartsWith(Constants.Message.JUDGE_DISCONNECT))
             {
-                if (_clientJudgeMapping.TryGetValue(args.ClientId, out var judge))
+                var payload = args.Message.Substring(Constants.Message.JUDGE_DISCONNECT.Length).TrimStart(':');
+                List<string> keysToRemove = new();
+
+                if (!string.IsNullOrEmpty(payload))
                 {
-                    judge.IsConnected = false;
-                    _clientJudgeMapping.Remove(args.ClientId);
+                    string posPart = payload;
+                    string? instPart = null;
+                    if (payload.Contains('#'))
+                    {
+                        var segs = payload.Split('#', 2);
+                        posPart = segs[0];
+                        instPart = segs[1];
+                    }
+
+                    if (!string.IsNullOrEmpty(instPart))
+                    {
+                        string targetKey = $"{args.ClientId}#{instPart}";
+                        if (_clientJudgeMapping.TryGetValue(targetKey, out var j))
+                        {
+                            j.IsConnected = false;
+                            keysToRemove.Add(targetKey);
+                        }
+                    }
+
+                    if (keysToRemove.Count == 0 && !string.IsNullOrEmpty(posPart))
+                    {
+                        foreach (var kvp in _clientJudgeMapping.Where(k => k.Key == args.ClientId || k.Key.StartsWith(args.ClientId + "#")))
+                        {
+                            var j = kvp.Value;
+                            if (j.Name == posPart || j.Number.ToString() == posPart || $"{j.Group}_{j.Number}" == posPart)
+                            {
+                                j.IsConnected = false;
+                                keysToRemove.Add(kvp.Key);
+                            }
+                        }
+                    }
+                }
+
+                if (keysToRemove.Count == 0)
+                {
+                    foreach (var kvp in _clientJudgeMapping.Where(k => k.Key == args.ClientId || k.Key.StartsWith(args.ClientId + "#")))
+                    {
+                        kvp.Value.IsConnected = false;
+                        keysToRemove.Add(kvp.Key);
+                    }
+                }
+
+                foreach (var k in keysToRemove)
+                {
+                    _clientJudgeMapping.Remove(k);
+                }
+
+                if (keysToRemove.Count > 0)
+                {
                     OnPropertyChanged(nameof(Judges));
                 }
             }
             else if (args.Message.StartsWith(Constants.Message.JUDGE_SCORE))
             {
-                if (_clientJudgeMapping.TryGetValue(args.ClientId, out var judge))
+                try
                 {
-                    try
-                    {
-                        var json = args.Message.Substring(Constants.Message.JUDGE_SCORE.Length);
-                        var scoreData = JsonSerializer.Deserialize<TransfertScoreModel>(json, _jsonOptions);
+                    var json = args.Message.Substring(Constants.Message.JUDGE_SCORE.Length);
+                    var scoreData = JsonSerializer.Deserialize<TransfertScoreModel>(json, _jsonOptions);
 
-                        if (scoreData != null && CurrentDraw != null && CurrentDraw.Type != RoundType.Order)
+                    JudgeModel? judge = null;
+                    // Recherche par position explicite (prioritaire pour multi-instances sur un même PC)
+                    if (!string.IsNullOrEmpty(scoreData?.JudgePosition))
+                    {
+                        var parts = scoreData.JudgePosition.Split('_');
+                        if (parts.Length == 2 && int.TryParse(parts[1], out int num))
+                        {
+                            judge = Judges.FirstOrDefault(j => j.Group == parts[0] && j.Number == num);
+                        }
+                        else if (int.TryParse(scoreData.JudgePosition, out int posNum))
+                        {
+                            judge = Judges.FirstOrDefault(j => string.IsNullOrEmpty(j.Group) && j.Number == posNum)
+                                 ?? Judges.FirstOrDefault(j => j.Number == posNum);
+                        }
+                        else
+                        {
+                            judge = Judges.FirstOrDefault(j => j.Name == scoreData.JudgePosition);
+                        }
+                    }
+
+                    // Repli sur le mapping d'adresse client
+                    if (judge == null)
+                    {
+                        _clientJudgeMapping.TryGetValue(args.ClientId, out judge);
+                    }
+
+                    if (judge != null && scoreData != null)
+                    {
+                        if (CurrentDraw != null && CurrentDraw.Type != RoundType.Order)
                         {
                             var competitor1 = GetCompetitor(CurrentDraw, true);
                             var competitor2 = GetCompetitor(CurrentDraw, false);
@@ -515,7 +612,7 @@ public partial class ServerViewModel : BaseViewModel
                                 UpdateCurrentRoundVotes();
                             }
                         }
-                        else if (scoreData != null && CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                        else if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
                         {
                             judge.Score = scoreData.Score;
                             if (scoreData.Code != null)
@@ -535,10 +632,10 @@ public partial class ServerViewModel : BaseViewModel
                             }
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error processing judge score from client {ClientId}", args.ClientId);
-                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing judge score from client {ClientId}", args.ClientId);
                 }
             }
             else if (args.Message.StartsWith(Constants.Message.JUDGE_SYNC_STATE))
@@ -648,12 +745,19 @@ public partial class ServerViewModel : BaseViewModel
             try
             {
                 await _bluetoothServer.SendToAllAsync(Constants.Message.SERVER_STOPPED);
-                await Task.Delay(150);
+                await Task.Delay(250);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error notifying clients on server disappearing");
             }
+
+            // Marquer tous les juges comme déconnectés localement
+            foreach (var judge in Judges)
+            {
+                judge.IsConnected = false;
+            }
+            _clientJudgeMapping.Clear();
 
             await _bluetoothServer.StopAdvertising();
             IsServerStarted = false;
@@ -697,7 +801,8 @@ public partial class ServerViewModel : BaseViewModel
             };
 
             var stateJson = JsonSerializer.Serialize(judgeState, _jsonOptions);
-            await _bluetoothServer.SendToClientAsync($"{Constants.Message.JUDGE_STATE}{stateJson}", clientId);
+            string targetClient = clientId.Contains('#') ? clientId.Split('#')[0] : clientId;
+            await _bluetoothServer.SendToClientAsync($"{Constants.Message.JUDGE_STATE}{stateJson}", targetClient);
         }
         catch (Exception ex)
         {
@@ -779,11 +884,24 @@ public partial class ServerViewModel : BaseViewModel
     /// <param name="competitionType"></param>
     private void SetupJudges(CompetitionType competitionType)
     {
-        JudgeGroups.Clear();
-
         if (competitionType == CompetitionType.Taolu)
         {
+            bool isAlreadyTaolu = Judges.Count == 9
+                && Judges.Count(j => j.Group == "A") == 3
+                && Judges.Count(j => j.Group == "B") == 3
+                && Judges.Count(j => j.Group == "C") == 3;
+
+            if (isAlreadyTaolu && JudgeGroups.Count == 3)
+            {
+                // Conserver les instances de juges et groupes existants pour préserver l'état IsConnected et les mappings
+                OnPropertyChanged(nameof(Judges));
+                OnPropertyChanged(nameof(JudgeGroups));
+                return;
+            }
+
             Judges.Clear();
+            JudgeGroups.Clear();
+
             var groupA = new JudgeGroupModel("Groupe A", "Qualité", 5.0);
             var groupB = new JudgeGroupModel("Groupe B", "Performance", 3.0);
             var groupC = new JudgeGroupModel("Groupe C", "Difficulté", 2.0);
@@ -818,6 +936,8 @@ public partial class ServerViewModel : BaseViewModel
         }
         else
         {
+            JudgeGroups.Clear();
+
             if (Judges.Count == 5 && Judges.All(j => string.IsNullOrEmpty(j.Group)))
             {
                 for (int i = 0; i < 5; i++)
@@ -838,6 +958,7 @@ public partial class ServerViewModel : BaseViewModel
         }
 
         OnPropertyChanged(nameof(Judges));
+        OnPropertyChanged(nameof(JudgeGroups));
     }
 
     /// <summary>
@@ -1214,12 +1335,19 @@ public partial class ServerViewModel : BaseViewModel
         try
         {
             await _bluetoothServer.SendToAllAsync(Constants.Message.SERVER_STOPPED);
-            await Task.Delay(150);
+            await Task.Delay(250);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error notifying clients on StopServer");
         }
+
+        // Marquer tous les juges comme déconnectés localement
+        foreach (var judge in Judges)
+        {
+            judge.IsConnected = false;
+        }
+        _clientJudgeMapping.Clear();
 
         await _bluetoothServer.StopAdvertising();
         IsServerStarted = false;
@@ -1346,6 +1474,11 @@ public partial class ServerViewModel : BaseViewModel
         else if (CurrentDraw is DrawOrderModel order)
         {
             order.IsFinished = true;
+            if (JudgeGroups.Count > 0)
+            {
+                double totalScore = Math.Round(JudgeGroups.Sum(g => g.GlobalScore), 2);
+                order.RoundResultsJson = totalScore.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+            }
             await _drawOrderService.UpdateAsync(order);
             winner = order.Competitor; // Just to trigger next
         }
@@ -1509,13 +1642,57 @@ public partial class ServerViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// Commande permettant de déclarer un ex-æquo pour le round actuel et de passer au round suivant
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task SetExAequo()
+    {
+        if (CurrentDraw == null)
+        {
+            return;
+        }
+
+        int redVotes = (int)Judges.Sum(j => j.RedPoints);
+        int blueVotes = (int)Judges.Sum(j => j.BluePoints);
+
+        RoundResults.Add(new RoundResultModel
+        {
+            RoundNumber = CurrentDraw.CurrentRound,
+            RedVotes = redVotes,
+            BlueVotes = blueVotes,
+            WinnerColor = "Draw"
+        });
+
+        CurrentDraw.RoundResultsJson = JsonSerializer.Serialize(RoundResults, _jsonOptions);
+        CurrentDraw.CurrentRound++;
+
+        if (CurrentDraw is DrawKnockoutModel k1)
+        {
+            await _drawKnockoutService.UpdateAsync(k1);
+        }
+        else if (CurrentDraw is DrawPoolsModel p1)
+        {
+            await _drawPoolsModel.UpdateAsync(p1);
+        }
+        else if (CurrentDraw is DrawOrderModel o1)
+        {
+            await _drawOrderService.UpdateAsync(o1);
+        }
+
+        ResetJudgeScores();
+        await ResetTimer();
+        await BroadcastMatchInfo();
+    }
+
+    /// <summary>
     /// Commande permettant de passer au round suivant
     /// </summary>
     /// <returns></returns>
     [RelayCommand]
     private async Task NextRound()
     {
-
+        await SetExAequo();
     }
     #endregion
 

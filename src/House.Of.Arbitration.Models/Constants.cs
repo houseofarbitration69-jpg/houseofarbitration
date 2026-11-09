@@ -71,6 +71,7 @@ public static class Constants
             public const string COMPETITORS = "COMPETITORS";
             public const string DRAWS = "DRAWS";
             public const string REFEREE_DATA = "REFEREE_DATA";
+            public const string RESULTS = "RESULTS";
             public const string TAOLU_CODES = "TAOLU_CODES";
         }
     }

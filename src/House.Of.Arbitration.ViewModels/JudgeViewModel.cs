@@ -746,7 +746,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             else if (message == Constants.Message.SERVER_STOPPED)
             {
                 _logger.LogInformation("Server announced it has stopped.");
-                //await HandleDeviceDisconnectedAsync();
+                await HandleServerStoppedAsync();
             }
             else if (message == Constants.Message.PONG)
             {
@@ -783,6 +783,36 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         {
             Codes[i].CanDelete = (i == 0);
         }
+    }
+
+    /// <summary>
+    /// Méthode appellée lorsque le serveur annonce son arrêt volontaire.
+    /// Contrairement à une déconnexion inattendue, on ne tente PAS de se reconnecter.
+    /// </summary>
+    private async Task HandleServerStoppedAsync()
+    {
+        StopWatchdog();
+        StopAutoReconnect();
+        _consecutiveFailedPings = 0;
+
+        IsConnected = false;
+        IsReconnecting = false;
+        IsReceivingMatch = false;
+
+        // Déconnecter proprement du périphérique BLE
+        if (ServerId != null)
+        {
+            try
+            {
+                await _bluetoothClient.DisconnectFromDevice(ServerId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error disconnecting from server device on SERVER_STOPPED");
+            }
+        }
+
+        await _alertService.ShowToast("Le serveur d'arbitrage a été arrêté.");
     }
 
     /// <summary>

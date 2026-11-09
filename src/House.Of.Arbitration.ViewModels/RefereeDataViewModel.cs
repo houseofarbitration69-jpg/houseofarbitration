@@ -10,7 +10,7 @@ using System.Collections.ObjectModel;
 
 namespace House.Of.Arbitration.ViewModels;
 
-public partial class RefereeDataViewModel : BaseViewModel
+public partial class RefereeDataViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
     private readonly IRepository<RefereeDataModel> _refereeDataRepository;
@@ -26,6 +26,7 @@ public partial class RefereeDataViewModel : BaseViewModel
     private CategoryModel? _selectedCategory;
     private List<RefereeDataModel> _allDatas = new();
     private List<CategoryModel> _allCategories = new();
+    private int? _targetCompetitionId;
     #endregion
 
     #region Properties
@@ -90,6 +91,24 @@ public partial class RefereeDataViewModel : BaseViewModel
     }
     #endregion
 
+    #region Implement IQueryAttributable
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue(Constants.Navigation.Parameter.COMPETITION_ID, out var compIdObj) ||
+            query.TryGetValue("CompetitionId", out compIdObj))
+        {
+            if (compIdObj is int id)
+            {
+                _targetCompetitionId = id;
+            }
+            else if (int.TryParse(compIdObj?.ToString(), out int parsedId))
+            {
+                _targetCompetitionId = parsedId;
+            }
+        }
+    }
+    #endregion
+
     #region Override Methods
     public override async Task OnAppearing()
     {
@@ -123,6 +142,14 @@ public partial class RefereeDataViewModel : BaseViewModel
                     .ThenBy(d => d.DrawPools?.Draw?.Category?.Name)
                     .ThenBy(d => d.DrawOrder?.CurrentRound)
                     .ToList();
+            }
+
+            if (_targetCompetitionId.HasValue && Competitions != null)
+            {
+                SelectedCompetition = Competitions.FirstOrDefault(c => c.Id == _targetCompetitionId.Value);
+            }
+            else
+            {
                 FilterDatas();
             }
         }
@@ -137,6 +164,7 @@ public partial class RefereeDataViewModel : BaseViewModel
     [RelayCommand]
     private void ResetFilter()
     {
+        _targetCompetitionId = null;
         SelectedCompetition = null;
         SelectedCategory = null;
     }

@@ -34,6 +34,17 @@ public partial class CompetitionsPage : BasePage<CompetitionsViewModel>
         }
     }
 
+    private async void OnResultsClicked(object sender, EventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Models.CompetitionModel comp)
+        {
+            if (BindingContext is CompetitionsViewModel vm)
+            {
+                await vm.ResultsCommand.ExecuteAsync(comp);
+            }
+        }
+    }
+
     private async void OnStartClicked(object sender, EventArgs e)
     {
         if (sender is Button btn && btn.CommandParameter is Models.CompetitionModel comp)
