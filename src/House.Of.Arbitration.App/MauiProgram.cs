@@ -87,6 +87,14 @@ namespace House.Of.Arbitration.App
             // Register DbContext
             builder.RegisterDbContext();
 
+            Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoUnderline", (h, v) =>
+            {
+#if ANDROID
+                h.PlatformView.BackgroundTintList =
+                Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+#endif
+            });
+
             // Supprimer les bordures natives des Entry
             Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoBorder", (handler, view) =>
             {

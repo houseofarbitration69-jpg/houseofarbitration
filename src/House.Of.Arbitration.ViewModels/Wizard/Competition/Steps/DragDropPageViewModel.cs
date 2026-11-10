@@ -89,8 +89,8 @@ public partial class DragDropPageViewModel : BaseViewModel
         if (m < 2) m = 2; // Min 1 match
 
         // Prepare Round 1 matches
-        var round1 = new BracketRoundViewModel { Name = "Round 1" };
         var matchesInRound = m / 2;
+        var round1 = new BracketRoundViewModel { Name = House.Of.Arbitration.Models.Helpers.KnockoutStageHelper.GetRoundName(matchesInRound) };
 
         for (int i = 0; i < matchesInRound; i++)
         {
@@ -103,11 +103,10 @@ public partial class DragDropPageViewModel : BaseViewModel
 
         // Prepare subsequent rounds
         int currentMatches = matchesInRound;
-        int roundIndex = 2;
         while (currentMatches > 1)
         {
             currentMatches /= 2;
-            var nextRound = new BracketRoundViewModel { Name = $"Round {roundIndex++}" };
+            var nextRound = new BracketRoundViewModel { Name = House.Of.Arbitration.Models.Helpers.KnockoutStageHelper.GetRoundName(currentMatches) };
             for (int i = 0; i < currentMatches; i++)
             {
                 nextRound.Matches.Add(new BracketMatchViewModel());
@@ -116,7 +115,7 @@ public partial class DragDropPageViewModel : BaseViewModel
         }
 
         // Add Winner slot round
-        var winnerRound = new BracketRoundViewModel { Name = "Winner" };
+        var winnerRound = new BracketRoundViewModel { Name = "Vainqueur" };
         winnerRound.Matches.Add(new BracketMatchViewModel { IsWinnerSlot = true });
         newRounds.Add(winnerRound);
 
@@ -136,7 +135,7 @@ public partial class DragDropPageViewModel : BaseViewModel
         {
             var round = targetRounds[i];
             
-            if (round.Name == "Winner")
+            if (round.Matches.Any(m => m.IsWinnerSlot) || round.Name == "Vainqueur" || round.Name == "Winner")
             {
                 foreach (var match in round.Matches)
                 {

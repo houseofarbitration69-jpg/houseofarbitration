@@ -78,22 +78,32 @@
                 </Grid>
             </Border>
 
-            <!-- Row 1: Category Name Header -->
+            <!-- Row 1: Category Name Header & Match Stage -->
             <Border 
                 Grid.Row="1" 
                 HorizontalOptions="Center" 
-                Padding="10,10,10,10" 
+                Padding="15,6" 
                 BackgroundColor="{DynamicResource SurfaceElevation6}" 
                 Stroke="{StaticResource PrimaryTextColor}" 
                 StrokeThickness="2" 
                 StrokeShape="RoundRectangle 15"
             >
-                <controls:ScrollingText 
-                    Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE MATCH'}" 
-                    TextColor="{StaticResource PrimaryTextColor}" 
-                    FontSize="36" 
-                    FontAttributes="Bold" 
-                />
+                <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                    <controls:ScrollingText 
+                        Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE MATCH'}" 
+                        TextColor="{StaticResource PrimaryTextColor}" 
+                        FontSize="30" 
+                        FontAttributes="Bold" 
+                    />
+                    <Label 
+                        Text="{Binding MatchStageName}"
+                        TextColor="{DynamicResource PrimaryColor}"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        IsVisible="{Binding MatchStageName, Converter={StaticResource EmptyToBoolConverter}}"
+                    />
+                </VerticalStackLayout>
             </Border>
 
             <!-- Row 2: Main Match Display (The Ring) -->

@@ -1,5 +1,6 @@
 #region Imports
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Maui.Layouts;
 #endregion
 
 namespace House.Of.Arbitration.Models;
@@ -15,6 +16,11 @@ public partial class DrawKnockoutModel : ObservableObject, IDrawModel
     /// Obtient ou définit l'ordre du match dans la catégorie
     /// </summary>
     public int Order { get; set; } = 0;
+
+    /// <summary>
+    /// Obtient le nom d'étape du combat (ex: "Finale", "Demi-finale 1", "Quart de finale 2")
+    /// </summary>
+    public string StageName => Helpers.KnockoutStageHelper.GetStageName(Order, Draw?.DrawKnockouts?.Count ?? 0, false);
 
     /// <summary>
     /// Obtient ou définit l'ordre du match dans la compétition

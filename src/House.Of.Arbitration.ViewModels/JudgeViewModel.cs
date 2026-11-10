@@ -69,6 +69,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         PropertyNameCaseInsensitive = true
     };
     private string? _categoryName;
+    private string? _matchStageName;
     private bool _hasUnsyncedChanges;
     private readonly List<TransfertScoreModel> _unsyncedScores = new();
 
@@ -177,6 +178,15 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     {
         get => _categoryName;
         set => SetProperty(ref _categoryName, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le nom de l'étape du match (ex: "Finale", "Demi-finale 1", "Quart de finale 2")
+    /// </summary>
+    public string? MatchStageName
+    {
+        get => _matchStageName;
+        set => SetProperty(ref _matchStageName, value);
     }
 
     /// <summary>
@@ -659,6 +669,23 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                     }
 
                     CategoryName = CurrentDraw?.Draw?.Category?.Name;
+                    if (CurrentDraw is DrawKnockoutModel k)
+                    {
+                        Competitor1 = k.Competitor1;
+                        Competitor2 = k.Competitor2;
+                        MatchStageName = k.StageName;
+                    }
+                    else if (CurrentDraw is DrawPoolsModel p)
+                    {
+                        Competitor1 = p.Competitor1;
+                        Competitor2 = p.Competitor2;
+                        MatchStageName = $"Poule - Match #{p.Order}";
+                    }
+                    else
+                    {
+                        MatchStageName = string.Empty;
+                    }
+
                     if (isNewMatch)
                     {
                         if (!HasUnsyncedChanges && _unsyncedScores.Count == 0 && !Codes.Any(c => !c.IsSynced))
@@ -666,12 +693,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                             Codes.Clear();
                             HasUnsyncedChanges = false;
                         }
-                    }
-
-                    if (CurrentDraw is DrawKnockoutModel k)
-                    {
-                        Competitor1 = k.Competitor1;
-                        Competitor2 = k.Competitor2;
                     }
                     else if (CurrentDraw is DrawPoolsModel p)
                     {

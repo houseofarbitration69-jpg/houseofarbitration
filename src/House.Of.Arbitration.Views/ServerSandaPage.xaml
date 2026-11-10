@@ -27,12 +27,23 @@
                     BackgroundColor="{DynamicResource SurfaceLight}"
                 >
                     <Grid 
-                        RowDefinitions="Auto, Auto, Auto" 
+                        RowDefinitions="Auto, Auto, Auto, Auto" 
                         ColumnDefinitions="*"
                     >
+                        <Label 
+                            Grid.Column="0"
+                            Grid.Row="0"
+                            Text="{Binding StageName}"
+                            FontAttributes="Bold"
+                            FontSize="13"
+                            TextColor="{DynamicResource PrimaryColor}"
+                            HorizontalOptions="Center"
+                            Margin="0,0,0,6"
+                        />
+
                         <Grid 
                             Grid.Column="0" 
-                            Grid.Row="0" 
+                            Grid.Row="1" 
                             ColumnDefinitions="Auto, *"
                         >
                             <Image 
@@ -80,7 +91,7 @@
 
                         <Label 
                             Grid.Column="0" 
-                            Grid.Row="1" 
+                            Grid.Row="2" 
                             Text="{Binding Resources.VS}" 
                             HorizontalOptions="Center" 
                             TextColor="DarkGray" 
@@ -90,7 +101,7 @@
 
                         <Grid 
                             Grid.Column="0" 
-                            Grid.Row="2" 
+                            Grid.Row="3" 
                             ColumnDefinitions="Auto, *"
                         >
                             <Image 
@@ -433,7 +444,7 @@
 
             <Grid 
                 Grid.Column="1" 
-                RowDefinitions="{OnIdiom Tablet='60,105,*,115', Phone='60,250,30,30,30,30,30,*'}" 
+                RowDefinitions="{OnIdiom Tablet='Auto,105,*,115', Phone='Auto,250,30,30,30,30,30,*'}" 
                 RowSpacing="15" 
                 ColumnDefinitions="{OnIdiom Tablet='85,80,*,80,85', Phone='*'}"
                 IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
@@ -447,24 +458,34 @@
                     VerticalOptions="Center"
                     Margin="5,0"
                 >
-                    <!-- CATEGORIE -->
+                    <!-- CATEGORIE & ETAPE DU MATCH -->
                     <Border 
                         Grid.Column="{OnIdiom Tablet='1', Phone='0'}"
                         HorizontalOptions="Center"
                         VerticalOptions="Center"
                         Margin="0,0,0,0"
-                        Padding="15,5,15,5"
+                        Padding="15,4,15,4"
                         BackgroundColor="{DynamicResource SurfaceElevation6}"
                         Stroke="{DynamicResource PrimaryTextColor}"
                         StrokeThickness="2"
                         StrokeShape="RoundRectangle 15"
                     >
-                        <controls:ScrollingText 
-                            Text="{Binding CurrentDraw.Draw.Category.Name}"
-                            TextColor="{DynamicResource PrimaryTextColor}" 
-                            FontSize="{OnIdiom Tablet='32', Phone='20'}" 
-                            FontAttributes="Bold"
-                        />
+                        <VerticalStackLayout Spacing="1" HorizontalOptions="Center">
+                            <controls:ScrollingText 
+                                Text="{Binding CurrentDraw.Draw.Category.Name}"
+                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                FontSize="{OnIdiom Tablet='26', Phone='18'}" 
+                                FontAttributes="Bold"
+                            />
+                            <Label 
+                                Text="{Binding CurrentMatchStageName}"
+                                TextColor="{DynamicResource PrimaryColor}" 
+                                FontSize="{OnIdiom Tablet='18', Phone='14'}" 
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center"
+                                IsVisible="{Binding CurrentMatchStageName, Converter={StaticResource EmptyToBoolConverter}}"
+                            />
+                        </VerticalStackLayout>
                     </Border>
                 </Grid>
 

@@ -242,11 +242,15 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
         if (result != null && result.Result != null)
         {
             var category = result.Result;
+            var ageRange = result.Result.AgeRange;
             category.AgeRange = null;
             category.CompetitionId = Model?.Id;
 
             await _repository.AddAsync(category);
+            
+            category.AgeRange = ageRange;
             Categories.Add(category);
+            
             Validate();
         }
     }

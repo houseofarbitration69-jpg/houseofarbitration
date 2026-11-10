@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
 #endregion
@@ -412,13 +413,21 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
             else if (semiFinalLooserIds.Contains(comp.Id))
             {
                 rank = 3;
-                status = "1/2 Finale 🥉";
+                status = "Demi-finale 🥉";
                 statusColor = "#CD7F32";
             }
             else if (losses > 0)
             {
+                var lostMatch = matches.FirstOrDefault(m => m.LooserId == comp.Id);
+                if (lostMatch != null)
+                {
+                    status = $"Éliminé ({KnockoutStageHelper.GetStageName(lostMatch.Order, matches.Count, includeIndex: false)})";
+                }
+                else
+                {
+                    status = "Éliminé";
+                }
                 rank = 4 + (matches.Count - wins);
-                status = "Éliminé";
                 statusColor = "#808080";
             }
 

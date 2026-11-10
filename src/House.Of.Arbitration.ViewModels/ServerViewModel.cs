@@ -166,7 +166,32 @@ public partial class ServerViewModel : BaseViewModel
     public IDrawModel? CurrentDraw
     {
         get => _currentDraw;
-        set => SetProperty(ref _currentDraw, value);
+        set
+        {
+            if (SetProperty(ref _currentDraw, value))
+            {
+                OnPropertyChanged(nameof(CurrentMatchStageName));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Obtient le nom de la phase/étape du match en cours (ex: "Finale", "Demi-finale 1", "Quart de finale 2")
+    /// </summary>
+    public string CurrentMatchStageName
+    {
+        get
+        {
+            if (CurrentDraw is DrawKnockoutModel k)
+            {
+                return k.StageName;
+            }
+            if (CurrentDraw is DrawPoolsModel p)
+            {
+                return $"Poule - Match #{p.Order}";
+            }
+            return string.Empty;
+        }
     }
 
     /// <summary>

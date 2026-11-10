@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
 using System.Collections.ObjectModel;
@@ -229,6 +230,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                 {
                     if (category.RoundType == RoundType.Knockouts && existingDraw.DrawKnockouts != null && existingDraw.DrawKnockouts.Count > 0)
                     {
+                        int totalMatches = existingDraw.DrawKnockouts.Count;
                         foreach (var k in existingDraw.DrawKnockouts.Where(x => !x.IsFinished).OrderBy(x => x.Order))
                         {
                             _allMatches.Add(new DrawMatchItemViewModel
@@ -242,7 +244,8 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                                 GlobalOrder = k.GlobalOrder,
                                 Competitor1 = k.Competitor1,
                                 Competitor2 = k.Competitor2,
-                                IsFinished = k.IsFinished
+                                IsFinished = k.IsFinished,
+                                TotalMatchesInCategory = totalMatches
                             });
                         }
                     }
@@ -339,6 +342,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
             {
                 m = 2;
             }
+            int totalMatches = m - 1;
 
             int matchesInRound = m / 2;
             int matchOffset = 0;
@@ -372,7 +376,8 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                     GlobalOrder = 0,
                     Competitor1 = comp1,
                     Competitor2 = comp2,
-                    IsBye = (compCount == 1)
+                    IsBye = (compCount == 1),
+                    TotalMatchesInCategory = totalMatches
                 });
             }
 
@@ -396,7 +401,8 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                         Category = category,
                         RoundType = RoundType.Knockouts,
                         Order = k.Order,
-                        GlobalOrder = 0
+                        GlobalOrder = 0,
+                        TotalMatchesInCategory = totalMatches
                     });
                 }
                 matchOffset += currentMatches;
@@ -910,16 +916,25 @@ public partial class DrawMatchItemViewModel : ObservableObject
 
     public bool IsDuel => RoundType != RoundType.Order;
     public bool IsSingle => RoundType == RoundType.Order;
+    public int TotalMatchesInCategory { get; set; }
 
     public string MatchTitle
     {
         get
         {
             if (RoundType == RoundType.Order)
-                return $"Passage #{Order}";
+            {
+                //return $"Passage #{Order}";
+                return $"Passage";
+            }
+
             if (RoundType == RoundType.Pools)
-                return $"Poule - Match #{Order}";
-            return $"Combat #{Order}";
+            {
+                //return $"Poule - Match #{Order}";
+                return $"Poule - Match";
+            }
+
+            return KnockoutStageHelper.GetStageName(Order, TotalMatchesInCategory, false);
         }
     }
 

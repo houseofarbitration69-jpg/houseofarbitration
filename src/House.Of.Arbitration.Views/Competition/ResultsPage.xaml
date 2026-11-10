@@ -47,32 +47,49 @@
         </Grid>
 
         <!-- Category Selector Card -->
-        <Border Grid.Row="1" 
-                BackgroundColor="{DynamicResource SurfaceColor}" 
-                StrokeShape="RoundRectangle 10" 
-                Stroke="{DynamicResource BorderColor}" 
-                StrokeThickness="1" 
-                Padding="16, 12">
+        <Border 
+            Grid.Row="1" 
+            BackgroundColor="{DynamicResource SurfaceColor}" 
+            StrokeShape="RoundRectangle 10" 
+            Stroke="{DynamicResource BorderColor}" 
+            StrokeThickness="1" 
+            Padding="16, 12"
+        >
             <Grid ColumnDefinitions="Auto, *, Auto" ColumnSpacing="16" VerticalOptions="Center">
                 <HorizontalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
-                    <Label Text="🥋" FontSize="20" VerticalOptions="Center" />
-                    <Label Text="Catégorie :" FontAttributes="Bold" FontSize="15" TextColor="{DynamicResource PrimaryTextColor}" VerticalOptions="Center" />
+                    <Label 
+                        Text="🥋" 
+                        FontSize="20" 
+                        VerticalOptions="Center" 
+                    />
+                    
+                    <Label 
+                        Text="Catégorie :" 
+                        FontAttributes="Bold" 
+                        FontSize="15" 
+                        TextColor="{DynamicResource PrimaryTextColor}" 
+                        VerticalOptions="Center" 
+                    />
                 </HorizontalStackLayout>
 
-                <Picker Grid.Column="1" 
-                        ItemsSource="{Binding Categories}" 
-                        SelectedItem="{Binding SelectedCategory}" 
-                        ItemDisplayBinding="{Binding Name}" 
-                        Title="Choisir une catégorie" 
-                        TextColor="{DynamicResource PrimaryTextColor}"
-                        FontAttributes="Bold"
-                        VerticalOptions="Center" />
+                <Picker 
+                    Grid.Column="1" 
+                    ItemsSource="{Binding Categories}" 
+                    SelectedItem="{Binding SelectedCategory}" 
+                    ItemDisplayBinding="{Binding Name}" 
+                    Title="Choisir une catégorie" 
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    FontAttributes="Bold"
+                    VerticalOptions="Center" 
+                />
 
-                <Label Grid.Column="2" 
-                       Text="{Binding CategoryStatusText}" 
-                       FontSize="13" 
-                       TextColor="{DynamicResource SecondaryTextColor}" 
-                       VerticalOptions="Center" />
+                <Label 
+                    Grid.Column="2" 
+                    Text="{Binding CategoryStatusText}" 
+                    FontSize="13" 
+                    TextColor="{DynamicResource SecondaryTextColor}" 
+                    VerticalOptions="Center" 
+                />
             </Grid>
         </Border>
 
@@ -80,65 +97,83 @@
         <ScrollView Grid.Row="2">
             <VerticalStackLayout Spacing="16">
                 <!-- Podium Top 3 (si disponible) -->
-                <Border IsVisible="{Binding HasPodium}" 
-                        BackgroundColor="{DynamicResource SurfaceElevation2}" 
-                        StrokeShape="RoundRectangle 12" 
-                        Stroke="{DynamicResource BorderMuted}" 
-                        Padding="16, 12">
+                <Border 
+                    IsVisible="{Binding HasPodium}" 
+                    BackgroundColor="{DynamicResource SurfaceElevation2}" 
+                    StrokeShape="RoundRectangle 12" 
+                    Stroke="{DynamicResource BorderMuted}" 
+                    Padding="16, 12"
+                >
                     <VerticalStackLayout Spacing="10">
-                        <Label Text="🏆 PODIUM" FontSize="16" FontAttributes="Bold" TextColor="{DynamicResource MartialRed}" HorizontalOptions="Center" />
+                        <Label 
+                            Text="🏆 PODIUM" 
+                            FontSize="16" 
+                            FontAttributes="Bold" 
+                            TextColor="{DynamicResource MartialRed}" 
+                            HorizontalOptions="Center" 
+                        />
                         
-                        <Grid ColumnDefinitions="*, *, *" ColumnSpacing="12" HorizontalOptions="Center">
+                        <Grid 
+                            ColumnDefinitions="*, *, *" 
+                            ColumnSpacing="12" 
+                            HorizontalOptions="Center"
+                        >
                             <!-- 2ème Place (Argent) -->
-                            <Border Grid.Column="0" 
-                                    IsVisible="{Binding SecondPlace, Converter={StaticResource EmptyToBoolConverter}}"
-                                    BackgroundColor="{DynamicResource SurfaceElevation5}" 
-                                    StrokeShape="RoundRectangle 8" 
-                                    Stroke="#C0C0C0" 
-                                    StrokeThickness="2" 
-                                    Padding="10" 
-                                    VerticalOptions="End">
+                            <Border 
+                                Grid.Column="0" 
+                                IsVisible="{Binding SecondPlace, Converter={StaticResource EmptyToBoolConverter}}"
+                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
+                                StrokeShape="RoundRectangle 8" 
+                                Stroke="#C0C0C0" 
+                                StrokeThickness="2" 
+                                Padding="10" 
+                                VerticalOptions="End"
+                            >
                                 <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                                     <Label Text="🥈" FontSize="26" HorizontalOptions="Center" />
                                     <Label Text="2ème Place" FontSize="11" FontAttributes="Bold" TextColor="#C0C0C0" HorizontalOptions="Center" />
-                                    <Label Text="{Binding SecondPlace.CompetitorName}" FontAttributes="Bold" FontSize="13" HorizontalOptions="Center" LineBreakMode="TailTruncation" />
-                                    <Label Text="{Binding SecondPlace.Club}" FontSize="11" Opacity="0.7" HorizontalOptions="Center" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding SecondPlace.CompetitorName}" FontAttributes="Bold" FontSize="13" HorizontalOptions="Center" LineBreakMode="TailTruncation" TextColor="White"/>
+                                    <Label Text="{Binding SecondPlace.Club}" FontSize="11" Opacity="0.7" HorizontalOptions="Center" LineBreakMode="TailTruncation" TextColor="White"/>
                                     <Label Text="{Binding SecondPlace.ScoreDisplay}" FontAttributes="Bold" FontSize="12" TextColor="{DynamicResource PrimaryTextColor}" HorizontalOptions="Center" />
                                 </VerticalStackLayout>
                             </Border>
 
                             <!-- 1ère Place (Or) -->
-                            <Border Grid.Column="1" 
-                                    IsVisible="{Binding FirstPlace, Converter={StaticResource EmptyToBoolConverter}}"
-                                    BackgroundColor="{DynamicResource SurfaceElevation6}" 
-                                    StrokeShape="RoundRectangle 8" 
-                                    Stroke="#FFD700" 
-                                    StrokeThickness="3" 
-                                    Padding="12" 
-                                    VerticalOptions="End">
+                            <Border 
+                                Grid.Column="1" 
+                                IsVisible="{Binding FirstPlace, Converter={StaticResource EmptyToBoolConverter}}"
+                                BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                                StrokeShape="RoundRectangle 8" 
+                                Stroke="#FFD700" 
+                                StrokeThickness="3" 
+                                Padding="12" 
+                                VerticalOptions="End"
+                            >
                                 <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                                     <Label Text="🥇" FontSize="32" HorizontalOptions="Center" />
                                     <Label Text="CHAMPION" FontSize="12" FontAttributes="Bold" TextColor="#FFD700" HorizontalOptions="Center" />
-                                    <Label Text="{Binding FirstPlace.CompetitorName}" FontAttributes="Bold" FontSize="14" HorizontalOptions="Center" LineBreakMode="TailTruncation" />
-                                    <Label Text="{Binding FirstPlace.Club}" FontSize="11" Opacity="0.7" HorizontalOptions="Center" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding FirstPlace.CompetitorName}" FontAttributes="Bold" FontSize="14" HorizontalOptions="Center" LineBreakMode="TailTruncation" TextColor="White"/>
+                                    <Label Text="{Binding FirstPlace.Club}" FontSize="11" Opacity="0.7" HorizontalOptions="Center" LineBreakMode="TailTruncation" TextColor="White"/>
                                     <Label Text="{Binding FirstPlace.ScoreDisplay}" FontAttributes="Bold" FontSize="13" TextColor="{DynamicResource PrimaryTextColor}" HorizontalOptions="Center" />
                                 </VerticalStackLayout>
                             </Border>
 
                             <!-- 3ème Place (Bronze) -->
-                            <Border Grid.Column="2" 
-                                    IsVisible="{Binding ThirdPlace, Converter={StaticResource EmptyToBoolConverter}}"
-                                    BackgroundColor="{DynamicResource SurfaceElevation5}" 
-                                    StrokeShape="RoundRectangle 8" 
-                                    Stroke="#CD7F32" 
-                                    StrokeThickness="2" 
-                                    Padding="10" 
-                                    VerticalOptions="End">
+                            <Border 
+                                Grid.Column="2" 
+                                IsVisible="{Binding ThirdPlace, Converter={StaticResource EmptyToBoolConverter}}"
+                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
+                                StrokeShape="RoundRectangle 8" 
+                                Stroke="#CD7F32" 
+                                StrokeThickness="2" 
+                                Padding="10" 
+                                VerticalOptions="End"
+                            >
                                 <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                                     <Label Text="🥉" FontSize="26" HorizontalOptions="Center" />
                                     <Label Text="3ème Place" FontSize="11" FontAttributes="Bold" TextColor="#CD7F32" HorizontalOptions="Center" />
-                                    <Label Text="{Binding ThirdPlace.CompetitorName}" FontAttributes="Bold" FontSize="13" HorizontalOptions="Center" LineBreakMode="TailTruncation" />
-                                    <Label Text="{Binding ThirdPlace.Club}" FontSize="11" Opacity="0.7" HorizontalOptions="Center" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding ThirdPlace.CompetitorName}" FontAttributes="Bold" FontSize="13" HorizontalOptions="Center" LineBreakMode="TailTruncation" TextColor="White"/>
+                                    <Label Text="{Binding ThirdPlace.Club}" FontSize="11" Opacity="0.7" HorizontalOptions="Center" LineBreakMode="TailTruncation" TextColor="White"/>
                                     <Label Text="{Binding ThirdPlace.ScoreDisplay}" FontAttributes="Bold" FontSize="12" TextColor="{DynamicResource PrimaryTextColor}" HorizontalOptions="Center" />
                                 </VerticalStackLayout>
                             </Border>
@@ -150,11 +185,11 @@
                 <VerticalStackLayout Spacing="8">
                     <!-- Column Header -->
                     <Border BackgroundColor="{DynamicResource SurfaceElevation8}" StrokeShape="RoundRectangle 6" Padding="14, 8">
-                        <Grid ColumnDefinitions="70, *, 120, 110, 100" ColumnSpacing="10">
+                        <Grid ColumnDefinitions="70, *, *, 110, 100" ColumnSpacing="10">
                             <Label Grid.Column="0" Text="RANG" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" FontSize="12" />
                             <Label Grid.Column="1" Text="COMPÉTITEUR" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" FontSize="12" />
                             <Label Grid.Column="2" Text="CLUB" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" FontSize="12" />
-                            <Label Grid.Column="3" Text="SCORE / RÉSULTAT" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" FontSize="12" HorizontalTextAlignment="Center" />
+                            <Label Grid.Column="3" Text="RÉSULTAT" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" FontSize="12" HorizontalTextAlignment="Center" />
                             <Label Grid.Column="4" Text="STATUT" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" FontSize="12" HorizontalTextAlignment="End" />
                         </Grid>
                     </Border>
@@ -163,71 +198,105 @@
                     <CollectionView ItemsSource="{Binding Results}">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="models:CategoryCompetitorResultModel">
-                                <Border Margin="0, 3" 
-                                        Padding="12, 10" 
-                                        BackgroundColor="{DynamicResource SurfaceColor}" 
-                                        Stroke="{DynamicResource BorderDark}" 
-                                        StrokeThickness="1" 
-                                        StrokeShape="RoundRectangle 8">
-                                    <Grid ColumnDefinitions="70, *, 120, 110, 100" ColumnSpacing="10" VerticalOptions="Center">
+                                <Border 
+                                    Margin="0, 3" 
+                                    Padding="12, 10" 
+                                    BackgroundColor="{DynamicResource SurfaceColor}" 
+                                    Stroke="{DynamicResource BorderDark}" 
+                                    StrokeThickness="1" 
+                                    StrokeShape="RoundRectangle 8"
+                                >
+                                    <Grid ColumnDefinitions="70, *, *, 110, 100" ColumnSpacing="10" VerticalOptions="Center">
                                         <!-- Rang & Médaille -->
                                         <HorizontalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
-                                            <Label Text="{Binding MedalIcon}" FontSize="16" VerticalOptions="Center" IsVisible="{Binding MedalIcon, Converter={StaticResource EmptyToBoolConverter}}" />
-                                            <Border BackgroundColor="{DynamicResource SurfaceElevation5}" 
-                                                    StrokeShape="RoundRectangle 4" 
-                                                    Padding="6, 2" 
-                                                    VerticalOptions="Center"
-                                                    IsVisible="{Binding MedalIcon, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}">
-                                                <Label Text="{Binding RankDisplay}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" HorizontalOptions="Center" />
+                                            <Label 
+                                                Text="{Binding MedalIcon}" 
+                                                FontSize="16" 
+                                                VerticalOptions="Center" 
+                                                IsVisible="{Binding MedalIcon, Converter={StaticResource EmptyToBoolConverter}}" 
+                                            />
+                                            <Border 
+                                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
+                                                StrokeShape="RoundRectangle 4" 
+                                                Padding="6, 2" 
+                                                VerticalOptions="Center"
+                                                IsVisible="{Binding MedalIcon, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+                                            >
+                                                <Label 
+                                                    Text="{Binding RankDisplay}" 
+                                                    FontSize="12" 
+                                                    FontAttributes="Bold" 
+                                                    TextColor="{DynamicResource PrimaryTextColor}" 
+                                                    HorizontalOptions="Center" 
+                                                />
                                             </Border>
-                                            <Label Text="{Binding RankDisplay}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" VerticalOptions="Center" IsVisible="{Binding MedalIcon, Converter={StaticResource EmptyToBoolConverter}}" />
+                                            <Label 
+                                                Text="{Binding RankDisplay}" 
+                                                FontSize="12" 
+                                                FontAttributes="Bold" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                                VerticalOptions="Center" 
+                                                IsVisible="{Binding MedalIcon, Converter={StaticResource EmptyToBoolConverter}}" 
+                                            />
                                         </HorizontalStackLayout>
 
                                         <!-- Nom & Drapeau -->
                                         <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
-                                            <Image Source="{Binding CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
-                                                   WidthRequest="22" 
-                                                   HeightRequest="15" 
-                                                   VerticalOptions="Center" 
-                                                   IsVisible="{Binding CountryIsoCode, Converter={StaticResource EmptyToBoolConverter}}" />
-                                            <Label Text="{Binding CompetitorName}" 
-                                                   FontAttributes="Bold" 
-                                                   FontSize="14" 
-                                                   TextColor="{DynamicResource PrimaryTextColor}" 
-                                                   VerticalOptions="Center" 
-                                                   LineBreakMode="TailTruncation" />
+                                            <Image 
+                                                Source="{Binding CountryIsoCode, Converter={StaticResource IsoCodeToFlagPathConverter}}" 
+                                                WidthRequest="22" 
+                                                HeightRequest="15" 
+                                                VerticalOptions="Center" 
+                                                IsVisible="{Binding CountryIsoCode, Converter={StaticResource EmptyToBoolConverter}}" 
+                                            />
+                                            <Label 
+                                                Text="{Binding CompetitorName}" 
+                                                FontAttributes="Bold" 
+                                                FontSize="14" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                                VerticalOptions="Center" 
+                                                LineBreakMode="TailTruncation" 
+                                            />
                                         </HorizontalStackLayout>
 
                                         <!-- Club -->
-                                        <Label Grid.Column="2" 
-                                               Text="{Binding Club, FallbackValue='—'}" 
-                                               FontSize="12" 
-                                               Opacity="0.8" 
-                                               TextColor="{DynamicResource SecondaryTextColor}" 
-                                               VerticalOptions="Center" 
-                                               LineBreakMode="TailTruncation" />
+                                        <Label 
+                                            Grid.Column="2" 
+                                            Text="{Binding Club, FallbackValue='—'}" 
+                                            FontSize="12" 
+                                            Opacity="0.8" 
+                                            TextColor="{DynamicResource SecondaryTextColor}" 
+                                            VerticalOptions="Center" 
+                                            LineBreakMode="TailTruncation" 
+                                        />
 
                                         <!-- Score / Résultat -->
-                                        <Label Grid.Column="3" 
-                                               Text="{Binding ScoreDisplay}" 
-                                               FontAttributes="Bold" 
-                                               FontSize="13" 
-                                               TextColor="{DynamicResource PrimaryTextColor}" 
-                                               HorizontalOptions="Center" 
-                                               VerticalOptions="Center" />
+                                        <Label 
+                                            Grid.Column="3" 
+                                            Text="{Binding ScoreDisplay}" 
+                                            FontAttributes="Bold" 
+                                            FontSize="13" 
+                                            TextColor="{DynamicResource PrimaryTextColor}" 
+                                            HorizontalOptions="Center" 
+                                            VerticalOptions="Center" 
+                                        />
 
                                         <!-- Statut -->
-                                        <Border Grid.Column="4" 
-                                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
-                                                StrokeShape="RoundRectangle 4" 
-                                                Padding="6, 3" 
-                                                HorizontalOptions="End" 
-                                                VerticalOptions="Center">
-                                            <Label Text="{Binding Status}" 
-                                                   FontSize="11" 
-                                                   FontAttributes="Bold" 
-                                                   TextColor="{DynamicResource PrimaryTextColor}" 
-                                                   HorizontalOptions="Center" />
+                                        <Border 
+                                            Grid.Column="4" 
+                                            BackgroundColor="{DynamicResource SurfaceElevation5}" 
+                                            StrokeShape="RoundRectangle 4" 
+                                            Padding="6, 3" 
+                                            HorizontalOptions="End" 
+                                            VerticalOptions="Center"
+                                        >
+                                            <Label 
+                                                Text="{Binding Status}" 
+                                                FontSize="11" 
+                                                FontAttributes="Bold" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                                HorizontalOptions="Center" 
+                                            />
                                         </Border>
                                     </Grid>
                                 </Border>
