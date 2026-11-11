@@ -73,7 +73,7 @@
                                 </HorizontalStackLayout>
                                 
                                 <Label 
-                                    Text="{Binding Resources.WAITING}" 
+                                    Text="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=Resources.WAITING}"
                                     IsVisible="{Binding Competitor1, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                                     FontAttributes="Italic" 
                                     TextColor="Gray" 
@@ -92,8 +92,8 @@
                         <Label 
                             Grid.Column="0" 
                             Grid.Row="2" 
-                            Text="{Binding Resources.VS}" 
-                            HorizontalOptions="Center" 
+                            Text="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=Resources.VS}"
+                            HorizontalOptions="Center"
                             TextColor="DarkGray" 
                             FontAttributes="Bold" 
                             Margin="0,5"
@@ -131,7 +131,7 @@
                                 </HorizontalStackLayout>
                                 
                                 <Label 
-                                    Text="{Binding Resources.WAITING}" 
+                                    Text="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=Resources.WAITING}"
                                     IsVisible="{Binding Competitor2, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
                                     FontAttributes="Italic" 
                                     TextColor="Gray" 
@@ -341,29 +341,6 @@
                     VerticalOptions="Center"
                     IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                 >
-                    <!-- MENU -->
-                    <Border
-                        StrokeShape="RoundRectangle 50"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        BackgroundColor="{StaticResource ValidColor}"
-                        Stroke="{StaticResource ValidColor}"
-                    >
-                        <Label 
-                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
-                            Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
-                            FontSize="25" 
-                            TextColor="{DynamicResource PrimaryTextColor}" 
-                            VerticalOptions="Center"
-                            HorizontalOptions="Center"
-                            FontAttributes="Bold"
-                        />
-                        
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
-                        </Border.GestureRecognizers>
-                    </Border>
-
                     <!-- INDICATEUR STATUT SERVEUR -->
                     <Border
                         Grid.Column="{OnIdiom Tablet='2', Phone='1'}"
@@ -372,20 +349,10 @@
                         StrokeShape="RoundRectangle 18"
                         Padding="12,6"
                         StrokeThickness="1.5"
-                        BackgroundColor="{DynamicResource SurfaceElevation4}"
-                        Stroke="{DynamicResource BorderMuted}"
+                        BackgroundColor="{DynamicResource SuccessBg}"
+                        Stroke="{DynamicResource SuccessColor}"
+                        IsVisible="{Binding IsServerStarted}"
                     >
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
-                                <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
-                                <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
-                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
-                                <Setter Property="BackgroundColor" Value="{DynamicResource ErrorBg}" />
-                            </DataTrigger>
-                        </Border.Triggers>
-
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                             <!-- Pastille de statut -->
                             <BoxView
@@ -393,17 +360,11 @@
                                 HeightRequest="10"
                                 CornerRadius="5"
                                 VerticalOptions="Center"
-                                Color="{DynamicResource ErrorColor}"
-                            >
-                                <BoxView.Triggers>
-                                    <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
-                                        <Setter Property="Color" Value="{DynamicResource SuccessColor}" />
-                                    </DataTrigger>
-                                </BoxView.Triggers>
-                            </BoxView>
+                                Color="{DynamicResource SuccessColor}"
+                            />
 
                             <!-- Texte statut DEMARRE -->
-                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center" IsVisible="{Binding IsServerStarted}">
+                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
                                 <Label
                                     Text="Serveur actif"
                                     TextColor="{DynamicResource SuccessLight}"
@@ -412,6 +373,33 @@
                                     VerticalOptions="Center"
                                 />
                             </HorizontalStackLayout>
+                        </HorizontalStackLayout>
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding StopServerCommand}" />
+                        </Border.GestureRecognizers>
+                    </Border>
+
+                    <Border
+                        Grid.Column="{OnIdiom Tablet='2', Phone='1'}"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"
+                        StrokeShape="RoundRectangle 18"
+                        Padding="12,6"
+                        StrokeThickness="1.5"
+                        BackgroundColor="{DynamicResource ErrorBg}"
+                        Stroke="{DynamicResource ErrorColor}"
+                        IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
+                    >
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <!-- Pastille de statut -->
+                            <BoxView
+                                WidthRequest="10"
+                                HeightRequest="10"
+                                CornerRadius="5"
+                                VerticalOptions="Center"
+                                Color="{DynamicResource ErrorColor}"
+                            />
 
                             <!-- Texte statut ARRETE -->
                             <Label
@@ -420,12 +408,11 @@
                                 FontAttributes="Bold"
                                 FontSize="13"
                                 VerticalOptions="Center"
-                                IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
                             />
                         </HorizontalStackLayout>
 
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}" />
+                            <TapGestureRecognizer Command="{Binding StartServerCommand}" />
                         </Border.GestureRecognizers>
                     </Border>
                 </HorizontalStackLayout>
@@ -2474,76 +2461,5 @@
                 IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
             />
         </Grid>
-
-        <!-- Side Sheet Control -->
-        <controls:SideSheetControl 
-            IsOpen="{Binding IsSideSheetOpen}"
-            CloseCommand="{Binding CloseSideSheetCommand}"
-        >
-            <controls:SideSheetControl.SheetContent>
-                <VerticalStackLayout Spacing="20">
-                    <Label 
-                        Text="MENU" 
-                        FontSize="24" 
-                        FontAttributes="Bold" 
-                        TextColor="{DynamicResource PrimaryTextColor}" 
-                        HorizontalOptions="Center" 
-                        Margin="0,0,0,10" 
-                    />
-
-                    <Button 
-                        Text="DÉMARRER" 
-                        Command="{Binding StartServerCommand}"
-                        BackgroundColor="{DynamicResource ValidColor}"
-                        TextColor="Black"
-                        FontAttributes="Bold"
-                        CornerRadius="20"
-                        HeightRequest="50"
-                        IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
-                    />
-
-                    <Button 
-                        Text="ARRÉTER" 
-                        Command="{Binding StopServerCommand}"
-                        BackgroundColor="Red"
-                        TextColor="White"
-                        FontAttributes="Bold"
-                        CornerRadius="20"
-                        HeightRequest="50"
-                        IsVisible="{Binding IsServerStarted}"
-                    />
-
-                    <Button 
-                        Text="DIFFUSER" 
-                        Command="{Binding BroadcastMatchInfoCommand}"
-                        BackgroundColor="{DynamicResource ValidColor}"
-                        TextColor="Black"
-                        FontAttributes="Bold"
-                        CornerRadius="20"
-                        HeightRequest="50"
-                    />
-
-                    <Button 
-                        Text="VOIR LES TIRAGES" 
-                        Command="{Binding GoToDrawsCommand}"
-                        BackgroundColor="{DynamicResource ValidColor}"
-                        TextColor="Black"
-                        FontAttributes="Bold"
-                        CornerRadius="20"
-                        HeightRequest="50"
-                    />
-
-                    <Button 
-                        Text="FERMER" 
-                        Command="{Binding CloseSideSheetCommand}"
-                        BackgroundColor="Gray"
-                        TextColor="White"
-                        CornerRadius="20"
-                        HeightRequest="40"
-                        Margin="0,20,0,0"
-                    />
-                </VerticalStackLayout>
-            </controls:SideSheetControl.SheetContent>
-        </controls:SideSheetControl>
     </Grid>
 </base:BasePage>

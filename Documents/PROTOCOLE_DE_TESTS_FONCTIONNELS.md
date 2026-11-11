@@ -157,14 +157,14 @@ Ce protocole a pour but de valider de façon formelle et exhaustive l'intégrit�
 
 | Étape | Action utilisateur | Résultat attendu | Validé (Oui/Non) |
 | :---: | :--- | :--- | :---: |
-| 1 | Cliquer sur le bouton rouge **DÉMARRER** de la compétition Sanda. | Une boîte de dialogue s'affiche demandant le nom du serveur BLE. | [ ] |
-| 2 | Saisir le nom `Tapis 1 - Sanda` et valider. | L'écran serveur Sanda s'ouvre, le voyant passe au vert, et l'étiquette `🟢 En cours` apparaît. | [ ] |
-| 3 | Observer le bandeau supérieur des juges. | 3 ou 5 pastilles de juges sont affichées en rouge/grisé (aucun connecté). | [ ] |
+| 1 | Cliquer sur le bouton rouge **Serveur arrêté** de la compétition Sanda. | Une boîte de dialogue s'affiche demandant le nom du serveur BLE. | [ ] |
+| 2 | Saisir le nom `Tapis 1 - Sanda` et cliquer sur le bouton **Démarrer**. | L'écran serveur Sanda s'ouvre, le voyant passe au vert, et l'étiquette `Serveur actif` apparaît. | [ ] |
+| 3 | Observer le bandeau supérieur des juges. | 5 pastilles de juges sont affichées en grisé (aucun connecté). | [ ] |
 
 ---
 
 ### Test 3.2 : Découverte et Connexion des Tablettes Arbitres
-* **Écran cible** : Sur chaque tablette arbitre > Accueil > Bouton **JUGE** (`JudgeConnectionPage`)
+* **Écran cible** : Sur chaque tablette arbitre > Accueil > Bouton **JUGE**
 
 | Étape | Action utilisateur | Résultat attendu | Validé (Oui/Non) |
 | :---: | :--- | :--- | :---: |
