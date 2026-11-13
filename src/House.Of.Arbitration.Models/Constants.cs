@@ -6,6 +6,11 @@ public static class Constants
     public static double DEFAULT_SCORE_GROUP_B = 3.0;
     public static double DEFAUTL_SCORE_GROUP_C = 2.0;
 
+    /// <summary>
+    /// Identifiant constructeur BLE propriétaire ('KF' = 0x4B46) pour transporter le nom du serveur dans les paquets BLE.
+    /// </summary>
+    public const ushort BLE_MANUFACTURER_ID = 0x4B46;
+
     public static class QueryParameter
     {
         public static string TITLE = "Title";
@@ -29,6 +34,7 @@ public static class Constants
         public static string TIMER_STOP = "TIMER_STOP";
         public static string TIMER_SET = "TIMER_SET:";
 
+        public static string SERVER_NAME = "SERVER_NAME:";
         public static string COMPETITION_DATA = "COMPETITION_DATA:";
         public static string GET_COMPETITION = "GET_COMPETITION";
         public static string GET_MATCH = "GET_MATCH";
@@ -51,6 +57,7 @@ public static class Constants
             public const string COMPETITION_ID = "COMPETITION_ID";
             public const string COMPETITION = "COMPETITION";
             public const string SERVER_ID = "SERVER_ID";
+            public const string SERVER_NAME = "SERVER_NAME";
             public const string JUDGE_GROUP = "JUDGE_GROUP";
             public const string JUDGE_POSITION = "JUDGE_POSITION";
         }
@@ -73,6 +80,7 @@ public static class Constants
             public const string REFEREE_DATA = "REFEREE_DATA";
             public const string RESULTS = "RESULTS";
             public const string TAOLU_CODES = "TAOLU_CODES";
+            public const string EXCEL_IMPORT = "ExcelImportPage";
         }
     }
 

@@ -16,6 +16,7 @@ namespace House.Of.Arbitration.ViewModels;
 
 [QueryProperty(nameof(CompetitionId), Constants.Navigation.Parameter.COMPETITION_ID)]
 [QueryProperty(nameof(ServerId), Constants.Navigation.Parameter.SERVER_ID)]
+[QueryProperty(nameof(ServerName), Constants.Navigation.Parameter.SERVER_NAME)]
 [QueryProperty(nameof(JudgeGroup), Constants.Navigation.Parameter.JUDGE_GROUP)]
 [QueryProperty(nameof(JudgePosition), Constants.Navigation.Parameter.JUDGE_POSITION)]
 public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
@@ -55,6 +56,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// Service d'accès aux données pour les compétitions
     /// </summary>
     private readonly IRepository<CompetitionModel> _competitionRepository;
+
+    /// <summary>
+    /// Service de gestion de la base de données
+    /// </summary>
+    private readonly IDatabaseService? _databaseService;
     #endregion
 
     #region Attributs
@@ -63,6 +69,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     private int _competitionId;
     private CompetitionModel? _competition;
     private string _serverId = String.Empty;
+    private string _serverName = String.Empty;
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -150,6 +157,21 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     {
         get => _serverId;
         set => SetProperty(ref _serverId, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le nom du serveur
+    /// </summary>
+    public string ServerName
+    {
+        get => _serverName;
+        set
+        {
+            if (SetProperty(ref _serverName, value))
+            {
+                Title = !string.IsNullOrWhiteSpace(_serverName) ? $"JUDGE - {_serverName}" : "JUDGE";
+            }
+        }
     }
 
     /// <summary>
@@ -302,8 +324,16 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         {
             SetProperty(ref _judgeGroup, value);
             OnPropertyChanged(nameof(JudgeName));
+            OnPropertyChanged(nameof(PositionCode));
         }
     }
+
+    /// <summary>
+    /// Code identifiant la position du juge (ex: "1", "A_1")
+    /// </summary>
+    public string PositionCode => !string.IsNullOrEmpty(JudgeGroup)
+        ? $"{JudgeGroup}_{JudgePosition}"
+        : JudgePosition.ToString();
 
     /// <summary>
     /// Obtient le text pour le bouton de reconnection
@@ -490,27 +520,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         _drawPoolsService = drawPoolsService;
         _drawOrderService = drawOrderService;
         _mvtCodesService = mvtCodesService;
-        //_databaseService = databaseService;
+        _databaseService = databaseService;
 
         _title = "JUDGE";
 
-        _timer = Application.Current?.Dispatcher.CreateTimer();
-        if (_timer != null)
-        {
-            _timer.Interval = TimeSpan.FromSeconds(1);
-            _timer.Tick += (s, e) =>
-            {
-                if (_timeLeft.TotalSeconds > 0)
-                {
-                    _timeLeft = _timeLeft.Subtract(TimeSpan.FromSeconds(1));
-                    TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
-                }
-                else
-                {
-                    _timer.Stop();
-                }
-            };
-        }
+        EnsureTimer();
 
         Codes.CollectionChanged += (s, e) => UpdateCodesCanDelete();
         IsReceivingMatch = true;
@@ -523,6 +537,14 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// </summary>
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.TryGetValue(nameof(ServerName), out var sNameObj) || query.TryGetValue(Constants.Navigation.Parameter.SERVER_NAME, out sNameObj))
+        {
+            if (sNameObj is string sName && !string.IsNullOrWhiteSpace(sName))
+            {
+                ServerName = sName;
+            }
+        }
+
         if (query.TryGetValue(nameof(CompetitionId), out var compIdObj) || query.TryGetValue(Constants.Navigation.Parameter.COMPETITION_ID, out compIdObj))
         {
             int newId = 0;
@@ -541,6 +563,34 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     }
     #endregion
 
+    /// <summary>
+    /// Initialise le timer du chronomètre de manière paresseuse si nécessaire
+    /// </summary>
+    public void EnsureTimer()
+    {
+        if (_timer == null)
+        {
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher != null)
+            {
+                _timer = dispatcher.CreateTimer();
+                _timer.Interval = TimeSpan.FromSeconds(1);
+                _timer.Tick += (s, e) =>
+                {
+                    if (_timeLeft.TotalSeconds > 0)
+                    {
+                        _timeLeft = _timeLeft.Subtract(TimeSpan.FromSeconds(1));
+                        TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
+                    }
+                    else
+                    {
+                        _timer.Stop();
+                    }
+                };
+            }
+        }
+    }
+
     #region Override Methods
     /// <summary>
     /// 
@@ -548,15 +598,23 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// <returns></returns>
     public override async Task OnAppearing()
     {
+        EnsureTimer();
         IsReceivingMatch = true;
         IsConnected = true;
 
         _lastServerContactTime = DateTime.UtcNow;
         _consecutiveFailedPings = 0;
 
+        // Mémoriser le ServerId dès l'arrivée sur la page pour la reconnexion automatique
+        if (!string.IsNullOrEmpty(ServerId))
+        {
+            _lastServerDeviceId = ServerId;
+        }
+
         StartWatchdog();
 
         _bluetoothClient.DeviceConnected += OnDeviceConnected;
+        _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;
         _bluetoothClient.MessageReceived += OnMessageReceived;
 
         try
@@ -579,12 +637,14 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// <returns></returns>
     public override async Task OnDisappearing()
     {
+        _timer?.Stop();
         _typeTimer?.Stop();
         _matchingCodesCts?.Cancel();
         _matchingCodesCts?.Dispose();
         _matchingCodesCts = null;
 
         _bluetoothClient.DeviceConnected -= OnDeviceConnected;
+        _bluetoothClient.DeviceDisconnected -= OnDeviceDisconnected;
         _bluetoothClient.MessageReceived -= OnMessageReceived;
 
         await base.OnDisappearing();
@@ -615,6 +675,17 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             await HandleDeviceConnectedAsync(deviceId);
         });
     }
+
+    /// <summary>
+    /// Méthode appelée lorsque la connexion avec le serveur est perdue
+    /// </summary>
+    public void OnDeviceDisconnected(object? sender, string deviceId)
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await HandleDeviceDisconnectedAsync();
+        });
+    }
     #endregion
 
     #region Private Methods
@@ -625,11 +696,14 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// <returns></returns>
     public async Task HandleMessageAsync(string message)
     {
+        if (string.IsNullOrWhiteSpace(message)) return;
+        var trimmed = message.Trim().TrimEnd('\0');
+
         try
         {
-            if (message.StartsWith(Constants.Message.MATCH_INFO))
+            if (trimmed.StartsWith(Constants.Message.MATCH_INFO))
             {
-                var content = message.Substring(Constants.Message.MATCH_INFO.Length);
+                var content = trimmed.Substring(Constants.Message.MATCH_INFO.Length);
                 var matchData = JsonSerializer.Deserialize<MatchInfoData>(content, _jsonOptions);
 
                 if (matchData != null)
@@ -741,35 +815,70 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
                 IsReceivingMatch = false;
             }
-            else if (message == Constants.Message.TIMER_START)
+            else if (trimmed == Constants.Message.TIMER_START)
             {
+                EnsureTimer();
                 _timer?.Start();
             }
-            else if (message == Constants.Message.TIMER_PAUSE)
+            else if (trimmed == Constants.Message.TIMER_PAUSE)
             {
                 _timer?.Stop();
             }
-            else if (message == Constants.Message.TIMER_STOP)
+            else if (trimmed == Constants.Message.TIMER_STOP)
             {
                 _timer?.Stop();
                 _timeLeft = TimeSpan.Zero;
                 TimeLeftDisplay = "00:00";
             }
-            else if (message.StartsWith(Constants.Message.TIMER_SET))
+            else if (trimmed.StartsWith(Constants.Message.TIMER_SET))
             {
-                var timeStr = message.Substring(Constants.Message.TIMER_SET.Length);
-                if (TimeSpan.TryParseExact(timeStr, @"mm\:ss", null, out var newTime))
+                var timeStr = trimmed.Substring(Constants.Message.TIMER_SET.Length).Trim();
+                EnsureTimer();
+                string[] formats = new[] { @"mm\:ss", @"m\:ss", @"hh\:mm\:ss", @"h\:mm\:ss" };
+                if (TimeSpan.TryParseExact(timeStr, formats, null, out var newTime) || TimeSpan.TryParse(timeStr, out newTime))
                 {
                     _timeLeft = newTime;
                     TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
                 }
             }
-            else if (message == Constants.Message.SERVER_STOPPED)
+            else if (trimmed.StartsWith(Constants.Message.SERVER_NAME))
+            {
+                var sName = trimmed.Substring(Constants.Message.SERVER_NAME.Length).Trim();
+                if (!string.IsNullOrEmpty(sName))
+                {
+                    ServerName = sName;
+                }
+            }
+            else if (trimmed.StartsWith(Constants.Message.COMPETITION_DATA))
+            {
+                var content = trimmed.Substring(Constants.Message.COMPETITION_DATA.Length);
+                var competition = JsonSerializer.Deserialize<CompetitionModel>(content, _jsonOptions);
+                if (competition != null)
+                {
+                    Competition = competition;
+
+                    if (_databaseService != null)
+                    {
+                        await _databaseService.ImportCompetitionDataAsync(competition);
+                    }
+                    else
+                    {
+                        var existing = await _competitionRepository.GetByIdAsync(competition.Id);
+                        if (existing != null)
+                            await _competitionRepository.UpdateAsync(competition);
+                        else
+                            await _competitionRepository.AddAsync(competition);
+                    }
+
+                    await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
+                }
+            }
+            else if (trimmed == Constants.Message.SERVER_STOPPED)
             {
                 _logger.LogInformation("Server announced it has stopped.");
                 await HandleServerStoppedAsync();
             }
-            else if (message == Constants.Message.PONG)
+            else if (trimmed == Constants.Message.PONG)
             {
                 _lastServerContactTime = DateTime.UtcNow;
             }
@@ -842,7 +951,13 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// <returns></returns>
     private async Task TryReconnectAsync()
     {
-        if (IsConnected || _isReconnecting || string.IsNullOrEmpty(_lastServerDeviceId))
+        if (IsConnected || string.IsNullOrEmpty(_lastServerDeviceId))
+        {
+            return;
+        }
+
+        // Protection contre les tentatives concurrentes
+        if (_isReconnecting)
         {
             return;
         }
@@ -850,11 +965,13 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         IsReconnecting = true;
         try
         {
+            _logger.LogInformation("Tentative de reconnexion au serveur {DeviceId}", _lastServerDeviceId);
             await _bluetoothClient.ConnectToDevice(_lastServerDeviceId);
+            // Si la connexion réussit, OnDeviceConnected sera déclenché automatiquement
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Failed attempt to reconnect to server {DeviceId}", _lastServerDeviceId);
+            _logger.LogWarning(ex, "Échec de la tentative de reconnexion au serveur {DeviceId}", _lastServerDeviceId);
         }
         finally
         {
@@ -972,8 +1089,16 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// Méthode permettant d'essayer de récupérer le signal du serveur
     /// </summary>
     /// <returns></returns>
-    private async Task HandleDeviceConnectedAsync(string deviceId)
+    internal async Task HandleDeviceConnectedAsync(string deviceId)
     {
+        // Mettre à jour ServerId avec le deviceId de reconnexion
+        // (peut différer de l'ancien si le serveur a redémarré)
+        if (!string.IsNullOrEmpty(deviceId))
+        {
+            ServerId = deviceId;
+            _lastServerDeviceId = deviceId;
+        }
+
         IsConnected = true;
         _lastServerContactTime = DateTime.UtcNow;
         _consecutiveFailedPings = 0;
@@ -981,20 +1106,22 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         StopAutoReconnect();
         StartWatchdog();
 
-        // Reconnecting with an active judge
+        // Réenregistrement du juge et synchronisation des scores offline
         try
         {
-            string positionCode = !string.IsNullOrEmpty(JudgeGroup)
-                ? JudgeGroup
-                : JudgePosition.ToString();
-            await _bluetoothClient.SendMessage(deviceId, $"{Constants.Message.JUDGE_POSITION}{positionCode}");
+            await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_POSITION}{PositionCode}");
 
             await Task.Delay(150);
 
+            // Envoyer les scores accumulés en mode hors-ligne
             if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
             {
                 await SyncUnsyncedScoresAsync();
             }
+
+            // Redemander l'état du match courant au serveur
+            await Task.Delay(100);
+            await _bluetoothClient.SendMessage(ServerId, Constants.Message.GET_MATCH);
         }
         catch (Exception ex)
         {
@@ -1028,6 +1155,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                 var scoresToSend = _unsyncedScores.ToList();
                 foreach (var scoreItem in scoresToSend)
                 {
+                    if (string.IsNullOrEmpty(scoreItem.JudgePosition))
+                    {
+                        scoreItem.JudgePosition = PositionCode;
+                    }
+
                     var json = JsonSerializer.Serialize(scoreItem, _jsonOptions);
                     await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_SCORE}{json}");
 
@@ -1041,13 +1173,14 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                     await Task.Delay(50);
                 }
             }
-            else if (Codes.Any(c => !c.IsSynced))
+
+            if (Codes.Any(c => !c.IsSynced))
             {
                 int? competitorId = (CurrentDraw is DrawOrderModel o) ? o.CompetitorId : null;
                 var unsynced = Codes.Where(c => !c.IsSynced).OrderBy(c => c.Date).ToList();
                 foreach (var c in unsynced)
                 {
-                    var model = new TransfertScoreModel { Score = c.Score, CompetitorId = competitorId, Code = c };
+                    var model = new TransfertScoreModel { Score = c.Score, CompetitorId = competitorId, Code = c, JudgePosition = PositionCode };
                     var json = JsonSerializer.Serialize(model, _jsonOptions);
                     await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_SCORE}{json}");
                     c.IsSynced = true;
@@ -1124,7 +1257,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                 break;
         }
 
-        var scoreModel = new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId, Side = side };
+        var scoreModel = new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId, Side = side, JudgePosition = PositionCode };
 
         if (!IsConnected || ServerId == null)
         {
@@ -1391,7 +1524,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         Code = string.Empty;
         MatchingCodes = new List<MvtCodeModel>();
 
-        var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data };
+        var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data, JudgePosition = PositionCode };
 
         if (!IsConnected || ServerId == null)
         {
@@ -1449,6 +1582,23 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     public async Task Reconnect()
     {
+        if (_isReconnecting)
+        {
+            return;
+        }
+
+        // Forcer la déconnexion propre si nécessaire avant de tenter la reconnexion
+        if (IsConnected)
+        {
+            IsConnected = false;
+        }
+
+        // S'assurer que l'autoReconnect est actif
+        if (!string.IsNullOrEmpty(_lastServerDeviceId))
+        {
+            StartAutoReconnect();
+        }
+
         await TryReconnectAsync();
     }
 
@@ -1741,7 +1891,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
         PointsInput = string.Empty;
 
-        var scoreModel = new TransfertScoreModel { Score = Score, CompetitorId = competitorId, Code = data };
+        var scoreModel = new TransfertScoreModel { Score = Score, CompetitorId = competitorId, Code = data, JudgePosition = PositionCode };
 
         if (!IsConnected || ServerId == null)
         {

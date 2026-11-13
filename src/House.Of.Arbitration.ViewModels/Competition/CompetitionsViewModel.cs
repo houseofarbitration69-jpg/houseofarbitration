@@ -142,6 +142,12 @@ public partial class CompetitionsViewModel : BaseViewModel
     {
         await Shell.Current.GoToAsync("WizardPage");
     }
+
+    [RelayCommand]
+    private async Task ImportExcel()
+    {
+        await Shell.Current.GoToAsync(Constants.Navigation.Page.EXCEL_IMPORT);
+    }
     #endregion
 
     #region Override Methods

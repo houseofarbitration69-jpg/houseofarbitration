@@ -14,6 +14,7 @@ namespace House.Of.Arbitration.ViewModels;
 
 [QueryProperty(nameof(CompetitionId), Constants.Navigation.Parameter.COMPETITION_ID)]
 [QueryProperty(nameof(ServerId), Constants.Navigation.Parameter.SERVER_ID)]
+[QueryProperty(nameof(ServerName), Constants.Navigation.Parameter.SERVER_NAME)]
 public partial class JudgePositionViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
@@ -32,6 +33,7 @@ public partial class JudgePositionViewModel : BaseViewModel, IQueryAttributable
     private int _competitionId;
     private CompetitionModel? _competition;
     private string _serverId = String.Empty;
+    private string _serverName = String.Empty;
     private string _positionCode = String.Empty;
     #endregion
 
@@ -68,6 +70,21 @@ public partial class JudgePositionViewModel : BaseViewModel, IQueryAttributable
     {
         get => _serverId;
         set => SetProperty(ref _serverId, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le nom du serveur
+    /// </summary>
+    public string ServerName
+    {
+        get => _serverName;
+        set
+        {
+            if (SetProperty(ref _serverName, value))
+            {
+                Title = !string.IsNullOrWhiteSpace(_serverName) ? $"JUDGE - {_serverName}" : "JUDGE";
+            }
+        }
     }
 
     /// <summary>
@@ -161,6 +178,14 @@ public partial class JudgePositionViewModel : BaseViewModel, IQueryAttributable
     /// </summary>
     public void ApplyQueryAttributes(IDictionary<string, object> query)
     {
+        if (query.TryGetValue(nameof(ServerName), out var sNameObj) || query.TryGetValue(Constants.Navigation.Parameter.SERVER_NAME, out sNameObj))
+        {
+            if (sNameObj is string sName && !string.IsNullOrWhiteSpace(sName))
+            {
+                ServerName = sName;
+            }
+        }
+
         if (query.TryGetValue(nameof(CompetitionId), out var compIdObj) || query.TryGetValue(Constants.Navigation.Parameter.COMPETITION_ID, out compIdObj))
         {
             int newId = 0;
@@ -199,6 +224,7 @@ public partial class JudgePositionViewModel : BaseViewModel, IQueryAttributable
             var navigationParameter = new Dictionary<string, object>
             {
                 { Constants.Navigation.Parameter.SERVER_ID, ServerId },
+                { Constants.Navigation.Parameter.SERVER_NAME, ServerName },
                 { Constants.Navigation.Parameter.COMPETITION_ID, CompetitionId },
                 { Constants.Navigation.Parameter.JUDGE_GROUP, judge.Group ?? String.Empty },
                 { Constants.Navigation.Parameter.JUDGE_POSITION, judge.Number },

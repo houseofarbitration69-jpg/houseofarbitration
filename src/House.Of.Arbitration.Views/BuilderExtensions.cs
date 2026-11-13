@@ -37,6 +37,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<ServerTaoluPage>();
         builder.Services.AddTransient<RefereeDataPage>();
         builder.Services.AddTransient<TaoluCodesPage>();
+        builder.Services.AddTransient<ExcelImportPage>();
 
         builder.Services.AddTransientPopup<CategoryPopup, CategoryPopupViewModel>();
         builder.Services.AddTransientPopup<CompetitorPopup, CompetitorPopupViewModel>();

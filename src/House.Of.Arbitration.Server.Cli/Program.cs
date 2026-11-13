@@ -9,6 +9,7 @@ internal static class Program
     private static WindowsBluetoothServer? _server;
     private static ArbitrationServerSession? _session;
     private static bool _running = true;
+    private static string _deviceName = "HouseOfArbitration-Server";
 
     private static async Task<int> Main(string[] args)
     {
@@ -21,7 +22,6 @@ internal static class Program
         HookEvents(_server, _session);
 
         bool autoStart = false;
-        string deviceName = "HouseOfArbitration-Server";
         CompetitionType initialMode = CompetitionType.Sanda;
 
         for (int i = 0; i < args.Length; i++)
@@ -38,7 +38,7 @@ internal static class Program
             }
             else if (arg is "-n" or "--name" && i + 1 < args.Length)
             {
-                deviceName = args[++i];
+                _deviceName = args[++i];
             }
             else if (arg is "-m" or "--mode" && i + 1 < args.Length)
             {
@@ -55,7 +55,7 @@ internal static class Program
 
         if (autoStart)
         {
-            await _server.StartAdvertisingAsync(deviceName);
+            await _server.StartAdvertisingAsync(_deviceName);
         }
 
         PrintHelpSummary();
@@ -167,7 +167,8 @@ internal static class Program
             switch (cmd)
             {
                 case "start":
-                    string devName = args.Length > 0 ? string.Join(" ", args) : _server!.DeviceName;
+                    string devName = args.Length > 0 ? string.Join(" ", args) : (!string.IsNullOrWhiteSpace(_deviceName) ? _deviceName : _server!.DeviceName);
+                    _deviceName = devName;
                     await _server!.StartAdvertisingAsync(devName);
                     break;
 

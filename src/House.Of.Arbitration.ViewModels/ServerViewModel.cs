@@ -300,10 +300,16 @@ public partial class ServerViewModel : BaseViewModel
                     _timeLeft = _timeLeft.Subtract(TimeSpan.FromSeconds(1));
 
                     OnPropertyChanged(nameof(TimeLeftDisplay));
+
+                    // Resynchronisation périodique toutes les 5 secondes
+                    if ((int)_timeLeft.TotalSeconds % 5 == 0)
+                    {
+                        _ = _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
+                    }
                 }
                 else
                 {
-                    StopTimer();
+                    await StopTimer();
 
                     await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_STOP);
                 }
@@ -392,6 +398,10 @@ public partial class ServerViewModel : BaseViewModel
                         var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
                         await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
                         await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
+                        if (IsTimerRunning)
+                        {
+                            await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, args.ClientId);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -1017,6 +1027,11 @@ public partial class ServerViewModel : BaseViewModel
         {
             try
             {
+                if (!string.IsNullOrWhiteSpace(ServerName))
+                {
+                    await _bluetoothServer.SendToClientAsync($"{Constants.Message.SERVER_NAME}{ServerName}", clientId);
+                }
+
                 var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
 
                 await _bluetoothServer.SendToClientAsync($"{Constants.Message.COMPETITION_DATA}{json}", clientId);
@@ -1224,6 +1239,7 @@ public partial class ServerViewModel : BaseViewModel
         IsTimerRunning = false;
 
         await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
+        await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
     }
     #endregion
 
@@ -1262,6 +1278,7 @@ public partial class ServerViewModel : BaseViewModel
         {
             _timer?.Start();
             IsTimerRunning = true;
+            await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
             await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_START);
         }
     }
@@ -1273,7 +1290,7 @@ public partial class ServerViewModel : BaseViewModel
     [RelayCommand]
     private async Task PauseTimer()
     {
-        StopTimer();
+        await StopTimer();
     }
 
     /// <summary>
@@ -1283,7 +1300,7 @@ public partial class ServerViewModel : BaseViewModel
     [RelayCommand]
     private async Task ResetTimer()
     {
-        StopTimer();
+        await StopTimer();
 
         _timeLeft = TimeSpan.FromMinutes(2); // Default reset
 
@@ -1303,7 +1320,7 @@ public partial class ServerViewModel : BaseViewModel
 
         if (result != null && result != "Annuler")
         {
-            StopTimer();
+            await StopTimer();
 
             if (TimeSpan.TryParseExact(result, @"m\:ss", null, out var newTime))
             {

@@ -46,6 +46,8 @@ public static class BuilderExtensions
         builder.Services.AddTransient<DragDropPageViewModel>();
         builder.Services.AddTransient<RefereeDataViewModel>();
 
+        builder.Services.AddTransient<ExcelImportViewModel>();
+
         return builder;
     }
 }

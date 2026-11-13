@@ -20,4 +20,6 @@ public static class FontCustomIcons
     public const string CATEGORY = "\uF00D";
     public const string MAN = "\uF00F";
     public const string WOMAN = "\uF00E";
+    public const string DOWNLOAD = "\uF010";
+    public const string UPLOAD = "\uF011";
 }

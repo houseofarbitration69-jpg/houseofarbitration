@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Competition;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    x:TypeArguments="vm:ExcelImportViewModel"
+    x:Class="House.Of.Arbitration.Views.Competition.ExcelImportPage"
+    x:DataType="vm:ExcelImportViewModel">
+
+    <base:BasePage.Resources>
+        <ResourceDictionary>
+            <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+            <converters:IntToBoolConverter x:Key="IntToBoolConverter" />
+            <converters:StringToBoolConverter x:Key="StringToBoolConverter" />
+        </ResourceDictionary>
+    </base:BasePage.Resources>
+
+    <Grid x:Name="MainContainer">
+        <ScrollView Padding="20">
+            <VerticalStackLayout Spacing="24">
+
+                <!-- En-tête -->
+                <Grid ColumnDefinitions="Auto, *" ColumnSpacing="16">
+                    <Button Grid.Column="0"
+                            Text="←"
+                            FontSize="20"
+                            BackgroundColor="Transparent"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter=".."
+                            VerticalOptions="Center" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                        <Label Text="Import Excel" Style="{DynamicResource Headline}" FontSize="28" />
+                        <Label Text="Importez vos compétitions depuis un fichier Excel" Style="{DynamicResource SubHeadline}" FontSize="14" Opacity="0.7" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Section 1 : Export Template -->
+                <Border 
+                    StrokeShape="RoundRectangle 8"
+                    Stroke="{DynamicResource BorderColor}"
+                    StrokeThickness="1"
+                    BackgroundColor="{DynamicResource SurfaceColor}"
+                    Padding="20"
+                >
+                    <VerticalStackLayout Spacing="12">
+                        <Label 
+                            Text="1. Télécharger le template" 
+                            FontAttributes="Bold" 
+                            FontSize="18" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                        />
+                        
+                        <Label 
+                            Text="Téléchargez le fichier Excel template et remplissez-le avec les informations de votre compétition (catégories et compétiteurs). Consultez l'onglet &quot;Guide&quot; dans le fichier pour les valeurs acceptées."
+                            Opacity="0.8"
+                            LineBreakMode="WordWrap" 
+                            TextColor="LightGray"
+                        />
+                        <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                            <controls:IconButton 
+                                Text="Télécharger le template Excel"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding ExportTemplateCommand}"
+                            >
+                                <controls:IconButton.Icons>
+                                    <controls:IconInfo 
+                                        Icon="{x:Static helpers:FontCustomIcons.DOWNLOAD}" 
+                                        Color="{StaticResource InverseTextColor}" 
+                                        FontSize="16" 
+                                    />  
+                                </controls:IconButton.Icons>
+                            </controls:IconButton>
+
+                            <!--<Button 
+                                Text="📥 Télécharger le template Excel"
+                                Command="{Binding ExportTemplateCommand}"
+                                IsEnabled="{Binding IsExporting, Converter={StaticResource InvertBoolConverter}}"
+                                BackgroundColor="{DynamicResource Primary}"
+                                TextColor="White"
+                                HorizontalOptions="Start" 
+                            />-->
+                            
+                            <ActivityIndicator 
+                                IsRunning="{Binding IsExporting}"
+                                IsVisible="{Binding IsExporting}"
+                                Color="{DynamicResource Primary}"
+                                VerticalOptions="Center" 
+                            />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Section 2 : Import -->
+                <Border 
+                    StrokeShape="RoundRectangle 8"
+                    Stroke="{DynamicResource BorderColor}"
+                    StrokeThickness="1"
+                    BackgroundColor="{DynamicResource SurfaceColor}"
+                    Padding="20"
+                >
+                    <VerticalStackLayout Spacing="12">
+                        <Label 
+                            Text="2. Importer le fichier rempli" 
+                            FontAttributes="Bold" 
+                            FontSize="18" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                        />
+                        
+                        <Label 
+                            Text="Une fois le template rempli et enregistré, importez-le ici pour créer la compétition en base de données avec toutes ses catégories et ses compétiteurs."
+                            Opacity="0.8"
+                            LineBreakMode="WordWrap" 
+                            TextColor="LightGray"
+                        />
+                        
+                        <HorizontalStackLayout Spacing="12" VerticalOptions="Center">
+                            <controls:IconButton 
+                                Text="Importer un fichier Excel"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding ImportCommand}"
+                            >
+                                <controls:IconButton.Icons>
+                                    <controls:IconInfo 
+                                        Icon="{x:Static helpers:FontCustomIcons.DOWNLOAD}" 
+                                        Color="{StaticResource InverseTextColor}" 
+                                        FontSize="16" 
+                                    />
+                                </controls:IconButton.Icons>
+                            </controls:IconButton>
+
+                            <!--<Button Text="📤 Importer un fichier Excel"
+                                    Command="{Binding ImportCommand}"
+                                    IsEnabled="{Binding IsImporting, Converter={StaticResource InvertBoolConverter}}"
+                                    BackgroundColor="{DynamicResource MartialRed}"
+                                    TextColor="White"
+                                    HorizontalOptions="Start" />-->
+                            
+                            <ActivityIndicator 
+                                IsRunning="{Binding IsImporting}"
+                                IsVisible="{Binding IsImporting}"
+                                Color="{DynamicResource MartialRed}"
+                                VerticalOptions="Center" 
+                            />
+                        </HorizontalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Message de statut -->
+                <Label 
+                    Text="{Binding StatusMessage}"
+                    IsVisible="{Binding StatusMessage, Converter={StaticResource StringToBoolConverter}}"
+                    FontSize="14"
+                    HorizontalTextAlignment="Center"
+                    HorizontalOptions="Center" 
+                />
+
+                <!-- Résultats de l'import -->
+                <Border 
+                    IsVisible="{Binding HasResult}"
+                    StrokeShape="RoundRectangle 8"
+                    Stroke="{DynamicResource BorderColor}"
+                    StrokeThickness="1"
+                    BackgroundColor="{DynamicResource SurfaceColor}"
+                    Padding="20"
+                >
+                    <VerticalStackLayout Spacing="16">
+                        <Label 
+                            Text="Résultats de l'import" 
+                            FontAttributes="Bold" 
+                            FontSize="18" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                        />
+
+                        <!-- Succès -->
+                        <Border 
+                            IsVisible="{Binding ImportSuccess}"
+                            BackgroundColor="#E8F5E9"
+                            StrokeShape="RoundRectangle 6"
+                            Padding="16"
+                            StrokeThickness="0"
+                        >
+                            <VerticalStackLayout Spacing="6">
+                                <Label 
+                                    Text="✅ Import réussi !" 
+                                    TextColor="#2E7D32" 
+                                    FontAttributes="Bold" 
+                                    FontSize="16" 
+                                />
+                                
+                                <Label 
+                                    Text="{Binding ImportedCategories, StringFormat='• {0} catégorie(s) importée(s)'}"
+                                    TextColor="#2E7D32" 
+                                />
+                                
+                                <Label 
+                                    Text="{Binding ImportedCompetitors, StringFormat='• {0} compétiteur(s) importé(s)'}" 
+                                    TextColor="#2E7D32" 
+                                />
+                                
+                                <Label 
+                                    Text="{Binding ImportedDraws, StringFormat='• {0} tirage(s) généré(s)'}" 
+                                    TextColor="#2E7D32" 
+                                />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Erreurs -->
+                        <VerticalStackLayout 
+                            Spacing="8"
+                            IsVisible="{Binding ErrorMessages.Count, Converter={StaticResource IntToBoolConverter}}"
+                        >
+                            <Label 
+                                Text="❌ Erreurs de validation" 
+                                TextColor="#C62828" 
+                                FontAttributes="Bold" 
+                                FontSize="15" 
+                            />
+                            
+                            <Border 
+                                BackgroundColor="#FFEBEE" 
+                                StrokeShape="RoundRectangle 6" 
+                                Padding="12" 
+                                StrokeThickness="0"
+                            >
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding ErrorMessages}" Spacing="6">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Label Text="{Binding .}" TextColor="#C62828" FontSize="13" />
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Avertissements -->
+                        <VerticalStackLayout 
+                            Spacing="8"
+                            IsVisible="{Binding WarningMessages.Count, Converter={StaticResource IntToBoolConverter}}"
+                        >
+                            <Label 
+                                Text="⚠️ Avertissements" 
+                                TextColor="#E65100" 
+                                FontAttributes="Bold" 
+                                FontSize="15" 
+                            />
+                            
+                            <Border BackgroundColor="#FFF3E0" StrokeShape="RoundRectangle 6" Padding="12" StrokeThickness="0">
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding WarningMessages}" Spacing="6">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="x:String">
+                                            <Label Text="{Binding .}" TextColor="#E65100" FontSize="13" />
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Loading Indicator Overlay -->
+        <Border 
+            IsVisible="{Binding IsBusy}" 
+            BackgroundColor="{DynamicResource OverlayModalColor}" 
+            StrokeThickness="0"
+            HorizontalOptions="Fill" 
+            VerticalOptions="Fill"
+            InputTransparent="False"
+        >
+            <Border 
+                BackgroundColor="{DynamicResource SurfaceColor}" 
+                Stroke="{DynamicResource Primary}" 
+                StrokeThickness="2" 
+                StrokeShape="RoundRectangle 16"
+                Padding="24, 20" 
+                HorizontalOptions="Center" 
+                VerticalOptions="Center"
+            >
+                <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
+                    <Label Text="Chargement en cours..." TextColor="{DynamicResource PrimaryTextColor}" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center"/>
+                </VerticalStackLayout>
+            </Border>
+        </Border>
+    </Grid>
+
+</base:BasePage>

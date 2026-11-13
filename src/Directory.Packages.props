@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="AndroidSdk" Version="0.26.0" />
+    <PackageVersion Include="ClosedXML" Version="0.104.2" />
     <PackageVersion Include="CommunityToolkit.Maui" Version="14.0.1" />
     <PackageVersion Include="CommunityToolkit.Maui.Core" Version="14.0.1" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />

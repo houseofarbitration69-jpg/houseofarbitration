@@ -24,6 +24,12 @@ public class JudgeSession : IDisposable
     private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
     private Stopwatch? _pingStopwatch;
     private CancellationTokenSource? _watchdogCts;
+    private CancellationTokenSource? _autoReconnectCts;
+    private int _isReconnectingFlag = 0;
+    private DateTime _lastServerContactTime = DateTime.UtcNow;
+    private int _consecutiveFailedPings = 0;
+
+    private readonly List<TransfertScoreModel> _unsyncedScores = new();
 
     public WindowsBluetoothClient Client => _client;
 
@@ -37,8 +43,13 @@ public class JudgeSession : IDisposable
     public double RedPoints { get; set; } = 0.0;
     public double BluePoints { get; set; } = 0.0;
 
+    public bool HasUnsyncedChanges => _unsyncedScores.Count > 0;
+    public IReadOnlyList<TransfertScoreModel> UnsyncedScores => _unsyncedScores.AsReadOnly();
+    public bool IsAutoReconnecting => _autoReconnectCts != null && !_autoReconnectCts.IsCancellationRequested;
+
     public MatchDisplayInfo? CurrentMatch { get; private set; }
     public CompetitionModel? CurrentCompetition { get; private set; }
+    public string ServerName { get; private set; } = string.Empty;
     public string TimerDisplay { get; private set; } = "02:00";
     public bool IsTimerRunning { get; private set; }
 
@@ -57,11 +68,15 @@ public class JudgeSession : IDisposable
     {
         _client = client;
         _client.MessageReceived += OnBluetoothMessageReceived;
-        _client.Connected += (s, e) => StatusChanged?.Invoke(this, $"Connecté au serveur [{e}].");
+        _client.Connected += async (s, e) =>
+        {
+            await HandleReconnectedAsync(e);
+        };
         _client.Disconnected += (s, e) =>
         {
             StopWatchdog();
-            StatusChanged?.Invoke(this, $"Déconnecté du serveur [{e}].");
+            StatusChanged?.Invoke(this, $"Déconnecté du serveur [{e}]. Mode hors-ligne actif : vos notes seront mémorisées.");
+            StartAutoReconnect();
         };
     }
 
@@ -135,12 +150,13 @@ public class JudgeSession : IDisposable
         double deduction = Math.Abs(mvt.Value);
         CurrentScore = Math.Round(Math.Max(0, CurrentScore - deduction), 2);
 
+        bool isConnected = _client.IsConnected;
         var mvtTimeCode = new MvtTimeCodeModel
         {
             Date = DateTime.Now,
             Code = mvt,
             Score = CurrentScore,
-            IsSynced = true
+            IsSynced = isConnected
         };
 
         DeductionsHistory.Insert(0, mvtTimeCode);
@@ -153,15 +169,39 @@ public class JudgeSession : IDisposable
             JudgePosition = PositionCode
         };
 
-        string json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
-        string message = $"{Constants.Message.JUDGE_SCORE}{json}";
-
-        bool sent = await _client.SendMessageAsync(message);
-        if (sent)
+        if (!isConnected)
         {
-            StatusChanged?.Invoke(this, $"[DÉDUCTION CODE] {mvt.Code} - {mvt.Movement} (-{deduction:F1}) => Nouveau score: {CurrentScore:F2}");
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Déduction {mvt.Code} - {mvt.Movement} (-{deduction:F1}) mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
+            return true;
         }
-        return sent;
+
+        try
+        {
+            string json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+            string message = $"{Constants.Message.JUDGE_SCORE}{json}";
+
+            bool sent = await _client.SendMessageAsync(message);
+            if (sent)
+            {
+                StatusChanged?.Invoke(this, $"[DÉDUCTION CODE] {mvt.Code} - {mvt.Movement} (-{deduction:F1}) => Nouveau score: {CurrentScore:F2}");
+                return true;
+            }
+
+            mvtTimeCode.IsSynced = false;
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Échec d'envoi BLE, déduction mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
+            StartAutoReconnect();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            mvtTimeCode.IsSynced = false;
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Erreur d'envoi ({ex.Message}), déduction mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
+            StartAutoReconnect();
+            return true;
+        }
     }
 
     /// <summary>
@@ -180,12 +220,13 @@ public class JudgeSession : IDisposable
             Category = "Taolu"
         };
 
+        bool isConnected = _client.IsConnected;
         var mvtTimeCode = new MvtTimeCodeModel
         {
             Date = DateTime.Now,
             Code = mvt,
             Score = CurrentScore,
-            IsSynced = true
+            IsSynced = isConnected
         };
 
         DeductionsHistory.Insert(0, mvtTimeCode);
@@ -198,15 +239,39 @@ public class JudgeSession : IDisposable
             JudgePosition = PositionCode
         };
 
-        string json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
-        string message = $"{Constants.Message.JUDGE_SCORE}{json}";
-
-        bool sent = await _client.SendMessageAsync(message);
-        if (sent)
+        if (!isConnected)
         {
-            StatusChanged?.Invoke(this, $"[DÉDUCTION DIRECTE] -{deduction:F1} ({reason ?? "Saisie"}) => Score: {CurrentScore:F2}");
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Déduction directe -{deduction:F1} mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
+            return true;
         }
-        return sent;
+
+        try
+        {
+            string json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+            string message = $"{Constants.Message.JUDGE_SCORE}{json}";
+
+            bool sent = await _client.SendMessageAsync(message);
+            if (sent)
+            {
+                StatusChanged?.Invoke(this, $"[DÉDUCTION DIRECTE] -{deduction:F1} ({reason ?? "Saisie"}) => Score: {CurrentScore:F2}");
+                return true;
+            }
+
+            mvtTimeCode.IsSynced = false;
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Échec d'envoi BLE, déduction mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
+            StartAutoReconnect();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            mvtTimeCode.IsSynced = false;
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Erreur d'envoi ({ex.Message}), déduction mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
+            StartAutoReconnect();
+            return true;
+        }
     }
 
     /// <summary>
@@ -223,15 +288,37 @@ public class JudgeSession : IDisposable
             JudgePosition = PositionCode
         };
 
-        string json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
-        string message = $"{Constants.Message.JUDGE_SCORE}{json}";
-
-        bool sent = await _client.SendMessageAsync(message);
-        if (sent)
+        if (!_client.IsConnected)
         {
-            StatusChanged?.Invoke(this, $"[SCORE FIXÉ] {CurrentScore:F2}");
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Score fixé à {CurrentScore:F2} mis en attente ({_unsyncedScores.Count} en attente)");
+            return true;
         }
-        return sent;
+
+        try
+        {
+            string json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+            string message = $"{Constants.Message.JUDGE_SCORE}{json}";
+
+            bool sent = await _client.SendMessageAsync(message);
+            if (sent)
+            {
+                StatusChanged?.Invoke(this, $"[SCORE FIXÉ] {CurrentScore:F2}");
+                return true;
+            }
+
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Échec d'envoi BLE, score mis en attente ({CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
+            StartAutoReconnect();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Erreur d'envoi ({ex.Message}), score mis en attente ({CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
+            StartAutoReconnect();
+            return true;
+        }
     }
 
     /// <summary>
@@ -259,15 +346,37 @@ public class JudgeSession : IDisposable
             JudgePosition = PositionCode
         };
 
-        string json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
-        string message = $"{Constants.Message.JUDGE_SCORE}{json}";
-
-        bool sent = await _client.SendMessageAsync(message);
-        if (sent)
+        if (!_client.IsConnected)
         {
-            StatusChanged?.Invoke(this, $"[SANDA POINT] +1 pour {side} (Total: Rouge={RedPoints:F0}, Bleu={BluePoints:F0})");
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] +1 pour {side} mis en attente (Total: Rouge={RedPoints:F0}, Bleu={BluePoints:F0} | {_unsyncedScores.Count} note(s) en attente)");
+            return true;
         }
-        return sent;
+
+        try
+        {
+            string json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+            string message = $"{Constants.Message.JUDGE_SCORE}{json}";
+
+            bool sent = await _client.SendMessageAsync(message);
+            if (sent)
+            {
+                StatusChanged?.Invoke(this, $"[SANDA POINT] +1 pour {side} (Total: Rouge={RedPoints:F0}, Bleu={BluePoints:F0})");
+                return true;
+            }
+
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Échec d'envoi BLE, point mis en attente (Total: Rouge={RedPoints:F0}, Bleu={BluePoints:F0} | {_unsyncedScores.Count} note(s) en attente)");
+            StartAutoReconnect();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _unsyncedScores.Add(scoreModel);
+            StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Erreur d'envoi ({ex.Message}), point mis en attente (Total: Rouge={RedPoints:F0}, Bleu={BluePoints:F0} | {_unsyncedScores.Count} note(s) en attente)");
+            StartAutoReconnect();
+            return true;
+        }
     }
 
     /// <summary>
@@ -295,12 +404,16 @@ public class JudgeSession : IDisposable
         return await _client.SendMessageAsync(rawMessage);
     }
 
+    private int _isHandlingReconnection = 0;
+
     /// <summary>
     /// Active le watchdog keep-alive automatique (ping toutes les X secondes).
     /// </summary>
     public void StartWatchdog(int intervalSeconds = 4)
     {
         StopWatchdog();
+        _lastServerContactTime = DateTime.UtcNow;
+        _consecutiveFailedPings = 0;
         _watchdogCts = new CancellationTokenSource();
         var token = _watchdogCts.Token;
 
@@ -311,9 +424,41 @@ public class JudgeSession : IDisposable
                 try
                 {
                     await Task.Delay(TimeSpan.FromSeconds(intervalSeconds), token);
+
+                    if (token.IsCancellationRequested) break;
+
+                    if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(10))
+                    {
+                        StatusChanged?.Invoke(this, "Expiration du heartbeat serveur (>10s). Déconnexion et bascule en mode hors-ligne.");
+                        StopWatchdog();
+                        await _client.DisconnectAsync();
+                        continue;
+                    }
+
                     if (_client.IsConnected)
                     {
-                        await PingAsync();
+                        bool sent = await PingAsync();
+                        if (!sent)
+                        {
+                            _consecutiveFailedPings++;
+                            StatusChanged?.Invoke(this, $"[WATCHDOG] Échec ping ({_consecutiveFailedPings}/2).");
+                            if (_consecutiveFailedPings >= 2)
+                            {
+                                StatusChanged?.Invoke(this, "Perte de liaison avec le serveur d'arbitrage. Déconnexion.");
+                                StopWatchdog();
+                                await _client.DisconnectAsync();
+                            }
+                        }
+                        else
+                        {
+                            _consecutiveFailedPings = 0;
+                            _lastServerContactTime = DateTime.UtcNow;
+                        }
+                    }
+                    else
+                    {
+                        StopWatchdog();
+                        StartAutoReconnect();
                     }
                 }
                 catch (OperationCanceledException)
@@ -337,8 +482,189 @@ public class JudgeSession : IDisposable
             _watchdogCts.Cancel();
             _watchdogCts.Dispose();
             _watchdogCts = null;
+            _consecutiveFailedPings = 0;
             StatusChanged?.Invoke(this, "Watchdog de connexion arrêté.");
         }
+    }
+
+    /// <summary>
+    /// Démarre la boucle de reconnexion automatique en arrière-plan lorsque le signal est perdu.
+    /// </summary>
+    public void StartAutoReconnect(int intervalSeconds = 2)
+    {
+        if (IsAutoReconnecting) return;
+
+        _autoReconnectCts = new CancellationTokenSource();
+        var token = _autoReconnectCts.Token;
+
+        _ = Task.Run(async () =>
+        {
+            StatusChanged?.Invoke(this, "Reconnexion automatique activée (recherche permanente du serveur)...");
+
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    if (!_client.IsConnected && Interlocked.CompareExchange(ref _isReconnectingFlag, 1, 0) == 0)
+                    {
+                        try
+                        {
+                            bool reconnected = await _client.ReconnectAsync();
+                            if (reconnected)
+                            {
+                                break;
+                            }
+                        }
+                        finally
+                        {
+                            Interlocked.Exchange(ref _isReconnectingFlag, 0);
+                        }
+                    }
+
+                    await Task.Delay(TimeSpan.FromSeconds(intervalSeconds), token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch { }
+            }
+        }, token);
+    }
+
+    /// <summary>
+    /// Arrête la reconnexion automatique.
+    /// </summary>
+    public void StopAutoReconnect()
+    {
+        if (_autoReconnectCts != null)
+        {
+            _autoReconnectCts.Cancel();
+            _autoReconnectCts.Dispose();
+            _autoReconnectCts = null;
+        }
+    }
+
+    /// <summary>
+    /// Gère la reconnexion au serveur : réenregistrement de la position,
+    /// synchronisation des notes prises hors-ligne, et mise à jour du match.
+    /// </summary>
+    public async Task HandleReconnectedAsync(string address)
+    {
+        if (Interlocked.CompareExchange(ref _isHandlingReconnection, 1, 0) != 0)
+        {
+            return;
+        }
+
+        try
+        {
+            StopAutoReconnect();
+            _lastServerContactTime = DateTime.UtcNow;
+            _consecutiveFailedPings = 0;
+            StartWatchdog();
+
+            StatusChanged?.Invoke(this, $"[RECONNEXION RÉUSSIE] Connecté au serveur [{address}] ! Réenregistrement...");
+
+            // 1. Réenregistrer la position auprès du serveur
+            await SendCurrentPositionAsync();
+            await Task.Delay(150);
+
+            // 2. Envoyer toutes les notes accumulées hors-ligne
+            if (_unsyncedScores.Count > 0 || DeductionsHistory.Any(d => !d.IsSynced))
+            {
+                await SyncUnsyncedScoresAsync();
+            }
+
+            // 3. Demander les données courantes du match et de la compétition
+            await Task.Delay(100);
+            await RequestMatchAsync();
+            await RequestCompetitionAsync();
+        }
+        catch (Exception ex)
+        {
+            StatusChanged?.Invoke(this, $"Erreur lors de la post-reconnexion : {ex.Message}");
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _isHandlingReconnection, 0);
+        }
+    }
+
+    /// <summary>
+    /// Envoie au serveur toutes les notes accumulées pendant la déconnexion ainsi que l'état global.
+    /// </summary>
+    public async Task SyncUnsyncedScoresAsync()
+    {
+        if (!_client.IsConnected) return;
+
+        int pendingCount = _unsyncedScores.Count;
+        StatusChanged?.Invoke(this, $"Synchronisation de {pendingCount} note(s) hors-ligne vers le serveur...");
+
+        try
+        {
+            if (_unsyncedScores.Count > 0)
+            {
+                var scoresToSend = _unsyncedScores.ToList();
+                foreach (var score in scoresToSend)
+                {
+                    if (string.IsNullOrEmpty(score.JudgePosition))
+                    {
+                        score.JudgePosition = PositionCode;
+                    }
+
+                    string json = JsonSerializer.Serialize(score, _jsonOptions);
+                    string message = $"{Constants.Message.JUDGE_SCORE}{json}";
+
+                    bool sent = await _client.SendMessageAsync(message);
+                    if (sent)
+                    {
+                        _unsyncedScores.Remove(score);
+                        if (score.Code != null)
+                        {
+                            score.Code.IsSynced = true;
+                        }
+                    }
+
+                    await Task.Delay(50);
+                }
+            }
+
+            foreach (var d in DeductionsHistory)
+            {
+                d.IsSynced = true;
+            }
+
+            // Envoi de l'état global synchronisé pour garantir la cohérence
+            await SendSyncStateAsync();
+
+            StatusChanged?.Invoke(this, "Toutes les notes hors-ligne ont été synchronisées avec succès !");
+        }
+        catch (Exception ex)
+        {
+            StatusChanged?.Invoke(this, $"Erreur lors de la synchronisation : {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Envoie l'état global du juge (JUDGE_SYNC_STATE) au serveur.
+    /// </summary>
+    public async Task<bool> SendSyncStateAsync()
+    {
+        if (!_client.IsConnected) return false;
+
+        var syncState = new JudgeStateModel
+        {
+            Group = JudgeGroup,
+            Number = JudgePosition,
+            Score = CurrentScore,
+            RedPoints = RedPoints,
+            BluePoints = BluePoints,
+            Codes = DeductionsHistory.ToList()
+        };
+
+        string json = JsonSerializer.Serialize(syncState, _jsonOptions);
+        string message = $"{Constants.Message.JUDGE_SYNC_STATE}{json}";
+        return await _client.SendMessageAsync(message);
     }
 
     private void OnBluetoothMessageReceived(object? sender, string message)
@@ -398,8 +724,15 @@ public class JudgeSession : IDisposable
             }
             else if (message == Constants.Message.PONG)
             {
+                _lastServerContactTime = DateTime.UtcNow;
+                _consecutiveFailedPings = 0;
                 TimeSpan latency = _pingStopwatch?.Elapsed ?? TimeSpan.Zero;
                 PongReceived?.Invoke(this, latency);
+            }
+            else if (message.StartsWith(Constants.Message.SERVER_NAME))
+            {
+                ServerName = message.Substring(Constants.Message.SERVER_NAME.Length).Trim();
+                NotificationReceived?.Invoke(this, $"Serveur connecté : {ServerName}");
             }
             else if (message.StartsWith(Constants.Message.COMPETITION_DATA))
             {
@@ -440,6 +773,7 @@ public class JudgeSession : IDisposable
     public void Dispose()
     {
         StopWatchdog();
+        StopAutoReconnect();
         _client.Dispose();
         GC.SuppressFinalize(this);
     }

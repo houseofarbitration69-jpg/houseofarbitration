@@ -41,7 +41,7 @@ public class BluetoothServer : IBluetoothServer
     private BluetoothGattServerCallback? _gattServerCallback;
 
     private List<BluetoothDevice> _connectedDevices = new();
-    private HashSet<string> _subscribedDevices = new();
+    private HashSet<string> _subscribedDevices = new(StringComparer.OrdinalIgnoreCase);
     private readonly BluetoothTransferManager _transferManager = new();
     private readonly SemaphoreSlim _sendSemaphore = new(1, 1);
     #endregion
@@ -106,11 +106,38 @@ public class BluetoothServer : IBluetoothServer
             ?.SetIncludeTxPowerLevel(false)
             ?.Build();
 
-        // Le nom de l'appareil est placé dans le Scan Response (budget distinct de 31 octets).
-        var scanResponse = new AdvertiseData.Builder()
-            ?.SetIncludeDeviceName(true)
-            ?.SetIncludeTxPowerLevel(false)
-            ?.Build();
+        // Le Scan Response est limité à 31 octets.
+        // Calcul : ManufacturerData = 1(len) + 1(type) + 2(CompanyId) + N(nom) = 4 + N octets.
+        // SetIncludeDeviceName ajoute 2 + nom_système octets supplémentaires.
+        // → On ne peut pas mettre les deux sans dépasser 31 octets.
+        // Stratégie : on utilise UNIQUEMENT ManufacturerData pour transporter le nom
+        // (le client juge lit ce champ en priorité). Le nom système Android n'est plus inclus.
+        AdvertiseData? scanResponse = null;
+
+        if (!string.IsNullOrEmpty(deviceName))
+        {
+            // Budget scan response : 31 octets max. ManufacturerData overhead = 4 octets (len+type+CompanyId×2).
+            // On limite le nom à 23 octets UTF-8 (27 - 4 overhead = 23, avec un peu de marge).
+            var nameBytes = Encoding.UTF8.GetBytes(deviceName);
+            if (nameBytes.Length > 23)
+            {
+                nameBytes = Encoding.UTF8.GetBytes(deviceName.Substring(0, 23));
+            }
+
+            scanResponse = new AdvertiseData.Builder()
+                ?.SetIncludeDeviceName(false)
+                ?.SetIncludeTxPowerLevel(false)
+                ?.AddManufacturerData(Models.Constants.BLE_MANUFACTURER_ID, nameBytes)
+                ?.Build();
+        }
+        else
+        {
+            // Pas de nom configuré : scan response vide (pas d'erreur)
+            scanResponse = new AdvertiseData.Builder()
+                ?.SetIncludeDeviceName(false)
+                ?.SetIncludeTxPowerLevel(false)
+                ?.Build();
+        }
 
         _bluetoothLeAdvertiser?.StartAdvertising(settings, data, scanResponse, _advertiseCallback);
 
@@ -170,17 +197,28 @@ public class BluetoothServer : IBluetoothServer
 
                 foreach (var chunk in _transferManager.PrepareMessagesForSending(message))
                 {
+                    byte[] bytes = Encoding.UTF8.GetBytes(chunk);
 #pragma warning disable CA1422
-                    characteristic.SetValue(Encoding.UTF8.GetBytes(chunk));
+                    characteristic.SetValue(bytes);
 #pragma warning restore CA1422
 
-                    foreach (var device in _connectedDevices)
+                    foreach (var device in _connectedDevices.ToList())
                     {
-                        if (device != null && device.Address != null && _subscribedDevices.Contains(device.Address))
+                        if (device != null && device.Address != null && (_subscribedDevices.Count == 0 || _subscribedDevices.Contains(device.Address)))
                         {
+                            if (Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu)
+                            {
+#pragma warning disable CA1416
+                                _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false, bytes);
+#pragma warning restore CA1416
+                            }
+                            else
+                            {
 #pragma warning disable CA1422
-                            _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
+                                _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
 #pragma warning restore CA1422
+                            }
+                            await Task.Delay(10);
                         }
                     }
 
@@ -209,17 +247,30 @@ public class BluetoothServer : IBluetoothServer
 
             if (device != null && device.Address != null)
             {
-                if (_subscribedDevices.Contains(device.Address))
+                if (_subscribedDevices.Count == 0 || _subscribedDevices.Contains(device.Address))
                 {
                     var characteristic = _bluetoothGattServer?.GetService(ServiceUuid)?.GetCharacteristic(CharacteristicUuid);
                     if (characteristic == null) return;
 
                     foreach (var chunk in _transferManager.PrepareMessagesForSending(message))
                     {
+                        byte[] bytes = Encoding.UTF8.GetBytes(chunk);
 #pragma warning disable CA1422
-                        characteristic.SetValue(Encoding.UTF8.GetBytes(chunk));
-                        _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
+                        characteristic.SetValue(bytes);
 #pragma warning restore CA1422
+
+                        if (Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu)
+                        {
+#pragma warning disable CA1416
+                            _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false, bytes);
+#pragma warning restore CA1416
+                        }
+                        else
+                        {
+#pragma warning disable CA1422
+                            _bluetoothGattServer?.NotifyCharacteristicChanged(device, characteristic, false);
+#pragma warning restore CA1422
+                        }
 
                         if (chunk.Length > 0)
                             await Task.Delay(30);

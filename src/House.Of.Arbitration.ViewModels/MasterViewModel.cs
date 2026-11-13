@@ -279,5 +279,15 @@ public partial class MasterViewModel : BaseViewModel
     {
         await Shell.Current.GoToAsync(Constants.Navigation.Page.COMPETITION_WIZARD);
     }
+
+    /// <summary>
+    /// Commande permettant d'importer un fichier excel
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task ImportExcel()
+    {
+        await Shell.Current.GoToAsync(Constants.Navigation.Page.EXCEL_IMPORT);
+    }
     #endregion
 }

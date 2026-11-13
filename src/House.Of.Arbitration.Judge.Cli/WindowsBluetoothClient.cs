@@ -16,8 +16,12 @@ public class DiscoveredDevice
     public bool HasArbitrationService { get; set; }
     public DateTime LastSeen { get; set; } = DateTime.UtcNow;
 
+    public string DisplayName => !string.IsNullOrWhiteSpace(Name) 
+        ? Name 
+        : (HasArbitrationService ? $"Serveur ({AddressFormatted})" : "Inconnu");
+
     public override string ToString() =>
-        $"[{AddressFormatted}] {Name} (RSSI: {Rssi} dBm, Type: {AddressType})" + (HasArbitrationService ? " [SERVEUR ARBITRATION]" : "");
+        $"[{AddressFormatted}] {DisplayName} (RSSI: {Rssi} dBm, Type: {AddressType})" + (HasArbitrationService ? " [SERVEUR ARBITRATION]" : "");
 }
 
 /// <summary>
@@ -48,8 +52,12 @@ public class WindowsBluetoothClient : IDisposable
                                _device.ConnectionStatus == BluetoothConnectionStatus.Connected &&
                                _characteristic != null;
 
-    public string? ConnectedDeviceName => _device?.Name;
+    private string? _discoveredServerName;
+    public string? ConnectedDeviceName => !string.IsNullOrWhiteSpace(_discoveredServerName) ? _discoveredServerName : _device?.Name;
     public string? ConnectedDeviceAddress { get; private set; }
+    public string? LastConnectedDeviceAddress { get; private set; }
+    public ulong? LastConnectedBluetoothAddress { get; private set; }
+    public BluetoothAddressType LastAddressType { get; private set; } = BluetoothAddressType.Public;
 
     public IReadOnlyList<DiscoveredDevice> DiscoveredDevices
     {
@@ -120,11 +128,31 @@ public class WindowsBluetoothClient : IDisposable
         ulong address = args.BluetoothAddress;
         BluetoothAddressType addressType = args.BluetoothAddressType;
         string addressStr = FormatAddress(address);
-        string name = !string.IsNullOrWhiteSpace(args.Advertisement.LocalName)
-            ? args.Advertisement.LocalName
-            : "Inconnu";
 
-        bool hasService = args.Advertisement.ServiceUuids.Contains(ArbitrationServiceUuid);
+        string name = string.Empty;
+
+        // 1. Priorité 1 : Nom propriétaire transporté dans ManufacturerData (CompanyId = BLE_MANUFACTURER_ID)
+        var mfg = args.Advertisement.ManufacturerData
+            .FirstOrDefault(m => m.CompanyId == Models.Constants.BLE_MANUFACTURER_ID);
+        if (mfg != null && mfg.Data != null && mfg.Data.Length > 0)
+        {
+            try
+            {
+                var reader = DataReader.FromBuffer(mfg.Data);
+                byte[] bytes = new byte[mfg.Data.Length];
+                reader.ReadBytes(bytes);
+                name = Encoding.UTF8.GetString(bytes).Trim();
+            }
+            catch { }
+        }
+
+        // 2. Priorité 2 : LocalName standard dans le paquet d'advertising BLE
+        if (string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(args.Advertisement.LocalName))
+        {
+            name = args.Advertisement.LocalName.Trim();
+        }
+
+        bool hasService = args.Advertisement.ServiceUuids.Contains(ArbitrationServiceUuid) || mfg != null;
 
         DiscoveredDevice dev;
 
@@ -133,7 +161,11 @@ public class WindowsBluetoothClient : IDisposable
             if (_discoveredDevices.TryGetValue(address, out var existing))
             {
                 dev = existing;
-                if (!string.IsNullOrWhiteSpace(name) && name != "Inconnu") dev.Name = name;
+                // Met à jour le nom si on a un nom valide
+                if (!string.IsNullOrWhiteSpace(name) && name != "Inconnu")
+                {
+                    dev.Name = name;
+                }
                 dev.AddressType = addressType;
                 dev.Rssi = args.RawSignalStrengthInDBm;
                 dev.HasArbitrationService = dev.HasArbitrationService || hasService;
@@ -146,7 +178,7 @@ public class WindowsBluetoothClient : IDisposable
                     Address = address,
                     AddressType = addressType,
                     AddressFormatted = addressStr,
-                    Name = name,
+                    Name = (!string.IsNullOrWhiteSpace(name) && name != "Inconnu") ? name : string.Empty,
                     Rssi = args.RawSignalStrengthInDBm,
                     HasArbitrationService = hasService,
                     LastSeen = DateTime.UtcNow
@@ -155,7 +187,41 @@ public class WindowsBluetoothClient : IDisposable
             }
         }
 
+        // Résolution du nom via le cache Windows Bluetooth uniquement si toujours inconnu
+        if (string.IsNullOrWhiteSpace(dev.Name))
+        {
+            _ = TryResolveDeviceNameAsync(address);
+        }
+
         DeviceDiscovered?.Invoke(this, dev);
+    }
+
+    /// <summary>
+    /// Tente de résoudre le nom d'un périphérique BLE via le cache Windows Bluetooth.
+    /// Utilisé comme fallback quand le LocalName n'est pas inclus dans le paquet d'advertising.
+    /// </summary>
+    private async Task TryResolveDeviceNameAsync(ulong bluetoothAddress)
+    {
+        try
+        {
+            // FromBluetoothAddressAsync interroge le cache système Bluetooth Windows
+            var bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(bluetoothAddress);
+            if (bleDevice != null && !string.IsNullOrWhiteSpace(bleDevice.Name))
+            {
+                lock (_discoveredDevices)
+                {
+                    if (_discoveredDevices.TryGetValue(bluetoothAddress, out var dev)
+                        && string.IsNullOrWhiteSpace(dev.Name))
+                    {
+                        dev.Name = bleDevice.Name;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Résolution silencieuse — pas critique
+        }
     }
 
     /// <summary>
@@ -178,6 +244,10 @@ public class WindowsBluetoothClient : IDisposable
             if (_discoveredDevices.TryGetValue(bluetoothAddress, out var dev))
             {
                 addressType = dev.AddressType;
+                if (!string.IsNullOrWhiteSpace(dev.Name) && dev.Name != "Inconnu")
+                {
+                    _discoveredServerName = dev.Name;
+                }
             }
         }
 
@@ -201,6 +271,9 @@ public class WindowsBluetoothClient : IDisposable
             }
 
             ConnectedDeviceAddress = addrStr;
+            LastConnectedDeviceAddress = addrStr;
+            LastConnectedBluetoothAddress = bluetoothAddress;
+            LastAddressType = addressType;
             _device.ConnectionStatusChanged += OnDeviceConnectionStatusChanged;
 
             // Maintien de la connexion physique BLE active via GattSession
@@ -218,54 +291,33 @@ public class WindowsBluetoothClient : IDisposable
                 LogMessage?.Invoke(this, $"Avertissement GattSession : {ex.Message}");
             }
 
-            // Découverte du service GATT d'arbitrage
+            // Découverte du service GATT d'arbitrage avec timeout court
             LogMessage?.Invoke(this, $"Recherche du service GATT ({ArbitrationServiceUuid})...");
-            var servicesResult = await _device.GetGattServicesForUuidAsync(ArbitrationServiceUuid, BluetoothCacheMode.Uncached);
+            var servicesOp = _device.GetGattServicesForUuidAsync(ArbitrationServiceUuid, BluetoothCacheMode.Uncached);
+            var servicesResult = await WithTimeoutAsync(servicesOp, TimeSpan.FromSeconds(4));
 
-            if (servicesResult.Status != GattCommunicationStatus.Success || servicesResult.Services.Count == 0)
+            if (servicesResult == null || servicesResult.Status != GattCommunicationStatus.Success || servicesResult.Services.Count == 0)
             {
-                LogMessage?.Invoke(this, $"Service non trouvé via filtre direct ({servicesResult.Status}), analyse complète des services...");
-                var allServicesResult = await _device.GetGattServicesAsync(BluetoothCacheMode.Uncached);
-                if (allServicesResult.Status == GattCommunicationStatus.Success)
-                {
-                    _service = allServicesResult.Services.FirstOrDefault(s => s.Uuid == ArbitrationServiceUuid);
-                }
-            }
-            else
-            {
-                _service = servicesResult.Services[0];
-            }
-
-            if (_service == null)
-            {
-                LogMessage?.Invoke(this, $"Échec : Le service d'arbitrage {ArbitrationServiceUuid} n'a pas été trouvé sur ce périphérique.");
+                LogMessage?.Invoke(this, $"Service d'arbitrage non trouvé ou timeout.");
                 await DisconnectAsync();
                 return false;
             }
 
-            // Découverte de la caractéristique GATT d'échange
+            _service = servicesResult.Services[0];
+
+            // Découverte de la caractéristique GATT d'échange avec timeout court
             LogMessage?.Invoke(this, $"Recherche de la caractéristique GATT ({ArbitrationCharacteristicUuid})...");
-            var charResult = await _service.GetCharacteristicsForUuidAsync(ArbitrationCharacteristicUuid, BluetoothCacheMode.Uncached);
+            var charOp = _service.GetCharacteristicsForUuidAsync(ArbitrationCharacteristicUuid, BluetoothCacheMode.Uncached);
+            var charResult = await WithTimeoutAsync(charOp, TimeSpan.FromSeconds(3));
 
-            if (charResult.Status != GattCommunicationStatus.Success || charResult.Characteristics.Count == 0)
+            if (charResult == null || charResult.Status != GattCommunicationStatus.Success || charResult.Characteristics.Count == 0)
             {
-                var allCharsResult = await _service.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
-                if (allCharsResult.Status == GattCommunicationStatus.Success)
-                {
-                    _characteristic = allCharsResult.Characteristics.FirstOrDefault(c => c.Uuid == ArbitrationCharacteristicUuid);
-                }
-            }
-            else
-            {
-                _characteristic = charResult.Characteristics[0];
-            }
-
-            if (_characteristic == null)
-            {
-                LogMessage?.Invoke(this, $"Échec : Caractéristique {ArbitrationCharacteristicUuid} introuvable.");
+                LogMessage?.Invoke(this, $"Caractéristique d'arbitrage introuvable ou timeout.");
                 await DisconnectAsync();
                 return false;
             }
+
+            _characteristic = charResult.Characteristics[0];
 
             // Inscription aux notifications
             LogMessage?.Invoke(this, "Activation des notifications GATT...");
@@ -280,7 +332,7 @@ public class WindowsBluetoothClient : IDisposable
             _characteristic.ValueChanged += OnCharacteristicValueChanged;
             _transferManager.Clear();
 
-            LogMessage?.Invoke(this, $"Connecté avec succès au serveur [{_device.Name ?? addrStr}] !");
+            LogMessage?.Invoke(this, $"Connecté avec succès au serveur [{ConnectedDeviceName ?? addrStr}] !");
             Connected?.Invoke(this, addrStr);
             return true;
         }
@@ -304,6 +356,88 @@ public class WindowsBluetoothClient : IDisposable
 
         LogMessage?.Invoke(this, $"Format d'adresse Bluetooth invalide : '{addressString}'.");
         return false;
+    }
+
+    /// <summary>
+    /// Scanne brièvement les annonces BLE à la recherche du serveur d'arbitrage.
+    /// Retourne dès que le serveur est détecté (sans attendre la fin du délai).
+    /// </summary>
+    public async Task<DiscoveredDevice?> ScanForServerAsync(TimeSpan timeout)
+    {
+        var tcs = new TaskCompletionSource<DiscoveredDevice?>();
+
+        void Handler(object? sender, DiscoveredDevice dev)
+        {
+            if ((LastConnectedBluetoothAddress.HasValue && dev.Address == LastConnectedBluetoothAddress.Value) ||
+                dev.HasArbitrationService)
+            {
+                tcs.TrySetResult(dev);
+            }
+        }
+
+        DeviceDiscovered += Handler;
+        StartScan();
+
+        try
+        {
+            var delayTask = Task.Delay(timeout);
+            var completed = await Task.WhenAny(tcs.Task, delayTask);
+            if (completed == tcs.Task)
+            {
+                return await tcs.Task;
+            }
+            return null;
+        }
+        finally
+        {
+            DeviceDiscovered -= Handler;
+            StopScan();
+        }
+    }
+
+    /// <summary>
+    /// Tente de se reconnecter au dernier périphérique serveur connu.
+    /// Lance un scan express pour capter l'annonce BLE, rafraîchir le cache Windows et se connecter.
+    /// </summary>
+    public async Task<bool> ReconnectAsync()
+    {
+        if (IsConnected) return true;
+
+        // 1. Scan express pour vérifier que le serveur est actif et actualiser le cache Windows BLE
+        var found = await ScanForServerAsync(TimeSpan.FromSeconds(2));
+        if (found != null)
+        {
+            LogMessage?.Invoke(this, $"Serveur d'arbitrage détecté [{found.AddressFormatted}] ! Connexion...");
+            return await ConnectAsync(found);
+        }
+
+        // 2. Si le scan n'a rien donné mais qu'on a une adresse directe, tenter avec timeout court
+        if (LastConnectedBluetoothAddress.HasValue)
+        {
+            LogMessage?.Invoke(this, $"Tentative de connexion directe vers [{LastConnectedDeviceAddress}]...");
+            try
+            {
+                bool ok = await ConnectAsync(LastConnectedBluetoothAddress.Value, LastAddressType);
+                if (ok) return true;
+            }
+            catch { }
+        }
+
+        return false;
+    }
+
+    private static async Task<T?> WithTimeoutAsync<T>(Windows.Foundation.IAsyncOperation<T> operation, TimeSpan timeout)
+    {
+        var opTask = operation.AsTask();
+        var delayTask = Task.Delay(timeout);
+        var completed = await Task.WhenAny(opTask, delayTask);
+        if (completed == opTask)
+        {
+            return await opTask;
+        }
+
+        try { operation.Cancel(); } catch { }
+        return default;
     }
 
     /// <summary>
@@ -400,7 +534,8 @@ public class WindowsBluetoothClient : IDisposable
 
                 if (result.Status != GattCommunicationStatus.Success)
                 {
-                    LogMessage?.Invoke(this, $"Échec d'envoi du paquet ({result.Status}).");
+                    LogMessage?.Invoke(this, $"Échec d'envoi du paquet ({result.Status}). Rupture de liaison Bluetooth.");
+                    _ = Task.Run(async () => await DisconnectAsync());
                     return false;
                 }
 
@@ -414,7 +549,8 @@ public class WindowsBluetoothClient : IDisposable
         }
         catch (Exception ex)
         {
-            LogMessage?.Invoke(this, $"Erreur d'envoi Bluetooth : {ex.Message}");
+            LogMessage?.Invoke(this, $"Erreur d'envoi Bluetooth : {ex.Message}. Rupture de liaison Bluetooth.");
+            _ = Task.Run(async () => await DisconnectAsync());
             return false;
         }
         finally

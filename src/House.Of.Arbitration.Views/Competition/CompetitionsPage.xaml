@@ -27,6 +27,12 @@
                     <Label Text="Liste de tous les événements enregistrés" Style="{DynamicResource SubHeadline}" FontSize="16" Opacity="0.7" />
                 </VerticalStackLayout>
 
+                <Button Text="📥 Import Excel"
+                        Command="{Binding ImportExcelCommand}"
+                        BackgroundColor="{DynamicResource Primary}"
+                        TextColor="White"
+                        HorizontalOptions="Start" />
+
                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding Competitions}" Spacing="16">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="models:CompetitionModel">

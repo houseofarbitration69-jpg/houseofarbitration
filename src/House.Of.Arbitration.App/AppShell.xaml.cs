@@ -34,5 +34,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(Constants.Navigation.Page.REFEREE_DATA, typeof(RefereeDataPage));
         Routing.RegisterRoute(Constants.Navigation.Page.RESULTS, typeof(ResultsPage));
         Routing.RegisterRoute(Constants.Navigation.Page.TAOLU_CODES, typeof(TaoluCodesPage));
+        Routing.RegisterRoute(Constants.Navigation.Page.EXCEL_IMPORT, typeof(ExcelImportPage));
     }
 }

@@ -97,7 +97,7 @@
                     />
                     <Label 
                         Text="{Binding MatchStageName}"
-                        TextColor="{DynamicResource PrimaryColor}"
+                        TextColor="LightGray"
                         FontSize="18"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"

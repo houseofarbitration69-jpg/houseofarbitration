@@ -431,7 +431,7 @@
 
             <Grid 
                 Grid.Column="1" 
-                RowDefinitions="{OnIdiom Tablet='Auto,105,*,115', Phone='Auto,250,30,30,30,30,30,*'}" 
+                RowDefinitions="{OnIdiom Tablet='Auto,105,*,115', Phone='Auto,250,30,30,30,30,30,*,Auto'}" 
                 RowSpacing="15" 
                 ColumnDefinitions="{OnIdiom Tablet='85,80,*,80,85', Phone='*'}"
                 IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
@@ -466,7 +466,7 @@
                             />
                             <Label 
                                 Text="{Binding CurrentMatchStageName}"
-                                TextColor="{DynamicResource PrimaryColor}" 
+                                TextColor="LightGray" 
                                 FontSize="{OnIdiom Tablet='18', Phone='14'}" 
                                 FontAttributes="Bold"
                                 HorizontalOptions="Center"
@@ -1490,6 +1490,22 @@
                                     HeightRequest="40"
                                     WidthRequest="130"
                                     Margin="0,0,0,0" 
+                                    IsVisible="{OnIdiom Tablet='true', Phone='false'}"
+                                />
+
+                                <Button 
+                                    Text="V" 
+                                    Command="{Binding BindingContext.SetWinnerCommand, Source={x:Reference this}}"
+                                    CommandParameter="Red"
+                                    BackgroundColor="{DynamicResource LessRedSide}"
+                                    BorderColor="{DynamicResource LessRedSide}"
+                                    TextColor="{StaticResource PrimaryTextColor}"
+                                    FontAttributes="Bold"
+                                    CornerRadius="20"
+                                    HeightRequest="40"
+                                    WidthRequest="40"
+                                    Margin="0,0,0,0" 
+                                    IsVisible="{OnIdiom Tablet='false', Phone='true'}"
                                 />
                             </VerticalStackLayout>
 
@@ -1610,6 +1626,23 @@
                                     WidthRequest="130"
                                     VerticalOptions="End"
                                     Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
+                                    IsVisible="{OnIdiom Tablet='true', Phone='false'}" 
+                                />
+
+                                <Button 
+                                    Grid.Row="2"
+                                    Text="EX" 
+                                    Command="{Binding BindingContext.SetExAequoCommand, Source={x:Reference this}}"
+                                    BackgroundColor="{DynamicResource SurfaceElevation6}"
+                                    BorderColor="{DynamicResource Gray400}"
+                                    TextColor="{StaticResource PrimaryTextColor}"
+                                    FontAttributes="Bold"
+                                    CornerRadius="20"
+                                    HeightRequest="40"
+                                    WidthRequest="60"
+                                    VerticalOptions="End"
+                                    Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
+                                    IsVisible="{OnIdiom Tablet='false', Phone='true'}" 
                                 />
                             </Grid>
 
@@ -1712,7 +1745,24 @@
                                     HeightRequest="40"
                                     WidthRequest="130"
                                     Margin="0,0,0,0" 
+                                    IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                                 />
+
+                                <Button 
+                                    Text="V" 
+                                    Command="{Binding BindingContext.SetWinnerCommand, Source={x:Reference this}}"
+                                    CommandParameter="Blue"
+                                    BackgroundColor="{DynamicResource LessBlueSide}"
+                                    BorderColor="{DynamicResource LessBlueSide}"
+                                    TextColor="{StaticResource PrimaryTextColor}"
+                                    FontAttributes="Bold"
+                                    CornerRadius="20"
+                                    HeightRequest="40"
+                                    WidthRequest="40"
+                                    Margin="0,0,0,0" 
+                                    IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                                />
+
                             </VerticalStackLayout>
                         </Grid>
                     </Grid>
@@ -2297,9 +2347,96 @@
                     </Grid>
                 </Grid>
 
+                <Grid
+                    Grid.Row="{OnIdiom Tablet='0', Phone='7'}" 
+                    Grid.ColumnSpan="{OnIdiom Tablet='5', Phone='0'}" 
+                    IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                    ColumnDefinitions="*,Auto,*"
+                >
+                    <HorizontalStackLayout 
+                        Grid.Column="1"
+                        Spacing="10" 
+                        VerticalOptions="Center"
+                        IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
+                    >
+                        <!-- INDICATEUR STATUT SERVEUR -->
+                        <Border
+                            HorizontalOptions="End"
+                            VerticalOptions="Center"
+                            StrokeShape="RoundRectangle 18"
+                            Padding="12,6"
+                            StrokeThickness="1.5"
+                            BackgroundColor="{DynamicResource SuccessBg}"
+                            Stroke="{DynamicResource SuccessColor}"
+                            IsVisible="{Binding IsServerStarted}"
+                        >
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <!-- Pastille de statut -->
+                            <BoxView
+                                WidthRequest="10"
+                                HeightRequest="10"
+                                CornerRadius="5"
+                                VerticalOptions="Center"
+                                Color="{DynamicResource SuccessColor}"
+                            />
+
+                            <!-- Texte statut DEMARRE -->
+                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
+                                <Label
+                                    Text="Serveur actif"
+                                    TextColor="{DynamicResource SuccessLight}"
+                                    FontAttributes="Bold"
+                                    FontSize="13"
+                                    VerticalOptions="Center"
+                                />
+                            </HorizontalStackLayout>
+                        </HorizontalStackLayout>
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StopServerCommand}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+
+                        <Border
+                            HorizontalOptions="End"
+                            VerticalOptions="Center"
+                            StrokeShape="RoundRectangle 18"
+                            Padding="12,6"
+                            StrokeThickness="1.5"
+                            BackgroundColor="{DynamicResource ErrorBg}"
+                            Stroke="{DynamicResource ErrorColor}"
+                            IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
+                        >
+                            <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                <!-- Pastille de statut -->
+                                <BoxView
+                                    WidthRequest="10"
+                                    HeightRequest="10"
+                                    CornerRadius="5"
+                                    VerticalOptions="Center"
+                                    Color="{DynamicResource ErrorColor}"
+                                />
+    
+                                <!-- Texte statut ARRETE -->
+                                <Label
+                                    Text="Serveur arrêté"
+                                    TextColor="{DynamicResource ErrorLight}"
+                                    FontAttributes="Bold"
+                                    FontSize="13"
+                                    VerticalOptions="Center"
+                                />
+                            </HorizontalStackLayout>
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding StartServerCommand}" />
+                            </Border.GestureRecognizers>
+                        </Border>
+                    </HorizontalStackLayout>
+                </Grid>
+                
                 <!-- CHRONO & CONTROLS -->
                 <Grid
-                    Grid.Row="{OnIdiom Tablet='0', Phone='7'}"
+                    Grid.Row="{OnIdiom Tablet='0', Phone='8'}"
                     Grid.RowSpan="{OnIdiom Tablet='4', Phone='0'}"
                     Grid.ColumnSpan="{OnIdiom Tablet='5', Phone='0'}" 
                     ColumnDefinitions="90,*,90"
@@ -2421,31 +2558,6 @@
                             </HorizontalStackLayout>
                         </VerticalStackLayout>
                     </Border>
-
-                    <Border
-                        Grid.Column="2"
-                        StrokeShape="RoundRectangle 50"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        BackgroundColor="{DynamicResource ValidColor}"
-                        Stroke="{DynamicResource ValidColor}"
-                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-                    >
-                        <Label 
-                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
-                            Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
-                            FontSize="25" 
-                            TextColor="{DynamicResource PrimaryTextColor}" 
-                            VerticalOptions="Center"
-                            HorizontalOptions="Center"
-                            FontAttributes="Bold"
-                        />
-
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
-                        </Border.GestureRecognizers>
-                    </Border>
-
                 </Grid>
             </Grid>
 

@@ -62,11 +62,6 @@ public partial class ServerSetupPopupViewModel : BaseViewModel, IQueryAttributab
         if (query.ContainsKey(Constants.Navigation.Parameter.COMPETITION))
         {
             Competition = query[Constants.Navigation.Parameter.COMPETITION] as CompetitionModel;
-
-            if (Competition != null)
-            {
-                ServerName = $"{Competition.Type} - {Competition.Name}";
-            }
         }
     }
     #endregion

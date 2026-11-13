@@ -42,6 +42,7 @@ public partial class JudgeConnectionViewModel : BaseViewModel
     private bool _isScanning;
     private bool _isReceivingCompetition;
     private string _serverId = String.Empty;
+    private string _serverName = String.Empty;
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
@@ -80,6 +81,15 @@ public partial class JudgeConnectionViewModel : BaseViewModel
     {
         get => _serverId;
         set => SetProperty(ref _serverId, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le nom du serveur
+    /// </summary>
+    public string ServerName
+    {
+        get => _serverName;
+        set => SetProperty(ref _serverName, value);
     }
     #endregion
 
@@ -170,6 +180,7 @@ public partial class JudgeConnectionViewModel : BaseViewModel
             IsScanning = false;
             IsReceivingCompetition = true;
             ServerId = device.DeviceId;
+            ServerName = !string.IsNullOrWhiteSpace(device.Name) ? device.Name : device.DisplayName;
             await _bluetoothClient.ConnectToDevice(device.DeviceId);
         }
     }
@@ -183,10 +194,13 @@ public partial class JudgeConnectionViewModel : BaseViewModel
     {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            var existing = DiscoveredDevices.FirstOrDefault(d => d.Name == device.Name);
+            var existing = DiscoveredDevices.FirstOrDefault(d => d.DeviceId == device.DeviceId);
             if (existing != null)
             {
-                existing.DeviceId = device.DeviceId;
+                if (!string.IsNullOrWhiteSpace(device.Name) && device.Name != "Unknown" && device.Name != "Inconnu")
+                {
+                    existing.Name = device.Name;
+                }
                 existing.Rssi = device.Rssi;
             }
             else
@@ -194,7 +208,7 @@ public partial class JudgeConnectionViewModel : BaseViewModel
                 DiscoveredDevices.Add(new DiscoveredDeviceModel
                 {
                     DeviceId = device.DeviceId,
-                    Name = device.Name,
+                    Name = (!string.IsNullOrWhiteSpace(device.Name) && device.Name != "Unknown" && device.Name != "Inconnu") ? device.Name : string.Empty,
                     Rssi = device.Rssi
                 });
             }
@@ -254,7 +268,20 @@ public partial class JudgeConnectionViewModel : BaseViewModel
     {
         try
         {
-            if (message.StartsWith(Constants.Message.COMPETITION_DATA))
+            if (message.StartsWith(Constants.Message.SERVER_NAME))
+            {
+                var sName = message.Substring(Constants.Message.SERVER_NAME.Length).Trim();
+                if (!string.IsNullOrEmpty(sName))
+                {
+                    ServerName = sName;
+                    var dev = DiscoveredDevices.FirstOrDefault(d => d.DeviceId == ServerId);
+                    if (dev != null)
+                    {
+                        dev.Name = sName;
+                    }
+                }
+            }
+            else if (message.StartsWith(Constants.Message.COMPETITION_DATA))
             {
                 var content = message.Substring(Constants.Message.COMPETITION_DATA.Length);
                 var competition = JsonSerializer.Deserialize<CompetitionModel>(content, _jsonOptions);
@@ -267,6 +294,7 @@ public partial class JudgeConnectionViewModel : BaseViewModel
                         var navigationParameter = new Dictionary<string, object>
                         {
                             { Constants.Navigation.Parameter.SERVER_ID, ServerId },
+                            { Constants.Navigation.Parameter.SERVER_NAME, ServerName },
                             { Constants.Navigation.Parameter.COMPETITION_ID, competition.Id },
                         };
 

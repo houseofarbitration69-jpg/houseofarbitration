@@ -96,14 +96,40 @@ public class WindowsBluetoothServer : IDisposable
             };
             _serviceProvider.StartAdvertising(advParameters);
 
-            // Diffusion complémentaire avec le nom local pour faciliter la détection lors du scan
+            // Diffusion complémentaire avec le nom local pour faciliter la détection lors du scan.
+            // Le ServiceUuid est déjà diffusé par GattServiceProvider.StartAdvertising().
+            // On inclut le LocalName et une section ManufacturerData propriétaire (BLE_MANUFACTURER_ID = 0x4B46)
+            // contenant le nom personnalisé du serveur. Ainsi le nom est garanti d'être transmis et reçu
+            // par le client sans risque d'être ignoré ou écrasé par le nom système Windows.
             try
             {
                 _publisher = new BluetoothLEAdvertisementPublisher();
                 _publisher.Advertisement.LocalName = DeviceName;
-                _publisher.Advertisement.ServiceUuids.Add(ArbitrationServiceUuid);
+
+                // Ajout de ManufacturerData propriétaire contenant le nom configuré
+                try
+                {
+                    var mfg = new BluetoothLEManufacturerData
+                    {
+                        CompanyId = Models.Constants.BLE_MANUFACTURER_ID
+                    };
+                    var writer = new DataWriter();
+                    writer.WriteString(DeviceName);
+                    mfg.Data = writer.DetachBuffer();
+                    _publisher.Advertisement.ManufacturerData.Add(mfg);
+                }
+                catch { }
+
+                _publisher.StatusChanged += (s, e) =>
+                {
+                    if (e.Status == BluetoothLEAdvertisementPublisherStatus.Aborted)
+                    {
+                        LogMessage?.Invoke(this, $"Avertissement diffuseur BLE interrompu : {e.Error}");
+                    }
+                };
+
                 _publisher.Start();
-                LogMessage?.Invoke(this, $"Diffuseur BLE actif avec le nom local : '{DeviceName}'.");
+                LogMessage?.Invoke(this, $"Diffuseur BLE actif avec le nom : '{DeviceName}'.");
             }
             catch (Exception ex)
             {

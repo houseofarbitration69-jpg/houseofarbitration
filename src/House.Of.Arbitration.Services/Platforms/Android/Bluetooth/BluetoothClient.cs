@@ -203,9 +203,26 @@ public class BluetoothClient : IBluetoothClient
             if (result?.Device?.Address != null)
             {
                 var address = result.Device.Address;
-                var deviceName = !string.IsNullOrWhiteSpace(result.ScanRecord?.DeviceName)
-                    ? result.ScanRecord.DeviceName
-                    : (!string.IsNullOrWhiteSpace(result.Device.Name) ? result.Device.Name : "Unknown");
+
+                // Priorité 1 : Nom transporté dans ManufacturerData propriétaire
+                string deviceName = string.Empty;
+                var mfgBytes = result.ScanRecord?.GetManufacturerSpecificData(Models.Constants.BLE_MANUFACTURER_ID);
+                if (mfgBytes != null && mfgBytes.Length > 0)
+                {
+                    try
+                    {
+                        deviceName = Encoding.UTF8.GetString(mfgBytes).Trim();
+                    }
+                    catch { }
+                }
+
+                // Priorité 2 : ScanRecord.DeviceName ou Device.Name
+                if (string.IsNullOrWhiteSpace(deviceName))
+                {
+                    deviceName = !string.IsNullOrWhiteSpace(result.ScanRecord?.DeviceName)
+                        ? result.ScanRecord.DeviceName
+                        : (!string.IsNullOrWhiteSpace(result.Device.Name) ? result.Device.Name : "Unknown");
+                }
 
                 if (!_parent._discoveredDevices.ContainsKey(address))
                 {

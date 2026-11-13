@@ -4,8 +4,10 @@ using House.Of.Arbitration.Services.Mock;
 
 #if ANDROID
 using House.Of.Arbitration.Services.Platforms.Android.Bluetooth;
+using AndroidFileDownload = House.Of.Arbitration.Services.Platforms.Android.FileDownloadService;
 #elif WINDOWS
 using House.Of.Arbitration.Services.Platforms.Windows.Bluetooth;
+using WindowsFileDownload = House.Of.Arbitration.Services.Platforms.Windows.FileDownloadService;
 #endif
 
 #endregion
@@ -26,6 +28,13 @@ public static class ServicesExtensions
     {
         builder.Services.AddScoped<IWarningService, WarningService>();
         builder.Services.AddScoped<IAlertService, AlertService>();
+        builder.Services.AddTransient<IExcelImportExportService, ExcelImportExportService>();
+
+#if ANDROID
+        builder.Services.AddTransient<IFileDownloadService, AndroidFileDownload>();
+#elif WINDOWS
+        builder.Services.AddTransient<IFileDownloadService, WindowsFileDownload>();
+#endif
 
 //#if DEBUG
 //        builder.Services.AddSingleton<IBluetoothService, MockBluetoothService>();

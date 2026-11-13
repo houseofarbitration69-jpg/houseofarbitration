@@ -31,25 +31,49 @@
                 Style="{StaticResource PageTitleStyle}"
             />
 
-            <controls:IconButton 
+            <HorizontalStackLayout
                 Grid.Column="1"
-                Text="{Binding Resources.ADD_COMPETITION}"
-                Style="{StaticResource PrimaryButtonStyle}"
-                Command="{Binding CreateCommand}"
+                Spacing="10"
             >
-                <controls:IconButton.Icons>
-                    <controls:IconInfo 
-                        Icon="{x:Static helpers:FontCustomIcons.ADD}" 
-                        Color="{StaticResource InverseTextColor}" 
-                        FontSize="16" 
-                    />
-                    <controls:IconInfo 
-                        Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
-                        Color="{StaticResource InverseTextColor}" 
-                        FontSize="24" 
-                    />
-                </controls:IconButton.Icons>
-            </controls:IconButton>
+                <controls:IconButton 
+                    Text="Importer fichier excel"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding ImportExcelCommand}"
+                >
+                    <controls:IconButton.Icons>
+                        <controls:IconInfo 
+                            Icon="{x:Static helpers:FontCustomIcons.ADD}" 
+                            Color="{StaticResource InverseTextColor}" 
+                            FontSize="16" 
+                        />
+
+                        <controls:IconInfo 
+                            Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
+                            Color="{StaticResource InverseTextColor}" 
+                            FontSize="24" 
+                        />
+                    </controls:IconButton.Icons>
+                </controls:IconButton>
+
+                <controls:IconButton 
+                    Text="{Binding Resources.ADD_COMPETITION}"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding CreateCommand}"
+                >
+                    <controls:IconButton.Icons>
+                        <controls:IconInfo 
+                            Icon="{x:Static helpers:FontCustomIcons.ADD}" 
+                            Color="{StaticResource InverseTextColor}" 
+                            FontSize="16" 
+                        />
+                        <controls:IconInfo 
+                            Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
+                            Color="{StaticResource InverseTextColor}" 
+                            FontSize="24" 
+                        />
+                    </controls:IconButton.Icons>
+                </controls:IconButton>
+            </HorizontalStackLayout>
         </Grid>
 
         <!-- HEADER PHONE -->
@@ -61,27 +85,51 @@
             HorizontalOptions="Center"
         />
 
-        <controls:IconButton 
+        <HorizontalStackLayout
             Grid.Row="1"
-            Text="{Binding Resources.ADD_COMPETITION}"
-            Style="{StaticResource PrimaryButtonStyle}"
-            Command="{Binding CreateCommand}"
+            Spacing="10"
             IsVisible="{OnIdiom Tablet='false', Phone='true'}"
-        >
-            <controls:IconButton.Icons>
-                <controls:IconInfo 
-                    Icon="{x:Static helpers:FontCustomIcons.ADD}" 
-                    Color="{StaticResource InverseTextColor}" 
-                    FontSize="16" 
-                />
+         >
+            <controls:IconButton 
+                Text="Excel"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding ImportExcelCommand}"
+            >
+                <controls:IconButton.Icons>
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.ADD}" 
+                        Color="{StaticResource InverseTextColor}" 
+                        FontSize="16" 
+                    />
+
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
+                        Color="{StaticResource InverseTextColor}" 
+                        FontSize="24" 
+                    />
+                </controls:IconButton.Icons>
+            </controls:IconButton>
+            
+            <controls:IconButton 
+                Text="{Binding Resources.ADD_COMPETITION}"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding CreateCommand}"
+            >
+                <controls:IconButton.Icons>
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.ADD}" 
+                        Color="{StaticResource InverseTextColor}" 
+                        FontSize="16" 
+                    />
                 
-                <controls:IconInfo 
-                    Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
-                    Color="{StaticResource InverseTextColor}" 
-                    FontSize="24" 
-                />
-            </controls:IconButton.Icons>
-        </controls:IconButton>
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.CIRCLE}" 
+                        Color="{StaticResource InverseTextColor}" 
+                        FontSize="24" 
+                    />
+                </controls:IconButton.Icons>
+            </controls:IconButton>
+        </HorizontalStackLayout>
 
         <!-- LISTE DES COMPETITIONS -->
         <CollectionView 

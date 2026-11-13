@@ -1128,7 +1128,7 @@ public partial class HomeViewModel : BaseViewModel
             await _drawKnockouts.AddAsync(drawKnockout);
             #endregion
 
-            #region Sanda / Masculin / Seniors / -65kg
+            #region Sanda / Masculin / Seniors / -60kg
             category = new CategoryModel()
             {
                 Id = 10,

@@ -265,6 +265,11 @@ public class ArbitrationServerSession : IDisposable
 
     public async Task BroadcastCompetitionDataAsync()
     {
+        if (!string.IsNullOrWhiteSpace(_bluetoothServer.DeviceName))
+        {
+            await _bluetoothServer.SendToAllAsync($"{Constants.Message.SERVER_NAME}{_bluetoothServer.DeviceName}");
+        }
+
         var comp = new CompetitionModel
         {
             Id = 1,
@@ -294,6 +299,11 @@ public class ArbitrationServerSession : IDisposable
 
     public async Task SendCompetitionDataToClientAsync(string clientId)
     {
+        if (!string.IsNullOrWhiteSpace(_bluetoothServer.DeviceName))
+        {
+            await _bluetoothServer.SendToClientAsync(clientId, $"{Constants.Message.SERVER_NAME}{_bluetoothServer.DeviceName}");
+        }
+
         var comp = new CompetitionModel
         {
             Id = 1,

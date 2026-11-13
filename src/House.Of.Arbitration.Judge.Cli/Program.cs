@@ -158,14 +158,39 @@ internal static class Program
     {
         lock (ConsoleLock)
         {
-            string status = _client?.IsConnected == true ? "CONNECTÉ" : "DÉCONNECTÉ";
-            ConsoleColor statusColor = _client?.IsConnected == true ? ConsoleColor.Green : ConsoleColor.Red;
+            bool isConnected = _client?.IsConnected == true;
+            bool hasUnsynced = _session?.HasUnsyncedChanges == true;
+            bool isReconnecting = _session?.IsAutoReconnecting == true;
+
+            string status;
+            ConsoleColor statusColor;
+
+            if (isConnected)
+            {
+                status = "CONNECTÉ";
+                statusColor = ConsoleColor.Green;
+            }
+            else if (hasUnsynced)
+            {
+                status = $"HORS-LIGNE ({_session!.UnsyncedScores.Count} note(s) en attente{(isReconnecting ? ", reconnexion..." : "")})";
+                statusColor = ConsoleColor.Yellow;
+            }
+            else if (isReconnecting)
+            {
+                status = "HORS-LIGNE (reconnexion en cours...)";
+                statusColor = ConsoleColor.DarkYellow;
+            }
+            else
+            {
+                status = "DÉCONNECTÉ";
+                statusColor = ConsoleColor.Red;
+            }
 
             Console.ForegroundColor = statusColor;
             Console.Write($"[{status}");
-            if (_session != null && _client?.IsConnected == true)
+            if (_session != null)
             {
-                Console.Write($" | Juge {_session.PositionCode} | Score: {_session.CurrentScore:F2}");
+                Console.Write($" | Juge {_session.PositionCode} | Score: {_session.CurrentScore:F2} (R={_session.RedPoints:F0} B={_session.BluePoints:F0})");
             }
             Console.Write("]");
             Console.ResetColor();
@@ -194,10 +219,32 @@ internal static class Program
                 case "c":
                     if (args.Length == 0)
                     {
+                        if (_client?.LastConnectedBluetoothAddress.HasValue == true)
+                        {
+                            LogInfo($"Reconnexion au dernier serveur connu [{_client.LastConnectedDeviceAddress}]...");
+                            await _client.ReconnectAsync();
+                            return;
+                        }
                         LogError("Usage: connect <index_du_scan | adresse_bluetooth>");
                         return;
                     }
                     await TryConnectAsync(args[0]);
+                    break;
+
+                case "reconnect":
+                case "rec":
+                    if (_client != null)
+                    {
+                        LogInfo("Tentative de reconnexion...");
+                        await _client.ReconnectAsync();
+                    }
+                    break;
+
+                case "sync":
+                    if (_session != null)
+                    {
+                        await _session.SyncUnsyncedScoresAsync();
+                    }
                     break;
 
                 case "disconnect":
@@ -367,7 +414,7 @@ internal static class Program
         {
             var d = devices[i];
             string marker = d.HasArbitrationService ? "[SERVEUR ARBITRATION]" : "";
-            Console.WriteLine($"  [{i + 1}] {d.Name} ({d.AddressFormatted}) RSSI: {d.Rssi} dBm {marker}");
+            Console.WriteLine($"  [{i + 1}] {d.DisplayName} ({d.AddressFormatted}) RSSI: {d.Rssi} dBm {marker}");
         }
         Console.WriteLine();
         LogInfo("Tapez 'connect 1' (ou l'index de votre choix) pour vous connecter.");
@@ -381,9 +428,9 @@ internal static class Program
             if (index >= 1 && index <= _client.DiscoveredDevices.Count)
             {
                 var device = _client.DiscoveredDevices[index - 1];
-                LogInfo($"Connexion à [{device.Name}] ({device.AddressFormatted}, Type: {device.AddressType})...");
+                LogInfo($"Connexion à [{device.DisplayName}] ({device.AddressFormatted}, Type: {device.AddressType})...");
                 bool ok = await _client.ConnectAsync(device);
-                await OnConnectionResultAsync(ok, device.Name);
+                await OnConnectionResultAsync(ok, device.DisplayName);
                 return;
             }
             LogError($"Index invalide: {index}. Les index valides vont de 1 à {_client.DiscoveredDevices.Count}.");
@@ -402,12 +449,13 @@ internal static class Program
 
         // 3. Recherche par nom parmi les périphériques scannés
         var matchByName = _client!.DiscoveredDevices.FirstOrDefault(d =>
-            d.Name.Contains(target, StringComparison.OrdinalIgnoreCase));
+            d.Name.Contains(target, StringComparison.OrdinalIgnoreCase) ||
+            d.DisplayName.Contains(target, StringComparison.OrdinalIgnoreCase));
         if (matchByName != null)
         {
-            LogInfo($"Périphérique '{matchByName.Name}' trouvé dans le cache de scan. Connexion...");
+            LogInfo($"Périphérique '{matchByName.DisplayName}' trouvé dans le cache de scan. Connexion...");
             bool ok = await _client.ConnectAsync(matchByName);
-            await OnConnectionResultAsync(ok, matchByName.Name);
+            await OnConnectionResultAsync(ok, matchByName.DisplayName);
             return;
         }
 
@@ -539,7 +587,10 @@ internal static class Program
         Console.WriteLine("\n--- ÉTAT DE LA SESSION D'ARBITRAGE ---");
         Console.ResetColor();
 
-        Console.WriteLine($"  Connexion BLE    : {(_client!.IsConnected ? "CONNECTÉ (" + _client.ConnectedDeviceName + ")" : "DÉCONNECTÉ")}");
+        string activeServerName = !string.IsNullOrWhiteSpace(_session?.ServerName)
+            ? _session.ServerName
+            : (!string.IsNullOrWhiteSpace(_client?.ConnectedDeviceName) ? _client.ConnectedDeviceName : "Serveur BLE");
+        Console.WriteLine($"  Connexion BLE    : {(_client!.IsConnected ? "CONNECTÉ (" + activeServerName + ")" : "DÉCONNECTÉ")}");
         Console.WriteLine($"  Position juge    : {_session!.PositionCode} (Groupe '{_session.JudgeGroup}', Numéro {_session.JudgePosition})");
         Console.WriteLine($"  Score courant    : {_session.CurrentScore:F2}");
         Console.WriteLine($"  Points Sanda     : Rouge={_session.RedPoints:F0} | Bleu={_session.BluePoints:F0}");
