@@ -34,6 +34,7 @@
     <ProjectReference Include="..\House.Of.Arbitration.Data.Abstractions\House.Of.Arbitration.Data.Abstractions.csproj" />
     <ProjectReference Include="..\House.Of.Arbitration.Data\House.Of.Arbitration.Data.csproj" />
     <ProjectReference Include="..\House.Of.Arbitration.Localization\House.Of.Arbitration.Localization.csproj" />
+    <ProjectReference Include="..\House.Of.Arbitration.Server.Cli\House.Of.Arbitration.Server.Cli.csproj" />
   </ItemGroup>
 
 </Project>

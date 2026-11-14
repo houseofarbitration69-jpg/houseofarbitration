@@ -38,9 +38,9 @@ public class WindowsBluetoothClient : IDisposable
 
     private BluetoothLEAdvertisementWatcher? _watcher;
     private BluetoothLEDevice? _device;
-    private GattSession? _gattSession;
     private GattDeviceService? _service;
     private GattCharacteristic? _characteristic;
+    private GattSession? _gattSession;
 
     public event EventHandler<DiscoveredDevice>? DeviceDiscovered;
     public event EventHandler<string>? Connected;
@@ -48,9 +48,13 @@ public class WindowsBluetoothClient : IDisposable
     public event EventHandler<string>? MessageReceived;
     public event EventHandler<string>? LogMessage;
 
-    public bool IsConnected => _device != null &&
-                               _device.ConnectionStatus == BluetoothConnectionStatus.Connected &&
-                               _characteristic != null;
+    /// <summary>
+    /// Déclenché quand Windows rapporte une reconnexion radio BLE (sans ConnectAsync de notre côté).
+    /// Utile pour réinitialiser les compteurs d'échec dans la session de juge.
+    /// </summary>
+    public event EventHandler<string>? RadioReconnected;
+
+    public bool IsConnected => _characteristic != null && !string.IsNullOrEmpty(ConnectedDeviceAddress);
 
     private string? _discoveredServerName;
     public string? ConnectedDeviceName => !string.IsNullOrWhiteSpace(_discoveredServerName) ? _discoveredServerName : _device?.Name;
@@ -237,7 +241,15 @@ public class WindowsBluetoothClient : IDisposable
     /// </summary>
     public async Task<bool> ConnectAsync(ulong bluetoothAddress, BluetoothAddressType addressType = BluetoothAddressType.Public)
     {
-        await DisconnectAsync();
+        // Ne pas déconnecter si déjà connecté au même périphérique (évite de couper une session active lors d'une tentative de reconnexion)
+        string addrStr = FormatAddress(bluetoothAddress);
+        if (IsConnected && ConnectedDeviceAddress == addrStr)
+        {
+            LogMessage?.Invoke(this, $"Déjà connecté à [{addrStr}], pas de reconnexion nécessaire.");
+            return true;
+        }
+
+        await DisconnectAsync(notify: false, reason: $"Nettoyage avant connexion à [{addrStr}]");
 
         lock (_discoveredDevices)
         {
@@ -251,7 +263,6 @@ public class WindowsBluetoothClient : IDisposable
             }
         }
 
-        string addrStr = FormatAddress(bluetoothAddress);
         LogMessage?.Invoke(this, $"Connexion au périphérique [{addrStr}] (AddressType: {addressType})...");
 
         try
@@ -276,7 +287,10 @@ public class WindowsBluetoothClient : IDisposable
             LastAddressType = addressType;
             _device.ConnectionStatusChanged += OnDeviceConnectionStatusChanged;
 
-            // Maintien de la connexion physique BLE active via GattSession
+            // === GattSession : maintien de la connexion physique BLE ===
+            // MaintainConnection = true empêche Windows de fermer la liaison BLE après inactivité.
+            // IMPORTANT : on ne Dispose() PAS _gattSession dans DisconnectAsync pour éviter
+            // un nettoyage BLE asynchrone ~2s qui couperait la nouvelle connexion.
             try
             {
                 _gattSession = await GattSession.FromDeviceIdAsync(_device.BluetoothDeviceId);
@@ -289,31 +303,48 @@ public class WindowsBluetoothClient : IDisposable
             catch (Exception ex)
             {
                 LogMessage?.Invoke(this, $"Avertissement GattSession : {ex.Message}");
+                // Non bloquant — la connexion peut continuer sans GattSession
             }
 
-            // Découverte du service GATT d'arbitrage avec timeout court
-            LogMessage?.Invoke(this, $"Recherche du service GATT ({ArbitrationServiceUuid})...");
-            var servicesOp = _device.GetGattServicesForUuidAsync(ArbitrationServiceUuid, BluetoothCacheMode.Uncached);
-            var servicesResult = await WithTimeoutAsync(servicesOp, TimeSpan.FromSeconds(4));
+            // === Découverte du service GATT d'arbitrage ===
+            // Stratégie : Cached d'abord (Windows a souvent le GATT en cache après reconnexion radio),
+            // puis Uncached si le cache est vide ou périmé.
+            LogMessage?.Invoke(this, $"Recherche du service GATT ({ArbitrationServiceUuid}) [Cached]...");
+            var cachedServicesOp = _device.GetGattServicesForUuidAsync(ArbitrationServiceUuid, BluetoothCacheMode.Cached);
+            var servicesResult = await WithTimeoutAsync(cachedServicesOp, TimeSpan.FromSeconds(3));
 
             if (servicesResult == null || servicesResult.Status != GattCommunicationStatus.Success || servicesResult.Services.Count == 0)
             {
-                LogMessage?.Invoke(this, $"Service d'arbitrage non trouvé ou timeout.");
-                await DisconnectAsync();
+                LogMessage?.Invoke(this, $"Cache GATT vide, tentative Uncached...");
+                var uncachedServicesOp = _device.GetGattServicesForUuidAsync(ArbitrationServiceUuid, BluetoothCacheMode.Uncached);
+                servicesResult = await WithTimeoutAsync(uncachedServicesOp, TimeSpan.FromSeconds(5));
+            }
+
+            if (servicesResult == null || servicesResult.Status != GattCommunicationStatus.Success || servicesResult.Services.Count == 0)
+            {
+                LogMessage?.Invoke(this, $"Service d'arbitrage non trouvé ou timeout (Status={servicesResult?.Status}).");
+                await DisconnectAsync(notify: false, reason: "Service GATT introuvable");
                 return false;
             }
 
             _service = servicesResult.Services[0];
 
-            // Découverte de la caractéristique GATT d'échange avec timeout court
-            LogMessage?.Invoke(this, $"Recherche de la caractéristique GATT ({ArbitrationCharacteristicUuid})...");
-            var charOp = _service.GetCharacteristicsForUuidAsync(ArbitrationCharacteristicUuid, BluetoothCacheMode.Uncached);
-            var charResult = await WithTimeoutAsync(charOp, TimeSpan.FromSeconds(3));
+            // === Découverte de la caractéristique GATT ===
+            LogMessage?.Invoke(this, $"Recherche de la caractéristique GATT ({ArbitrationCharacteristicUuid}) [Cached]...");
+            var cachedCharOp = _service.GetCharacteristicsForUuidAsync(ArbitrationCharacteristicUuid, BluetoothCacheMode.Cached);
+            var charResult = await WithTimeoutAsync(cachedCharOp, TimeSpan.FromSeconds(3));
 
             if (charResult == null || charResult.Status != GattCommunicationStatus.Success || charResult.Characteristics.Count == 0)
             {
-                LogMessage?.Invoke(this, $"Caractéristique d'arbitrage introuvable ou timeout.");
-                await DisconnectAsync();
+                LogMessage?.Invoke(this, $"Cache caractéristique vide, tentative Uncached...");
+                var uncachedCharOp = _service.GetCharacteristicsForUuidAsync(ArbitrationCharacteristicUuid, BluetoothCacheMode.Uncached);
+                charResult = await WithTimeoutAsync(uncachedCharOp, TimeSpan.FromSeconds(5));
+            }
+
+            if (charResult == null || charResult.Status != GattCommunicationStatus.Success || charResult.Characteristics.Count == 0)
+            {
+                LogMessage?.Invoke(this, $"Caractéristique d'arbitrage introuvable ou timeout (Status={charResult?.Status}).");
+                await DisconnectAsync(notify: false, reason: "Caractéristique GATT introuvable");
                 return false;
             }
 
@@ -339,7 +370,7 @@ public class WindowsBluetoothClient : IDisposable
         catch (Exception ex)
         {
             LogMessage?.Invoke(this, $"Erreur lors de la connexion Bluetooth : {ex.Message}");
-            await DisconnectAsync();
+            await DisconnectAsync(notify: false, reason: $"Exception ConnectAsync : {ex.Message}");
             return false;
         }
     }
@@ -443,31 +474,33 @@ public class WindowsBluetoothClient : IDisposable
     /// <summary>
     /// Déconnecte le périphérique actuel.
     /// </summary>
-    public async Task DisconnectAsync()
+    public async Task DisconnectAsync(bool notify = true, string reason = "")
     {
         string? addr = ConnectedDeviceAddress;
-
-        if (_gattSession != null)
-        {
-            try
-            {
-                _gattSession.MaintainConnection = false;
-                _gattSession.Dispose();
-            }
-            catch { }
-            _gattSession = null;
-        }
+        string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+        string reasonText = string.IsNullOrEmpty(reason) ? "(non spécifiée)" : reason;
+        LogMessage?.Invoke(this, $"[{timestamp}] [DISCONNECT] Appelé — Raison : {reasonText} | addr={addr ?? "null"} | notify={notify}");
 
         if (_characteristic != null)
         {
             try
             {
                 _characteristic.ValueChanged -= OnCharacteristicValueChanged;
-                await _characteristic.WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
+                var writeOp = _characteristic.WriteClientCharacteristicConfigurationDescriptorWithResultAsync(
                     GattClientCharacteristicConfigurationDescriptorValue.None);
+                await WithTimeoutAsync(writeOp, TimeSpan.FromMilliseconds(500));
             }
             catch { }
             _characteristic = null;
+        }
+
+        // Désactiver MaintainConnection SANS Dispose (évite le nettoyage BLE asynchrone ~2s
+        // qui couperait la nouvelle connexion si un ReconnectAsync est en cours).
+        if (_gattSession != null)
+        {
+            try { _gattSession.MaintainConnection = false; } catch { }
+            // NE PAS appeler _gattSession.Dispose() ici — le GC nettoie sans effet secondaire BLE.
+            _gattSession = null;
         }
 
         if (_service != null)
@@ -490,7 +523,7 @@ public class WindowsBluetoothClient : IDisposable
         _transferManager.Clear();
         ConnectedDeviceAddress = null;
 
-        if (!string.IsNullOrEmpty(addr))
+        if (notify && !string.IsNullOrEmpty(addr))
         {
             Disconnected?.Invoke(this, addr);
         }
@@ -518,24 +551,26 @@ public class WindowsBluetoothClient : IDisposable
                 writer.WriteBytes(Encoding.UTF8.GetBytes(chunk));
                 var buffer = writer.DetachBuffer();
 
-                var writeOption = _characteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.WriteWithoutResponse)
-                    ? GattWriteOption.WriteWithoutResponse
-                    : GattWriteOption.WriteWithResponse;
+                // Préférer WriteWithResponse pour la fiabilité et le support des charges utiles longues (GATT Long Write)
+                var writeOption = _characteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Write)
+                    ? GattWriteOption.WriteWithResponse
+                    : (_characteristic.CharacteristicProperties.HasFlag(GattCharacteristicProperties.WriteWithoutResponse)
+                        ? GattWriteOption.WriteWithoutResponse
+                        : GattWriteOption.WriteWithResponse);
 
                 var result = await _characteristic.WriteValueWithResultAsync(buffer, writeOption);
                 if (result.Status != GattCommunicationStatus.Success)
                 {
                     // Repli : tenter avec l'autre mode d'écriture
-                    var fallbackOption = writeOption == GattWriteOption.WriteWithoutResponse
-                        ? GattWriteOption.WriteWithResponse
-                        : GattWriteOption.WriteWithoutResponse;
+                    var fallbackOption = writeOption == GattWriteOption.WriteWithResponse
+                        ? GattWriteOption.WriteWithoutResponse
+                        : GattWriteOption.WriteWithResponse;
                     result = await _characteristic.WriteValueWithResultAsync(buffer, fallbackOption);
                 }
 
                 if (result.Status != GattCommunicationStatus.Success)
                 {
-                    LogMessage?.Invoke(this, $"Échec d'envoi du paquet ({result.Status}). Rupture de liaison Bluetooth.");
-                    _ = Task.Run(async () => await DisconnectAsync());
+                    LogMessage?.Invoke(this, $"Échec d'envoi du paquet ({result.Status}).");
                     return false;
                 }
 
@@ -549,8 +584,7 @@ public class WindowsBluetoothClient : IDisposable
         }
         catch (Exception ex)
         {
-            LogMessage?.Invoke(this, $"Erreur d'envoi Bluetooth : {ex.Message}. Rupture de liaison Bluetooth.");
-            _ = Task.Run(async () => await DisconnectAsync());
+            LogMessage?.Invoke(this, $"Erreur d'envoi Bluetooth : {ex.Message}.");
             return false;
         }
         finally
@@ -561,15 +595,22 @@ public class WindowsBluetoothClient : IDisposable
 
     private void OnDeviceConnectionStatusChanged(BluetoothLEDevice sender, object args)
     {
+        string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
         if (sender.ConnectionStatus == BluetoothConnectionStatus.Disconnected)
         {
-            LogMessage?.Invoke(this, $"Le périphérique [{FormatAddress(sender.BluetoothAddress)}] s'est déconnecté.");
-            Disconnected?.Invoke(this, FormatAddress(sender.BluetoothAddress));
+            LogMessage?.Invoke(this, $"[{timestamp}] [RADIO-BLE] Statut radio : DÉCONNECTÉ (inactif/veille). ConnectedDeviceAddress={ConnectedDeviceAddress}");
+            // Note : Windows WinRT passe souvent en ConnectionStatus.Disconnected lors de brèves périodes d'inactivité ou d'une coupure BT.
+            // La rupture réelle de la session applicative est gérée par l'échec du prochain ping (watchdog).
         }
         else if (sender.ConnectionStatus == BluetoothConnectionStatus.Connected)
         {
-            LogMessage?.Invoke(this, $"Le périphérique [{FormatAddress(sender.BluetoothAddress)}] est connecté.");
-            Connected?.Invoke(this, FormatAddress(sender.BluetoothAddress));
+            LogMessage?.Invoke(this, $"[{timestamp}] [RADIO-BLE] Statut radio : CONNECTÉ. ConnectedDeviceAddress={ConnectedDeviceAddress}");
+            // La radio BLE s'est reconnectée (Windows a rétabli la liaison sans ConnectAsync de notre côté).
+            // On notifie la session de juge pour qu'elle puisse réinitialiser les compteurs d'échec.
+            if (!string.IsNullOrEmpty(ConnectedDeviceAddress))
+            {
+                RadioReconnected?.Invoke(this, ConnectedDeviceAddress);
+            }
         }
     }
 
@@ -628,6 +669,11 @@ public class WindowsBluetoothClient : IDisposable
     public void Dispose()
     {
         StopScan();
+        if (_gattSession != null)
+        {
+            try { _gattSession.MaintainConnection = false; _gattSession.Dispose(); } catch { }
+            _gattSession = null;
+        }
         _ = DisconnectAsync();
         _sendSemaphore.Dispose();
         GC.SuppressFinalize(this);

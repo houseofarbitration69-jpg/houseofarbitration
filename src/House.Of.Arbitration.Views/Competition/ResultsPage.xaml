@@ -44,6 +44,17 @@
                        TextColor="{DynamicResource MartialRed}" 
                        HorizontalOptions="Center" />
             </VerticalStackLayout>
+
+            <Button Grid.Column="2"
+                    Text="📊 Excel"
+                    Command="{Binding ExportToExcelCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                    BackgroundColor="{DynamicResource MartialRed}"
+                    TextColor="White"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    Padding="12, 6" />
         </Grid>
 
         <!-- Category Selector Card -->
@@ -104,7 +115,9 @@
                     Stroke="{DynamicResource BorderMuted}" 
                     Padding="16, 12"
                 >
-                    <VerticalStackLayout Spacing="10">
+                    <VerticalStackLayout 
+                        Spacing="10"
+                    >
                         <Label 
                             Text="🏆 PODIUM" 
                             FontSize="16" 
@@ -116,18 +129,19 @@
                         <Grid 
                             ColumnDefinitions="*, *, *" 
                             ColumnSpacing="12" 
-                            HorizontalOptions="Center"
+                            HorizontalOptions="Fill"
                         >
+                            <!--BackgroundColor="{DynamicResource SurfaceElevation5}"-->
                             <!-- 2ème Place (Argent) -->
                             <Border 
                                 Grid.Column="0" 
                                 IsVisible="{Binding SecondPlace, Converter={StaticResource EmptyToBoolConverter}}"
-                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
                                 StrokeShape="RoundRectangle 8" 
                                 Stroke="#C0C0C0" 
                                 StrokeThickness="2" 
                                 Padding="10" 
                                 VerticalOptions="End"
+                                HorizontalOptions="Fill"
                             >
                                 <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                                     <Label Text="🥈" FontSize="26" HorizontalOptions="Center" />
@@ -138,16 +152,17 @@
                                 </VerticalStackLayout>
                             </Border>
 
+                            <!--BackgroundColor="{DynamicResource SurfaceElevation6}"-->
                             <!-- 1ère Place (Or) -->
                             <Border 
                                 Grid.Column="1" 
                                 IsVisible="{Binding FirstPlace, Converter={StaticResource EmptyToBoolConverter}}"
-                                BackgroundColor="{DynamicResource SurfaceElevation6}" 
                                 StrokeShape="RoundRectangle 8" 
                                 Stroke="#FFD700" 
                                 StrokeThickness="3" 
                                 Padding="12" 
                                 VerticalOptions="End"
+                                HorizontalOptions="Fill"
                             >
                                 <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                                     <Label Text="🥇" FontSize="32" HorizontalOptions="Center" />
@@ -158,16 +173,17 @@
                                 </VerticalStackLayout>
                             </Border>
 
+                            <!--BackgroundColor="{DynamicResource SurfaceElevation5}"-->
                             <!-- 3ème Place (Bronze) -->
                             <Border 
                                 Grid.Column="2" 
                                 IsVisible="{Binding ThirdPlace, Converter={StaticResource EmptyToBoolConverter}}"
-                                BackgroundColor="{DynamicResource SurfaceElevation5}" 
                                 StrokeShape="RoundRectangle 8" 
                                 Stroke="#CD7F32" 
                                 StrokeThickness="2" 
                                 Padding="10" 
                                 VerticalOptions="End"
+                                HorizontalOptions="Fill"
                             >
                                 <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
                                     <Label Text="🥉" FontSize="26" HorizontalOptions="Center" />

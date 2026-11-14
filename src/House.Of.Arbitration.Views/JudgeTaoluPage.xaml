@@ -700,6 +700,25 @@
                         />
                 </HorizontalStackLayout>
 
+                <!-- Signal Strength Indicator -->
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center" IsVisible="{Binding IsConnected}">
+                    <Grid ColumnDefinitions="4,4,4,4" ColumnSpacing="2" HeightRequest="18" VerticalOptions="End">
+                        <BoxView Grid.Column="0" HeightRequest="5" WidthRequest="4" VerticalOptions="End" 
+                                 Color="{Binding ServerRssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=1}"/>
+                        <BoxView Grid.Column="1" HeightRequest="9" WidthRequest="4" VerticalOptions="End" 
+                                 Color="{Binding ServerRssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=2}"/>
+                        <BoxView Grid.Column="2" HeightRequest="13" WidthRequest="4" VerticalOptions="End" 
+                                 Color="{Binding ServerRssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=3}"/>
+                        <BoxView Grid.Column="3" HeightRequest="18" WidthRequest="4" VerticalOptions="End" 
+                                 Color="{Binding ServerRssi, Converter={StaticResource SignalToColorConverter}, ConverterParameter=4}"/>
+                    </Grid>
+                    <Label 
+                        Text="{Binding ServerRssiText}" 
+                        TextColor="{StaticResource Gray200}" 
+                        FontSize="14" 
+                        VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+
                 <Label 
                     Text="{Binding JudgeName}" 
                     TextColor="{StaticResource PrimaryTextColor}" 

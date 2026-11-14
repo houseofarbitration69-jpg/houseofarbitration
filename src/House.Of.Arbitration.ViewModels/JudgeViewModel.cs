@@ -1,4 +1,4 @@
-#region Imports
+﻿#region Imports
 using CommunityToolkit.Maui;
 using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
@@ -93,11 +93,15 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     private string _timeLeftDisplay = "02:00";
     private string _judgeGroup = String.Empty;
     private bool _isReconnecting;
+    private int _reconnectingFlag; // 0 = libre, 1 = en cours (Interlocked)
     private string? _lastServerDeviceId;
     private int _judgePosition;
     private DateTime _lastServerContactTime = DateTime.UtcNow;
     private int _consecutiveFailedPings;
+    private int _serverRssi;
+    private readonly SemaphoreSlim _connectionLock = new(1, 1);
     private IDispatcherTimer? _watchdogTimer;
+    private IDispatcherTimer? _rssiTimer;
     private IDispatcherTimer? _autoReconnectTimer;
     private double _redScore = 0;
     private double _blueScore = 0;
@@ -291,9 +295,39 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             {
                 OnPropertyChanged(nameof(ConnectionStatusText));
                 OnPropertyChanged(nameof(ConnectionStatusColor));
+                OnPropertyChanged(nameof(ServerRssiText));
+                OnPropertyChanged(nameof(HasServerRssi));
             }
         }
     }
+
+    /// <summary>
+    /// Puissance du signal Bluetooth avec le serveur (RSSI en dBm)
+    /// </summary>
+    public int ServerRssi
+    {
+        get => _serverRssi;
+        set
+        {
+            if (SetProperty(ref _serverRssi, value))
+            {
+                OnPropertyChanged(nameof(ServerRssiText));
+                OnPropertyChanged(nameof(HasServerRssi));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Indique si une mesure de signal est disponible
+    /// </summary>
+    public bool HasServerRssi => IsConnected && ServerRssi != 0;
+
+    /// <summary>
+    /// Affichage textuel du signal du serveur (ex: "-65 dBm")
+    /// </summary>
+    public string ServerRssiText => IsConnected && ServerRssi != 0
+        ? $"{ServerRssi} dBm"
+        : string.Empty;
 
     /// <summary>
     /// Obtient le status de la connection
@@ -611,11 +645,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             _lastServerDeviceId = ServerId;
         }
 
-        StartWatchdog();
+        //StartWatchdog();
 
         _bluetoothClient.DeviceConnected += OnDeviceConnected;
         _bluetoothClient.DeviceDisconnected += OnDeviceDisconnected;
         _bluetoothClient.MessageReceived += OnMessageReceived;
+        _bluetoothClient.RssiUpdated += OnRssiUpdated;
 
         try
         {
@@ -628,6 +663,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
         _ = LoadRecognizedCodesAsync();
 
+        if (IsConnected)
+        {
+            StartRssiPolling();
+        }
+
         await base.OnAppearing();
     }
 
@@ -639,6 +679,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     {
         _timer?.Stop();
         _typeTimer?.Stop();
+        StopRssiPolling();
         _matchingCodesCts?.Cancel();
         _matchingCodesCts?.Dispose();
         _matchingCodesCts = null;
@@ -646,6 +687,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         _bluetoothClient.DeviceConnected -= OnDeviceConnected;
         _bluetoothClient.DeviceDisconnected -= OnDeviceDisconnected;
         _bluetoothClient.MessageReceived -= OnMessageReceived;
+        _bluetoothClient.RssiUpdated -= OnRssiUpdated;
 
         await base.OnDisappearing();
     }
@@ -672,6 +714,8 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {
+            await _alertService.ShowToast($"OnDeviceConnected({deviceId})");
+
             await HandleDeviceConnectedAsync(deviceId);
         });
     }
@@ -683,7 +727,32 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     {
         MainThread.BeginInvokeOnMainThread(async () =>
         {
+            await _alertService.ShowToast($"OnDeviceDisconnected({deviceId})");
+
+            // Ignorer les événements obsolètes : si on est déjà hors-ligne et pas en cours
+            // de reconnexion, c'est un callback BLE en retard (antérieur à la reconnexion).
+            if (!IsConnected && !_isReconnecting)
+                return;
+
+            // Si on était en train de se reconnecter et que ça a échoué
+            if (_isReconnecting)
+            {
+                IsReconnecting = false;
+                await _alertService.ShowToast("Reconnexion échouée — serveur injoignable.");
+            }
+
             await HandleDeviceDisconnectedAsync();
+        });
+    }
+
+    /// <summary>
+    /// Méthode appelée lorsque la mesure de puissance du signal (RSSI) du serveur est reçue
+    /// </summary>
+    public void OnRssiUpdated(object? sender, int rssi)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            ServerRssi = rssi;
         });
     }
     #endregion
@@ -922,7 +991,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     private async Task HandleServerStoppedAsync()
     {
         StopWatchdog();
-        StopAutoReconnect();
         _consecutiveFailedPings = 0;
 
         IsConnected = false;
@@ -946,41 +1014,8 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     }
 
     /// <summary>
-    /// Méthode permettant d'essayer de se reconnecter avec le serveur
-    /// </summary>
-    /// <returns></returns>
-    private async Task TryReconnectAsync()
-    {
-        if (IsConnected || string.IsNullOrEmpty(_lastServerDeviceId))
-        {
-            return;
-        }
-
-        // Protection contre les tentatives concurrentes
-        if (_isReconnecting)
-        {
-            return;
-        }
-
-        IsReconnecting = true;
-        try
-        {
-            _logger.LogInformation("Tentative de reconnexion au serveur {DeviceId}", _lastServerDeviceId);
-            await _bluetoothClient.ConnectToDevice(_lastServerDeviceId);
-            // Si la connexion réussit, OnDeviceConnected sera déclenché automatiquement
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Échec de la tentative de reconnexion au serveur {DeviceId}", _lastServerDeviceId);
-        }
-        finally
-        {
-            IsReconnecting = false;
-        }
-    }
-
-    /// <summary>
-    /// Méthode permettant de vérifier qu'on accède toujours au serveur
+    /// Démarre le watchdog : envoie un PING toutes les 4s.
+    /// Après 3 PINGs consécutifs sans réponse → déconnecté.
     /// </summary>
     private void StartWatchdog()
     {
@@ -993,19 +1028,14 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             if (_watchdogTimer != null)
             {
                 _watchdogTimer.Interval = TimeSpan.FromSeconds(4);
-                _watchdogTimer.Tick += async (s, e) =>
-                {
-                    await PerformWatchdogTickAsync();
-                };
+                _watchdogTimer.Tick += async (s, e) => await PerformWatchdogTickAsync();
             }
         }
 
         _watchdogTimer?.Start();
     }
 
-    /// <summary>
-    /// Méthode permettant d'arrêtre la vérification que le serveur est online
-    /// </summary>
+    /// <summary>Arrête le watchdog.</summary>
     private void StopWatchdog()
     {
         _watchdogTimer?.Stop();
@@ -1013,128 +1043,188 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     }
 
     /// <summary>
-    /// Méthode permettant de vérifier l'état du serveur
+    /// Tick du watchdog : envoie un PING et vérifie le timeout du PONG.
+    /// Synchronisé via _connectionLock : si une opération de connexion est en cours,
+    /// le watchdog passe son tour pour ne pas interférer avec le protocole d'enregistrement.
     /// </summary>
     private async Task PerformWatchdogTickAsync()
     {
-        if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(12))
-        {
-            _logger.LogWarning("Server heartbeat timeout (>12s). Declaring server disconnected.");
-            await HandleDeviceDisconnectedAsync();
+        if (!IsConnected) return;
+
+        // Si la connexion ou déconnexion est en cours, ne pas interférer
+        if (!await _connectionLock.WaitAsync(0))
             return;
-        }
 
         try
         {
-            await _bluetoothClient.SendMessage(ServerId, Constants.Message.PING);
-        }
-        catch (Exception ex)
-        {
-            _consecutiveFailedPings++;
-            _logger.LogWarning(ex, "Failed to send PING to server (attempt {Attempt}/3).", _consecutiveFailedPings);
+            if (!IsConnected) return;
+
+            try
+            {
+                await _bluetoothClient.SendMessage(ServerId, Constants.Message.PING);
+                await _bluetoothClient.ReadRssiAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "PING : exception lors de l'envoi.");
+            }
+
+            // Détection via timeout PONG :
+            // Le watchdog tick toutes les 4s. On accorde un délai de 7 secondes
+            // (1 cycle complet + 3s de marge pour l'aller-retour BLE et la gigue du dispatcher)
+            var elapsed = DateTime.UtcNow - _lastServerContactTime;
+            if (elapsed > TimeSpan.FromSeconds(7))
+            {
+                _consecutiveFailedPings++;
+                _logger.LogWarning("Pas de PONG depuis {Elapsed:F0}s (tentative {N}/3).", elapsed.TotalSeconds, _consecutiveFailedPings);
+            }
+            else
+            {
+                // PONG reçu récemment : réinitialiser le compteur
+                _consecutiveFailedPings = 0;
+            }
 
             if (_consecutiveFailedPings >= 3)
             {
-                _logger.LogWarning("3 consecutive PING attempts failed. Declaring server disconnected.");
-                await HandleDeviceDisconnectedAsync();
+                _logger.LogWarning("3 cycles sans PONG → déconnexion détectée par watchdog.");
+                await HandleDeviceDisconnectedInternalAsync();
             }
+        }
+        finally
+        {
+            _connectionLock.Release();
         }
     }
 
-
     /// <summary>
-    /// Méthode appellée lorsque le serveur ne répond plus au pong
+    /// Appelée quand le juge est considéré déconnecté (watchdog ou BLE perdu).
+    /// Met à jour l'interface et notifie le serveur.
+    /// Protégée par le sémaphore pour éviter les conflits avec la connexion.
     /// </summary>
     public async Task HandleDeviceDisconnectedAsync()
     {
+        await _connectionLock.WaitAsync();
+        try
+        {
+            await HandleDeviceDisconnectedInternalAsync();
+        }
+        finally
+        {
+            _connectionLock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Implémentation interne de la déconnexion sans réacquisition du sémaphore.
+    /// </summary>
+    private async Task HandleDeviceDisconnectedInternalAsync()
+    {
         StopWatchdog();
+        StopRssiPolling();
         _consecutiveFailedPings = 0;
 
-        _lastServerDeviceId = ServerId;
+        // Mémoriser le ServerId pour permettre la reconnexion
+        if (!string.IsNullOrEmpty(ServerId))
+            _lastServerDeviceId = ServerId;
 
         IsConnected = false;
         IsReceivingMatch = false;
 
-        // Judge is actively in a match: keep local data, activate offline mode and background auto-reconnect
-        StartAutoReconnect();
-
-        await _alertService.ShowToast("Serveur déconnecté. Mode hors-ligne actif : continuez à noter.");
+        await _alertService.ShowToast("Serveur déconnecté — mode hors-ligne actif.");
     }
 
     /// <summary>
-    /// Méthode permettant d'essayer de se reconnecter automatique au serveur
+    /// Démarre la lecture en temps réel de la puissance du signal (RSSI) chaque seconde.
     /// </summary>
-    private void StartAutoReconnect()
+    private void StartRssiPolling()
     {
-        if (_autoReconnectTimer == null)
+        if (_rssiTimer == null)
         {
-            _autoReconnectTimer = Application.Current?.Dispatcher?.CreateTimer();
-            if (_autoReconnectTimer != null)
+            _rssiTimer = Application.Current?.Dispatcher?.CreateTimer();
+            if (_rssiTimer != null)
             {
-                _autoReconnectTimer.Interval = TimeSpan.FromSeconds(3);
-                _autoReconnectTimer.Tick += async (s, e) =>
+                _rssiTimer.Interval = TimeSpan.FromSeconds(1);
+                _rssiTimer.Tick += async (s, e) =>
                 {
-                    if (!IsConnected)
+                    if (IsConnected)
                     {
-                        await TryReconnectAsync();
+                        try
+                        {
+                            await _bluetoothClient.ReadRssiAsync();
+                        }
+                        catch { }
+                    }
+                    else
+                    {
+                        StopRssiPolling();
                     }
                 };
             }
         }
 
-        _autoReconnectTimer?.Start();
+        _rssiTimer?.Start();
+
+        // Première lecture immédiate
+        if (IsConnected)
+        {
+            _ = _bluetoothClient.ReadRssiAsync();
+        }
     }
 
     /// <summary>
-    /// Méthode permettant d'essayer de récupérer le signal du serveur
+    /// Arrête le rafraîchissement du signal RSSI.
     /// </summary>
-    /// <returns></returns>
+    private void StopRssiPolling()
+    {
+        _rssiTimer?.Stop();
+        ServerRssi = 0;
+    }
+
+    /// <summary>
+    /// Appelée quand la connexion GATT est pleinement rétablie.
+    /// Protégée par le sémaphore pour empêcher le watchdog de pinger pendant l'enregistrement.
+    /// </summary>
     internal async Task HandleDeviceConnectedAsync(string deviceId)
     {
-        // Mettre à jour ServerId avec le deviceId de reconnexion
-        // (peut différer de l'ancien si le serveur a redémarré)
-        if (!string.IsNullOrEmpty(deviceId))
-        {
-            ServerId = deviceId;
-            _lastServerDeviceId = deviceId;
-        }
-
-        IsConnected = true;
-        _lastServerContactTime = DateTime.UtcNow;
-        _consecutiveFailedPings = 0;
-
-        StopAutoReconnect();
-        StartWatchdog();
-
-        // Réenregistrement du juge et synchronisation des scores offline
+        await _connectionLock.WaitAsync();
         try
         {
-            await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_POSITION}{PositionCode}");
-
-            await Task.Delay(150);
-
-            // Envoyer les scores accumulés en mode hors-ligne
-            if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
+            if (!string.IsNullOrEmpty(deviceId))
             {
-                await SyncUnsyncedScoresAsync();
+                ServerId = deviceId;
+                _lastServerDeviceId = deviceId;
             }
 
-            // Redemander l'état du match courant au serveur
-            await Task.Delay(100);
-            await _bluetoothClient.SendMessage(ServerId, Constants.Message.GET_MATCH);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error re-registering judge position upon reconnection");
-        }
-    }
+            IsConnected = true;
+            IsReconnecting = false;
+            _lastServerContactTime = DateTime.UtcNow;
+            _consecutiveFailedPings = 0;
 
-    /// <summary>
-    /// Méthode permettant d'arrêter le timer pour lancer la reconnection automatique
-    /// </summary>
-    private void StopAutoReconnect()
-    {
-        _autoReconnectTimer?.Stop();
+            StartWatchdog();
+            StartRssiPolling();
+
+            try
+            {
+                // Réenregistrement de la position du juge
+                await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_POSITION}{PositionCode}");
+                await Task.Delay(150);
+
+                // Synchronisation des scores offline si nécessaire
+                if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
+                    await SyncUnsyncedScoresAsync();
+
+                await Task.Delay(100);
+                await _bluetoothClient.SendMessage(ServerId, Constants.Message.GET_MATCH);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur lors de la réinscription du juge après reconnexion.");
+            }
+        }
+        finally
+        {
+            _connectionLock.Release();
+        }
     }
 
     /// <summary>
@@ -1576,30 +1666,65 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
     #region Commands
     /// <summary>
-    /// Commande pour se reconnecter avec le serveur
+    /// Bouton Reconnect : tente une reconnexion manuelle au serveur.
+    /// - Affiche l'état "en cours de reconnexion" sur l'interface.
+    /// - Si la connexion BLE réussit → DeviceConnected → HandleDeviceConnectedAsync → mode connecté.
+    /// - Si elle échoue → DeviceDisconnected → OnDeviceDisconnected → message d'erreur.
+    /// La protection contre les appels concurrents est atomique via Interlocked.
     /// </summary>
-    /// <returns></returns>
     [RelayCommand]
     public async Task Reconnect()
     {
-        if (_isReconnecting)
+        if (IsConnected) return;
+
+        if (string.IsNullOrEmpty(_lastServerDeviceId))
         {
+            await _alertService.ShowToast("Aucun serveur connu. Retournez à l'écran de connexion.");
             return;
         }
 
-        // Forcer la déconnexion propre si nécessaire avant de tenter la reconnexion
-        if (IsConnected)
-        {
-            IsConnected = false;
-        }
+        // Guard atomique contre les appels concurrents
+        if (Interlocked.CompareExchange(ref _reconnectingFlag, 1, 0) != 0)
+            return;
 
-        // S'assurer que l'autoReconnect est actif
-        if (!string.IsNullOrEmpty(_lastServerDeviceId))
+        IsReconnecting = true;
+        try
         {
-            StartAutoReconnect();
+            _logger.LogInformation("Reconnexion manuelle vers {DeviceId}...", _lastServerDeviceId);
+            await _bluetoothClient.ConnectToDevice(_lastServerDeviceId);
+            // ConnectToDevice retourne immédiatement : la connexion BLE est asynchrone.
+            // Le résultat arrive via DeviceConnected → HandleDeviceConnectedAsync
+            //                     ou DeviceDisconnected → OnDeviceDisconnected.
+            // On lance un timeout en arrière-plan (15 s) pour gérer les échecs silencieux Android.
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(15));
+                // Après 15 s, si toujours hors-ligne ET toujours marqué "reconnexion en cours"
+                // c'est un timeout silencieux (Android n'a déclenché aucun event BLE).
+                if (!IsConnected && IsReconnecting)
+                {
+                    _logger.LogWarning("Timeout reconnexion (15 s) — aucun event BLE reçu.");
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        IsReconnecting = false;
+                        Interlocked.Exchange(ref _reconnectingFlag, 0);
+                        await _alertService.ShowToast("Reconnexion expirée. Vérifiez le Bluetooth et réessayez.");
+                    });
+                }
+            });
         }
-
-        await TryReconnectAsync();
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Erreur lors de ConnectToDevice.");
+            IsReconnecting = false;
+            await _alertService.ShowToast("Reconnexion échouée. Réessayez.");
+        }
+        finally
+        {
+            // Le flag est libéré immédiatement pour que l'utilisateur puisse réessayer.
+            // Le timeout en arrière-plan le remet à 0 si nécessaire après 15 s.
+            Interlocked.Exchange(ref _reconnectingFlag, 0);
+        }
     }
 
     /// <summary>

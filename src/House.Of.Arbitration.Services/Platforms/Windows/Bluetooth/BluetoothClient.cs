@@ -18,6 +18,7 @@ public class BluetoothClient : IBluetoothClient
     public event EventHandler<(string DeviceId, string Name, int Rssi)>? DeviceDiscovered;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
+    public event EventHandler<int>? RssiUpdated;
 #pragma warning restore CS0067
     #endregion
 
@@ -53,5 +54,7 @@ public class BluetoothClient : IBluetoothClient
     {
         await _alertService.ShowToast($"Client sent : {message}");
     }
+
+    public Task ReadRssiAsync() => Task.CompletedTask;
     #endregion
 }

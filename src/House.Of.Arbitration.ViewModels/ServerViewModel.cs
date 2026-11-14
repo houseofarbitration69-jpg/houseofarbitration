@@ -1736,6 +1736,15 @@ public partial class ServerViewModel : BaseViewModel
     {
         await SetExAequo();
     }
+
+    /// <summary>
+    /// Commande permettant de passer au round suivant
+    /// </summary>
+    /// <returns></returns>
+    [RelayCommand]
+    private async Task NextMatch()
+    {
+    }
     #endregion
 
     #region SideSheet logic

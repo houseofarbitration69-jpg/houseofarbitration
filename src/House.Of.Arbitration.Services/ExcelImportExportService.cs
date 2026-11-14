@@ -65,6 +65,7 @@ public class ExcelImportExportService : IExcelImportExportService
         wsCat.Cell(1, 5).Value = "TrancheAge";
         wsCat.Cell(1, 6).Value = "TypeRound";
         wsCat.Cell(1, 7).Value = "NomCategorie (auto)";
+        wsCat.Cell(1, 8).Value = "Petite Finale (Oui/Non)";
         wsCat.Row(1).Style.Font.Bold = true;
         wsCat.Cell(1, 7).Style.Fill.BackgroundColor = XLColor.LightGray;
 
@@ -75,6 +76,7 @@ public class ExcelImportExportService : IExcelImportExportService
         wsCat.Cell(2, 4).Value = "65";
         wsCat.Cell(2, 5).Value = "Seniors";
         wsCat.Cell(2, 6).Value = "Knockouts";
+        wsCat.Cell(2, 8).Value = "Oui";
 
         // Colonne G : formule de concatenation du nom affiche de la categorie
         // Produit ex : "Sanda Seniors Hommes -65kg"
@@ -112,6 +114,9 @@ public class ExcelImportExportService : IExcelImportExportService
         var catRoundValidation = wsCat.Range("F2:F1000").CreateDataValidation();
         catRoundValidation.List("\"Knockouts,Pools,Order\"");
 
+        var catBronzeValidation = wsCat.Range("H2:H1000").CreateDataValidation();
+        catBronzeValidation.List("\"Oui,Non\"");
+
         wsCat.Column(1).Width = 25;
         wsCat.Column(2).Width = 10;
         wsCat.Column(3).Width = 10;
@@ -119,6 +124,7 @@ public class ExcelImportExportService : IExcelImportExportService
         wsCat.Column(5).Width = 15;
         wsCat.Column(6).Width = 15;
         wsCat.Column(7).Width = 35;
+        wsCat.Column(8).Width = 22;
 
         // ── Onglet "Competiteurs" ─────────────────────────────────────────
         var wsComp2 = workbook.Worksheets.Add("Compétiteurs");
@@ -317,6 +323,12 @@ public class ExcelImportExportService : IExcelImportExportService
                     var weightMaxStr = wsCat.Cell(catRow, 4).GetString();
                     var ageLabel = wsCat.Cell(catRow, 5).GetString();
                     var roundTypeStr = wsCat.Cell(catRow, 6).GetString();
+                    var bronzeStr = wsCat.Cell(catRow, 8).GetString()?.Trim();
+                    bool hasBronzeMatch = bronzeStr != null && (bronzeStr.Equals("oui", StringComparison.OrdinalIgnoreCase) ||
+                                                                bronzeStr.Equals("yes", StringComparison.OrdinalIgnoreCase) ||
+                                                                bronzeStr.Equals("true", StringComparison.OrdinalIgnoreCase) ||
+                                                                bronzeStr.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                                                                bronzeStr.Equals("vrai", StringComparison.OrdinalIgnoreCase));
 
                     if (!TryParseCategoryType(typeStr, out var categoryType))
                     {
@@ -361,6 +373,7 @@ public class ExcelImportExportService : IExcelImportExportService
                         WeightMax = weightMax,
                         AgeRangeId = ageRange?.Id,
                         RoundType = roundType,
+                        HasBronzeMatch = hasBronzeMatch,
                         CompetitionId = competition.Id
                     };
 
@@ -705,6 +718,25 @@ public class ExcelImportExportService : IExcelImportExportService
                 }
                 offset += currentMatches;
             }
+
+            // Si la catégorie a une petite finale et au moins 4 compétiteurs (au moins des demi-finales)
+            if (category.HasBronzeMatch && matchesInRound >= 2 && draw.DrawKnockouts!.Count > 0)
+            {
+                var finalMatch = draw.DrawKnockouts.Last();
+                int bronzeOrder = finalMatch.Order;
+                finalMatch.Order = bronzeOrder + 1;
+
+                var bronzeMatch = new DrawKnockoutModel
+                {
+                    Draw = draw,
+                    Order = bronzeOrder,
+                    GlobalOrder = globalOrder++,
+                    IsBronzeMatch = true
+                };
+
+                // Insérer la petite finale juste avant la finale
+                draw.DrawKnockouts.Insert(draw.DrawKnockouts.Count - 1, bronzeMatch);
+            }
         }
         else if (roundType == RoundType.Pools)
         {
@@ -851,5 +883,414 @@ public class ExcelImportExportService : IExcelImportExportService
             return true;
 
         return DateTime.TryParse(str, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out result);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // Export Résultats
+    // ══════════════════════════════════════════════════════════════════
+
+    /// <inheritdoc/>
+    public Task<Stream> ExportResultsAsync(string competitionName, DateTime? competitionDate, IEnumerable<CategoryResultExportData> categories)
+    {
+        var workbook = new XLWorkbook();
+
+        var categoriesList = categories.ToList();
+
+        // ── Onglet Résumé ─────────────────────────────────────────────
+        var wsSummary = workbook.Worksheets.Add("Résumé");
+        StyleSummarySheet(wsSummary, competitionName, competitionDate, categoriesList);
+
+        // ── Un onglet par catégorie ───────────────────────────────────
+        foreach (var cat in categoriesList)
+        {
+            // Les noms d'onglets Excel sont limités à 31 caractères
+            string sheetName = cat.CategoryName.Length > 31
+                ? cat.CategoryName[..31]
+                : cat.CategoryName;
+
+            // Dédoublonner si nécessaire
+            int suffix = 2;
+            string originalName = sheetName;
+            while (workbook.Worksheets.Any(ws => ws.Name.Equals(sheetName, StringComparison.OrdinalIgnoreCase)))
+            {
+                string suffixStr = $" ({suffix})";
+                sheetName = originalName.Length + suffixStr.Length > 31
+                    ? originalName[..(31 - suffixStr.Length)] + suffixStr
+                    : originalName + suffixStr;
+                suffix++;
+            }
+
+            var ws = workbook.Worksheets.Add(sheetName);
+            StyleCategorySheet(ws, cat, competitionName, competitionDate);
+        }
+
+        var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+        return Task.FromResult<Stream>(stream);
+    }
+
+    private static void StyleSummarySheet(IXLWorksheet ws, string competitionName, DateTime? competitionDate, List<CategoryResultExportData> categories)
+    {
+        // En-tête
+        ws.Cell(1, 1).Value = competitionName;
+        ws.Cell(1, 1).Style.Font.Bold = true;
+        ws.Cell(1, 1).Style.Font.FontSize = 16;
+        ws.Range(1, 1, 1, 6).Merge();
+
+        if (competitionDate.HasValue)
+        {
+            ws.Cell(2, 1).Value = competitionDate.Value.ToString("dd/MM/yyyy");
+            ws.Cell(2, 1).Style.Font.Italic = true;
+            ws.Range(2, 1, 2, 6).Merge();
+        }
+
+        // En-têtes colonnes
+        int headerRow = 4;
+        ws.Cell(headerRow, 1).Value = "Catégorie";
+        ws.Cell(headerRow, 2).Value = "Type";
+        ws.Cell(headerRow, 3).Value = "🥇 1er";
+        ws.Cell(headerRow, 4).Value = "🥈 2e";
+        ws.Cell(headerRow, 5).Value = "🥉 3e";
+        ws.Cell(headerRow, 6).Value = "Nb. compétiteurs";
+
+        var headerRange = ws.Range(headerRow, 1, headerRow, 6);
+        headerRange.Style.Font.Bold = true;
+        headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1E3A5F");
+        headerRange.Style.Font.FontColor = XLColor.White;
+        headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+        // Données
+        int row = headerRow + 1;
+        foreach (var cat in categories)
+        {
+            ws.Cell(row, 1).Value = cat.CategoryName;
+            ws.Cell(row, 2).Value = cat.CategoryType;
+            ws.Cell(row, 3).Value = cat.Rows.FirstOrDefault(r => r.Position == 1)?.CompetitorName ?? "—";
+            ws.Cell(row, 4).Value = cat.Rows.FirstOrDefault(r => r.Position == 2)?.CompetitorName ?? "—";
+            ws.Cell(row, 5).Value = cat.Rows.FirstOrDefault(r => r.Position == 3)?.CompetitorName ?? "—";
+            ws.Cell(row, 6).Value = cat.Rows.Count;
+            ws.Cell(row, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            if (row % 2 == 0)
+                ws.Range(row, 1, row, 6).Style.Fill.BackgroundColor = XLColor.FromHtml("#F5F7FA");
+
+            row++;
+        }
+
+        // Bordures
+        ws.Range(headerRow, 1, row - 1, 6).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        ws.Range(headerRow, 1, row - 1, 6).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+        // Largeurs colonnes
+        ws.Column(1).Width = 35;
+        ws.Column(2).Width = 15;
+        ws.Column(3).Width = 25;
+        ws.Column(4).Width = 25;
+        ws.Column(5).Width = 25;
+        ws.Column(6).Width = 18;
+    }
+
+    private static void StyleCategorySheet(IXLWorksheet ws, CategoryResultExportData cat, string competitionName, DateTime? competitionDate)
+    {
+        // En-tête compétition
+        ws.Cell(1, 1).Value = competitionName;
+        ws.Cell(1, 1).Style.Font.Bold = true;
+        ws.Cell(1, 1).Style.Font.FontSize = 14;
+        ws.Range(1, 1, 1, 7).Merge();
+
+        if (competitionDate.HasValue)
+        {
+            ws.Cell(2, 1).Value = competitionDate.Value.ToString("dd/MM/yyyy");
+            ws.Cell(2, 1).Style.Font.Italic = true;
+            ws.Range(2, 1, 2, 7).Merge();
+        }
+
+        // Nom catégorie
+        ws.Cell(3, 1).Value = $"{cat.CategoryName} — {cat.CategoryType}";
+        ws.Cell(3, 1).Style.Font.Bold = true;
+        ws.Cell(3, 1).Style.Font.FontSize = 12;
+        ws.Cell(3, 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1E3A5F");
+        ws.Cell(3, 1).Style.Font.FontColor = XLColor.White;
+        ws.Range(3, 1, 3, 7).Merge();
+
+        // En-têtes colonnes
+        int headerRow = 5;
+        ws.Cell(headerRow, 1).Value = "Rang";
+        ws.Cell(headerRow, 2).Value = "Médaille";
+        ws.Cell(headerRow, 3).Value = "Compétiteur";
+        ws.Cell(headerRow, 4).Value = "Club";
+        ws.Cell(headerRow, 5).Value = "Pays";
+        ws.Cell(headerRow, 6).Value = "Score / Résultat";
+        ws.Cell(headerRow, 7).Value = "Statut";
+
+        var headerRange = ws.Range(headerRow, 1, headerRow, 7);
+        headerRange.Style.Font.Bold = true;
+        headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#2C5F8A");
+        headerRange.Style.Font.FontColor = XLColor.White;
+        headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+        // Données
+        int row = headerRow + 1;
+        foreach (var r in cat.Rows.OrderBy(x => x.Position))
+        {
+            ws.Cell(row, 1).Value = r.Position;
+            ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            ws.Cell(row, 2).Value = r.Medal;
+            ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            ws.Cell(row, 3).Value = r.CompetitorName;
+            ws.Cell(row, 4).Value = r.Club;
+            ws.Cell(row, 5).Value = r.Country;
+            ws.Cell(row, 6).Value = r.Score;
+            ws.Cell(row, 7).Value = r.Status;
+
+            // Coloration selon position
+            var rowStyle = ws.Range(row, 1, row, 7).Style;
+            if (r.Position == 1)
+                rowStyle.Fill.BackgroundColor = XLColor.FromHtml("#FFF8DC"); // or pâle
+            else if (r.Position == 2)
+                rowStyle.Fill.BackgroundColor = XLColor.FromHtml("#F5F5F5"); // argent pâle
+            else if (r.Position == 3)
+                rowStyle.Fill.BackgroundColor = XLColor.FromHtml("#FFF0E6"); // bronze pâle
+            else if (row % 2 == 0)
+                rowStyle.Fill.BackgroundColor = XLColor.FromHtml("#FAFAFA");
+
+            row++;
+        }
+
+        // Bordures
+        if (row > headerRow + 1)
+            ws.Range(headerRow, 1, row - 1, 7).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        ws.Range(headerRow, 1, row - 1, 7).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+        // Largeurs colonnes
+        ws.Column(1).Width = 8;
+        ws.Column(2).Width = 10;
+        ws.Column(3).Width = 28;
+        ws.Column(4).Width = 22;
+        ws.Column(5).Width = 10;
+        ws.Column(6).Width = 18;
+        ws.Column(7).Width = 20;
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // Export Notes Arbitres
+    // ══════════════════════════════════════════════════════════════════
+
+    /// <inheritdoc/>
+    public Task<Stream> ExportRefereeDataAsync(string competitionName, DateTime? competitionDate, IEnumerable<CategoryRefereeExportData> categories)
+    {
+        var workbook = new XLWorkbook();
+        var categoriesList = categories.ToList();
+
+        // ── Onglet Résumé ─────────────────────────────────────────────
+        var wsSummary = workbook.Worksheets.Add("Résumé");
+        StyleRefereeeSummarySheet(wsSummary, competitionName, competitionDate, categoriesList);
+
+        // ── Un onglet par catégorie ───────────────────────────────────
+        foreach (var cat in categoriesList)
+        {
+            string sheetName = cat.CategoryName.Length > 31
+                ? cat.CategoryName[..31]
+                : cat.CategoryName;
+
+            int suffix = 2;
+            string originalName = sheetName;
+            while (workbook.Worksheets.Any(ws => ws.Name.Equals(sheetName, StringComparison.OrdinalIgnoreCase)))
+            {
+                string suffixStr = $" ({suffix})";
+                sheetName = originalName.Length + suffixStr.Length > 31
+                    ? originalName[..(31 - suffixStr.Length)] + suffixStr
+                    : originalName + suffixStr;
+                suffix++;
+            }
+
+            var ws = workbook.Worksheets.Add(sheetName);
+            StyleRefereeDataSheet(ws, cat, competitionName, competitionDate);
+        }
+
+        var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        stream.Position = 0;
+        return Task.FromResult<Stream>(stream);
+    }
+
+    private static void StyleRefereeeSummarySheet(IXLWorksheet ws, string competitionName, DateTime? competitionDate, List<CategoryRefereeExportData> categories)
+    {
+        ws.Cell(1, 1).Value = $"Notes des arbitres — {competitionName}";
+        ws.Cell(1, 1).Style.Font.Bold = true;
+        ws.Cell(1, 1).Style.Font.FontSize = 16;
+        ws.Range(1, 1, 1, 5).Merge();
+
+        if (competitionDate.HasValue)
+        {
+            ws.Cell(2, 1).Value = competitionDate.Value.ToString("dd/MM/yyyy");
+            ws.Cell(2, 1).Style.Font.Italic = true;
+            ws.Range(2, 1, 2, 5).Merge();
+        }
+
+        int headerRow = 4;
+        ws.Cell(headerRow, 1).Value = "Catégorie";
+        ws.Cell(headerRow, 2).Value = "Nb. notes";
+        ws.Cell(headerRow, 3).Value = "Nb. corrections";
+        ws.Cell(headerRow, 4).Value = "Arbitres distincts";
+        ws.Cell(headerRow, 5).Value = "Plage horaire";
+
+        var headerRange = ws.Range(headerRow, 1, headerRow, 5);
+        headerRange.Style.Font.Bold = true;
+        headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#1E3A5F");
+        headerRange.Style.Font.FontColor = XLColor.White;
+        headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+        int row = headerRow + 1;
+        foreach (var cat in categories)
+        {
+            var referees = cat.Rows.Select(r => r.Referee).Distinct().Count();
+            var corrections = cat.Rows.Count(r => r.IsCorrection);
+            var minDate = cat.Rows.Count > 0 ? cat.Rows.Min(r => r.Date) : (DateTime?)null;
+            var maxDate = cat.Rows.Count > 0 ? cat.Rows.Max(r => r.Date) : (DateTime?)null;
+            string plage = (minDate.HasValue && maxDate.HasValue)
+                ? $"{minDate.Value:HH:mm:ss} → {maxDate.Value:HH:mm:ss}"
+                : "—";
+
+            ws.Cell(row, 1).Value = cat.CategoryName;
+            ws.Cell(row, 2).Value = cat.Rows.Count;
+            ws.Cell(row, 3).Value = corrections;
+            ws.Cell(row, 4).Value = referees;
+            ws.Cell(row, 5).Value = plage;
+
+            foreach (var col in new[] { 2, 3, 4 })
+                ws.Cell(row, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            if (row % 2 == 0)
+                ws.Range(row, 1, row, 5).Style.Fill.BackgroundColor = XLColor.FromHtml("#F5F7FA");
+
+            row++;
+        }
+
+        ws.Range(headerRow, 1, row - 1, 5).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        ws.Range(headerRow, 1, row - 1, 5).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+        ws.Column(1).Width = 35;
+        ws.Column(2).Width = 12;
+        ws.Column(3).Width = 16;
+        ws.Column(4).Width = 20;
+        ws.Column(5).Width = 25;
+    }
+
+    private static void StyleRefereeDataSheet(IXLWorksheet ws, CategoryRefereeExportData cat, string competitionName, DateTime? competitionDate)
+    {
+        // En-tête
+        ws.Cell(1, 1).Value = $"Notes arbitres — {competitionName}";
+        ws.Cell(1, 1).Style.Font.Bold = true;
+        ws.Cell(1, 1).Style.Font.FontSize = 13;
+        ws.Range(1, 1, 1, 9).Merge();
+
+        if (competitionDate.HasValue)
+        {
+            ws.Cell(2, 1).Value = competitionDate.Value.ToString("dd/MM/yyyy");
+            ws.Cell(2, 1).Style.Font.Italic = true;
+            ws.Range(2, 1, 2, 9).Merge();
+        }
+
+        ws.Cell(3, 1).Value = cat.CategoryName;
+        ws.Cell(3, 1).Style.Font.Bold = true;
+        ws.Cell(3, 1).Style.Font.FontSize = 12;
+        ws.Cell(3, 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1E3A5F");
+        ws.Cell(3, 1).Style.Font.FontColor = XLColor.White;
+        ws.Range(3, 1, 3, 9).Merge();
+
+        // En-têtes colonnes
+        int headerRow = 5;
+        ws.Cell(headerRow, 1).Value = "Date";
+        ws.Cell(headerRow, 2).Value = "Heure";
+        ws.Cell(headerRow, 3).Value = "Arbitre";
+        ws.Cell(headerRow, 4).Value = "Nom";
+        ws.Cell(headerRow, 5).Value = "Prénom";
+        ws.Cell(headerRow, 6).Value = "Note";
+        ws.Cell(headerRow, 7).Value = "Round";
+        ws.Cell(headerRow, 8).Value = "Correction";
+        ws.Cell(headerRow, 9).Value = "Match (ID / Ordre global)";
+
+        var headerRange = ws.Range(headerRow, 1, headerRow, 9);
+        headerRange.Style.Font.Bold = true;
+        headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#2C5F8A");
+        headerRange.Style.Font.FontColor = XLColor.White;
+        headerRange.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+        // Données
+        int row = headerRow + 1;
+        string? lastMatchKey = null;
+        XLColor altColor1 = XLColor.White;
+        XLColor altColor2 = XLColor.FromHtml("#EEF4FB");
+        bool useAlt = false;
+
+        // Trier : par match (GlobalOrder), puis par heure
+        var sorted = cat.Rows
+            .OrderBy(r => r.GlobalOrder ?? int.MaxValue)
+            .ThenBy(r => r.Date)
+            .ToList();
+
+        foreach (var r in sorted)
+        {
+            // Alterner couleur de fond par match pour faciliter la lecture
+            string matchKey = $"{r.MatchType}_{r.MatchId}";
+            if (matchKey != lastMatchKey)
+            {
+                useAlt = !useAlt;
+                lastMatchKey = matchKey;
+            }
+
+            ws.Cell(row, 1).Value = r.Date.ToString("dd/MM/yyyy");
+            ws.Cell(row, 2).Value = r.Date.ToString("HH:mm:ss");
+            ws.Cell(row, 3).Value = r.Referee;
+            ws.Cell(row, 4).Value = r.CompetitorLastName;
+            ws.Cell(row, 5).Value = r.CompetitorFirstName;
+            ws.Cell(row, 6).Value = r.Score;
+            ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
+            ws.Cell(row, 7).Value = r.Round;
+            ws.Cell(row, 8).Value = r.IsCorrection ? "✓" : "";
+            ws.Cell(row, 9).Value = r.MatchId.HasValue
+                ? $"{r.MatchType} #{r.MatchId} (ord. {r.GlobalOrder})"
+                : "—";
+
+            // Coloration : rouge clair pour corrections, alternance par match sinon
+            if (r.IsCorrection)
+                ws.Range(row, 1, row, 9).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFE4E4");
+            else
+                ws.Range(row, 1, row, 9).Style.Fill.BackgroundColor = useAlt ? altColor2 : altColor1;
+
+            // Note négative en rouge, positive en vert
+            if (r.Score < 0)
+                ws.Cell(row, 6).Style.Font.FontColor = XLColor.Red;
+            else if (r.Score > 0)
+                ws.Cell(row, 6).Style.Font.FontColor = XLColor.FromHtml("#1B7A34");
+
+            foreach (var col in new[] { 1, 2, 7, 8 })
+                ws.Cell(row, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+            row++;
+        }
+
+        // Bordures
+        if (row > headerRow + 1)
+            ws.Range(headerRow, 1, row - 1, 9).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        ws.Range(headerRow, 1, row - 1, 9).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+        // Largeurs
+        ws.Column(1).Width = 12;
+        ws.Column(2).Width = 11;
+        ws.Column(3).Width = 14;
+        ws.Column(4).Width = 18;
+        ws.Column(5).Width = 16;
+        ws.Column(6).Width = 10;
+        ws.Column(7).Width = 8;
+        ws.Column(8).Width = 12;
+        ws.Column(9).Width = 28;
+
+        // Figer la ligne d'en-tête
+        ws.SheetView.FreezeRows(headerRow);
     }
 }

@@ -1613,37 +1613,54 @@
                                 </VerticalStackLayout>
 
                                 <!-- Bottom: Ex-Aequo Button just above the timer -->
-                                <Button 
+                                <HorizontalStackLayout
                                     Grid.Row="2"
-                                    Text="EX-ÆQUO" 
-                                    Command="{Binding BindingContext.SetExAequoCommand, Source={x:Reference this}}"
-                                    BackgroundColor="{DynamicResource SurfaceElevation6}"
-                                    BorderColor="{DynamicResource Gray400}"
-                                    TextColor="{StaticResource PrimaryTextColor}"
-                                    FontAttributes="Bold"
-                                    CornerRadius="20"
-                                    HeightRequest="40"
-                                    WidthRequest="130"
-                                    VerticalOptions="End"
-                                    Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
-                                    IsVisible="{OnIdiom Tablet='true', Phone='false'}" 
-                                />
+                                >
+                                    <Button 
+                                        Text="EX-ÆQUO" 
+                                        Command="{Binding BindingContext.SetExAequoCommand, Source={x:Reference this}}"
+                                        BackgroundColor="{DynamicResource SurfaceElevation6}"
+                                        BorderColor="{DynamicResource Gray400}"
+                                        TextColor="{StaticResource PrimaryTextColor}"
+                                        FontAttributes="Bold"
+                                        CornerRadius="20"
+                                        HeightRequest="40"
+                                        WidthRequest="130"
+                                        VerticalOptions="End"
+                                        Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
+                                        IsVisible="{OnIdiom Tablet='true', Phone='false'}" 
+                                    />
 
-                                <Button 
-                                    Grid.Row="2"
-                                    Text="EX" 
-                                    Command="{Binding BindingContext.SetExAequoCommand, Source={x:Reference this}}"
-                                    BackgroundColor="{DynamicResource SurfaceElevation6}"
-                                    BorderColor="{DynamicResource Gray400}"
-                                    TextColor="{StaticResource PrimaryTextColor}"
-                                    FontAttributes="Bold"
-                                    CornerRadius="20"
-                                    HeightRequest="40"
-                                    WidthRequest="60"
-                                    VerticalOptions="End"
-                                    Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
-                                    IsVisible="{OnIdiom Tablet='false', Phone='true'}" 
-                                />
+                                    <Button 
+                                        Text="Next Match" 
+                                        Command="{Binding BindingContext.NextMatchCommand, Source={x:Reference this}}"
+                                        BackgroundColor="{DynamicResource SurfaceElevation6}"
+                                        BorderColor="{DynamicResource Gray400}"
+                                        TextColor="{StaticResource PrimaryTextColor}"
+                                        FontAttributes="Bold"
+                                        CornerRadius="20"
+                                        HeightRequest="40"
+                                        WidthRequest="130"
+                                        VerticalOptions="End"
+                                        Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
+                                        IsVisible="{OnIdiom Tablet='true', Phone='false'}" 
+                                    />
+
+                                    <Button 
+                                        Text="EX" 
+                                        Command="{Binding BindingContext.SetExAequoCommand, Source={x:Reference this}}"
+                                        BackgroundColor="{DynamicResource SurfaceElevation6}"
+                                        BorderColor="{DynamicResource Gray400}"
+                                        TextColor="{StaticResource PrimaryTextColor}"
+                                        FontAttributes="Bold"
+                                        CornerRadius="20"
+                                        HeightRequest="40"
+                                        WidthRequest="60"
+                                        VerticalOptions="End"
+                                        Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
+                                        IsVisible="{OnIdiom Tablet='false', Phone='true'}" 
+                                    />
+                                </HorizontalStackLayout>
                             </Grid>
 
                             <!-- Competitor 2 (Blue Side) -->

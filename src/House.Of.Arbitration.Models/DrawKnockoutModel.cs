@@ -18,9 +18,30 @@ public partial class DrawKnockoutModel : ObservableObject, IDrawModel
     public int Order { get; set; } = 0;
 
     /// <summary>
-    /// Obtient le nom d'étape du combat (ex: "Finale", "Demi-finale 1", "Quart de finale 2")
+    /// Indique si ce match est la petite finale (combat pour la 3e place).
     /// </summary>
-    public string StageName => Helpers.KnockoutStageHelper.GetStageName(Order, Draw?.DrawKnockouts?.Count ?? 0, false);
+    public bool IsBronzeMatch { get; set; } = false;
+
+    /// <summary>
+    /// Obtient le nom d'étape du combat (ex: "Finale", "Petite finale", "Demi-finale 1", "Quart de finale 2")
+    /// </summary>
+    public string StageName
+    {
+        get
+        {
+            if (IsBronzeMatch) return "Petite finale";
+            var nonBronzeMatches = Draw?.DrawKnockouts?.Where(k => !k.IsBronzeMatch).OrderBy(k => k.Order).ToList();
+            if (nonBronzeMatches != null && nonBronzeMatches.Count > 0)
+            {
+                int rankInNonBronze = nonBronzeMatches.IndexOf(this) + 1;
+                if (rankInNonBronze > 0)
+                {
+                    return Helpers.KnockoutStageHelper.GetStageName(rankInNonBronze, nonBronzeMatches.Count, false);
+                }
+            }
+            return Helpers.KnockoutStageHelper.GetStageName(Order, Draw?.DrawKnockouts?.Count ?? 0, false);
+        }
+    }
 
     /// <summary>
     /// Obtient ou définit l'ordre du match dans la compétition

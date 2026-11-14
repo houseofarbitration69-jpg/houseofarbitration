@@ -199,7 +199,30 @@ public class WindowsBluetoothServer : IDisposable
                 writer.WriteBytes(Encoding.UTF8.GetBytes(chunk));
                 var buffer = writer.DetachBuffer();
 
-                await _characteristic.NotifyValueAsync(buffer);
+                var subscribers = _characteristic.SubscribedClients.ToList();
+                if (subscribers.Count == 0)
+                {
+                    try
+                    {
+                        await _characteristic.NotifyValueAsync(buffer);
+                    }
+                    catch { }
+                }
+                else
+                {
+                    // Notifier chaque client individuellement pour isoler les erreurs de sessions stale
+                    foreach (var client in subscribers)
+                    {
+                        try
+                        {
+                            await _characteristic.NotifyValueAsync(buffer, client);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogMessage?.Invoke(this, $"Notification client ignorée (session stale) : {ex.Message}");
+                        }
+                    }
+                }
 
                 if (chunks.Count > 1)
                 {
@@ -229,10 +252,11 @@ public class WindowsBluetoothServer : IDisposable
         await _sendSemaphore.WaitAsync();
         try
         {
-            var client = _characteristic.SubscribedClients.FirstOrDefault(c =>
+            var matchingClients = _characteristic.SubscribedClients.Where(c =>
                 c.Session?.DeviceId?.Id != null &&
                 (c.Session.DeviceId.Id.Contains(clientId, StringComparison.OrdinalIgnoreCase) ||
-                 FormatClientId(c.Session.DeviceId.Id).Contains(clientId, StringComparison.OrdinalIgnoreCase)));
+                 FormatClientId(c.Session.DeviceId.Id).Contains(clientId, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
 
             var chunks = _transferManager.PrepareMessagesForSending(message).ToList();
             foreach (var chunk in chunks)
@@ -241,14 +265,28 @@ public class WindowsBluetoothServer : IDisposable
                 writer.WriteBytes(Encoding.UTF8.GetBytes(chunk));
                 var buffer = writer.DetachBuffer();
 
-                if (client != null)
+                if (matchingClients.Count > 0)
                 {
-                    await _characteristic.NotifyValueAsync(buffer, client);
+                    bool sent = false;
+                    for (int i = matchingClients.Count - 1; i >= 0; i--)
+                    {
+                        try
+                        {
+                            await _characteristic.NotifyValueAsync(buffer, matchingClients[i]);
+                            sent = true;
+                            break;
+                        }
+                        catch { }
+                    }
+
+                    if (!sent)
+                    {
+                        try { await _characteristic.NotifyValueAsync(buffer); } catch { }
+                    }
                 }
                 else
                 {
-                    // Si le client précis n'a pas été distingué, on notifie globalement
-                    await _characteristic.NotifyValueAsync(buffer);
+                    try { await _characteristic.NotifyValueAsync(buffer); } catch { }
                 }
 
                 if (chunks.Count > 1)

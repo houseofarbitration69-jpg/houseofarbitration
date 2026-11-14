@@ -68,6 +68,11 @@ public partial class CategoryModel : ObservableObject
     public DrawModel? Draw { get; set; }
 
     /// <summary>
+    /// Indique si la catégorie comporte une petite finale (match pour la 3ème place) en élimination directe
+    /// </summary>
+    public bool HasBronzeMatch { get; set; } = false;
+
+    /// <summary>
     /// Indique si la catégorie possède un tirage (Non persisté)
     /// </summary>
     [System.ComponentModel.DataAnnotations.Schema.NotMapped]

@@ -18,6 +18,7 @@ public class MockBluetoothClient : IBluetoothClient
     public event EventHandler<(string DeviceId, string Name, int Rssi)>? DeviceDiscovered;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
+    public event EventHandler<int>? RssiUpdated;
 
     public async Task StartScan()
     {
@@ -38,6 +39,12 @@ public class MockBluetoothClient : IBluetoothClient
     public Task DisconnectFromDevice(string deviceId)
     {
         DeviceDisconnected?.Invoke(this, deviceId);
+        return Task.CompletedTask;
+    }
+
+    public Task ReadRssiAsync()
+    {
+        RssiUpdated?.Invoke(this, -65);
         return Task.CompletedTask;
     }
 
@@ -90,6 +97,7 @@ public class MockBluetoothServer : IBluetoothServer
     public event EventHandler<(string ClientId, string Message)>? MessageReceived;
     public event EventHandler<string>? DeviceConnected;
     public event EventHandler<string>? DeviceDisconnected;
+    public event EventHandler<int>? RssiUpdated;
 #pragma warning restore CS0067
 
     public Guid InstanceId { get; } = Guid.NewGuid();

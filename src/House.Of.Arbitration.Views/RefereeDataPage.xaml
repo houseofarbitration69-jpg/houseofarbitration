@@ -12,12 +12,35 @@
     Title="Notes des Arbitres">
 
     <base:BasePage.Resources>
+        <ResourceDictionary>
+            <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+            <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />
+        </ResourceDictionary>
     </base:BasePage.Resources>
 
     <Grid RowDefinitions="Auto, Auto, *" Margin="10" RowSpacing="15">
         <!-- Header / Title -->
         <Border Grid.Row="0" Padding="15" BackgroundColor="{DynamicResource SurfaceElevation6}" StrokeShape="RoundRectangle 10" Stroke="{DynamicResource BorderStrong}" StrokeThickness="1">
-            <Label Text="LISTE DES SCORES (LOGS)" TextColor="{DynamicResource PrimaryTextColor}" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" />
+            <Grid ColumnDefinitions="*, Auto">
+                <Label Grid.Column="0"
+                       Text="LISTE DES SCORES (LOGS)"
+                       TextColor="{DynamicResource PrimaryTextColor}"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       VerticalOptions="Center" />
+                <Button Grid.Column="1"
+                        Text="📊 Excel"
+                        Command="{Binding ExportToExcelCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
+                        BackgroundColor="{DynamicResource MartialRed}"
+                        TextColor="White"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        CornerRadius="8"
+                        Padding="12, 6"
+                        VerticalOptions="Center" />
+            </Grid>
         </Border>
 
         <!-- Filters -->

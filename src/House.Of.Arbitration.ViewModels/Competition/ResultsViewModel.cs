@@ -8,6 +8,7 @@ using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Models.Helpers;
+using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
 #endregion
@@ -21,6 +22,8 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
     private readonly IRepository<CategoryModel> _categoryRepository;
     private readonly IRepository<DrawModel> _drawRepository;
     private readonly IRepository<RefereeDataModel> _refereeDataRepository;
+    private readonly IExcelImportExportService _excelService;
+    private readonly IFileDownloadService _fileDownloadService;
     #endregion
 
     #region Fields
@@ -119,13 +122,17 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
         IRepository<CompetitionModel> competitionRepository,
         IRepository<CategoryModel> categoryRepository,
         IRepository<DrawModel> drawRepository,
-        IRepository<RefereeDataModel> refereeDataRepository)
+        IRepository<RefereeDataModel> refereeDataRepository,
+        IExcelImportExportService excelService,
+        IFileDownloadService fileDownloadService)
         : base(logger, resourceProvider, popupService)
     {
         _competitionRepository = competitionRepository;
         _categoryRepository = categoryRepository;
         _drawRepository = drawRepository;
         _refereeDataRepository = refereeDataRepository;
+        _excelService = excelService;
+        _fileDownloadService = fileDownloadService;
     }
     #endregion
 
@@ -152,6 +159,69 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
     private async Task Back()
     {
         await Shell.Current.GoToAsync("..");
+    }
+
+    [RelayCommand]
+    private async Task ExportToExcel()
+    {
+        if (Categories == null || !Categories.Any())
+        {
+            await Shell.Current.DisplayAlertAsync("Export", "Aucune catégorie à exporter.", "OK");
+            return;
+        }
+
+        IsBusy = true;
+        try
+        {
+            var exportData = new List<CategoryResultExportData>();
+
+            // Charger les résultats de toutes les catégories
+            foreach (var category in Categories)
+            {
+                var rows = await LoadResultsForCategoryAsync(category);
+                exportData.Add(new CategoryResultExportData
+                {
+                    CategoryName = category.Name ?? $"Catégorie {category.Id}",
+                    CategoryType = GetCategoryTypeLabel(category),
+                    Rows = rows.Select(r => new CompetitorResultExportRow
+                    {
+                        Position = r.Position,
+                        Medal = r.MedalIcon ?? string.Empty,
+                        CompetitorName = r.CompetitorName ?? string.Empty,
+                        Club = r.Club ?? string.Empty,
+                        Country = r.CountryIsoCode ?? string.Empty,
+                        Score = r.ScoreDisplay ?? string.Empty,
+                        Status = r.Status ?? string.Empty
+                    }).ToList()
+                });
+            }
+
+            string competitionName = Competition?.Name ?? "Compétition";
+            DateTime? competitionDate = Competition?.Date;
+
+            var stream = await _excelService.ExportResultsAsync(competitionName, competitionDate, exportData);
+
+            string fileName = $"Resultats_{SanitizeFileName(competitionName)}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+            string? savedPath = await _fileDownloadService.SaveToDownloadsAsync(stream, fileName, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            if (savedPath != null)
+            {
+                await Shell.Current.DisplayAlert("Export réussi", $"Fichier sauvegardé :\n{savedPath}", "OK");
+            }
+            else
+            {
+                await Shell.Current.DisplayAlert("Export", "Le fichier n'a pas pu être sauvegardé.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors de l'export Excel des résultats");
+            await Shell.Current.DisplayAlert("Erreur", "Une erreur est survenue lors de l'export Excel.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
     #endregion
 
@@ -369,23 +439,55 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
             if (m.Competitor2 != null && !competitorsDict.ContainsKey(m.Competitor2.Id)) competitorsDict[m.Competitor2.Id] = m.Competitor2;
         }
 
-        var finalMatch = matches.OrderBy(m => m.Order).LastOrDefault();
+        var finalMatch = matches.Where(m => !m.IsBronzeMatch).OrderBy(m => m.Order).LastOrDefault() ?? matches.OrderBy(m => m.Order).LastOrDefault();
         int? championId = finalMatch?.WinnerId;
         int? viceChampionId = finalMatch?.LooserId;
 
+        var bronzeMatch = matches.FirstOrDefault(m => m.IsBronzeMatch);
+        int? bronzeWinnerId = (bronzeMatch?.IsFinished == true) ? bronzeMatch.WinnerId : null;
+        int? bronzeLooserId = (bronzeMatch?.IsFinished == true) ? bronzeMatch.LooserId : null;
+
         // Demi-finales (matches juste avant la finale)
         var semiFinalLooserIds = new HashSet<int>();
-        if (matches.Count >= 3)
+        var nonFinalMatches = matches.Where(m => !m.IsBronzeMatch && (finalMatch == null || m.Id != finalMatch.Id)).ToList();
+        if (nonFinalMatches.Count >= 2)
         {
-            int total = matches.Count;
-            // Dans un arbre binaire, le match de finale est à l'index total-1, et les demis sont total-2 et total-3
-            var semi1 = matches.ElementAtOrDefault(total - 2);
-            var semi2 = matches.ElementAtOrDefault(total - 3);
+            var semi1 = nonFinalMatches[^1];
+            var semi2 = nonFinalMatches[^2];
 
-            if (semi1?.LooserId.HasValue == true && semi1.LooserId != viceChampionId)
+            if (semi1.LooserId.HasValue && semi1.LooserId != viceChampionId)
                 semiFinalLooserIds.Add(semi1.LooserId.Value);
-            if (semi2?.LooserId.HasValue == true && semi2.LooserId != viceChampionId)
+            if (semi2.LooserId.HasValue && semi2.LooserId != viceChampionId)
                 semiFinalLooserIds.Add(semi2.LooserId.Value);
+        }
+
+        // Calcul des points cumulés par compétiteur (si notes arbitres ou différentiel)
+        var pointsByComp = new Dictionary<int, double>();
+        foreach (var kvp in competitorsDict)
+        {
+            double totalPts = 0;
+            var compMatches = matches.Where(m => m.IsFinished && (m.Competitor1Id == kvp.Key || m.Competitor2Id == kvp.Key));
+            foreach (var cm in compMatches)
+            {
+                if (cm.RefereeDatas != null && cm.RefereeDatas.Count > 0)
+                {
+                    totalPts += cm.RefereeDatas.Where(rd => rd.CompetitorId == kvp.Key).Sum(rd => (double)rd.Score);
+                }
+            }
+            pointsByComp[kvp.Key] = totalPts;
+        }
+
+        int? bronzeByPointsId = null;
+        int? fourthByPointsId = null;
+        if (bronzeMatch == null && semiFinalLooserIds.Count > 0)
+        {
+            var sortedSemiLosers = semiFinalLooserIds
+                .OrderByDescending(id => pointsByComp.GetValueOrDefault(id, 0))
+                .ThenByDescending(id => matches.Count(m => m.WinnerId == id && m.IsFinished))
+                .ToList();
+
+            if (sortedSemiLosers.Count >= 1) bronzeByPointsId = sortedSemiLosers[0];
+            if (sortedSemiLosers.Count >= 2) fourthByPointsId = sortedSemiLosers[1];
         }
 
         foreach (var kvp in competitorsDict)
@@ -410,10 +512,40 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
                 status = "Finaliste 🥈";
                 statusColor = "#C0C0C0";
             }
-            else if (semiFinalLooserIds.Contains(comp.Id))
+            else if (bronzeWinnerId.HasValue && comp.Id == bronzeWinnerId.Value)
             {
                 rank = 3;
-                status = "Demi-finale 🥉";
+                status = "3e place (Petite finale) 🥉";
+                statusColor = "#CD7F32";
+            }
+            else if (bronzeLooserId.HasValue && comp.Id == bronzeLooserId.Value)
+            {
+                rank = 4;
+                status = "4e place (Petite finale)";
+                statusColor = "#808080";
+            }
+            else if (bronzeMatch != null && (bronzeMatch.Competitor1Id == comp.Id || bronzeMatch.Competitor2Id == comp.Id))
+            {
+                rank = 3;
+                status = "Qualifié Petite finale 🥉";
+                statusColor = "#CD7F32";
+            }
+            else if (bronzeMatch == null && bronzeByPointsId.HasValue && comp.Id == bronzeByPointsId.Value)
+            {
+                rank = 3;
+                status = "3e place (Points cumulés) 🥉";
+                statusColor = "#CD7F32";
+            }
+            else if (bronzeMatch == null && fourthByPointsId.HasValue && comp.Id == fourthByPointsId.Value)
+            {
+                rank = 4;
+                status = "4e place";
+                statusColor = "#808080";
+            }
+            else if (semiFinalLooserIds.Contains(comp.Id))
+            {
+                rank = 5;
+                status = "Demi-finale";
                 statusColor = "#CD7F32";
             }
             else if (losses > 0)
@@ -421,13 +553,13 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
                 var lostMatch = matches.FirstOrDefault(m => m.LooserId == comp.Id);
                 if (lostMatch != null)
                 {
-                    status = $"Éliminé ({KnockoutStageHelper.GetStageName(lostMatch.Order, matches.Count, includeIndex: false)})";
+                    status = $"Éliminé ({lostMatch.StageName})";
                 }
                 else
                 {
                     status = "Éliminé";
                 }
-                rank = 4 + (matches.Count - wins);
+                rank = 6 + (matches.Count - wins);
                 statusColor = "#808080";
             }
 
@@ -527,6 +659,100 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
         }
 
         return sorted;
+    }
+
+    /// <summary>
+    /// Charge les résultats d'une catégorie donnée (sans changer la sélection courante).
+    /// </summary>
+    private async Task<List<CategoryCompetitorResultModel>> LoadResultsForCategoryAsync(CategoryModel category)
+    {
+        try
+        {
+            var allDraws = await _drawRepository.GetAllAsync(
+                "DrawKnockouts.Competitor1.Country",
+                "DrawKnockouts.Competitor2.Country",
+                "DrawKnockouts.Winner",
+                "DrawKnockouts.Looser",
+                "DrawPools.Competitor1.Country",
+                "DrawPools.Competitor2.Country",
+                "DrawPools.Winner",
+                "DrawPools.Looser",
+                "DrawOrders.Competitor.Country");
+
+            var draw = allDraws?.FirstOrDefault(d => d.CategoryId == category.Id);
+            var computedResults = new List<CategoryCompetitorResultModel>();
+
+            bool isTaolu = category.RoundType == RoundType.Order ||
+                           category.Type == CategoryType.Taolu ||
+                           category.Type == CategoryType.TaoluModerneNord ||
+                           category.Type == CategoryType.TaoluModerneSud;
+
+            if (isTaolu && draw?.DrawOrders != null && draw.DrawOrders.Count > 0)
+            {
+                computedResults = await ComputeTaoluResultsAsync(draw.DrawOrders);
+            }
+            else if (category.RoundType == RoundType.Knockouts && draw?.DrawKnockouts != null && draw.DrawKnockouts.Count > 0)
+            {
+                computedResults = ComputeKnockoutResults(draw.DrawKnockouts, category);
+            }
+            else if (category.RoundType == RoundType.Pools && draw?.DrawPools != null && draw.DrawPools.Count > 0)
+            {
+                computedResults = ComputePoolResults(draw.DrawPools, category);
+            }
+            else
+            {
+                int pos = 1;
+                foreach (var cc in category.Competitors ?? Enumerable.Empty<CompetitorCategoryModel>())
+                {
+                    if (cc.Competitor != null)
+                    {
+                        computedResults.Add(new CategoryCompetitorResultModel
+                        {
+                            Position = pos,
+                            RankDisplay = $"{pos}",
+                            CompetitorId = cc.Competitor.Id,
+                            CompetitorName = cc.Competitor.Name,
+                            Club = cc.Competitor.Club,
+                            CountryIsoCode = cc.Competitor.CountryIsoCode,
+                            ScoreDisplay = "En attente",
+                            Status = "Non démarré",
+                            StatusColorHex = "#808080"
+                        });
+                        pos++;
+                    }
+                }
+            }
+
+            return computedResults;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur calcul des résultats pour la catégorie {CategoryId}", category.Id);
+            return new List<CategoryCompetitorResultModel>();
+        }
+    }
+
+    private static string GetCategoryTypeLabel(CategoryModel category)
+    {
+        return category.Type switch
+        {
+            CategoryType.Taolu => "Taolu",
+            CategoryType.TaoluModerneNord => "Taolu Moderne Nord",
+            CategoryType.TaoluModerneSud => "Taolu Moderne Sud",
+            _ => category.RoundType switch
+            {
+                RoundType.Knockouts => "Sanda - Élimination directe",
+                RoundType.Pools => "Sanda - Poules",
+                RoundType.Order => "Taolu",
+                _ => "Sanda"
+            }
+        };
+    }
+
+    private static string SanitizeFileName(string name)
+    {
+        var invalid = System.IO.Path.GetInvalidFileNameChars();
+        return new string(name.Where(c => !invalid.Contains(c)).ToArray()).Replace(' ', '_');
     }
     #endregion
 }

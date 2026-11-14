@@ -7,6 +7,7 @@ public interface IBluetoothClient
     event EventHandler<(string DeviceId, string Name, int Rssi)> DeviceDiscovered;
     event EventHandler<string> DeviceConnected;
     event EventHandler<string> DeviceDisconnected;
+    event EventHandler<int> RssiUpdated;
 
     Task StartScan();
 
@@ -17,4 +18,6 @@ public interface IBluetoothClient
     Task DisconnectFromDevice(string deviceId);
 
     Task SendMessage(string deviceId, string message);
+
+    Task ReadRssiAsync();
 }

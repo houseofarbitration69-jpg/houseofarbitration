@@ -76,7 +76,50 @@ public class JudgeSession : IDisposable
         {
             StopWatchdog();
             StatusChanged?.Invoke(this, $"Déconnecté du serveur [{e}]. Mode hors-ligne actif : vos notes seront mémorisées.");
-            StartAutoReconnect();
+            // Ne démarrer la reconnexion automatique que si HandleReconnectedAsync n'est pas en cours
+            if (_isHandlingReconnection == 0)
+            {
+                StartAutoReconnect();
+            }
+        };
+
+        // Reconnexion radio BLE (Windows a rétabli la liaison sans ConnectAsync de notre côté).
+        // Cas typique : l'utilisateur réactive le Bluetooth → Windows restaure automatiquement la
+        // subscription GATT (le serveur voit le juge connecté), mais le juge a _characteristic=null
+        // car DisconnectAsync l'a mise à null lors de la coupure.
+        _client.RadioReconnected += (s, addr) =>
+        {
+            string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
+            StatusChanged?.Invoke(this, $"[{timestamp}] [RADIO-BLE] Reconnexion radio détectée vers [{addr}].");
+
+            // Cas 1 : juge déjà connecté (IsConnected=true) → réinitialiser les compteurs watchdog
+            if (_client.IsConnected)
+            {
+                StatusChanged?.Invoke(this, $"[{timestamp}] [RADIO-BLE] Connexion applicative active — réinitialisation des compteurs watchdog.");
+                _lastServerContactTime = DateTime.UtcNow;
+                _consecutiveFailedPings = 0;
+                if (IsWatchdogActive)
+                {
+                    StartWatchdog(); // redémarre proprement
+                }
+                return;
+            }
+
+            // Cas 2 : juge déconnecté, mais la boucle autoReconnect tourne déjà.
+            // NE PAS lancer un ReconnectAsync concurrent — les deux appellent StartScan()
+            // simultanément, ce qui se sabote mutuellement (StopScan tue le scan de l'autre).
+            if (IsAutoReconnecting)
+            {
+                StatusChanged?.Invoke(this, $"[{timestamp}] [RADIO-BLE] AutoReconnect déjà actif — pas de reconnexion concurrente.");
+                return;
+            }
+
+            // Cas 3 : juge déconnecté, autoReconnect PAS en cours → le démarrer maintenant
+            StatusChanged?.Invoke(this, $"[{timestamp}] [RADIO-BLE] Juge hors-ligne, autoReconnect inactif → démarrage reconnexion automatique.");
+            if (_isHandlingReconnection == 0)
+            {
+                StartAutoReconnect();
+            }
         };
     }
 
@@ -191,7 +234,6 @@ public class JudgeSession : IDisposable
             mvtTimeCode.IsSynced = false;
             _unsyncedScores.Add(scoreModel);
             StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Échec d'envoi BLE, déduction mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
-            StartAutoReconnect();
             return true;
         }
         catch (Exception ex)
@@ -199,7 +241,6 @@ public class JudgeSession : IDisposable
             mvtTimeCode.IsSynced = false;
             _unsyncedScores.Add(scoreModel);
             StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Erreur d'envoi ({ex.Message}), déduction mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
-            StartAutoReconnect();
             return true;
         }
     }
@@ -261,7 +302,6 @@ public class JudgeSession : IDisposable
             mvtTimeCode.IsSynced = false;
             _unsyncedScores.Add(scoreModel);
             StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Échec d'envoi BLE, déduction mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
-            StartAutoReconnect();
             return true;
         }
         catch (Exception ex)
@@ -269,7 +309,6 @@ public class JudgeSession : IDisposable
             mvtTimeCode.IsSynced = false;
             _unsyncedScores.Add(scoreModel);
             StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Erreur d'envoi ({ex.Message}), déduction mise en attente (Score: {CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
-            StartAutoReconnect();
             return true;
         }
     }
@@ -309,14 +348,12 @@ public class JudgeSession : IDisposable
 
             _unsyncedScores.Add(scoreModel);
             StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Échec d'envoi BLE, score mis en attente ({CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
-            StartAutoReconnect();
             return true;
         }
         catch (Exception ex)
         {
             _unsyncedScores.Add(scoreModel);
             StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Erreur d'envoi ({ex.Message}), score mis en attente ({CurrentScore:F2} | {_unsyncedScores.Count} en attente)");
-            StartAutoReconnect();
             return true;
         }
     }
@@ -367,14 +404,12 @@ public class JudgeSession : IDisposable
 
             _unsyncedScores.Add(scoreModel);
             StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Échec d'envoi BLE, point mis en attente (Total: Rouge={RedPoints:F0}, Bleu={BluePoints:F0} | {_unsyncedScores.Count} note(s) en attente)");
-            StartAutoReconnect();
             return true;
         }
         catch (Exception ex)
         {
             _unsyncedScores.Add(scoreModel);
             StatusChanged?.Invoke(this, $"[MODE HORS-LIGNE] Erreur d'envoi ({ex.Message}), point mis en attente (Total: Rouge={RedPoints:F0}, Bleu={BluePoints:F0} | {_unsyncedScores.Count} note(s) en attente)");
-            StartAutoReconnect();
             return true;
         }
     }
@@ -416,6 +451,7 @@ public class JudgeSession : IDisposable
         _consecutiveFailedPings = 0;
         _watchdogCts = new CancellationTokenSource();
         var token = _watchdogCts.Token;
+        int tickCount = 0;
 
         _ = Task.Run(async () =>
         {
@@ -427,26 +463,34 @@ public class JudgeSession : IDisposable
 
                     if (token.IsCancellationRequested) break;
 
-                    if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(10))
+                    tickCount++;
+                    string ts = DateTime.Now.ToString("HH:mm:ss.fff");
+                    double secondsSinceContact = (DateTime.UtcNow - _lastServerContactTime).TotalSeconds;
+                    bool isConn = _client.IsConnected;
+
+                    StatusChanged?.Invoke(this, $"[{ts}] [WATCHDOG-TICK#{tickCount}] IsConnected={isConn} | consecutiveFails={_consecutiveFailedPings} | secondsSinceContact={secondsSinceContact:F1}s");
+
+                    if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(20))
                     {
-                        StatusChanged?.Invoke(this, "Expiration du heartbeat serveur (>10s). Déconnexion et bascule en mode hors-ligne.");
+                        StatusChanged?.Invoke(this, $"[{ts}] Expiration du heartbeat serveur (>20s sans réponse). Déconnexion.");
                         StopWatchdog();
-                        await _client.DisconnectAsync();
+                        await _client.DisconnectAsync(reason: "Heartbeat expiré (>20s sans réponse serveur)");
                         continue;
                     }
 
-                    if (_client.IsConnected)
+                    if (isConn)
                     {
                         bool sent = await PingAsync();
+                        string ts2 = DateTime.Now.ToString("HH:mm:ss.fff");
                         if (!sent)
                         {
                             _consecutiveFailedPings++;
-                            StatusChanged?.Invoke(this, $"[WATCHDOG] Échec ping ({_consecutiveFailedPings}/2).");
-                            if (_consecutiveFailedPings >= 2)
+                            StatusChanged?.Invoke(this, $"[{ts2}] [WATCHDOG] Échec ping ({_consecutiveFailedPings}/3).");
+                            if (_consecutiveFailedPings >= 3)
                             {
-                                StatusChanged?.Invoke(this, "Perte de liaison avec le serveur d'arbitrage. Déconnexion.");
+                                StatusChanged?.Invoke(this, $"[{ts2}] [WATCHDOG] 3 pings échoués consécutivement. Déconnexion forcée.");
                                 StopWatchdog();
-                                await _client.DisconnectAsync();
+                                await _client.DisconnectAsync(reason: "3 pings consécutifs échoués");
                             }
                         }
                         else
@@ -457,8 +501,21 @@ public class JudgeSession : IDisposable
                     }
                     else
                     {
-                        StopWatchdog();
-                        StartAutoReconnect();
+                        // IsConnected est false sans que DisconnectAsync ait été appelé par le watchdog.
+                        // Cela ne devrait pas arriver normalement (IsConnected = _characteristic != null).
+                        StatusChanged?.Invoke(this, $"[{ts}] [WATCHDOG] ANOMALIE — IsConnected=false sans déconnexion explicite ! _isHandlingReconnection={_isHandlingReconnection} IsAutoReconnecting={IsAutoReconnecting}");
+
+                        if (_isHandlingReconnection == 0 && !IsAutoReconnecting)
+                        {
+                            StopWatchdog();
+                            StatusChanged?.Invoke(this, "[WATCHDOG] Connexion perdue, démarrage de la reconnexion automatique.");
+                            StartAutoReconnect();
+                        }
+                        else
+                        {
+                            // Reconnexion déjà en cours — arrêter le watchdog
+                            StopWatchdog();
+                        }
                     }
                 }
                 catch (OperationCanceledException)
@@ -494,6 +551,9 @@ public class JudgeSession : IDisposable
     {
         if (IsAutoReconnecting) return;
 
+        // Guard : si le client est déjà connecté, ne pas démarrer la reconnexion
+        if (_client.IsConnected) return;
+
         _autoReconnectCts = new CancellationTokenSource();
         var token = _autoReconnectCts.Token;
 
@@ -505,7 +565,15 @@ public class JudgeSession : IDisposable
             {
                 try
                 {
-                    if (!_client.IsConnected && Interlocked.CompareExchange(ref _isReconnectingFlag, 1, 0) == 0)
+                    // Vérification en début de chaque itération : si déjà connecté, arrêter
+                    if (_client.IsConnected)
+                    {
+                        StatusChanged?.Invoke(this, "[RECONNEXION] Connexion détectée, arrêt de la reconnexion automatique.");
+                        StopAutoReconnect();
+                        break;
+                    }
+
+                    if (Interlocked.CompareExchange(ref _isReconnectingFlag, 1, 0) == 0)
                     {
                         try
                         {
@@ -553,17 +621,22 @@ public class JudgeSession : IDisposable
     {
         if (Interlocked.CompareExchange(ref _isHandlingReconnection, 1, 0) != 0)
         {
+            StatusChanged?.Invoke(this, "[RECONNEXION] Traitement déjà en cours, ignoré.");
             return;
         }
 
         try
         {
+            string tsStart = DateTime.Now.ToString("HH:mm:ss.fff");
+            // Arrêter immédiatement la reconnexion automatique AVANT tout await,
+            // pour éviter qu'une itération concurrente relance ConnectAsync
             StopAutoReconnect();
+            StopWatchdog();
+
             _lastServerContactTime = DateTime.UtcNow;
             _consecutiveFailedPings = 0;
-            StartWatchdog();
 
-            StatusChanged?.Invoke(this, $"[RECONNEXION RÉUSSIE] Connecté au serveur [{address}] ! Réenregistrement...");
+            StatusChanged?.Invoke(this, $"[{tsStart}] [RECONNEXION RÉUSSIE] Connecté au serveur [{address}] ! Réenregistrement...");
 
             // 1. Réenregistrer la position auprès du serveur
             await SendCurrentPositionAsync();
@@ -579,6 +652,21 @@ public class JudgeSession : IDisposable
             await Task.Delay(100);
             await RequestMatchAsync();
             await RequestCompetitionAsync();
+
+            // 4. Démarrer le watchdog seulement si on est encore connecté à l'issue du traitement
+            string tsEnd = DateTime.Now.ToString("HH:mm:ss.fff");
+            bool stillConnected = _client.IsConnected;
+            StatusChanged?.Invoke(this, $"[{tsEnd}] [RECONNEXION] Post-traitement terminé. IsConnected={stillConnected}");
+
+            if (stillConnected)
+            {
+                StartWatchdog();
+            }
+            else
+            {
+                StatusChanged?.Invoke(this, $"[{tsEnd}] [RECONNEXION] Connexion perdue pendant le traitement post-reconnexion. Reprise de la reconnexion automatique.");
+                StartAutoReconnect();
+            }
         }
         catch (Exception ex)
         {
@@ -669,6 +757,9 @@ public class JudgeSession : IDisposable
 
     private void OnBluetoothMessageReceived(object? sender, string message)
     {
+        _lastServerContactTime = DateTime.UtcNow;
+        _consecutiveFailedPings = 0;
+
         try
         {
             if (message.StartsWith(Constants.Message.MATCH_INFO))
@@ -751,11 +842,12 @@ public class JudgeSession : IDisposable
             else if (message == Constants.Message.SERVER_STOPPED)
             {
                 StopWatchdog();
+                StopAutoReconnect();
                 StatusChanged?.Invoke(this, "ALERTE : Le serveur d'arbitrage s'est arrêté. Déconnexion et arrêt de l'écoute.");
                 NotificationReceived?.Invoke(this, "ALERTE : Le serveur d'arbitrage a annoncé son arrêt volontaire. Écoute stoppée.");
                 _ = Task.Run(async () =>
                 {
-                    try { await _client.DisconnectAsync(); } catch { }
+                    try { await _client.DisconnectAsync(reason: "Serveur arrêté volontairement"); } catch { }
                 });
                 ServerStopped?.Invoke(this, EventArgs.Empty);
             }

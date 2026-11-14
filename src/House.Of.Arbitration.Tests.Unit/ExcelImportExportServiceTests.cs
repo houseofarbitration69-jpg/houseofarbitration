@@ -66,6 +66,10 @@ public class ExcelImportExportServiceTests
         Assert.Equal("NomCategorie (auto)", wsCat.Cell(1, 7).GetString());
         Assert.True(wsCat.Cell(2, 7).HasFormula);
 
+        // Verify category column H has Petite Finale header
+        Assert.Equal("Petite Finale (Oui/Non)", wsCat.Cell(1, 8).GetString());
+        Assert.Equal("Oui", wsCat.Cell(2, 8).GetString());
+
         // Verify competitors column H has "Catégorie" header and dropdown refers to ListeCategories
         Assert.Equal("Catégorie", wsComp.Cell(1, 8).GetString());
         Assert.Equal("Sanda Seniors Hommes -65kg", wsComp.Cell(2, 8).GetString());
@@ -328,5 +332,120 @@ public class ExcelImportExportServiceTests
         Assert.NotNull(capturedDraw);
         Assert.NotNull(capturedDraw.DrawOrders);
         Assert.Single(capturedDraw.DrawOrders);
+    }
+
+    [Fact]
+    public async Task ImportAsync_SandaWithBronzeMatch_GeneratesDrawWithBronzeMatch()
+    {
+        var compRepo = Substitute.For<IRepository<CompetitionModel>>();
+        var catRepo = Substitute.For<IRepository<CategoryModel>>();
+        var comporRepo = Substitute.For<IRepository<CompetitorModel>>();
+        var compCatRepo = Substitute.For<IRepository<CompetitorCategoryModel>>();
+        var drawRepo = Substitute.For<IRepository<DrawModel>>();
+
+        CompetitionModel? capturedComp = null;
+        compRepo.AddAsync(Arg.Any<CompetitionModel>()).Returns(call =>
+        {
+            capturedComp = call.Arg<CompetitionModel>();
+            capturedComp.Id = 1;
+            return Task.FromResult<CompetitionModel?>(capturedComp);
+        });
+
+        CategoryModel? capturedCat = null;
+        catRepo.AddAsync(Arg.Any<CategoryModel>()).Returns(call =>
+        {
+            capturedCat = call.Arg<CategoryModel>();
+            capturedCat.Id = 10;
+            return Task.FromResult<CategoryModel?>(capturedCat);
+        });
+
+        int compId = 1;
+        comporRepo.AddAsync(Arg.Any<CompetitorModel>()).Returns(call =>
+        {
+            var comp = call.Arg<CompetitorModel>();
+            comp.Id = compId++;
+            return Task.FromResult<CompetitorModel?>(comp);
+        });
+
+        compCatRepo.AddAsync(Arg.Any<CompetitorCategoryModel>()).Returns(call =>
+            Task.FromResult<CompetitorCategoryModel?>(call.Arg<CompetitorCategoryModel>()));
+
+        DrawModel? capturedDraw = null;
+        drawRepo.AddAsync(Arg.Any<DrawModel>()).Returns(call =>
+        {
+            capturedDraw = call.Arg<DrawModel>();
+            capturedDraw.Id = 50;
+            return Task.FromResult<DrawModel?>(capturedDraw);
+        });
+
+        var service = new ExcelImportExportService(compRepo, catRepo, comporRepo, compCatRepo, drawRepo);
+
+        using var workbook = new XLWorkbook();
+        var wsComp = workbook.Worksheets.Add("Compétition");
+        wsComp.Cell(1, 1).Value = "Nom";
+        wsComp.Cell(1, 2).Value = "Date (JJ/MM/AAAA)";
+        wsComp.Cell(1, 3).Value = "Type";
+        wsComp.Cell(2, 1).Value = "Compétition Sanda Test";
+        wsComp.Cell(2, 2).Value = "15/03/2026";
+        wsComp.Cell(2, 3).Value = "Sanda";
+
+        var wsCat = workbook.Worksheets.Add("Catégories");
+        wsCat.Cell(1, 1).Value = "TypeCategorie";
+        wsCat.Cell(1, 2).Value = "Genre";
+        wsCat.Cell(1, 3).Value = "PoidsMin";
+        wsCat.Cell(1, 4).Value = "PoidsMax";
+        wsCat.Cell(1, 5).Value = "TrancheAge";
+        wsCat.Cell(1, 6).Value = "TypeRound";
+        wsCat.Cell(1, 7).Value = "NomCategorie (auto)";
+        wsCat.Cell(1, 8).Value = "Petite Finale (Oui/Non)";
+
+        wsCat.Cell(2, 1).Value = "Sanda";
+        wsCat.Cell(2, 2).Value = "Men";
+        wsCat.Cell(2, 3).Value = "60";
+        wsCat.Cell(2, 4).Value = "65";
+        wsCat.Cell(2, 5).Value = "Seniors";
+        wsCat.Cell(2, 6).Value = "Knockouts";
+        wsCat.Cell(2, 7).Value = "Sanda Seniors Hommes -65kg";
+        wsCat.Cell(2, 8).Value = "Oui"; // Petite finale activée
+
+        var wsCompetitors = workbook.Worksheets.Add("Compétiteurs");
+        wsCompetitors.Cell(1, 1).Value = "Prénom";
+        wsCompetitors.Cell(1, 2).Value = "Nom";
+        wsCompetitors.Cell(1, 3).Value = "Genre";
+        wsCompetitors.Cell(1, 4).Value = "DateNaissance (JJ/MM/AAAA)";
+        wsCompetitors.Cell(1, 5).Value = "Club";
+        wsCompetitors.Cell(1, 6).Value = "PaysISO";
+        wsCompetitors.Cell(1, 7).Value = "Poids (kg)";
+        wsCompetitors.Cell(1, 8).Value = "Catégorie";
+
+        wsCompetitors.Cell(2, 1).Value = "Lucas"; wsCompetitors.Cell(2, 2).Value = "Dupont"; wsCompetitors.Cell(2, 3).Value = "Men"; wsCompetitors.Cell(2, 4).Value = "15/03/2000"; wsCompetitors.Cell(2, 5).Value = "Club"; wsCompetitors.Cell(2, 6).Value = "FR"; wsCompetitors.Cell(2, 7).Value = "64"; wsCompetitors.Cell(2, 8).Value = "Sanda Seniors Hommes -65kg";
+        wsCompetitors.Cell(3, 1).Value = "Marco"; wsCompetitors.Cell(3, 2).Value = "Rossi"; wsCompetitors.Cell(3, 3).Value = "Men"; wsCompetitors.Cell(3, 4).Value = "15/03/2000"; wsCompetitors.Cell(3, 5).Value = "Club"; wsCompetitors.Cell(3, 6).Value = "FR"; wsCompetitors.Cell(3, 7).Value = "63"; wsCompetitors.Cell(3, 8).Value = "Sanda Seniors Hommes -65kg";
+        wsCompetitors.Cell(4, 1).Value = "Chen"; wsCompetitors.Cell(4, 2).Value = "Wei"; wsCompetitors.Cell(4, 3).Value = "Men"; wsCompetitors.Cell(4, 4).Value = "15/03/2000"; wsCompetitors.Cell(4, 5).Value = "Club"; wsCompetitors.Cell(4, 6).Value = "FR"; wsCompetitors.Cell(4, 7).Value = "62"; wsCompetitors.Cell(4, 8).Value = "Sanda Seniors Hommes -65kg";
+        wsCompetitors.Cell(5, 1).Value = "Tarik"; wsCompetitors.Cell(5, 2).Value = "Benali"; wsCompetitors.Cell(5, 3).Value = "Men"; wsCompetitors.Cell(5, 4).Value = "15/03/2000"; wsCompetitors.Cell(5, 5).Value = "Club"; wsCompetitors.Cell(5, 6).Value = "FR"; wsCompetitors.Cell(5, 7).Value = "64.5"; wsCompetitors.Cell(5, 8).Value = "Sanda Seniors Hommes -65kg";
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        ms.Position = 0;
+
+        var result = await service.ImportAsync(ms);
+
+        Assert.True(result.Success, string.Join("; ", result.Errors));
+        Assert.NotNull(capturedCat);
+        Assert.True(capturedCat.HasBronzeMatch);
+
+        Assert.NotNull(capturedDraw);
+        Assert.NotNull(capturedDraw.DrawKnockouts);
+        // Pour 4 compétiteurs avec petite finale : 2 demis + 1 petite finale + 1 finale = 4 combats
+        Assert.Equal(4, capturedDraw.DrawKnockouts.Count);
+
+        var bronzeMatch = capturedDraw.DrawKnockouts.FirstOrDefault(k => k.IsBronzeMatch);
+        Assert.NotNull(bronzeMatch);
+        Assert.Equal("Petite finale", bronzeMatch.StageName);
+        Assert.Equal(3, bronzeMatch.Order);
+
+        var finalMatch = capturedDraw.DrawKnockouts.Last();
+        Assert.False(finalMatch.IsBronzeMatch);
+        Assert.Equal("Finale", finalMatch.StageName);
+        Assert.Equal(4, finalMatch.Order);
     }
 }
