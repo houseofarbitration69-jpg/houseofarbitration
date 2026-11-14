@@ -389,6 +389,7 @@
                             <Grid 
                                 Grid.Row="1"
                                 IsVisible="{Binding IsCodeMode}"
+                                IsEnabled="{Binding CanSendScore}"
                                 RowDefinitions="55, Auto, *, *, *, *"
                                 ColumnDefinitions="*, *, *"
                                 RowSpacing="8"
@@ -504,6 +505,7 @@
                             <Grid 
                                 Grid.Row="1"
                                 IsVisible="{Binding IsPointMode}"
+                                IsEnabled="{Binding CanSendScore}"
                                 RowDefinitions="55, Auto, *, *, *, *, 46"
                                 ColumnDefinitions="*, *, *"
                                 RowSpacing="8"

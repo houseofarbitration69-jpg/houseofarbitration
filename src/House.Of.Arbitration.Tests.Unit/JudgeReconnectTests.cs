@@ -186,6 +186,9 @@ public class JudgeReconnectTests
         vm.JudgeGroup = string.Empty;
         vm.JudgePosition = 1;
 
+        // Démarrer le chronomètre pour autoriser la notation
+        await vm.HandleMessageAsync(Constants.Message.TIMER_START);
+
         // Passer hors-ligne
         await vm.HandleDeviceDisconnectedAsync();
         Assert.False(vm.IsConnected);

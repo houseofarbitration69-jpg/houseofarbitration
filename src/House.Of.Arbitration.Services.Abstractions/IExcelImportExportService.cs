@@ -63,6 +63,8 @@ public class CategoryRefereeExportData
 public class RefereeScoreExportRow
 {
     public DateTime Date { get; set; }
+    public TimeSpan? MatchTimer { get; set; }
+    public string MatchTimerDisplay => MatchTimer.HasValue ? $"{(int)MatchTimer.Value.TotalMinutes:D2}:{MatchTimer.Value.Seconds:D2}" : "00:00";
     public string Referee { get; set; } = string.Empty;
     public string CompetitorLastName { get; set; } = string.Empty;
     public string CompetitorFirstName { get; set; } = string.Empty;

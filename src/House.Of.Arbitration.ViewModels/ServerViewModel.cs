@@ -67,6 +67,7 @@ public partial class ServerViewModel : BaseViewModel
     private System.Collections.ObjectModel.ObservableCollection<JudgeModel> _judges = new();
     private System.Collections.ObjectModel.ObservableCollection<RoundResultModel> _roundResults = new();
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
+    private TimeSpan _totalRoundTime = TimeSpan.FromMinutes(2);
     private bool _isTimerRunning;
     private bool _isServerStarted;
     private IDispatcherTimer? _timer;
@@ -585,6 +586,12 @@ public partial class ServerViewModel : BaseViewModel
             }
             else if (args.Message.StartsWith(Constants.Message.JUDGE_SCORE))
             {
+                if (!IsTimerRunning || _timeLeft.TotalSeconds <= 0)
+                {
+                    _logger.LogWarning("Score reçu du juge ({ClientId}) alors que le chronomètre est arrêté, en pause ou expiré. Ignoré.", args.ClientId);
+                    return;
+                }
+
                 try
                 {
                     var json = args.Message.Substring(Constants.Message.JUDGE_SCORE.Length);
@@ -1203,9 +1210,12 @@ public partial class ServerViewModel : BaseViewModel
             code.Score = score;
         }
 
+        var elapsed = _totalRoundTime > _timeLeft ? (_totalRoundTime - _timeLeft) : TimeSpan.Zero;
+
         var data = new RefereeDataModel
         {
             Date = DateTime.Now,
+            MatchTimer = elapsed,
             Referee = judge.Name,
             Score = score,
             Data = (code != null) ? JsonSerializer.Serialize(code) : String.Empty,
@@ -1302,6 +1312,7 @@ public partial class ServerViewModel : BaseViewModel
     {
         await StopTimer();
 
+        _totalRoundTime = TimeSpan.FromMinutes(2);
         _timeLeft = TimeSpan.FromMinutes(2); // Default reset
 
         OnPropertyChanged(nameof(TimeLeftDisplay));
@@ -1324,6 +1335,7 @@ public partial class ServerViewModel : BaseViewModel
 
             if (TimeSpan.TryParseExact(result, @"m\:ss", null, out var newTime))
             {
+                _totalRoundTime = newTime;
                 _timeLeft = newTime;
 
                 OnPropertyChanged(nameof(TimeLeftDisplay));

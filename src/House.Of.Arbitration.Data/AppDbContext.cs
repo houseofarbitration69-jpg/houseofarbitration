@@ -48,6 +48,7 @@ public class AppDbContext : DbContext
         try { Database.ExecuteSqlRaw("ALTER TABLE Categories ADD COLUMN HasBronzeMatch INTEGER NOT NULL DEFAULT 0;"); } catch { }
         try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN IsBronzeMatch INTEGER NOT NULL DEFAULT 0;"); } catch { }
         try { Database.ExecuteSqlRaw("ALTER TABLE RefereeDatas ADD COLUMN Round INTEGER NOT NULL DEFAULT 1;"); } catch { }
+        try { Database.ExecuteSqlRaw("ALTER TABLE RefereeDatas ADD COLUMN MatchTimer TEXT NULL;"); } catch { }
         try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
         try { Database.ExecuteSqlRaw("ALTER TABLE DrawsPools ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
         try { Database.ExecuteSqlRaw("ALTER TABLE DrawsOrders ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }

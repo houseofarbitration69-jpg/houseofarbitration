@@ -151,12 +151,18 @@
                             ColumnSpacing="10"
                             IsVisible="{OnIdiom Tablet=True, Phone=False}"
                         >
-                                <Label 
-                                    Grid.Column="0" 
-                                    Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" 
-                                    VerticalOptions="Center" 
-                                    FontSize="12" 
-                                />
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" 
+                                        FontSize="12" 
+                                    />
+                                    <Label 
+                                        Text="{Binding MatchTimerDisplay, StringFormat='Chrono: {0}'}" 
+                                        FontSize="11" 
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryColor}" 
+                                    />
+                                </VerticalStackLayout>
                                 <Label 
                                     Grid.Column="1" 
                                     Text="{Binding Referee}" 
@@ -218,13 +224,19 @@
                                 ColumnSpacing="5"
                                 IsVisible="{OnIdiom Tablet=False, Phone=True}"
                             >
-                                <Label 
-                                    Grid.Column="0" 
-                                    Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" 
-                                    VerticalOptions="Center" 
-                                    FontSize="12" 
-                                    TextColor="{DynamicResource InverseTextColor}"
-                                />
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" 
+                                        FontSize="11" 
+                                        TextColor="{DynamicResource InverseTextColor}" 
+                                    />
+                                    <Label 
+                                        Text="{Binding MatchTimerDisplay, StringFormat='Chrono: {0}'}" 
+                                        FontSize="10" 
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryColor}" 
+                                    />
+                                </VerticalStackLayout>
                                 <Label 
                                     Grid.Column="1" 
                                     Text="{Binding Referee}" 

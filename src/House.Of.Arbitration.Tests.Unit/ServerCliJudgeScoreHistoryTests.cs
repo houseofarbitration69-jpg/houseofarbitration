@@ -156,4 +156,26 @@ public class ServerCliJudgeScoreHistoryTests
         session.ClearJudgeScoresHistory();
         Assert.Empty(session.JudgeScoreHistory);
     }
+
+    [Fact]
+    public async Task RecordJudgeScore_CalculatesElapsedTimeFromBeginningOfMatch_InverseOfCountdown()
+    {
+        using var server = new WindowsBluetoothServer();
+        using var session = new ArbitrationServerSession(server);
+
+        // Timer initialisé à 2 minutes (02:00)
+        await session.SetTimerDurationAsync(TimeSpan.FromMinutes(2));
+
+        // Simuler qu'il reste 1 minute 30 (30 secondes écoulées)
+        // Pour simuler cela, on appelle une réflexion ou on décrémente
+        var timeLeftField = typeof(ArbitrationServerSession).GetField("_timeLeft", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        timeLeftField?.SetValue(session, TimeSpan.FromMinutes(1).Add(TimeSpan.FromSeconds(30)));
+
+        var judge = session.Judges[0];
+        var entry = session.RecordJudgeScore(judge, Constants.Side.Red, 1.0, 1.0, null, "Point Rouge", "+1 Rouge");
+
+        // Le temps enregistré doit être 30 secondes (00:30) par rapport au début du match, pas 01:30
+        Assert.Equal(TimeSpan.FromSeconds(30), entry.MatchTimer);
+        Assert.Equal("00:30", entry.MatchTimeDisplay);
+    }
 }

@@ -119,6 +119,7 @@
                     <!-- Background Colors -->
                     <Grid 
                         x:DataType="models:IDrawModel"
+                        IsEnabled="{Binding CanSendScore, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}"
                         ColumnDefinitions="*,*"
                     >
                         <Border
@@ -150,6 +151,8 @@
                     <Grid 
                         ColumnDefinitions="*,*" 
                         IsVisible="False"
+                        InputTransparent="True"
+                        CascadeInputTransparent="True"
                     >
                         <!-- Competitor 1 (Red Side) -->
                         <VerticalStackLayout 
@@ -159,6 +162,33 @@
                             Spacing="10" 
                             Padding="0,5,0,0"
                         >
+                            <!-- Points donnés par le juge (Rouge) -->
+                            <Border 
+                                BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                                Stroke="{StaticResource PrimaryTextColor}" 
+                                StrokeThickness="2" 
+                                StrokeShape="RoundRectangle 16"
+                                Padding="20,6"
+                                HorizontalOptions="Center"
+                            >
+                                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                    <Label 
+                                        Text="POINTS :" 
+                                        TextColor="LightGray" 
+                                        FontSize="16" 
+                                        FontAttributes="Bold" 
+                                        VerticalOptions="Center"
+                                    />
+                                    <Label 
+                                        Text="{Binding RedScore, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" 
+                                        TextColor="{StaticResource PrimaryTextColor}" 
+                                        FontSize="36" 
+                                        FontAttributes="Bold" 
+                                        VerticalOptions="Center"
+                                    />
+                                </HorizontalStackLayout>
+                            </Border>
+
                             <!-- Circular Photo / Icon -->
                             <Border 
                                 StrokeShape="RoundRectangle 50" 
@@ -255,6 +285,32 @@
                             Spacing="10" 
                             Padding="0,5,0,0"
                         >
+                            <!-- Points donnés par le juge (Bleu) -->
+                            <Border 
+                                BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                                Stroke="{StaticResource PrimaryTextColor}" 
+                                StrokeThickness="2" 
+                                StrokeShape="RoundRectangle 16"
+                                Padding="20,6"
+                                HorizontalOptions="Center"
+                            >
+                                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                                    <Label 
+                                        Text="POINTS :" 
+                                        TextColor="LightGray" 
+                                        FontSize="16" 
+                                        FontAttributes="Bold" 
+                                        VerticalOptions="Center"
+                                    />
+                                    <Label 
+                                        Text="{Binding BlueScore, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" 
+                                        TextColor="{StaticResource PrimaryTextColor}" 
+                                        FontSize="36" 
+                                        FontAttributes="Bold" 
+                                        VerticalOptions="Center"
+                                    />
+                                </HorizontalStackLayout>
+                            </Border>
 
                             <!-- Circular Photo / Icon -->
                             <Border 

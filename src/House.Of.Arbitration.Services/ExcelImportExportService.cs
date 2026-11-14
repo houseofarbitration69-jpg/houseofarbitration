@@ -1186,13 +1186,13 @@ public class ExcelImportExportService : IExcelImportExportService
         ws.Cell(1, 1).Value = $"Notes arbitres — {competitionName}";
         ws.Cell(1, 1).Style.Font.Bold = true;
         ws.Cell(1, 1).Style.Font.FontSize = 13;
-        ws.Range(1, 1, 1, 9).Merge();
+        ws.Range(1, 1, 1, 10).Merge();
 
         if (competitionDate.HasValue)
         {
             ws.Cell(2, 1).Value = competitionDate.Value.ToString("dd/MM/yyyy");
             ws.Cell(2, 1).Style.Font.Italic = true;
-            ws.Range(2, 1, 2, 9).Merge();
+            ws.Range(2, 1, 2, 10).Merge();
         }
 
         ws.Cell(3, 1).Value = cat.CategoryName;
@@ -1200,21 +1200,22 @@ public class ExcelImportExportService : IExcelImportExportService
         ws.Cell(3, 1).Style.Font.FontSize = 12;
         ws.Cell(3, 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1E3A5F");
         ws.Cell(3, 1).Style.Font.FontColor = XLColor.White;
-        ws.Range(3, 1, 3, 9).Merge();
+        ws.Range(3, 1, 3, 10).Merge();
 
         // En-têtes colonnes
         int headerRow = 5;
         ws.Cell(headerRow, 1).Value = "Date";
         ws.Cell(headerRow, 2).Value = "Heure";
-        ws.Cell(headerRow, 3).Value = "Arbitre";
-        ws.Cell(headerRow, 4).Value = "Nom";
-        ws.Cell(headerRow, 5).Value = "Prénom";
-        ws.Cell(headerRow, 6).Value = "Note";
-        ws.Cell(headerRow, 7).Value = "Round";
-        ws.Cell(headerRow, 8).Value = "Correction";
-        ws.Cell(headerRow, 9).Value = "Match (ID / Ordre global)";
+        ws.Cell(headerRow, 3).Value = "Chrono";
+        ws.Cell(headerRow, 4).Value = "Arbitre";
+        ws.Cell(headerRow, 5).Value = "Nom";
+        ws.Cell(headerRow, 6).Value = "Prénom";
+        ws.Cell(headerRow, 7).Value = "Note";
+        ws.Cell(headerRow, 8).Value = "Round";
+        ws.Cell(headerRow, 9).Value = "Correction";
+        ws.Cell(headerRow, 10).Value = "Match (ID / Ordre global)";
 
-        var headerRange = ws.Range(headerRow, 1, headerRow, 9);
+        var headerRange = ws.Range(headerRow, 1, headerRow, 10);
         headerRange.Style.Font.Bold = true;
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#2C5F8A");
         headerRange.Style.Font.FontColor = XLColor.White;
@@ -1245,30 +1246,31 @@ public class ExcelImportExportService : IExcelImportExportService
 
             ws.Cell(row, 1).Value = r.Date.ToString("dd/MM/yyyy");
             ws.Cell(row, 2).Value = r.Date.ToString("HH:mm:ss");
-            ws.Cell(row, 3).Value = r.Referee;
-            ws.Cell(row, 4).Value = r.CompetitorLastName;
-            ws.Cell(row, 5).Value = r.CompetitorFirstName;
-            ws.Cell(row, 6).Value = r.Score;
-            ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
-            ws.Cell(row, 7).Value = r.Round;
-            ws.Cell(row, 8).Value = r.IsCorrection ? "✓" : "";
-            ws.Cell(row, 9).Value = r.MatchId.HasValue
+            ws.Cell(row, 3).Value = r.MatchTimerDisplay;
+            ws.Cell(row, 4).Value = r.Referee;
+            ws.Cell(row, 5).Value = r.CompetitorLastName;
+            ws.Cell(row, 6).Value = r.CompetitorFirstName;
+            ws.Cell(row, 7).Value = r.Score;
+            ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
+            ws.Cell(row, 8).Value = r.Round;
+            ws.Cell(row, 9).Value = r.IsCorrection ? "✓" : "";
+            ws.Cell(row, 10).Value = r.MatchId.HasValue
                 ? $"{r.MatchType} #{r.MatchId} (ord. {r.GlobalOrder})"
                 : "—";
 
             // Coloration : rouge clair pour corrections, alternance par match sinon
             if (r.IsCorrection)
-                ws.Range(row, 1, row, 9).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFE4E4");
+                ws.Range(row, 1, row, 10).Style.Fill.BackgroundColor = XLColor.FromHtml("#FFE4E4");
             else
-                ws.Range(row, 1, row, 9).Style.Fill.BackgroundColor = useAlt ? altColor2 : altColor1;
+                ws.Range(row, 1, row, 10).Style.Fill.BackgroundColor = useAlt ? altColor2 : altColor1;
 
             // Note négative en rouge, positive en vert
             if (r.Score < 0)
-                ws.Cell(row, 6).Style.Font.FontColor = XLColor.Red;
+                ws.Cell(row, 7).Style.Font.FontColor = XLColor.Red;
             else if (r.Score > 0)
-                ws.Cell(row, 6).Style.Font.FontColor = XLColor.FromHtml("#1B7A34");
+                ws.Cell(row, 7).Style.Font.FontColor = XLColor.FromHtml("#1B7A34");
 
-            foreach (var col in new[] { 1, 2, 7, 8 })
+            foreach (var col in new[] { 1, 2, 3, 8, 9 })
                 ws.Cell(row, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
             row++;
@@ -1276,19 +1278,20 @@ public class ExcelImportExportService : IExcelImportExportService
 
         // Bordures
         if (row > headerRow + 1)
-            ws.Range(headerRow, 1, row - 1, 9).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-        ws.Range(headerRow, 1, row - 1, 9).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            ws.Range(headerRow, 1, row - 1, 10).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        ws.Range(headerRow, 1, row - 1, 10).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
         // Largeurs
         ws.Column(1).Width = 12;
         ws.Column(2).Width = 11;
-        ws.Column(3).Width = 14;
-        ws.Column(4).Width = 18;
-        ws.Column(5).Width = 16;
-        ws.Column(6).Width = 10;
-        ws.Column(7).Width = 8;
-        ws.Column(8).Width = 12;
-        ws.Column(9).Width = 28;
+        ws.Column(3).Width = 11;
+        ws.Column(4).Width = 14;
+        ws.Column(5).Width = 18;
+        ws.Column(6).Width = 16;
+        ws.Column(7).Width = 10;
+        ws.Column(8).Width = 8;
+        ws.Column(9).Width = 12;
+        ws.Column(10).Width = 28;
 
         // Figer la ligne d'en-tête
         ws.SheetView.FreezeRows(headerRow);

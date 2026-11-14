@@ -91,6 +91,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     private IDispatcherTimer? _timer;
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private string _timeLeftDisplay = "02:00";
+    private bool _isTimerRunning;
     private string _judgeGroup = String.Empty;
     private bool _isReconnecting;
     private int _reconnectingFlag; // 0 = libre, 1 = en cours (Interlocked)
@@ -345,8 +346,34 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     public string TimeLeftDisplay
     {
         get => _timeLeftDisplay;
-        set => SetProperty(ref _timeLeftDisplay, value);
+        set
+        {
+            if (SetProperty(ref _timeLeftDisplay, value))
+            {
+                OnPropertyChanged(nameof(CanSendScore));
+            }
+        }
     }
+
+    /// <summary>
+    /// Obtient ou définit si le chronomètre est en cours d'exécution
+    /// </summary>
+    public bool IsTimerRunning
+    {
+        get => _isTimerRunning;
+        set
+        {
+            if (SetProperty(ref _isTimerRunning, value))
+            {
+                OnPropertyChanged(nameof(CanSendScore));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Indique si les juges peuvent envoyer des notes (le chrono doit tourner et être > 0)
+    /// </summary>
+    public bool CanSendScore => IsTimerRunning && _timeLeft.TotalSeconds > 0;
 
     /// <summary>
     /// Obtient ou définit le groupe du juge si c'est une compétition Sanda la valeur est vide
@@ -615,10 +642,16 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                     {
                         _timeLeft = _timeLeft.Subtract(TimeSpan.FromSeconds(1));
                         TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
+                        if (_timeLeft.TotalSeconds <= 0)
+                        {
+                            _timer.Stop();
+                            IsTimerRunning = false;
+                        }
                     }
                     else
                     {
                         _timer.Stop();
+                        IsTimerRunning = false;
                     }
                 };
             }
@@ -831,6 +864,8 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
                     if (isNewMatch)
                     {
+                        RedScore = 0;
+                        BlueScore = 0;
                         if (!HasUnsyncedChanges && _unsyncedScores.Count == 0 && !Codes.Any(c => !c.IsSynced))
                         {
                             Codes.Clear();
@@ -888,16 +923,19 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             {
                 EnsureTimer();
                 _timer?.Start();
+                IsTimerRunning = true;
             }
             else if (trimmed == Constants.Message.TIMER_PAUSE)
             {
                 _timer?.Stop();
+                IsTimerRunning = false;
             }
             else if (trimmed == Constants.Message.TIMER_STOP)
             {
                 _timer?.Stop();
                 _timeLeft = TimeSpan.Zero;
                 TimeLeftDisplay = "00:00";
+                IsTimerRunning = false;
             }
             else if (trimmed.StartsWith(Constants.Message.TIMER_SET))
             {
@@ -908,6 +946,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                 {
                     _timeLeft = newTime;
                     TimeLeftDisplay = _timeLeft.ToString(@"mm\:ss");
+                    if (_timeLeft.TotalSeconds <= 0)
+                    {
+                        _timer?.Stop();
+                        IsTimerRunning = false;
+                    }
                 }
             }
             else if (trimmed.StartsWith(Constants.Message.SERVER_NAME))
@@ -1213,8 +1256,8 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                 if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
                     await SyncUnsyncedScoresAsync();
 
-                //await Task.Delay(100);
-                //await _bluetoothClient.SendMessage(ServerId, Constants.Message.GET_MATCH);
+                await Task.Delay(100);
+                await _bluetoothClient.SendMessage(ServerId, Constants.Message.GET_MATCH);
             }
             catch (Exception ex)
             {
@@ -1335,6 +1378,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// <returns></returns>
     private async Task SendScore(int? competitorId, Constants.Side side)
     {
+        if (!CanSendScore)
+        {
+            _logger.LogWarning("Score refusé : le chronomètre est arrêté, en pause ou arrivé à 0.");
+            return;
+        }
+
         switch (side)
         {
             case Constants.Side.Red:
@@ -1598,6 +1647,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// <returns></returns>
     private async Task ProcessCode(MvtCodeModel findCode)
     {
+        if (!CanSendScore)
+        {
+            _logger.LogWarning("Déduction refusée : le chronomètre est arrêté, en pause ou arrivé à 0.");
+            return;
+        }
+
         Score = Math.Round(Math.Max(0, Score - Math.Abs(findCode.Value)), 2);
         int? competitorId = null;
 
@@ -1734,6 +1789,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private async Task AddRedScore()
     {
+        if (!CanSendScore)
+        {
+            _logger.LogWarning("Score refusé : le chronomètre est arrêté, en pause ou arrivé à 0.");
+            return;
+        }
+
         int? compId = Competitor1?.Id;
 
         if (compId == null && CurrentDraw is DrawKnockoutModel k)
@@ -1755,6 +1816,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private async Task AddBlueScore()
     {
+        if (!CanSendScore)
+        {
+            _logger.LogWarning("Score refusé : le chronomètre est arrêté, en pause ou arrivé à 0.");
+            return;
+        }
+
         int? compId = Competitor2?.Id;
 
         if (compId == null && CurrentDraw is DrawKnockoutModel k)
@@ -1897,6 +1964,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private void TypeNumber(object? val)
     {
+        if (!CanSendScore) return;
         if (val == null) return;
 
         try
@@ -1963,6 +2031,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private async Task ValidateCode()
     {
+        if (!CanSendScore) return;
         if (!string.IsNullOrWhiteSpace(Code))
         {
             await ProcessTypedCode(Code);
@@ -1977,6 +2046,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private async Task DeductPoints(object? val)
     {
+        if (!CanSendScore)
+        {
+            _logger.LogWarning("Déduction refusée : le chronomètre est arrêté, en pause ou arrivé à 0.");
+            return;
+        }
+
         double pts = 0;
         if (val is double d)
         {
@@ -2047,6 +2122,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     [RelayCommand]
     private void TypePoint(object? val)
     {
+        if (!CanSendScore) return;
         if (val == null) return;
 
         string s = val.ToString() ?? string.Empty;
@@ -2771,51 +2847,57 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     //    await Shell.Current.GoToAsync("TaoluCodesPage");
     //}
 
-    //[RelayCommand]
-    //private async Task ApplyCode(MvtCodeModel? code)
-    //{
-    //    if (code == null) return;
-    //    await ProcessCode(code);
-    //}
+    [RelayCommand]
+    private async Task ApplyCode(MvtCodeModel? code)
+    {
+        if (!CanSendScore)
+        {
+            _logger.LogWarning("Déduction refusée : le chronomètre est arrêté, en pause ou arrivé à 0.");
+            return;
+        }
 
-    //[RelayCommand]
-    //private async Task DeleteCode(MvtTimeCodeModel code)
-    //{
-    //    if (code == null) return;
-    //    Codes.Remove(code);
+        if (code == null) return;
+        await ProcessCode(code);
+    }
 
-    //    if (code.Code != null)
-    //    {
-    //        int? competitorId = null;
-    //        if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
-    //        {
-    //            competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
-    //        }
+    [RelayCommand]
+    private async Task DeleteCode(MvtTimeCodeModel code)
+    {
+        if (code == null) return;
+        Codes.Remove(code);
 
-    //        Score = Math.Round(Score + Math.Abs(code.Code.Value), 2);
-    //        var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId };
+        if (code.Code != null)
+        {
+            int? competitorId = null;
+            if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+            {
+                competitorId = ((DrawOrderModel)CurrentDraw).CompetitorId;
+            }
 
-    //        if (!IsConnected || _serverDeviceId == null)
-    //        {
-    //            _unsyncedScores.Add(scoreModel);
-    //            HasUnsyncedChanges = true;
-    //        }
-    //        else
-    //        {
-    //            try
-    //            {
-    //                var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
-    //                await _bluetoothClient.SendMessage(_serverDeviceId, $"{Constants.Message.JUDGE_SCORE}{json}");
-    //            }
-    //            catch (Exception ex)
-    //            {
-    //                _logger.LogWarning(ex, "Failed to send deleted code score to server immediately; stored locally for future sync.");
-    //                _unsyncedScores.Add(scoreModel);
-    //                HasUnsyncedChanges = true;
-    //            }
-    //        }
-    //    }
-    //}
+            Score = Math.Round(Score + Math.Abs(code.Code.Value), 2);
+            var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, JudgePosition = PositionCode };
+
+            if (!IsConnected || ServerId == null)
+            {
+                _unsyncedScores.Add(scoreModel);
+                HasUnsyncedChanges = true;
+            }
+            else
+            {
+                try
+                {
+                    var json = JsonSerializer.Serialize(scoreModel, _jsonOptions);
+                    await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_SCORE}{json}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send deleted code score to server immediately; stored locally for future sync.");
+                    _unsyncedScores.Add(scoreModel);
+                    HasUnsyncedChanges = true;
+                }
+            }
+        }
+    }
 
     //#endregion
 

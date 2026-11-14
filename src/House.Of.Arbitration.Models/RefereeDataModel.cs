@@ -22,6 +22,17 @@ public partial class RefereeDataModel : ObservableObject
     public required DateTime Date { get; set; }
 
     /// <summary>
+    /// Obtient ou définit le temps écoulé depuis le début du match (temps inverse du compte à rebours)
+    /// </summary>
+    public TimeSpan? MatchTimer { get; set; }
+
+    /// <summary>
+    /// Affichage formaté du timer du match (ex: "00:30")
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public string MatchTimerDisplay => MatchTimer.HasValue ? $"{(int)MatchTimer.Value.TotalMinutes:D2}:{MatchTimer.Value.Seconds:D2}" : "00:00";
+
+    /// <summary>
     /// 
     /// </summary>
     public double Score { get; set; } = 0;

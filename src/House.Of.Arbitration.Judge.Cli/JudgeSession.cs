@@ -52,6 +52,7 @@ public class JudgeSession : IDisposable
     public string ServerName { get; private set; } = string.Empty;
     public string TimerDisplay { get; private set; } = "02:00";
     public bool IsTimerRunning { get; private set; }
+    public bool CanSendScore => IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00";
 
     public List<MvtTimeCodeModel> DeductionsHistory { get; } = new();
 
@@ -179,6 +180,12 @@ public class JudgeSession : IDisposable
     /// </summary>
     public async Task<bool> ApplyTaoluCodeAsync(string codeOrNumber)
     {
+        if (!CanSendScore)
+        {
+            StatusChanged?.Invoke(this, "[ACTION BLOQUÉE] Impossible de noter : le chronomètre est inactif.");
+            return false;
+        }
+
         string search = codeOrNumber.Trim().ToUpperInvariant();
         var mvt = MvtCodeModel.DefaultCodes.FirstOrDefault(c =>
             string.Equals(c.Code, search, StringComparison.OrdinalIgnoreCase))
@@ -250,6 +257,12 @@ public class JudgeSession : IDisposable
     /// </summary>
     public async Task<bool> DeductPointsAsync(double points, string? reason = null)
     {
+        if (!CanSendScore)
+        {
+            StatusChanged?.Invoke(this, "[ACTION BLOQUÉE] Impossible de noter : le chronomètre est inactif.");
+            return false;
+        }
+
         double deduction = Math.Abs(points);
         CurrentScore = Math.Round(Math.Max(0, CurrentScore - deduction), 2);
 
@@ -318,6 +331,12 @@ public class JudgeSession : IDisposable
     /// </summary>
     public async Task<bool> SetAbsoluteScoreAsync(double score)
     {
+        if (!CanSendScore)
+        {
+            StatusChanged?.Invoke(this, "[ACTION BLOQUÉE] Impossible de noter : le chronomètre est inactif.");
+            return false;
+        }
+
         CurrentScore = Math.Round(Math.Max(0, score), 2);
 
         var scoreModel = new TransfertScoreModel
@@ -363,6 +382,12 @@ public class JudgeSession : IDisposable
     /// </summary>
     public async Task<bool> AddSandaPointAsync(Constants.Side side)
     {
+        if (!CanSendScore)
+        {
+            StatusChanged?.Invoke(this, "[ACTION BLOQUÉE] Impossible de noter : le chronomètre est inactif.");
+            return false;
+        }
+
         int? compId = null;
         if (side == Constants.Side.Red)
         {
@@ -792,6 +817,10 @@ public class JudgeSession : IDisposable
             else if (message.StartsWith(Constants.Message.TIMER_SET))
             {
                 TimerDisplay = message.Substring(Constants.Message.TIMER_SET.Length);
+                if (TimerDisplay == "00:00" || TimerDisplay == "0:00")
+                {
+                    IsTimerRunning = false;
+                }
                 TimerUpdated?.Invoke(this, TimerDisplay);
             }
             else if (message == Constants.Message.TIMER_START)

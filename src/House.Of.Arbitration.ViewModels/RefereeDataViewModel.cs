@@ -207,6 +207,7 @@ public partial class RefereeDataViewModel : BaseViewModel, IQueryAttributable
                     Rows = g.Select(d => new RefereeScoreExportRow
                     {
                         Date = d.Date,
+                        MatchTimer = d.MatchTimer,
                         Referee = d.Referee ?? string.Empty,
                         CompetitorLastName = d.Competitor?.LastName ?? d.Competitor?.Name ?? string.Empty,
                         CompetitorFirstName = d.Competitor?.FirstName ?? string.Empty,

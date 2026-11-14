@@ -46,6 +46,7 @@ public class ArbitrationServerSession : IDisposable
 
     private System.Threading.Timer? _timer;
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
+    private TimeSpan _totalRoundTime = TimeSpan.FromMinutes(2);
     private int _currentMatchIndex = 0;
 
     public WindowsBluetoothServer BluetoothServer => _bluetoothServer;
@@ -753,6 +754,7 @@ public class ArbitrationServerSession : IDisposable
 
     public async Task SetTimerDurationAsync(TimeSpan duration)
     {
+        _totalRoundTime = duration;
         _timeLeft = duration;
         StatusChanged?.Invoke(this, $"Durée du chronomètre définie à : {TimeLeftDisplay}");
         await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
@@ -898,6 +900,12 @@ public class ArbitrationServerSession : IDisposable
             }
             else if (message.StartsWith(Constants.Message.JUDGE_SCORE))
             {
+                if (!IsTimerRunning || _timeLeft.TotalSeconds <= 0)
+                {
+                    StatusChanged?.Invoke(this, $"[SCORE REFUSÉ] Note reçue de {clientId} alors que le chronomètre est inactif.");
+                    return;
+                }
+
                 string json = message.Substring(Constants.Message.JUDGE_SCORE.Length);
                 var scoreModel = JsonSerializer.Deserialize<TransfertScoreModel>(json, _jsonOptions);
 
@@ -1605,11 +1613,15 @@ public class ArbitrationServerSession : IDisposable
             ? (match.Type == RoundType.Order ? match.RedCompetitor : $"{match.RedCompetitor} vs {match.BlueCompetitor}")
             : "N/A";
 
+        var elapsed = _totalRoundTime > _timeLeft ? (_totalRoundTime - _timeLeft) : TimeSpan.Zero;
+        string elapsedDisplay = $"{(int)elapsed.TotalMinutes:D2}:{elapsed.Seconds:D2}";
+
         var entry = new JudgeScoreEntry
         {
             Id = nextId,
             Timestamp = DateTime.Now,
-            MatchTimeDisplay = TimeLeftDisplay,
+            MatchTimer = elapsed,
+            MatchTimeDisplay = elapsedDisplay,
             MatchId = match?.Id ?? 0,
             MatchCategory = match?.Category ?? "N/A",
             MatchCompetitors = competitors,

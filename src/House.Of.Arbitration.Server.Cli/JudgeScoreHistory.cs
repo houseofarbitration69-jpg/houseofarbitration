@@ -9,6 +9,7 @@ public class JudgeScoreEntry
 {
     public int Id { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.Now;
+    public TimeSpan? MatchTimer { get; set; }
     public string MatchTimeDisplay { get; set; } = string.Empty;
     public int MatchId { get; set; }
     public string MatchCategory { get; set; } = string.Empty;
