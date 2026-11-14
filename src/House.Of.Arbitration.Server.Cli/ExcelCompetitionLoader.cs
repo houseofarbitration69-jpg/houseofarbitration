@@ -276,16 +276,34 @@ public static class ExcelCompetitionLoader
 
             result.Competitors = competitorsList;
 
-            // 4. Génération des matchs (MatchItem) pour la session CLI
+            // 4. Génération des matchs (MatchItem) et des tirages complets pour la session CLI
             var matches = new List<MatchItem>();
             int matchId = 1;
 
             foreach (var cat in categoriesList)
             {
+                cat.CompetitionId = result.Competition.Id;
+                var draw = new DrawModel
+                {
+                    Id = cat.Id,
+                    CategoryId = cat.Id,
+                    DrawKnockouts = new List<DrawKnockoutModel>(),
+                    DrawPools = new List<DrawPoolsModel>(),
+                    DrawOrders = new List<DrawOrderModel>()
+                };
+                cat.Draw = draw;
+
                 if (!competitorsByCat.TryGetValue(cat.Id, out var catCompetitors) || catCompetitors.Count == 0)
                 {
                     continue;
                 }
+
+                cat.Competitors = catCompetitors.Select(c => new CompetitorCategoryModel
+                {
+                    CategoryId = cat.Id,
+                    CompetitorId = c.Id,
+                    Competitor = c
+                }).ToList();
 
                 var roundType = (compType == CompetitionType.Taolu || cat.Type == CategoryType.Taolu || cat.RoundType == RoundType.Order)
                     ? RoundType.Order
@@ -298,10 +316,11 @@ public static class ExcelCompetitionLoader
                     {
                         var comp = catCompetitors[i];
                         string compDisplay = FormatCompetitorName(comp);
+                        int currentMatchId = matchId++;
 
                         matches.Add(new MatchItem
                         {
-                            Id = matchId++,
+                            Id = currentMatchId,
                             Type = RoundType.Order,
                             Category = cat.Name,
                             RedCompetitor = compDisplay,
@@ -309,27 +328,52 @@ public static class ExcelCompetitionLoader
                             RedScore = 0,
                             BlueScore = 0
                         });
+
+                        draw.DrawOrders!.Add(new DrawOrderModel
+                        {
+                            Id = currentMatchId,
+                            Order = i + 1,
+                            GlobalOrder = currentMatchId,
+                            DrawId = draw.Id,
+                            CompetitorId = comp.Id,
+                            Competitor = comp
+                        });
                     }
                 }
                 else if (roundType == RoundType.Pools)
                 {
                     // Poule : tout le monde rencontre tout le monde
+                    int poolOrder = 1;
                     for (int i = 0; i < catCompetitors.Count; i++)
                     {
                         for (int j = i + 1; j < catCompetitors.Count; j++)
                         {
                             var c1 = catCompetitors[i];
                             var c2 = catCompetitors[j];
+                            int currentMatchId = matchId++;
 
                             matches.Add(new MatchItem
                             {
-                                Id = matchId++,
+                                Id = currentMatchId,
                                 Type = RoundType.Pools,
                                 Category = cat.Name,
                                 RedCompetitor = FormatCompetitorName(c1),
                                 BlueCompetitor = FormatCompetitorName(c2),
                                 RedScore = 0,
                                 BlueScore = 0
+                            });
+
+                            draw.DrawPools!.Add(new DrawPoolsModel
+                            {
+                                Id = currentMatchId,
+                                Order = poolOrder++,
+                                GlobalOrder = currentMatchId,
+                                DrawId = draw.Id,
+                                Competitor1Id = c1.Id,
+                                Competitor1 = c1,
+                                Competitor2Id = c2.Id,
+                                Competitor2 = c2,
+                                RoundResultsJson = string.Empty
                             });
                         }
                     }
@@ -342,9 +386,10 @@ public static class ExcelCompetitionLoader
                     {
                         if (n == 1)
                         {
+                            int currentMatchId = matchId++;
                             matches.Add(new MatchItem
                             {
-                                Id = matchId++,
+                                Id = currentMatchId,
                                 Type = RoundType.Knockouts,
                                 Category = cat.Name,
                                 RedCompetitor = FormatCompetitorName(catCompetitors[0]),
@@ -356,6 +401,21 @@ public static class ExcelCompetitionLoader
                                 WinnerSide = Constants.Side.Red,
                                 DecisionReason = "Seul compétiteur inscrit",
                                 StageName = "Finale"
+                            });
+
+                            draw.DrawKnockouts!.Add(new DrawKnockoutModel
+                            {
+                                Id = currentMatchId,
+                                Order = 1,
+                                GlobalOrder = currentMatchId,
+                                DrawId = draw.Id,
+                                Competitor1Id = catCompetitors[0].Id,
+                                Competitor1 = catCompetitors[0],
+                                Competitor2Id = null,
+                                IsBronzeMatch = false,
+                                IsFinished = true,
+                                WinnerId = catCompetitors[0].Id,
+                                RoundResultsJson = string.Empty
                             });
                         }
                     }
@@ -514,15 +574,38 @@ public static class ExcelCompetitionLoader
                             }
                         }
 
-                        // Ajouter tous les matchs dans l'ordre chronologique des tours
+                        // Ajouter tous les matchs dans l'ordre chronologique des tours et peupler le tirage Knockouts
+                        int koOrder = 1;
                         foreach (var roundList in rounds)
                         {
                             matches.AddRange(roundList);
+                            foreach (var match in roundList)
+                            {
+                                CompetitorModel? c1 = catCompetitors.FirstOrDefault(c => FormatCompetitorName(c).Equals(match.RedCompetitor, StringComparison.OrdinalIgnoreCase));
+                                CompetitorModel? c2 = catCompetitors.FirstOrDefault(c => FormatCompetitorName(c).Equals(match.BlueCompetitor, StringComparison.OrdinalIgnoreCase));
+
+                                draw.DrawKnockouts!.Add(new DrawKnockoutModel
+                                {
+                                    Id = match.Id,
+                                    Order = koOrder++,
+                                    GlobalOrder = match.Id,
+                                    DrawId = draw.Id,
+                                    Competitor1Id = c1?.Id,
+                                    Competitor1 = c1,
+                                    Competitor2Id = c2?.Id,
+                                    Competitor2 = c2,
+                                    IsBronzeMatch = match.IsBronzeMatch,
+                                    IsFinished = match.IsFinished,
+                                    WinnerId = match.WinnerSide == Constants.Side.Red ? c1?.Id : (match.WinnerSide == Constants.Side.Blue ? c2?.Id : null),
+                                    RoundResultsJson = string.Empty
+                                });
+                            }
                         }
                     }
                 }
             }
 
+            result.Competition.Categories = categoriesList;
             result.Matches = matches;
             result.Success = true;
 

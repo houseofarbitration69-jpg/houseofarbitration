@@ -38,6 +38,11 @@ public class ExcelCliLoaderTests
         Assert.NotEmpty(result.Categories);
         Assert.NotEmpty(result.Competitors);
         Assert.NotEmpty(result.Matches);
+        Assert.NotEmpty(result.Competition.Categories);
+        Assert.All(result.Competition.Categories, c =>
+        {
+            Assert.NotNull(c.Draw);
+        });
 
         // Check first match
         var firstMatch = result.Matches[0];
@@ -606,5 +611,44 @@ public class ExcelCliLoaderTests
         // Les deux matchs cibles doivent être réinitialisés avec les placeholders
         Assert.Contains("Vainqueur", session.Matches[3].RedCompetitor);
         Assert.Contains("Perdant", session.Matches[2].RedCompetitor);
+    }
+
+    [Fact]
+    public async Task ArbitrationServerSession_SendsFullCompetitionWithCategoriesAndDraws_OnGetCompetition()
+    {
+        using var server = new WindowsBluetoothServer();
+        using var session = new ArbitrationServerSession(server);
+
+        // Vérifier l'état par défaut
+        Assert.NotEmpty(session.CurrentCompetition.Categories);
+        Assert.All(session.CurrentCompetition.Categories, cat =>
+        {
+            Assert.NotNull(cat.Draw);
+            Assert.NotEmpty(cat.Competitors);
+        });
+
+        // BroadcastCompetitionDataAsync envoie COMPETITION_DATA:{json}
+        await session.BroadcastCompetitionDataAsync();
+
+        // Sérialisation avec options pour vérifier le contenu
+        var options = new System.Text.Json.JsonSerializerOptions
+        {
+            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+            PropertyNameCaseInsensitive = true
+        };
+        string json = System.Text.Json.JsonSerializer.Serialize(session.CurrentCompetition, options);
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<CompetitionModel>(json, options);
+
+        Assert.NotNull(deserialized);
+        Assert.Equal(session.CurrentCompetition.Name, deserialized.Name);
+        Assert.NotEmpty(deserialized.Categories);
+        Assert.All(deserialized.Categories, cat =>
+        {
+            Assert.NotNull(cat.Draw);
+            Assert.True(
+                (cat.Draw.DrawKnockouts != null && cat.Draw.DrawKnockouts.Count > 0) ||
+                (cat.Draw.DrawOrders != null && cat.Draw.DrawOrders.Count > 0) ||
+                (cat.Draw.DrawPools != null && cat.Draw.DrawPools.Count > 0));
+        });
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using House.Of.Arbitration.Models;
 
 namespace House.Of.Arbitration.Server.Cli;
@@ -33,7 +34,11 @@ public class MatchItem
 public class ArbitrationServerSession : IDisposable
 {
     private readonly WindowsBluetoothServer _bluetoothServer;
-    private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReferenceHandler = ReferenceHandler.IgnoreCycles
+    };
     private readonly Dictionary<string, JudgeModel> _clientJudgeMapping = new();
     private readonly List<MatchItem> _matches = new();
     private readonly List<CategoryModel> _loadedCategories = new();
@@ -78,6 +83,17 @@ public class ArbitrationServerSession : IDisposable
         _bluetoothServer = bluetoothServer;
         _bluetoothServer.MessageReceived += OnBluetoothMessageReceived;
         _bluetoothServer.ClientDisconnected += OnClientDisconnected;
+        _bluetoothServer.ClientConnected += async (sender, clientId) =>
+        {
+            try
+            {
+                await SendCompetitionDataToClientAsync(clientId);
+            }
+            catch (Exception ex)
+            {
+                StatusChanged?.Invoke(this, $"Erreur lors de l'envoi de la compétition au client {clientId} : {ex.Message}");
+            }
+        };
 
         // Initialisation des données par défaut
         SetupDefaultMatches();
@@ -107,6 +123,10 @@ public class ArbitrationServerSession : IDisposable
     public async Task LoadCompetitionAsync(CompetitionModel competition, IEnumerable<MatchItem> matches, IEnumerable<CategoryModel>? categories = null)
     {
         CurrentCompetition = competition;
+        if (categories != null && (competition.Categories == null || competition.Categories.Count == 0))
+        {
+            competition.Categories = categories.ToList();
+        }
         CurrentCompetitionType = competition.Type;
         SetupJudges(competition.Type);
 
@@ -119,6 +139,10 @@ public class ArbitrationServerSession : IDisposable
         if (categories != null)
         {
             _loadedCategories.AddRange(categories);
+        }
+        else if (competition.Categories != null && competition.Categories.Count > 0)
+        {
+            _loadedCategories.AddRange(competition.Categories);
         }
 
         StatusChanged?.Invoke(this, $"Compétition '{competition.Name}' ({competition.Type}) chargée avec {_matches.Count} match(s).");
@@ -189,6 +213,72 @@ public class ArbitrationServerSession : IDisposable
         _matches.Add(new MatchItem { Id = 2, Type = RoundType.Knockouts, Category = "Sanda -70kg", RedCompetitor = "Zhang (Rouge)", BlueCompetitor = "Leclerc (Bleu)" });
         _matches.Add(new MatchItem { Id = 3, Type = RoundType.Order, Category = "Taolu Changquan", RedCompetitor = "Wang (Athlète)", BlueCompetitor = "" });
         _matches.Add(new MatchItem { Id = 4, Type = RoundType.Order, Category = "Taolu Nanquan", RedCompetitor = "Dubois (Athlète)", BlueCompetitor = "" });
+
+        CurrentCompetition.Categories.Clear();
+
+        var comp1 = new CompetitorModel { Id = 1, FirstName = "Dupont", LastName = "Rouge", CountryIsoCode = "FR" };
+        var comp2 = new CompetitorModel { Id = 2, FirstName = "Martin", LastName = "Bleu", CountryIsoCode = "FR" };
+        var cat1 = new CategoryModel { Id = 1, Type = CategoryType.Sanda, Genre = Genre.Men, WeightMax = 65, RoundType = RoundType.Knockouts, CompetitionId = CurrentCompetition.Id };
+        var draw1 = new DrawModel { Id = 1, CategoryId = 1, Category = cat1 };
+        draw1.DrawKnockouts = new List<DrawKnockoutModel>
+        {
+            new DrawKnockoutModel { Id = 1, Order = 1, GlobalOrder = 1, DrawId = 1, Competitor1Id = 1, Competitor1 = comp1, Competitor2Id = 2, Competitor2 = comp2 }
+        };
+        cat1.Draw = draw1;
+        cat1.Competitors = new List<CompetitorCategoryModel>
+        {
+            new() { Id = 1, CategoryId = 1, CompetitorId = 1, Competitor = comp1 },
+            new() { Id = 2, CategoryId = 1, CompetitorId = 2, Competitor = comp2 }
+        };
+
+        var comp3 = new CompetitorModel { Id = 3, FirstName = "Zhang", LastName = "Rouge", CountryIsoCode = "CN" };
+        var comp4 = new CompetitorModel { Id = 4, FirstName = "Leclerc", LastName = "Bleu", CountryIsoCode = "FR" };
+        var cat2 = new CategoryModel { Id = 2, Type = CategoryType.Sanda, Genre = Genre.Men, WeightMax = 70, RoundType = RoundType.Knockouts, CompetitionId = CurrentCompetition.Id };
+        var draw2 = new DrawModel { Id = 2, CategoryId = 2, Category = cat2 };
+        draw2.DrawKnockouts = new List<DrawKnockoutModel>
+        {
+            new DrawKnockoutModel { Id = 2, Order = 1, GlobalOrder = 2, DrawId = 2, Competitor1Id = 3, Competitor1 = comp3, Competitor2Id = 4, Competitor2 = comp4 }
+        };
+        cat2.Draw = draw2;
+        cat2.Competitors = new List<CompetitorCategoryModel>
+        {
+            new() { Id = 3, CategoryId = 2, CompetitorId = 3, Competitor = comp3 },
+            new() { Id = 4, CategoryId = 2, CompetitorId = 4, Competitor = comp4 }
+        };
+
+        var comp5 = new CompetitorModel { Id = 5, FirstName = "Wang", LastName = "Athlète", CountryIsoCode = "CN" };
+        var cat3 = new CategoryModel { Id = 3, Type = CategoryType.Taolu, Genre = Genre.Men, RoundType = RoundType.Order, CompetitionId = CurrentCompetition.Id };
+        var draw3 = new DrawModel { Id = 3, CategoryId = 3, Category = cat3 };
+        draw3.DrawOrders = new List<DrawOrderModel>
+        {
+            new DrawOrderModel { Id = 3, Order = 1, GlobalOrder = 3, DrawId = 3, CompetitorId = 5, Competitor = comp5 }
+        };
+        cat3.Draw = draw3;
+        cat3.Competitors = new List<CompetitorCategoryModel>
+        {
+            new() { Id = 5, CategoryId = 3, CompetitorId = 5, Competitor = comp5 }
+        };
+
+        var comp6 = new CompetitorModel { Id = 6, FirstName = "Dubois", LastName = "Athlète", CountryIsoCode = "FR" };
+        var cat4 = new CategoryModel { Id = 4, Type = CategoryType.Taolu, Genre = Genre.Men, RoundType = RoundType.Order, CompetitionId = CurrentCompetition.Id };
+        var draw4 = new DrawModel { Id = 4, CategoryId = 4, Category = cat4 };
+        draw4.DrawOrders = new List<DrawOrderModel>
+        {
+            new DrawOrderModel { Id = 4, Order = 1, GlobalOrder = 4, DrawId = 4, CompetitorId = 6, Competitor = comp6 }
+        };
+        cat4.Draw = draw4;
+        cat4.Competitors = new List<CompetitorCategoryModel>
+        {
+            new() { Id = 6, CategoryId = 4, CompetitorId = 6, Competitor = comp6 }
+        };
+
+        CurrentCompetition.Categories.Add(cat1);
+        CurrentCompetition.Categories.Add(cat2);
+        CurrentCompetition.Categories.Add(cat3);
+        CurrentCompetition.Categories.Add(cat4);
+
+        _loadedCategories.Clear();
+        _loadedCategories.AddRange(CurrentCompetition.Categories);
     }
 
     public async Task NextMatchAsync()
