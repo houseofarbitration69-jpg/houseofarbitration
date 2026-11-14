@@ -834,6 +834,8 @@ public class ArbitrationServerSession : IDisposable
 
         try
         {
+            StatusChanged?.Invoke(this, $"[Received] : '{message}'.");
+
             if (message.StartsWith(Constants.Message.JUDGE_POSITION))
             {
                 var posStr = message.Substring(Constants.Message.JUDGE_POSITION.Length).Trim();
@@ -886,8 +888,8 @@ public class ArbitrationServerSession : IDisposable
                     JudgeConnected?.Invoke(this, judge);
 
                     // Envoi immédiat des infos de match et compétition
-                    await SendCompetitionDataToClientAsync(clientId);
-                    await SendMatchInfoToClientAsync(clientId);
+                    //await SendCompetitionDataToClientAsync(clientId);
+                    //await SendMatchInfoToClientAsync(clientId);
                 }
                 else
                 {

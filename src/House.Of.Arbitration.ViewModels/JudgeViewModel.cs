@@ -1213,8 +1213,8 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                 if (HasUnsyncedChanges || _unsyncedScores.Count > 0 || Codes.Any(c => !c.IsSynced))
                     await SyncUnsyncedScoresAsync();
 
-                await Task.Delay(100);
-                await _bluetoothClient.SendMessage(ServerId, Constants.Message.GET_MATCH);
+                //await Task.Delay(100);
+                //await _bluetoothClient.SendMessage(ServerId, Constants.Message.GET_MATCH);
             }
             catch (Exception ex)
             {
