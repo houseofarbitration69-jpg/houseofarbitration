@@ -828,6 +828,18 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                     _lastRoundNumber = roundNum;
                     CurrentRound = roundNum;
 
+                    if (_databaseService != null)
+                    {
+                        try
+                        {
+                            await _databaseService.ImportMatchDataAsync(matchData);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Erreur lors de l'import du match {MatchId}", matchData.Id);
+                        }
+                    }
+
                     switch (matchData.Type)
                     {
                         case RoundType.Knockouts:
@@ -859,35 +871,42 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                             break;
                     }
 
+                    if (CurrentDraw == null)
+                    {
+                        CurrentDraw = (IDrawModel?)matchData.DrawKnockout
+                                   ?? (IDrawModel?)matchData.DrawPool
+                                   ?? (IDrawModel?)matchData.DrawOrder;
+                    }
+
                     if (CurrentDraw != null)
                     {
                         CurrentDraw.CurrentRound = roundNum;
                     }
 
-                    CategoryName = CurrentDraw?.Draw?.Category?.Name;
+                    CategoryName = CurrentDraw?.Draw?.Category?.Name ?? matchData.CategoryName;
                     if (CurrentDraw is DrawKnockoutModel k)
                     {
-                        Competitor1 = k.Competitor1;
-                        Competitor2 = k.Competitor2;
-                        MatchStageName = k.StageName;
+                        Competitor1 = k.Competitor1 ?? matchData.Competitor1;
+                        Competitor2 = k.Competitor2 ?? matchData.Competitor2;
+                        MatchStageName = k.StageName ?? matchData.StageName;
                     }
                     else if (CurrentDraw is DrawPoolsModel p)
                     {
-                        Competitor1 = p.Competitor1;
-                        Competitor2 = p.Competitor2;
-                        MatchStageName = $"Poule - Match #{p.Order}";
+                        Competitor1 = p.Competitor1 ?? matchData.Competitor1;
+                        Competitor2 = p.Competitor2 ?? matchData.Competitor2;
+                        MatchStageName = !string.IsNullOrEmpty(matchData.StageName) ? matchData.StageName : $"Poule - Match #{p.Order}";
                     }
                     else if (CurrentDraw is DrawOrderModel o)
                     {
-                        Competitor1 = o.Competitor;
+                        Competitor1 = o.Competitor ?? matchData.Competitor1;
                         Competitor2 = null;
                         MatchStageName = string.Empty;
                     }
                     else
                     {
-                        Competitor1 = null;
-                        Competitor2 = null;
-                        MatchStageName = string.Empty;
+                        Competitor1 = matchData.Competitor1;
+                        Competitor2 = matchData.Competitor2;
+                        MatchStageName = matchData.StageName ?? string.Empty;
                     }
 
                     if (isNewRound)

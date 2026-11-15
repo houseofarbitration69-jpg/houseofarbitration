@@ -799,12 +799,38 @@ public class JudgeSession : IDisposable
 
                 if (matchData != null)
                 {
+                    string c1Name = FormatCompetitor(matchData.Competitor1) switch
+                    {
+                        { Length: > 0 } s => s,
+                        _ => FormatCompetitor(matchData.DrawKnockout?.Competitor1) switch
+                        {
+                            { Length: > 0 } s => s,
+                            _ => FormatCompetitor(matchData.DrawOrder?.Competitor)
+                        }
+                    };
+
+                    string c2Name = FormatCompetitor(matchData.Competitor2) switch
+                    {
+                        { Length: > 0 } s => s,
+                        _ => FormatCompetitor(matchData.DrawKnockout?.Competitor2)
+                    };
+
+                    string catName = matchData.CategoryName
+                        ?? matchData.DrawKnockout?.Draw?.Category?.Name
+                        ?? matchData.DrawPool?.Draw?.Category?.Name
+                        ?? matchData.DrawOrder?.Draw?.Category?.Name
+                        ?? string.Empty;
+
                     CurrentMatch = new MatchDisplayInfo
                     {
                         Id = matchData.Id,
                         Type = matchData.Type,
                         Round = matchData.Round > 0 ? matchData.Round : 1,
-                        Competitor1Id = matchData.Id
+                        CategoryName = catName,
+                        Competitor1Name = c1Name,
+                        Competitor2Name = c2Name,
+                        Competitor1Id = matchData.Competitor1?.Id ?? matchData.DrawKnockout?.Competitor1Id ?? matchData.DrawOrder?.CompetitorId ?? matchData.Id,
+                        Competitor2Id = matchData.Competitor2?.Id ?? matchData.DrawKnockout?.Competitor2Id
                     };
 
                     // Réinitialisation des déductions pour un nouveau match ou nouveau round
@@ -817,7 +843,9 @@ public class JudgeSession : IDisposable
                     else if (JudgeGroup == "C") CurrentScore = Constants.DEFAUTL_SCORE_GROUP_C;
 
                     MatchUpdated?.Invoke(this, CurrentMatch);
-                    NotificationReceived?.Invoke(this, $"Match / Round reçu : #{matchData.Id} (Round {CurrentMatch.Round}, {matchData.Type})");
+                    string matchDesc = !string.IsNullOrEmpty(c2Name) ? $"{c1Name} vs {c2Name}" : c1Name;
+                    string catDesc = !string.IsNullOrEmpty(catName) ? $" [{catName}]" : "";
+                    NotificationReceived?.Invoke(this, $"Match / Round reçu : #{matchData.Id} (Round {CurrentMatch.Round}, {matchData.Type}){catDesc} {matchDesc}");
                 }
             }
             else if (message.StartsWith(Constants.Message.TIMER_SET))
@@ -895,6 +923,14 @@ public class JudgeSession : IDisposable
         {
             NotificationReceived?.Invoke(this, $"Erreur traitement message serveur : {ex.Message}");
         }
+    }
+
+    private static string FormatCompetitor(CompetitorModel? c)
+    {
+        if (c == null) return string.Empty;
+        if (!string.IsNullOrWhiteSpace(c.LastName) && !string.IsNullOrWhiteSpace(c.FirstName))
+            return $"{c.LastName.ToUpperInvariant()} {c.FirstName}".Trim();
+        return (!string.IsNullOrWhiteSpace(c.LastName) ? c.LastName : c.FirstName).Trim();
     }
 
     public void Dispose()

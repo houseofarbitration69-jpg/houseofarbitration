@@ -433,4 +433,238 @@ public class DatabaseService : IDatabaseService
             _context.ChangeTracker.Clear();
         }
     }
+
+    public async Task ImportMatchDataAsync(MatchInfoData matchData)
+    {
+        if (matchData == null || matchData.Id <= 0) return;
+
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
+        {
+            _context.ChangeTracker.Clear();
+
+            // S'assurer que les compétiteurs existent
+            async Task EnsureCompetitorAsync(CompetitorModel? comp)
+            {
+                if (comp == null || comp.Id <= 0) return;
+                var existing = await _context.Competitors.FirstOrDefaultAsync(c => c.Id == comp.Id);
+                var isoCode = comp.CountryIsoCode ?? comp.Country?.IsoCode;
+                if (existing == null)
+                {
+                    _context.Competitors.Add(new CompetitorModel
+                    {
+                        Id = comp.Id,
+                        FirstName = comp.FirstName,
+                        LastName = comp.LastName,
+                        Club = comp.Club,
+                        BirthDate = comp.BirthDate,
+                        Genre = comp.Genre,
+                        Weight = comp.Weight,
+                        CountryIsoCode = isoCode,
+                        Photo = comp.Photo
+                    });
+                    await _context.SaveChangesAsync();
+                    _context.ChangeTracker.Clear();
+                }
+                else
+                {
+                    bool updated = false;
+                    if (string.IsNullOrWhiteSpace(existing.LastName) && !string.IsNullOrWhiteSpace(comp.LastName))
+                    {
+                        existing.LastName = comp.LastName;
+                        updated = true;
+                    }
+                    if (string.IsNullOrWhiteSpace(existing.FirstName) && !string.IsNullOrWhiteSpace(comp.FirstName))
+                    {
+                        existing.FirstName = comp.FirstName;
+                        updated = true;
+                    }
+                    if (string.IsNullOrWhiteSpace(existing.Club) && !string.IsNullOrWhiteSpace(comp.Club))
+                    {
+                        existing.Club = comp.Club;
+                        updated = true;
+                    }
+                    if (updated)
+                    {
+                        await _context.SaveChangesAsync();
+                        _context.ChangeTracker.Clear();
+                    }
+                }
+
+                if (matchData.CategoryId.HasValue && matchData.CategoryId.Value > 0)
+                {
+                    var existingCc = await _context.CompetitorCategories.FirstOrDefaultAsync(cc => cc.CategoryId == matchData.CategoryId.Value && cc.CompetitorId == comp.Id);
+                    if (existingCc == null)
+                    {
+                        _context.CompetitorCategories.Add(new CompetitorCategoryModel
+                        {
+                            CategoryId = matchData.CategoryId.Value,
+                            CompetitorId = comp.Id
+                        });
+                        await _context.SaveChangesAsync();
+                        _context.ChangeTracker.Clear();
+                    }
+                }
+            }
+
+            await EnsureCompetitorAsync(matchData.Competitor1);
+            await EnsureCompetitorAsync(matchData.Competitor2);
+            await EnsureCompetitorAsync(matchData.DrawKnockout?.Competitor1);
+            await EnsureCompetitorAsync(matchData.DrawKnockout?.Competitor2);
+            await EnsureCompetitorAsync(matchData.DrawPool?.Competitor1);
+            await EnsureCompetitorAsync(matchData.DrawPool?.Competitor2);
+            await EnsureCompetitorAsync(matchData.DrawOrder?.Competitor);
+
+            // S'assurer que le tirage DrawModel existe si un DrawId ou CategoryId est spécifié
+            int? drawId = matchData.DrawKnockout?.DrawId ?? matchData.DrawPool?.DrawId ?? matchData.DrawOrder?.DrawId;
+            if ((drawId == null || drawId <= 0) && matchData.CategoryId.HasValue && matchData.CategoryId.Value > 0)
+            {
+                var existingDraw = await _context.Draws.FirstOrDefaultAsync(d => d.CategoryId == matchData.CategoryId.Value);
+                if (existingDraw != null)
+                {
+                    drawId = existingDraw.Id;
+                }
+                else
+                {
+                    var newDraw = new DrawModel { CategoryId = matchData.CategoryId.Value };
+                    _context.Draws.Add(newDraw);
+                    await _context.SaveChangesAsync();
+                    _context.ChangeTracker.Clear();
+                    drawId = newDraw.Id;
+                }
+            }
+
+            int finalDrawId = drawId ?? 1;
+
+            if (matchData.Type == RoundType.Knockouts || matchData.DrawKnockout != null)
+            {
+                var k = matchData.DrawKnockout;
+                int? comp1Id = k?.Competitor1Id ?? k?.Competitor1?.Id ?? matchData.Competitor1?.Id;
+                int? comp2Id = k?.Competitor2Id ?? k?.Competitor2?.Id ?? matchData.Competitor2?.Id;
+                int? winnerId = k?.WinnerId ?? k?.Winner?.Id;
+                int? looserId = k?.LooserId ?? k?.Looser?.Id;
+                int roundNum = matchData.Round > 0 ? matchData.Round : (k?.CurrentRound ?? 1);
+
+                var existingK = await _context.DrawsKnockouts.FirstOrDefaultAsync(x => x.Id == matchData.Id);
+                if (existingK != null)
+                {
+                    if (comp1Id.HasValue) existingK.Competitor1Id = comp1Id;
+                    if (comp2Id.HasValue) existingK.Competitor2Id = comp2Id;
+                    if (winnerId.HasValue) existingK.WinnerId = winnerId;
+                    if (looserId.HasValue) existingK.LooserId = looserId;
+                    existingK.CurrentRound = roundNum;
+                    if (k != null)
+                    {
+                        existingK.IsFinished = k.IsFinished;
+                        existingK.IsBronzeMatch = k.IsBronzeMatch;
+                        if (!string.IsNullOrEmpty(k.RoundResultsJson)) existingK.RoundResultsJson = k.RoundResultsJson;
+                    }
+                }
+                else
+                {
+                    _context.DrawsKnockouts.Add(new DrawKnockoutModel
+                    {
+                        Id = matchData.Id,
+                        Order = k?.Order ?? matchData.Id,
+                        GlobalOrder = k?.GlobalOrder ?? matchData.Id,
+                        DrawId = (k != null && k.DrawId > 0) ? k.DrawId : finalDrawId,
+                        Competitor1Id = comp1Id,
+                        Competitor2Id = comp2Id,
+                        WinnerId = winnerId,
+                        LooserId = looserId,
+                        IsFinished = k?.IsFinished ?? false,
+                        IsBronzeMatch = k?.IsBronzeMatch ?? false,
+                        CurrentRound = roundNum,
+                        RoundResultsJson = k?.RoundResultsJson ?? string.Empty
+                    });
+                }
+            }
+            else if (matchData.Type == RoundType.Pools || matchData.DrawPool != null)
+            {
+                var p = matchData.DrawPool;
+                int? comp1Id = p?.Competitor1Id ?? p?.Competitor1?.Id ?? matchData.Competitor1?.Id;
+                int? comp2Id = p?.Competitor2Id ?? p?.Competitor2?.Id ?? matchData.Competitor2?.Id;
+                int? winnerId = p?.WinnerId ?? p?.Winner?.Id;
+                int? looserId = p?.LooserId ?? p?.Looser?.Id;
+                int roundNum = matchData.Round > 0 ? matchData.Round : (p?.CurrentRound ?? 1);
+
+                var existingP = await _context.DrawsPools.FirstOrDefaultAsync(x => x.Id == matchData.Id);
+                if (existingP != null)
+                {
+                    if (comp1Id.HasValue) existingP.Competitor1Id = comp1Id;
+                    if (comp2Id.HasValue) existingP.Competitor2Id = comp2Id;
+                    if (winnerId.HasValue) existingP.WinnerId = winnerId;
+                    if (looserId.HasValue) existingP.LooserId = looserId;
+                    existingP.CurrentRound = roundNum;
+                    if (p != null)
+                    {
+                        existingP.IsFinished = p.IsFinished;
+                        if (!string.IsNullOrEmpty(p.RoundResultsJson)) existingP.RoundResultsJson = p.RoundResultsJson;
+                    }
+                }
+                else
+                {
+                    _context.DrawsPools.Add(new DrawPoolsModel
+                    {
+                        Id = matchData.Id,
+                        Order = p?.Order ?? matchData.Id,
+                        GlobalOrder = p?.GlobalOrder ?? matchData.Id,
+                        DrawId = (p != null && p.DrawId > 0) ? p.DrawId : finalDrawId,
+                        Competitor1Id = comp1Id,
+                        Competitor2Id = comp2Id,
+                        WinnerId = winnerId,
+                        LooserId = looserId,
+                        IsFinished = p?.IsFinished ?? false,
+                        CurrentRound = roundNum,
+                        RoundResultsJson = p?.RoundResultsJson ?? string.Empty
+                    });
+                }
+            }
+            else if (matchData.Type == RoundType.Order || matchData.DrawOrder != null)
+            {
+                var o = matchData.DrawOrder;
+                int? compId = o?.CompetitorId ?? o?.Competitor?.Id ?? matchData.Competitor1?.Id;
+                int roundNum = matchData.Round > 0 ? matchData.Round : (o?.CurrentRound ?? 1);
+
+                var existingO = await _context.DrawsOrders.FirstOrDefaultAsync(x => x.Id == matchData.Id);
+                if (existingO != null)
+                {
+                    if (compId.HasValue) existingO.CompetitorId = compId.Value;
+                    existingO.CurrentRound = roundNum;
+                    if (o != null)
+                    {
+                        existingO.IsFinished = o.IsFinished;
+                        if (!string.IsNullOrEmpty(o.RoundResultsJson)) existingO.RoundResultsJson = o.RoundResultsJson;
+                    }
+                }
+                else
+                {
+                    _context.DrawsOrders.Add(new DrawOrderModel
+                    {
+                        Id = matchData.Id,
+                        Order = o?.Order ?? matchData.Id,
+                        GlobalOrder = o?.GlobalOrder ?? matchData.Id,
+                        DrawId = (o != null && o.DrawId > 0) ? o.DrawId : finalDrawId,
+                        CompetitorId = compId ?? 0,
+                        IsFinished = o?.IsFinished ?? false,
+                        CurrentRound = roundNum,
+                        RoundResultsJson = o?.RoundResultsJson ?? string.Empty
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            _context.ChangeTracker.Clear();
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+        finally
+        {
+            _context.ChangeTracker.Clear();
+        }
+    }
 }

@@ -763,6 +763,26 @@ public class ArbitrationServerSession : IDisposable
     {
         if (string.IsNullOrWhiteSpace(match.Winner)) return;
 
+        // Trouver le DrawKnockout correspondant au match courant pour récupérer directement les CompetitorModel
+        var allCats = CurrentCompetition.Categories.Concat(_loadedCategories).Distinct();
+        DrawKnockoutModel? currentK = null;
+        foreach (var cat in allCats)
+        {
+            if (cat.Draw?.DrawKnockouts != null)
+            {
+                currentK = cat.Draw.DrawKnockouts.FirstOrDefault(k => k.Id == match.Id);
+                if (currentK != null) break;
+            }
+        }
+
+        CompetitorModel? winnerComp = match.WinnerSide == Constants.Side.Red
+            ? currentK?.Competitor1
+            : (match.WinnerSide == Constants.Side.Blue ? currentK?.Competitor2 : null);
+
+        CompetitorModel? loserComp = match.WinnerSide == Constants.Side.Red
+            ? currentK?.Competitor2
+            : (match.WinnerSide == Constants.Side.Blue ? currentK?.Competitor1 : null);
+
         // Vainqueur -> NextMatchId
         if (match.NextMatchId.HasValue)
         {
@@ -780,6 +800,8 @@ public class ArbitrationServerSession : IDisposable
 
                 string stageInfo = !string.IsNullOrWhiteSpace(nextMatch.StageName) ? nextMatch.StageName : $"Match #{nextMatch.Id}";
                 StatusChanged?.Invoke(this, $"➡️ {match.Winner} qualifié pour {stageInfo} (Coin {match.NextMatchSide})");
+
+                UpdateDrawKnockoutCompetitor(nextMatch.Id, match.NextMatchSide, match.Winner, nextMatch.Category, winnerComp);
             }
         }
 
@@ -806,6 +828,8 @@ public class ArbitrationServerSession : IDisposable
 
                     string stageInfo = !string.IsNullOrWhiteSpace(loserMatch.StageName) ? loserMatch.StageName : $"Match #{loserMatch.Id}";
                     StatusChanged?.Invoke(this, $"🥉 {loser} qualifié pour {stageInfo} (Coin {match.NextLoserMatchSide})");
+
+                    UpdateDrawKnockoutCompetitor(loserMatch.Id, match.NextLoserMatchSide, loser, loserMatch.Category, loserComp);
                 }
             }
         }
@@ -831,6 +855,8 @@ public class ArbitrationServerSession : IDisposable
                 {
                     nextMatch.BlueCompetitor = placeholder;
                 }
+
+                ClearDrawKnockoutCompetitor(nextMatch.Id, match.NextMatchSide);
 
                 // Si le match suivant était déjà validé, réinitialiser en cascade
                 if (nextMatch.IsFinished)
@@ -863,6 +889,8 @@ public class ArbitrationServerSession : IDisposable
                     loserMatch.BlueCompetitor = placeholder;
                 }
 
+                ClearDrawKnockoutCompetitor(loserMatch.Id, match.NextLoserMatchSide);
+
                 if (loserMatch.IsFinished)
                 {
                     ClearWinnerFromNextMatch(loserMatch);
@@ -872,6 +900,195 @@ public class ArbitrationServerSession : IDisposable
                     loserMatch.RedScore = 0;
                     loserMatch.BlueScore = 0;
                     loserMatch.DecisionReason = null;
+                }
+            }
+        }
+    }
+
+    public CompetitorModel? FindCompetitor(string? name, CategoryModel? preferredCat = null)
+    {
+        if (string.IsNullOrWhiteSpace(name) || !IsValidCompetitorName(name))
+            return null;
+
+        string search = name.Trim();
+
+        // 1. Chercher dans la catégorie préférée
+        if (preferredCat?.Competitors != null)
+        {
+            foreach (var cc in preferredCat.Competitors)
+            {
+                var c = cc.Competitor;
+                if (c == null) continue;
+                if (MatchCompetitorName(c, search))
+                    return c;
+            }
+        }
+
+        // 2. Chercher dans toutes les catégories chargées
+        var allCats = CurrentCompetition.Categories.Concat(_loadedCategories).Distinct();
+        foreach (var cat in allCats)
+        {
+            if (cat.Competitors != null)
+            {
+                foreach (var cc in cat.Competitors)
+                {
+                    var c = cc.Competitor;
+                    if (c == null) continue;
+                    if (MatchCompetitorName(c, search))
+                        return c;
+                }
+            }
+
+            if (cat.Draw?.DrawKnockouts != null)
+            {
+                foreach (var k in cat.Draw.DrawKnockouts)
+                {
+                    if (k.Competitor1 != null && MatchCompetitorName(k.Competitor1, search))
+                        return k.Competitor1;
+                    if (k.Competitor2 != null && MatchCompetitorName(k.Competitor2, search))
+                        return k.Competitor2;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static bool MatchCompetitorName(CompetitorModel? c, string search)
+    {
+        if (c == null) return false;
+
+        string full1 = $"{c.LastName} {c.FirstName}".Trim();
+        string full2 = $"{c.FirstName} {c.LastName}".Trim();
+
+        if (string.Equals(full1, search, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(full2, search, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(c.Club))
+        {
+            string withClub1 = $"{full1} ({c.Club})".Trim();
+            string withClub2 = $"{full2} ({c.Club})".Trim();
+            if (string.Equals(withClub1, search, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(withClub2, search, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(c.LastName) && search.Contains(c.LastName, StringComparison.OrdinalIgnoreCase) &&
+            (!string.IsNullOrWhiteSpace(c.FirstName) && search.Contains(c.FirstName, StringComparison.OrdinalIgnoreCase)))
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(c.LastName) && string.Equals(c.LastName, search, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(c.FirstName) && string.Equals(c.FirstName, search, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    }
+
+    public CompetitorModel ResolveOrCreateCompetitor(string name, CategoryModel? preferredCat = null, int fallbackId = 1)
+    {
+        var found = FindCompetitor(name, preferredCat);
+        if (found != null) return found;
+
+        string trimmed = name.Trim();
+        string club = "";
+        int parenIdx = trimmed.LastIndexOf('(');
+        if (parenIdx > 0 && trimmed.EndsWith(')'))
+        {
+            club = trimmed.Substring(parenIdx + 1, trimmed.Length - parenIdx - 2).Trim();
+            trimmed = trimmed.Substring(0, parenIdx).Trim();
+        }
+
+        var parts = trimmed.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string lastName = parts.Length > 0 ? parts[0] : trimmed;
+        string firstName = parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : "";
+
+        var comp = new CompetitorModel
+        {
+            Id = fallbackId,
+            LastName = lastName,
+            FirstName = firstName,
+            Club = club
+        };
+
+        if (preferredCat != null)
+        {
+            if (preferredCat.Competitors == null)
+                preferredCat.Competitors = new List<CompetitorCategoryModel>();
+
+            if (!preferredCat.Competitors.Any(cc => cc.CompetitorId == comp.Id || MatchCompetitorName(cc.Competitor, name)))
+            {
+                preferredCat.Competitors.Add(new CompetitorCategoryModel
+                {
+                    CategoryId = preferredCat.Id,
+                    CompetitorId = comp.Id,
+                    Competitor = comp
+                });
+            }
+        }
+
+        return comp;
+    }
+
+    private void UpdateDrawKnockoutCompetitor(int matchId, Constants.Side? side, string competitorName, string? categoryName, CompetitorModel? knownCompetitor = null)
+    {
+        var allCats = CurrentCompetition.Categories.Concat(_loadedCategories).Distinct();
+        CategoryModel? targetCat = null;
+        DrawKnockoutModel? targetK = null;
+
+        foreach (var cat in allCats)
+        {
+            if (cat.Draw?.DrawKnockouts != null)
+            {
+                targetK = cat.Draw.DrawKnockouts.FirstOrDefault(k => k.Id == matchId);
+                if (targetK != null)
+                {
+                    targetCat = cat;
+                    break;
+                }
+            }
+        }
+
+        if (targetK != null)
+        {
+            int fallbackId = matchId * 2 - (side == Constants.Side.Red ? 1 : 0);
+            var comp = knownCompetitor ?? ResolveOrCreateCompetitor(competitorName, targetCat, fallbackId);
+            if (side == Constants.Side.Red)
+            {
+                targetK.Competitor1Id = comp.Id;
+                targetK.Competitor1 = comp;
+            }
+            else if (side == Constants.Side.Blue)
+            {
+                targetK.Competitor2Id = comp.Id;
+                targetK.Competitor2 = comp;
+            }
+        }
+    }
+
+    private void ClearDrawKnockoutCompetitor(int matchId, Constants.Side? side)
+    {
+        var allCats = CurrentCompetition.Categories.Concat(_loadedCategories).Distinct();
+        foreach (var cat in allCats)
+        {
+            if (cat.Draw?.DrawKnockouts != null)
+            {
+                var targetK = cat.Draw.DrawKnockouts.FirstOrDefault(k => k.Id == matchId);
+                if (targetK != null)
+                {
+                    if (side == Constants.Side.Red)
+                    {
+                        targetK.Competitor1Id = null;
+                        targetK.Competitor1 = null;
+                    }
+                    else if (side == Constants.Side.Blue)
+                    {
+                        targetK.Competitor2Id = null;
+                        targetK.Competitor2 = null;
+                    }
+                    break;
                 }
             }
         }
@@ -938,17 +1155,232 @@ public class ArbitrationServerSession : IDisposable
     #endregion
 
     #region Protocol & Broadcasts
+    /// <summary>
+    /// Retourne une copie de la compétition contenant uniquement les informations globales,
+    /// les catégories et les compétiteurs, sans les matchs des tirages.
+    /// </summary>
+    public CompetitionModel GetCompetitionWithoutMatches()
+    {
+        var comp = new CompetitionModel
+        {
+            Id = CurrentCompetition.Id,
+            Name = CurrentCompetition.Name,
+            Date = CurrentCompetition.Date,
+            Type = CurrentCompetition.Type,
+            Categories = new List<CategoryModel>()
+        };
+
+        foreach (var cat in CurrentCompetition.Categories)
+        {
+            var newCat = new CategoryModel
+            {
+                Id = cat.Id,
+                Type = cat.Type,
+                Genre = cat.Genre,
+                WeightMin = cat.WeightMin,
+                WeightMax = cat.WeightMax,
+                AgeRangeId = cat.AgeRangeId,
+                AgeRange = cat.AgeRange,
+                RoundType = cat.RoundType,
+                HasBronzeMatch = cat.HasBronzeMatch,
+                CompetitionId = cat.CompetitionId,
+                Competitors = cat.Competitors != null
+                    ? new List<CompetitorCategoryModel>(cat.Competitors)
+                    : new List<CompetitorCategoryModel>()
+            };
+
+            if (cat.Draw != null)
+            {
+                newCat.Draw = new DrawModel
+                {
+                    Id = cat.Draw.Id,
+                    CategoryId = cat.Id,
+                    DrawKnockouts = new List<DrawKnockoutModel>(),
+                    DrawPools = new List<DrawPoolsModel>(),
+                    DrawOrders = new List<DrawOrderModel>()
+                };
+            }
+
+            comp.Categories.Add(newCat);
+        }
+
+        return comp;
+    }
+
+    /// <summary>
+    /// Construit le modèle de données complet d'un match pour le téléchargement au fur et à mesure par le juge.
+    /// </summary>
+    public MatchInfoData CreateMatchInfoData(MatchItem match)
+    {
+        var data = new MatchInfoData
+        {
+            Id = match.Id,
+            Type = match.Type,
+            Round = match.CurrentRound,
+            CategoryName = match.Category,
+            StageName = match.StageName
+        };
+
+        CategoryModel? matchedCat = null;
+        var allCats = CurrentCompetition.Categories.Concat(_loadedCategories).Distinct().ToList();
+        foreach (var cat in allCats)
+        {
+            if (string.Equals(cat.Name, match.Category, StringComparison.OrdinalIgnoreCase) ||
+                (cat.Draw != null && (
+                    (cat.Draw.DrawKnockouts != null && cat.Draw.DrawKnockouts.Any(k => k.Id == match.Id)) ||
+                    (cat.Draw.DrawPools != null && cat.Draw.DrawPools.Any(p => p.Id == match.Id)) ||
+                    (cat.Draw.DrawOrders != null && cat.Draw.DrawOrders.Any(o => o.Id == match.Id))
+                )))
+            {
+                matchedCat = cat;
+                data.CategoryId = cat.Id;
+                data.CategoryName = cat.Name;
+                break;
+            }
+        }
+
+        if (matchedCat != null && matchedCat.Draw != null)
+        {
+            if (match.Type == RoundType.Knockouts && matchedCat.Draw.DrawKnockouts != null)
+            {
+                var k = matchedCat.Draw.DrawKnockouts.FirstOrDefault(x => x.Id == match.Id);
+                if (k != null)
+                {
+                    data.DrawKnockout = k;
+                    data.Competitor1 = k.Competitor1;
+                    data.Competitor2 = k.Competitor2;
+                }
+            }
+            else if (match.Type == RoundType.Pools && matchedCat.Draw.DrawPools != null)
+            {
+                var p = matchedCat.Draw.DrawPools.FirstOrDefault(x => x.Id == match.Id);
+                if (p != null)
+                {
+                    data.DrawPool = p;
+                    data.Competitor1 = p.Competitor1;
+                    data.Competitor2 = p.Competitor2;
+                }
+            }
+            else if (match.Type == RoundType.Order && matchedCat.Draw.DrawOrders != null)
+            {
+                var o = matchedCat.Draw.DrawOrders.FirstOrDefault(x => x.Id == match.Id);
+                if (o != null)
+                {
+                    data.DrawOrder = o;
+                    data.Competitor1 = o.Competitor;
+                }
+            }
+        }
+
+        // Si Competitor1 est manquant mais qu'un compétiteur valide est renseigné dans le match
+        if (data.Competitor1 == null && IsValidCompetitorName(match.RedCompetitor))
+        {
+            int c1Id = data.DrawKnockout?.Competitor1Id ?? (match.Id * 2 - 1);
+            var c1 = ResolveOrCreateCompetitor(match.RedCompetitor, matchedCat, c1Id);
+            data.Competitor1 = c1;
+            if (data.DrawKnockout != null)
+            {
+                data.DrawKnockout.Competitor1 = c1;
+                data.DrawKnockout.Competitor1Id = c1.Id;
+            }
+            if (data.DrawPool != null)
+            {
+                data.DrawPool.Competitor1 = c1;
+                data.DrawPool.Competitor1Id = c1.Id;
+            }
+            if (data.DrawOrder != null)
+            {
+                data.DrawOrder.Competitor = c1;
+                data.DrawOrder.CompetitorId = c1.Id;
+            }
+        }
+
+        // Si Competitor2 est manquant mais qu'un compétiteur valide est renseigné dans le match
+        if (data.Competitor2 == null && IsValidCompetitorName(match.BlueCompetitor))
+        {
+            int c2Id = data.DrawKnockout?.Competitor2Id ?? (match.Id * 2);
+            var c2 = ResolveOrCreateCompetitor(match.BlueCompetitor, matchedCat, c2Id);
+            data.Competitor2 = c2;
+            if (data.DrawKnockout != null)
+            {
+                data.DrawKnockout.Competitor2 = c2;
+                data.DrawKnockout.Competitor2Id = c2.Id;
+            }
+            if (data.DrawPool != null)
+            {
+                data.DrawPool.Competitor2 = c2;
+                data.DrawPool.Competitor2Id = c2.Id;
+            }
+        }
+
+        int drawId = matchedCat?.Draw?.Id ?? (matchedCat?.Id ?? 1);
+
+        if (data.DrawKnockout == null && data.DrawPool == null && data.DrawOrder == null)
+        {
+            if (match.Type == RoundType.Order)
+            {
+                var c = data.Competitor1 ?? (IsValidCompetitorName(match.RedCompetitor) ? ResolveOrCreateCompetitor(match.RedCompetitor, matchedCat, match.Id) : null);
+                data.Competitor1 = c;
+                data.DrawOrder = new DrawOrderModel
+                {
+                    Id = match.Id,
+                    Order = match.Id,
+                    GlobalOrder = match.Id,
+                    DrawId = drawId,
+                    CompetitorId = c?.Id ?? 0,
+                    Competitor = c,
+                    CurrentRound = match.CurrentRound
+                };
+            }
+            else if (match.Type == RoundType.Pools)
+            {
+                var c1 = data.Competitor1 ?? (IsValidCompetitorName(match.RedCompetitor) ? ResolveOrCreateCompetitor(match.RedCompetitor, matchedCat, match.Id * 2 - 1) : null);
+                var c2 = data.Competitor2 ?? (IsValidCompetitorName(match.BlueCompetitor) ? ResolveOrCreateCompetitor(match.BlueCompetitor, matchedCat, match.Id * 2) : null);
+                data.Competitor1 = c1;
+                data.Competitor2 = c2;
+                data.DrawPool = new DrawPoolsModel
+                {
+                    Id = match.Id,
+                    Order = match.Id,
+                    GlobalOrder = match.Id,
+                    DrawId = drawId,
+                    Competitor1Id = c1?.Id,
+                    Competitor1 = c1,
+                    Competitor2Id = c2?.Id,
+                    Competitor2 = c2,
+                    CurrentRound = match.CurrentRound
+                };
+            }
+            else
+            {
+                var c1 = data.Competitor1 ?? (IsValidCompetitorName(match.RedCompetitor) ? ResolveOrCreateCompetitor(match.RedCompetitor, matchedCat, match.Id * 2 - 1) : null);
+                var c2 = data.Competitor2 ?? (IsValidCompetitorName(match.BlueCompetitor) ? ResolveOrCreateCompetitor(match.BlueCompetitor, matchedCat, match.Id * 2) : null);
+                data.Competitor1 = c1;
+                data.Competitor2 = c2;
+                data.DrawKnockout = new DrawKnockoutModel
+                {
+                    Id = match.Id,
+                    Order = match.Id,
+                    GlobalOrder = match.Id,
+                    DrawId = drawId,
+                    Competitor1Id = c1?.Id,
+                    Competitor1 = c1,
+                    Competitor2Id = c2?.Id,
+                    Competitor2 = c2,
+                    CurrentRound = match.CurrentRound,
+                    IsBronzeMatch = match.IsBronzeMatch
+                };
+            }
+        }
+
+        return data;
+    }
+
     public async Task BroadcastMatchInfoAsync()
     {
         if (CurrentMatch == null) return;
 
-        var data = new MatchInfoData
-        {
-            Id = CurrentMatch.Id,
-            Type = CurrentMatch.Type,
-            Round = CurrentMatch.CurrentRound
-        };
-
+        var data = CreateMatchInfoData(CurrentMatch);
         string json = JsonSerializer.Serialize(data, _jsonOptions);
         await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{json}");
         await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
@@ -961,7 +1393,8 @@ public class ArbitrationServerSession : IDisposable
             await _bluetoothServer.SendToAllAsync($"{Constants.Message.SERVER_NAME}{_bluetoothServer.DeviceName}");
         }
 
-        string json = JsonSerializer.Serialize(CurrentCompetition, _jsonOptions);
+        var lightComp = GetCompetitionWithoutMatches();
+        string json = JsonSerializer.Serialize(lightComp, _jsonOptions);
         await _bluetoothServer.SendToAllAsync($"{Constants.Message.COMPETITION_DATA}{json}");
     }
 
@@ -969,13 +1402,7 @@ public class ArbitrationServerSession : IDisposable
     {
         if (CurrentMatch == null) return;
 
-        var data = new MatchInfoData
-        {
-            Id = CurrentMatch.Id,
-            Type = CurrentMatch.Type,
-            Round = CurrentMatch.CurrentRound
-        };
-
+        var data = CreateMatchInfoData(CurrentMatch);
         string json = JsonSerializer.Serialize(data, _jsonOptions);
         await _bluetoothServer.SendToClientAsync(clientId, $"{Constants.Message.MATCH_INFO}{json}");
         await _bluetoothServer.SendToClientAsync(clientId, $"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
@@ -988,7 +1415,8 @@ public class ArbitrationServerSession : IDisposable
             await _bluetoothServer.SendToClientAsync(clientId, $"{Constants.Message.SERVER_NAME}{_bluetoothServer.DeviceName}");
         }
 
-        string json = JsonSerializer.Serialize(CurrentCompetition, _jsonOptions);
+        var lightComp = GetCompetitionWithoutMatches();
+        string json = JsonSerializer.Serialize(lightComp, _jsonOptions);
         await _bluetoothServer.SendToClientAsync(clientId, $"{Constants.Message.COMPETITION_DATA}{json}");
     }
     #endregion
@@ -1054,9 +1482,8 @@ public class ArbitrationServerSession : IDisposable
                     StatusChanged?.Invoke(this, $"[JUGE ENREGISTRÉ] {judge.Name} (Position: {posStr}) connecté via [{sessionKey}].");
                     JudgeConnected?.Invoke(this, judge);
 
-                    // Envoi immédiat des infos de match et compétition
-                    //await SendCompetitionDataToClientAsync(clientId);
-                    //await SendMatchInfoToClientAsync(clientId);
+                    // Envoi immédiat du match en cours au juge enregistré
+                    await SendMatchInfoToClientAsync(clientId);
                 }
                 else
                 {
@@ -1523,6 +1950,7 @@ public class ArbitrationServerSession : IDisposable
         string trimmed = name.Trim();
         if (trimmed.Contains("EXEMPTÉ", StringComparison.OrdinalIgnoreCase)) return false;
         if (trimmed.StartsWith("Vainqueur", StringComparison.OrdinalIgnoreCase)) return false;
+        if (trimmed.StartsWith("Perdant", StringComparison.OrdinalIgnoreCase)) return false;
         if (trimmed.StartsWith("[", StringComparison.OrdinalIgnoreCase) && trimmed.EndsWith("]")) return false;
         if (trimmed.Equals("À déterminer", StringComparison.OrdinalIgnoreCase)) return false;
         return true;

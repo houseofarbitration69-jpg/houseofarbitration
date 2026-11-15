@@ -16,4 +16,44 @@ public class MatchInfoData
     /// Obtient ou définit le numéro de round en cours (1 par défaut)
     /// </summary>
     public int Round { get; set; } = 1;
+
+    /// <summary>
+    /// Identifiant de la catégorie du match
+    /// </summary>
+    public int? CategoryId { get; set; }
+
+    /// <summary>
+    /// Nom de la catégorie du match
+    /// </summary>
+    public string? CategoryName { get; set; }
+
+    /// <summary>
+    /// Étape du match (ex: 1/4 finale, 1/2 finale, Poule - Match #1)
+    /// </summary>
+    public string? StageName { get; set; }
+
+    /// <summary>
+    /// Premier compétiteur (Rouge / Athlète)
+    /// </summary>
+    public CompetitorModel? Competitor1 { get; set; }
+
+    /// <summary>
+    /// Deuxième compétiteur (Bleu)
+    /// </summary>
+    public CompetitorModel? Competitor2 { get; set; }
+
+    /// <summary>
+    /// Données complètes du match si mode élimination directe (Knockouts)
+    /// </summary>
+    public DrawKnockoutModel? DrawKnockout { get; set; }
+
+    /// <summary>
+    /// Données complètes du match si mode poules (Pools)
+    /// </summary>
+    public DrawPoolsModel? DrawPool { get; set; }
+
+    /// <summary>
+    /// Données complètes du match si mode ordre de passage (Order / Taolu)
+    /// </summary>
+    public DrawOrderModel? DrawOrder { get; set; }
 }

@@ -149,4 +149,47 @@ public class JudgeCompetitionDataTests
         Assert.Equal(99, vm.Competition.Id);
         await _competitionRepo.Received(1).AddAsync(Arg.Is<CompetitionModel>(c => c.Id == 99));
     }
+
+    [Fact]
+    public async Task HandleMessageAsync_MatchInfo_CallsImportMatchDataAsync_AndUpdatesCurrentDraw()
+    {
+        // Arrange
+        var vm = CreateViewModel(_databaseService);
+
+        var matchData = new MatchInfoData
+        {
+            Id = 5,
+            Type = RoundType.Knockouts,
+            Round = 2,
+            CategoryName = "Sanda -70kg",
+            Competitor1 = new CompetitorModel { Id = 10, FirstName = "Luc", LastName = "Rouge" },
+            Competitor2 = new CompetitorModel { Id = 20, FirstName = "Paul", LastName = "Bleu" },
+            DrawKnockout = new DrawKnockoutModel
+            {
+                Id = 5,
+                Order = 1,
+                CurrentRound = 2,
+                Competitor1Id = 10,
+                Competitor2Id = 20
+            }
+        };
+
+        var json = JsonSerializer.Serialize(matchData);
+        var message = $"{Constants.Message.MATCH_INFO}{json}";
+
+        // Act
+        await vm.HandleMessageAsync(message);
+
+        // Assert
+        await _databaseService.Received(1).ImportMatchDataAsync(Arg.Is<MatchInfoData>(m =>
+            m.Id == 5 &&
+            m.Round == 2 &&
+            m.Type == RoundType.Knockouts
+        ));
+
+        Assert.Equal(2, vm.CurrentRound);
+        Assert.NotNull(vm.CurrentDraw);
+        Assert.Equal(5, vm.CurrentDraw.Id);
+        Assert.Equal("Sanda -70kg", vm.CategoryName);
+    }
 }

@@ -17,4 +17,10 @@ public interface IDatabaseService
     /// </summary>
     /// <param name="competition">Modèle complet de la compétition à importer</param>
     Task ImportCompetitionDataAsync(CompetitionModel competition);
+
+    /// <summary>
+    /// Sauvegarde ou met à jour les données d'un match individuel reçu au fur et à mesure.
+    /// </summary>
+    /// <param name="matchData">Informations du match à importer</param>
+    Task ImportMatchDataAsync(MatchInfoData matchData);
 }

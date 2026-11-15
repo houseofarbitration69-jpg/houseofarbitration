@@ -614,12 +614,12 @@ public class ExcelCliLoaderTests
     }
 
     [Fact]
-    public async Task ArbitrationServerSession_SendsFullCompetitionWithCategoriesAndDraws_OnGetCompetition()
+    public async Task ArbitrationServerSession_SendsOnlyCompetitionCategoriesAndCompetitors_WithoutMatches_OnGetCompetition()
     {
         using var server = new WindowsBluetoothServer();
         using var session = new ArbitrationServerSession(server);
 
-        // Vérifier l'état par défaut
+        // Vérifier l'état par défaut en mémoire côté serveur
         Assert.NotEmpty(session.CurrentCompetition.Categories);
         Assert.All(session.CurrentCompetition.Categories, cat =>
         {
@@ -627,28 +627,131 @@ public class ExcelCliLoaderTests
             Assert.NotEmpty(cat.Competitors);
         });
 
-        // BroadcastCompetitionDataAsync envoie COMPETITION_DATA:{json}
-        await session.BroadcastCompetitionDataAsync();
+        // La version envoyée au client ne doit contenir que compétition, catégories et compétiteurs, sans aucun match
+        var lightComp = session.GetCompetitionWithoutMatches();
 
-        // Sérialisation avec options pour vérifier le contenu
-        var options = new System.Text.Json.JsonSerializerOptions
+        Assert.NotNull(lightComp);
+        Assert.Equal(session.CurrentCompetition.Name, lightComp.Name);
+        Assert.NotEmpty(lightComp.Categories);
+        Assert.All(lightComp.Categories, cat =>
         {
-            ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
-            PropertyNameCaseInsensitive = true
-        };
-        string json = System.Text.Json.JsonSerializer.Serialize(session.CurrentCompetition, options);
-        var deserialized = System.Text.Json.JsonSerializer.Deserialize<CompetitionModel>(json, options);
-
-        Assert.NotNull(deserialized);
-        Assert.Equal(session.CurrentCompetition.Name, deserialized.Name);
-        Assert.NotEmpty(deserialized.Categories);
-        Assert.All(deserialized.Categories, cat =>
-        {
-            Assert.NotNull(cat.Draw);
-            Assert.True(
-                (cat.Draw.DrawKnockouts != null && cat.Draw.DrawKnockouts.Count > 0) ||
-                (cat.Draw.DrawOrders != null && cat.Draw.DrawOrders.Count > 0) ||
-                (cat.Draw.DrawPools != null && cat.Draw.DrawPools.Count > 0));
+            Assert.NotEmpty(cat.Competitors);
+            if (cat.Draw != null)
+            {
+                Assert.True(cat.Draw.DrawKnockouts == null || cat.Draw.DrawKnockouts.Count == 0);
+                Assert.True(cat.Draw.DrawOrders == null || cat.Draw.DrawOrders.Count == 0);
+                Assert.True(cat.Draw.DrawPools == null || cat.Draw.DrawPools.Count == 0);
+            }
         });
+    }
+
+    [Fact]
+    public void ArbitrationServerSession_CreateMatchInfoData_ProvidesFullMatchDataForOnDemandDownload()
+    {
+        using var server = new WindowsBluetoothServer();
+        using var session = new ArbitrationServerSession(server);
+
+        Assert.NotNull(session.CurrentMatch);
+        var matchInfo = session.CreateMatchInfoData(session.CurrentMatch);
+
+        Assert.NotNull(matchInfo);
+        Assert.Equal(session.CurrentMatch.Id, matchInfo.Id);
+        Assert.Equal(session.CurrentMatch.Type, matchInfo.Type);
+        Assert.Equal(session.CurrentMatch.CurrentRound, matchInfo.Round);
+        Assert.NotNull(matchInfo.CategoryName);
+        Assert.NotNull(matchInfo.Competitor1);
+        Assert.NotNull(matchInfo.DrawKnockout);
+        Assert.Equal(session.CurrentMatch.Id, matchInfo.DrawKnockout.Id);
+    }
+
+    [Fact]
+    public async Task ArbitrationServerSession_CreateMatchInfoData_PopulatesCompetitorsForFinalsAndBronzeMatchesAfterPropagation()
+    {
+        using var server = new WindowsBluetoothServer();
+        using var session = new ArbitrationServerSession(server);
+
+        using var workbook = new XLWorkbook();
+        var wsComp = workbook.Worksheets.Add("Compétition");
+        wsComp.Cell(1, 1).Value = "Nom";
+        wsComp.Cell(1, 3).Value = "Type";
+        wsComp.Cell(2, 1).Value = "Tournoi Sanda Finales";
+        wsComp.Cell(2, 3).Value = "Sanda";
+
+        var wsCat = workbook.Worksheets.Add("Catégories");
+        wsCat.Cell(1, 1).Value = "TypeCategorie";
+        wsCat.Cell(1, 2).Value = "Genre";
+        wsCat.Cell(1, 6).Value = "TypeRound";
+        wsCat.Cell(1, 7).Value = "NomCategorie";
+        wsCat.Cell(1, 8).Value = "Petite Finale (Oui/Non)";
+        wsCat.Cell(2, 1).Value = "Sanda";
+        wsCat.Cell(2, 2).Value = "Men";
+        wsCat.Cell(2, 6).Value = "Knockouts";
+        wsCat.Cell(2, 7).Value = "Sanda -70kg";
+        wsCat.Cell(2, 8).Value = "OUI";
+
+        var wsCompetitors = workbook.Worksheets.Add("Compétiteurs");
+        wsCompetitors.Cell(1, 1).Value = "Prénom";
+        wsCompetitors.Cell(1, 2).Value = "Nom";
+        wsCompetitors.Cell(1, 8).Value = "Catégorie";
+
+        wsCompetitors.Cell(2, 1).Value = "Lucas";
+        wsCompetitors.Cell(2, 2).Value = "Dupont";
+        wsCompetitors.Cell(2, 8).Value = "Sanda -70kg";
+
+        wsCompetitors.Cell(3, 1).Value = "Marco";
+        wsCompetitors.Cell(3, 2).Value = "Rossi";
+        wsCompetitors.Cell(3, 8).Value = "Sanda -70kg";
+
+        wsCompetitors.Cell(4, 1).Value = "Chen";
+        wsCompetitors.Cell(4, 2).Value = "Wei";
+        wsCompetitors.Cell(4, 8).Value = "Sanda -70kg";
+
+        wsCompetitors.Cell(5, 1).Value = "Tarik";
+        wsCompetitors.Cell(5, 2).Value = "Benali";
+        wsCompetitors.Cell(5, 8).Value = "Sanda -70kg";
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        ms.Position = 0;
+
+        var loadResult = ExcelCompetitionLoader.LoadFromStream(ms);
+        await session.LoadCompetitionAsync(loadResult.Competition!, loadResult.Matches, loadResult.Categories);
+
+        // 4 compétiteurs avec petite finale = 4 matchs (Demi 1, Demi 2, Petite Finale, Finale)
+        Assert.Equal(4, session.Matches.Count);
+
+        var bronzeMatch = session.Matches.First(m => m.IsBronzeMatch);
+        var finalMatch = session.Matches.Last();
+
+        // 1. Avant les demi-finales, le match de finale et de petite finale ont des placeholders
+        var finalInfoBefore = session.CreateMatchInfoData(finalMatch);
+        Assert.Null(finalInfoBefore.Competitor1);
+        Assert.Null(finalInfoBefore.Competitor2);
+
+        // 2. Jouer la Demi-finale 1 (Dupont vs Rossi) : Dupont gagne, Rossi perd
+        await session.SetMatchIndexAsync(0);
+        await session.SetWinnerSideAsync(Constants.Side.Red);
+
+        // 3. Jouer la Demi-finale 2 (Chen vs Benali) : Wei Chen gagne, Benali perd
+        await session.SetMatchIndexAsync(1);
+        await session.SetWinnerSideAsync(Constants.Side.Red);
+
+        // 4. Vérifier que pour la Finale, CreateMatchInfoData résout maintenant Dupont et Chen
+        var finalInfoAfter = session.CreateMatchInfoData(finalMatch);
+        Assert.NotNull(finalInfoAfter.Competitor1);
+        Assert.NotNull(finalInfoAfter.Competitor2);
+        Assert.Contains("Dupont", finalInfoAfter.Competitor1.LastName, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Chen", finalInfoAfter.Competitor2.FirstName, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(finalInfoAfter.DrawKnockout?.Competitor1);
+        Assert.NotNull(finalInfoAfter.DrawKnockout?.Competitor2);
+
+        // 5. Vérifier que pour la Petite Finale (3e place), CreateMatchInfoData résout Rossi et Benali
+        var bronzeInfoAfter = session.CreateMatchInfoData(bronzeMatch);
+        Assert.NotNull(bronzeInfoAfter.Competitor1);
+        Assert.NotNull(bronzeInfoAfter.Competitor2);
+        Assert.Contains("Rossi", bronzeInfoAfter.Competitor1.LastName, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Benali", bronzeInfoAfter.Competitor2.LastName, StringComparison.OrdinalIgnoreCase);
+        Assert.NotNull(bronzeInfoAfter.DrawKnockout?.Competitor1);
+        Assert.NotNull(bronzeInfoAfter.DrawKnockout?.Competitor2);
     }
 }

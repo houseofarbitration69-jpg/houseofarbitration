@@ -396,7 +396,8 @@ public partial class ServerViewModel : BaseViewModel
                 {
                     try
                     {
-                        var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type, Round = CurrentDraw.CurrentRound }, _jsonOptions);
+                        var matchData = CreateMatchInfoData(CurrentDraw);
+                        var json = JsonSerializer.Serialize(matchData, _jsonOptions);
                         await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
                         await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
                         if (IsTimerRunning)
@@ -1039,7 +1040,8 @@ public partial class ServerViewModel : BaseViewModel
                     await _bluetoothServer.SendToClientAsync($"{Constants.Message.SERVER_NAME}{ServerName}", clientId);
                 }
 
-                var json = JsonSerializer.Serialize(_currentCompetition, _jsonOptions);
+                var lightComp = GetCompetitionWithoutMatches(_currentCompetition);
+                var json = JsonSerializer.Serialize(lightComp, _jsonOptions);
 
                 await _bluetoothServer.SendToClientAsync($"{Constants.Message.COMPETITION_DATA}{json}", clientId);
             }
@@ -1048,6 +1050,131 @@ public partial class ServerViewModel : BaseViewModel
                 _logger.LogError(ex, "Error sending competition data to client {ClientId}", clientId);
             }
         }
+    }
+
+    private CompetitionModel GetCompetitionWithoutMatches(CompetitionModel competition)
+    {
+        var comp = new CompetitionModel
+        {
+            Id = competition.Id,
+            Name = competition.Name,
+            Date = competition.Date,
+            Type = competition.Type,
+            Categories = new List<CategoryModel>()
+        };
+
+        if (competition.Categories != null)
+        {
+            foreach (var cat in competition.Categories)
+            {
+                var newCat = new CategoryModel
+                {
+                    Id = cat.Id,
+                    Type = cat.Type,
+                    Genre = cat.Genre,
+                    WeightMin = cat.WeightMin,
+                    WeightMax = cat.WeightMax,
+                    AgeRangeId = cat.AgeRangeId,
+                    AgeRange = cat.AgeRange,
+                    RoundType = cat.RoundType,
+                    HasBronzeMatch = cat.HasBronzeMatch,
+                    CompetitionId = cat.CompetitionId,
+                    Competitors = cat.Competitors != null
+                        ? new List<CompetitorCategoryModel>(cat.Competitors)
+                        : new List<CompetitorCategoryModel>()
+                };
+
+                if (cat.Draw != null)
+                {
+                    newCat.Draw = new DrawModel
+                    {
+                        Id = cat.Draw.Id,
+                        CategoryId = cat.Id,
+                        DrawKnockouts = new List<DrawKnockoutModel>(),
+                        DrawPools = new List<DrawPoolsModel>(),
+                        DrawOrders = new List<DrawOrderModel>()
+                    };
+                }
+
+                comp.Categories.Add(newCat);
+            }
+        }
+
+        return comp;
+    }
+
+    private MatchInfoData CreateMatchInfoData(IDrawModel draw)
+    {
+        var matchData = new MatchInfoData
+        {
+            Id = draw.Id,
+            Type = draw.Type,
+            Round = draw.CurrentRound,
+            CategoryId = draw.Draw?.CategoryId,
+            CategoryName = draw.Draw?.Category?.Name
+        };
+
+        if (draw is DrawKnockoutModel k)
+        {
+            matchData.DrawKnockout = k;
+            matchData.Competitor1 = k.Competitor1;
+            matchData.Competitor2 = k.Competitor2;
+            matchData.StageName = k.StageName;
+
+            if (matchData.Competitor1 == null && k.Competitor1Id.HasValue)
+            {
+                matchData.Competitor1 = _currentCompetition?.Categories
+                    .SelectMany(c => c.Competitors ?? Enumerable.Empty<CompetitorCategoryModel>())
+                    .Select(cc => cc.Competitor)
+                    .FirstOrDefault(c => c?.Id == k.Competitor1Id.Value);
+            }
+
+            if (matchData.Competitor2 == null && k.Competitor2Id.HasValue)
+            {
+                matchData.Competitor2 = _currentCompetition?.Categories
+                    .SelectMany(c => c.Competitors ?? Enumerable.Empty<CompetitorCategoryModel>())
+                    .Select(cc => cc.Competitor)
+                    .FirstOrDefault(c => c?.Id == k.Competitor2Id.Value);
+            }
+        }
+        else if (draw is DrawPoolsModel p)
+        {
+            matchData.DrawPool = p;
+            matchData.Competitor1 = p.Competitor1;
+            matchData.Competitor2 = p.Competitor2;
+            matchData.StageName = $"Poule - Match #{p.Order}";
+
+            if (matchData.Competitor1 == null && p.Competitor1Id.HasValue)
+            {
+                matchData.Competitor1 = _currentCompetition?.Categories
+                    .SelectMany(c => c.Competitors ?? Enumerable.Empty<CompetitorCategoryModel>())
+                    .Select(cc => cc.Competitor)
+                    .FirstOrDefault(c => c?.Id == p.Competitor1Id.Value);
+            }
+
+            if (matchData.Competitor2 == null && p.Competitor2Id.HasValue)
+            {
+                matchData.Competitor2 = _currentCompetition?.Categories
+                    .SelectMany(c => c.Competitors ?? Enumerable.Empty<CompetitorCategoryModel>())
+                    .Select(cc => cc.Competitor)
+                    .FirstOrDefault(c => c?.Id == p.Competitor2Id.Value);
+            }
+        }
+        else if (draw is DrawOrderModel o)
+        {
+            matchData.DrawOrder = o;
+            matchData.Competitor1 = o.Competitor;
+
+            if (matchData.Competitor1 == null && o.CompetitorId > 0)
+            {
+                matchData.Competitor1 = _currentCompetition?.Categories
+                    .SelectMany(c => c.Competitors ?? Enumerable.Empty<CompetitorCategoryModel>())
+                    .Select(cc => cc.Competitor)
+                    .FirstOrDefault(c => c?.Id == o.CompetitorId);
+            }
+        }
+
+        return matchData;
     }
 
     /// <summary>
@@ -1269,7 +1396,8 @@ public partial class ServerViewModel : BaseViewModel
         {
             try
             {
-                var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type, Round = CurrentDraw.CurrentRound }, _jsonOptions);
+                var matchData = CreateMatchInfoData(CurrentDraw);
+                var json = JsonSerializer.Serialize(matchData, _jsonOptions);
                 await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{json}");
             }
             catch (Exception ex)
@@ -1503,9 +1631,36 @@ public partial class ServerViewModel : BaseViewModel
                                 var nextMatch = allKnockouts.FirstOrDefault(k => k.Order == nextMatchOrder);
                                 if (nextMatch != null)
                                 {
-                                    if (localIndex % 2 != 0) nextMatch.Competitor1Id = winner.Id;
-                                    else nextMatch.Competitor2Id = winner.Id;
+                                    if (localIndex % 2 != 0)
+                                    {
+                                        nextMatch.Competitor1Id = winner.Id;
+                                        nextMatch.Competitor1 = winner;
+                                    }
+                                    else
+                                    {
+                                        nextMatch.Competitor2Id = winner.Id;
+                                        nextMatch.Competitor2 = winner;
+                                    }
                                     await _drawKnockoutService.UpdateAsync(nextMatch);
+                                }
+
+                                if (matchesInRound == 2 && looser != null)
+                                {
+                                    var bronzeMatch = allKnockouts.FirstOrDefault(k => k.IsBronzeMatch);
+                                    if (bronzeMatch != null)
+                                    {
+                                        if (localIndex % 2 != 0)
+                                        {
+                                            bronzeMatch.Competitor1Id = looser.Id;
+                                            bronzeMatch.Competitor1 = looser;
+                                        }
+                                        else
+                                        {
+                                            bronzeMatch.Competitor2Id = looser.Id;
+                                            bronzeMatch.Competitor2 = looser;
+                                        }
+                                        await _drawKnockoutService.UpdateAsync(bronzeMatch);
+                                    }
                                 }
                             }
                             break;

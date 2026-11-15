@@ -229,4 +229,161 @@ public class DatabaseServiceTests : IDisposable
         Assert.NotNull(competitor);
         Assert.Equal("Sophie-Anne", competitor.FirstName);
     }
+
+    [Fact]
+    public async Task ImportMatchDataAsync_ImportsMatchOnDemand_WithoutPriorMatchesInDb()
+    {
+        // 1. Importer d'abord la compétition allégée (compétition + catégorie sans matchs)
+        var competition = new CompetitionModel
+        {
+            Id = 10,
+            Name = "Open Test On Demand",
+            Date = DateTime.Today,
+            Type = CompetitionType.Sanda,
+            Categories = new List<CategoryModel>
+            {
+                new()
+                {
+                    Id = 101,
+                    Genre = Genre.Men,
+                    WeightMax = 65,
+                    Type = CategoryType.Sanda,
+                    RoundType = RoundType.Knockouts,
+                    Draw = new DrawModel { Id = 101, CategoryId = 101 }
+                }
+            }
+        };
+
+        await _databaseService.ImportCompetitionDataAsync(competition);
+
+        // Vérifier qu'aucun match n'est dans la DB
+        var matchesBefore = await _context.DrawsKnockouts.ToListAsync();
+        Assert.Empty(matchesBefore);
+
+        // 2. Simuler l'arrivée d'un match au fur et à mesure via MATCH_INFO
+        var comp1 = new CompetitorModel { Id = 501, FirstName = "Jean", LastName = "Rouge" };
+        var comp2 = new CompetitorModel { Id = 502, FirstName = "Marc", LastName = "Bleu" };
+
+        var matchData = new MatchInfoData
+        {
+            Id = 1,
+            Type = RoundType.Knockouts,
+            Round = 1,
+            CategoryId = 101,
+            CategoryName = "Senior -65kg",
+            Competitor1 = comp1,
+            Competitor2 = comp2,
+            DrawKnockout = new DrawKnockoutModel
+            {
+                Id = 1,
+                Order = 1,
+                GlobalOrder = 1,
+                DrawId = 101,
+                Competitor1Id = 501,
+                Competitor1 = comp1,
+                Competitor2Id = 502,
+                Competitor2 = comp2,
+                CurrentRound = 1
+            }
+        };
+
+        await _databaseService.ImportMatchDataAsync(matchData);
+
+        // Vérifier que le match a été correctement inséré
+        var savedMatch = await _context.DrawsKnockouts.FirstOrDefaultAsync(k => k.Id == 1);
+        Assert.NotNull(savedMatch);
+        Assert.Equal(501, savedMatch.Competitor1Id);
+        Assert.Equal(502, savedMatch.Competitor2Id);
+        Assert.Equal(1, savedMatch.CurrentRound);
+    }
+
+    [Fact]
+    public async Task ImportMatchDataAsync_KnockoutFinalMatch_PopulatesCompetitorsWhenInitiallyEmpty()
+    {
+        // Arrange : simulation d'un match de finale (id 3) qui n'avait aucun compétiteur au début
+        var competition = new CompetitionModel
+        {
+            Id = 2,
+            Name = "Tournoi Test Finales",
+            Date = DateTime.Today,
+            Type = CompetitionType.Sanda,
+            Categories = new List<CategoryModel>
+            {
+                new()
+                {
+                    Id = 201,
+                    Genre = Genre.Men,
+                    WeightMax = 70,
+                    Type = CategoryType.Sanda,
+                    RoundType = RoundType.Knockouts,
+                    Draw = new DrawModel
+                    {
+                        Id = 201,
+                        CategoryId = 201,
+                        DrawKnockouts = new List<DrawKnockoutModel>
+                        {
+                            new()
+                            {
+                                Id = 3,
+                                Order = 3,
+                                GlobalOrder = 3,
+                                DrawId = 201,
+                                Competitor1Id = null,
+                                Competitor2Id = null,
+                                CurrentRound = 1
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        // 1. Initialement, téléchargement léger : la compétition et ses catégories sont créées
+        await _databaseService.ImportCompetitionDataAsync(competition);
+
+        // 2. Plus tard, les demi-finales se jouent et les vainqueurs se qualifient
+        var comp1 = new CompetitorModel { Id = 601, FirstName = "Lucas", LastName = "Dupont", Club = "Club A" };
+        var comp2 = new CompetitorModel { Id = 602, FirstName = "Wei", LastName = "Chen", Club = "Club B" };
+
+        var matchData = new MatchInfoData
+        {
+            Id = 3,
+            Type = RoundType.Knockouts,
+            Round = 1,
+            CategoryId = 201,
+            CategoryName = "Sanda -70kg",
+            Competitor1 = comp1,
+            Competitor2 = comp2,
+            DrawKnockout = new DrawKnockoutModel
+            {
+                Id = 3,
+                Order = 3,
+                GlobalOrder = 3,
+                DrawId = 201,
+                Competitor1Id = 601,
+                Competitor1 = comp1,
+                Competitor2Id = 602,
+                Competitor2 = comp2,
+                CurrentRound = 1
+            }
+        };
+
+        // Act : le juge reçoit MATCH_INFO de la finale avec les compétiteurs résolus
+        await _databaseService.ImportMatchDataAsync(matchData);
+
+        // Assert : Les compétiteurs existent en base et le match de finale a ses CompetitorIds mis à jour
+        var savedComp1 = await _context.Competitors.FirstOrDefaultAsync(c => c.Id == 601);
+        var savedComp2 = await _context.Competitors.FirstOrDefaultAsync(c => c.Id == 602);
+        Assert.NotNull(savedComp1);
+        Assert.Equal("Lucas", savedComp1.FirstName);
+        Assert.Equal("Dupont", savedComp1.LastName);
+        Assert.NotNull(savedComp2);
+        Assert.Equal("Wei", savedComp2.FirstName);
+        Assert.Equal("Chen", savedComp2.LastName);
+
+        var finalMatch = await _context.DrawsKnockouts.FirstOrDefaultAsync(k => k.Id == 3);
+        Assert.NotNull(finalMatch);
+        Assert.Equal(601, finalMatch.Competitor1Id);
+        Assert.Equal(602, finalMatch.Competitor2Id);
+    }
 }
