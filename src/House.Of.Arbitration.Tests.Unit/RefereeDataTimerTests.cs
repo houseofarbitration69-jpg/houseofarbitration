@@ -91,13 +91,28 @@ public class RefereeDataTimerTests
         var ws = workbook.Worksheet("Sanda Seniors Hommes -70kg");
         Assert.NotNull(ws);
 
-        // En-tête ligne 5 : colonne 3 = Chrono
+        // En-tête ligne 5 : colonne 3 = Chrono, colonne 8 = Round
         Assert.Equal("Chrono", ws.Cell(5, 3).GetString());
+        Assert.Equal("Round", ws.Cell(5, 8).GetString());
 
         // Ligne 6 : données
         Assert.Equal("00:30", ws.Cell(6, 3).GetString());
         Assert.Equal("JUGE 1", ws.Cell(6, 4).GetString());
         Assert.Equal("Dupont", ws.Cell(6, 5).GetString());
         Assert.Equal(1.0, ws.Cell(6, 7).GetDouble());
+        Assert.Equal(1, ws.Cell(6, 8).GetDouble());
+    }
+
+    [Fact]
+    public void RefereeDataModel_Round_DefaultsToOneAndCanBeCustomized()
+    {
+        var dataDefault = new RefereeDataModel { Date = DateTime.Now };
+        Assert.Equal(1, dataDefault.Round);
+
+        var dataRound2 = new RefereeDataModel { Date = DateTime.Now, Round = 2 };
+        Assert.Equal(2, dataRound2.Round);
+
+        var dataRound3 = new RefereeDataModel { Date = DateTime.Now, Round = 3 };
+        Assert.Equal(3, dataRound3.Round);
     }
 }

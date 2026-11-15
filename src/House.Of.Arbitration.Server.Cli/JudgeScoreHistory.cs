@@ -12,6 +12,7 @@ public class JudgeScoreEntry
     public TimeSpan? MatchTimer { get; set; }
     public string MatchTimeDisplay { get; set; } = string.Empty;
     public int MatchId { get; set; }
+    public int Round { get; set; } = 1;
     public string MatchCategory { get; set; } = string.Empty;
     public string MatchCompetitors { get; set; } = string.Empty;
     public string JudgeName { get; set; } = string.Empty;

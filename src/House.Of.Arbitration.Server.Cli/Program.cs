@@ -112,7 +112,8 @@ internal static class Program
 
         session.ScoreUpdated += (_, e) =>
         {
-            LogColor(ConsoleColor.Magenta, $"[ACTION NOTATION] {e.Judge.Name} : {e.Details}");
+            string roundBadge = session.CurrentMatch != null ? $"[R{session.CurrentMatch.CurrentRound}] " : "";
+            LogColor(ConsoleColor.Magenta, $"[ACTION NOTATION] {roundBadge}{e.Judge.Name} : {e.Details}");
         };
 
         session.WinnerDeclared += (_, e) =>
@@ -140,7 +141,7 @@ internal static class Program
     private static void PrintHelpSummary()
     {
         Console.ForegroundColor = ConsoleColor.DarkGray;
-        Console.WriteLine("Commandes rapides : 'start', 'load <fichier.xlsx>', 'export results', 'export scores', 'history', 'scores history', 'help'.");
+        Console.WriteLine("Commandes rapides : 'start', 'load <fichier.xlsx>', 'round next', 'winner', 'export results', 'export scores', 'history', 'scores history', 'help'.");
         Console.ResetColor();
     }
 
@@ -158,10 +159,15 @@ internal static class Program
             string compName = _session?.CurrentCompetition?.Name ?? "Wushu";
             if (compName.Length > 16) compName = compName.Substring(0, 13) + "...";
 
+            var curMatch = _session?.CurrentMatch;
+            string matchInfo = curMatch != null
+                ? (curMatch.Type != RoundType.Order ? $" | M#{curMatch.Id} R{curMatch.CurrentRound}/{curMatch.MaxRounds}" : $" | M#{curMatch.Id}")
+                : "";
+
             Console.ForegroundColor = advColor;
             Console.Write($"[SERVEUR: {advStatus}");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write($" | {compName} ({_session?.CurrentCompetitionType})");
+            Console.Write($" | {compName} ({_session?.CurrentCompetitionType}){matchInfo}");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write($" | {connectedCount}/{totalJudges} Juges");
             Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -246,6 +252,12 @@ internal static class Program
                 case "match":
                 case "m":
                     await HandleMatchCommandAsync(args);
+                    break;
+
+                case "round":
+                case "r":
+                case "rd":
+                    await HandleRoundCommandAsync(args);
                     break;
 
                 case "winner":
@@ -446,6 +458,13 @@ internal static class Program
                 await HandleWinnerCommandAsync(args.Skip(1).ToArray());
                 break;
 
+            case "round":
+            case "r":
+            case "next-round":
+            case "nr":
+                await HandleRoundCommandAsync(args.Skip(1).ToArray());
+                break;
+
             case "list":
             case "l":
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -468,6 +487,123 @@ internal static class Program
                 PrintCurrentMatch();
                 break;
         }
+    }
+
+    private static async Task HandleRoundCommandAsync(string[] args)
+    {
+        var match = _session!.CurrentMatch;
+        if (match == null)
+        {
+            LogError("Aucun match configuré ou actif.");
+            return;
+        }
+
+        if (args.Length == 0)
+        {
+            PrintRoundStatus();
+            return;
+        }
+
+        string sub = args[0].ToLowerInvariant();
+        switch (sub)
+        {
+            case "next":
+            case "n":
+                await _session.NextRoundAsync();
+                break;
+
+            case "red":
+            case "rouge":
+            case "r":
+                await _session.NextRoundAsync("red");
+                break;
+
+            case "blue":
+            case "bleu":
+            case "b":
+                await _session.NextRoundAsync("blue");
+                break;
+
+            case "draw":
+            case "nul":
+            case "d":
+            case "egalite":
+            case "ex":
+                await _session.NextRoundAsync("draw");
+                break;
+
+            case "reset":
+            case "clear":
+                _session.ResetMatchScores();
+                LogInfo($"Scores et rounds réinitialisés au Round 1 pour le match #{match.Id}.");
+                break;
+
+            default:
+                LogError($"Sous-commande round inconnue : '{sub}'. Options: next (ou n), red (ou r), blue (ou b), draw (ou d), reset.");
+                break;
+        }
+    }
+
+    private static void PrintRoundStatus()
+    {
+        var match = _session!.CurrentMatch;
+        if (match == null)
+        {
+            LogError("Aucun match actif.");
+            return;
+        }
+
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"\n--- ÉTAT DES ROUNDS DU MATCH #{match.Id} ---");
+        Console.ResetColor();
+
+        string stage = !string.IsNullOrWhiteSpace(match.StageName) ? $" ({match.StageName})" : "";
+        Console.WriteLine($"  Catégorie        : {match.Category}{stage}");
+        Console.WriteLine($"  Combattants      : {match.RedCompetitor} (Rouge) vs {match.BlueCompetitor} (Bleu)");
+        Console.WriteLine($"  Round actuel     : Round {match.CurrentRound} / {match.MaxRounds}");
+
+        string timerStatus = _session.IsTimerRunning ? "EN COURS" : "ARRÊTÉ / PAUSE";
+        Console.WriteLine($"  Chronomètre      : {_session.TimeLeftDisplay} ({timerStatus})");
+
+        int curRed = (int)_session.Judges.Sum(j => j.RedPoints);
+        int curBlue = (int)_session.Judges.Sum(j => j.BluePoints);
+        Console.WriteLine($"  Score Round {match.CurrentRound}  : Rouge {curRed} pts vs {curBlue} pts Bleu");
+
+        if (match.RoundResults.Count > 0)
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("\n  Historique des rounds terminés :");
+            foreach (var r in match.RoundResults)
+            {
+                string winnerDesc = r.WinnerColor == "Red" ? $"🏆 {match.RedCompetitor} (Rouge)" : (r.WinnerColor == "Blue" ? $"🏆 {match.BlueCompetitor} (Bleu)" : "⚖️ Match nul");
+                Console.WriteLine($"    - Round {r.RoundNumber} : {winnerDesc} | Points juges : {r.RedVotes} Rouge - {r.BlueVotes} Bleu");
+            }
+
+            int redWins = match.RoundResults.Count(r => r.WinnerColor == "Red");
+            int blueWins = match.RoundResults.Count(r => r.WinnerColor == "Blue");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"  Total victoires  : Rouge {redWins} - {blueWins} Bleu");
+            Console.ResetColor();
+        }
+
+        if (match.IsFinished)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"\n  Match TERMINÉ | Vainqueur final : {match.Winner} ({match.DecisionReason})");
+            Console.ResetColor();
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("\n  Commandes pour gérer les rounds :");
+            Console.WriteLine("    round next (ou r n, r)    : Valide le round (auto d'après les juges) et passe au suivant");
+            Console.WriteLine("    round red  (ou r r)       : Valide le round pour Rouge et passe au suivant");
+            Console.WriteLine("    round blue (ou r b)       : Valide le round pour Bleu et passe au suivant");
+            Console.WriteLine("    round draw (ou r d)       : Valide le round en match nul et passe au suivant");
+            Console.WriteLine("    round reset               : Réinitialise les scores et remet au Round 1");
+            Console.ResetColor();
+        }
+        Console.WriteLine();
     }
 
     private static async Task HandleWinnerCommandAsync(string[] args)
@@ -826,6 +962,15 @@ internal static class Program
         string stage = !string.IsNullOrWhiteSpace(m.StageName) ? $" ({m.StageName})" : "";
         Console.WriteLine($"  Catégorie        : {m.Category}{stage}");
         Console.WriteLine($"  Type             : {m.Type}");
+        if (m.Type != RoundType.Order)
+        {
+            Console.WriteLine($"  Round            : Round {m.CurrentRound}/{m.MaxRounds}");
+            if (m.RoundResults.Count > 0)
+            {
+                var summaryList = m.RoundResults.Select(r => $"R{r.RoundNumber} [{r.WinnerColor}: {r.RedVotes}-{r.BlueVotes}]");
+                Console.WriteLine($"  Rounds terminés  : {string.Join(" | ", summaryList)}");
+            }
+        }
         Console.WriteLine($"  Coin ROUGE       : {m.RedCompetitor}");
         if (!string.IsNullOrWhiteSpace(m.BlueCompetitor))
         {
@@ -875,8 +1020,11 @@ internal static class Program
 
     private static void PrintJudges()
     {
+        string roundInfo = _session?.CurrentMatch != null && _session.CurrentCompetitionType == CompetitionType.Sanda
+            ? $" - Round {_session.CurrentMatch.CurrentRound}/{_session.CurrentMatch.MaxRounds}"
+            : "";
         Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine($"\n--- ÉTAT DES JUGES ({_session!.CurrentCompetitionType}) ---");
+        Console.WriteLine($"\n--- ÉTAT DES JUGES ({_session!.CurrentCompetitionType}{roundInfo}) ---");
         Console.ResetColor();
 
         if (_session.CurrentCompetitionType == CompetitionType.Sanda)
@@ -1048,10 +1196,11 @@ internal static class Program
                 : (e.Side == Constants.Side.Blue ? ConsoleColor.Cyan : (e.ActionType == "Déduction" ? ConsoleColor.DarkYellow : ConsoleColor.Magenta));
 
             string matchBadge = e.MatchId > 0 ? $"[M#{e.MatchId}]" : "";
+            string roundBadge = e.Round > 0 ? $"[R{e.Round}]" : "";
             string timeBadge = !string.IsNullOrEmpty(e.MatchTimeDisplay) ? $"({e.MatchTimeDisplay})" : "";
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"  {e.Timestamp:HH:mm:ss} {timeBadge,-7} {matchBadge,-6} ");
+            Console.Write($"  {e.Timestamp:HH:mm:ss} {timeBadge,-7} {matchBadge,-6} {roundBadge,-5} ");
 
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write($"{e.JudgeName,-9} : ");
@@ -1072,9 +1221,9 @@ internal static class Program
         var entries = _session!.GetJudgeScoresHistory(matchId, judgeFilter);
 
         Console.ForegroundColor = ConsoleColor.Cyan;
-        Console.WriteLine("\n" + new string('=', 84));
+        Console.WriteLine("\n" + new string('=', 92));
         Console.WriteLine("  📋 HISTORIQUE DES NOTATIONS DES JUGES");
-        Console.WriteLine(new string('=', 84));
+        Console.WriteLine(new string('=', 92));
         Console.ResetColor();
 
         if (matchId.HasValue && matchId.Value > 0)
@@ -1102,13 +1251,13 @@ internal static class Program
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("  Aucune notation trouvée correspondant aux critères.");
             Console.ResetColor();
-            Console.WriteLine(new string('=', 84) + "\n");
+            Console.WriteLine(new string('=', 92) + "\n");
             return;
         }
 
-        Console.WriteLine(string.Format("  {0,-4} | {1,-8} | {2,-6} | {3,-5} | {4,-10} | {5,-12} | {6,-22} | {7}",
-            "#", "Heure", "Chrono", "Match", "Juge", "Type", "Détail", "Total"));
-        Console.WriteLine("  " + new string('-', 84));
+        Console.WriteLine(string.Format("  {0,-4} | {1,-8} | {2,-6} | {3,-5} | {4,-5} | {5,-10} | {6,-12} | {7,-22} | {8}",
+            "#", "Heure", "Chrono", "Match", "Round", "Juge", "Type", "Détail", "Total"));
+        Console.WriteLine("  " + new string('-', 92));
 
         for (int i = 0; i < entries.Count; i++)
         {
@@ -1119,10 +1268,11 @@ internal static class Program
 
             string chrono = !string.IsNullOrEmpty(e.MatchTimeDisplay) ? e.MatchTimeDisplay : "--:--";
             string matchBadge = e.MatchId > 0 ? $"#{e.MatchId}" : "--";
+            string roundBadge = e.Round > 0 ? $"R{e.Round}" : "--";
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write(string.Format("  [{0,2}] | {1,-8} | {2,-6} | {3,-5} | {4,-10} | ",
-                i + 1, e.Timestamp.ToString("HH:mm:ss"), chrono, matchBadge, e.JudgeName));
+            Console.Write(string.Format("  [{0,2}] | {1,-8} | {2,-6} | {3,-5} | {4,-5} | {5,-10} | ",
+                i + 1, e.Timestamp.ToString("HH:mm:ss"), chrono, matchBadge, roundBadge, e.JudgeName));
 
             Console.ForegroundColor = typeColor;
             Console.Write(string.Format("{0,-12}", Truncate(e.ActionType, 12)));
@@ -1139,7 +1289,7 @@ internal static class Program
         }
 
         var summary = _session.GetJudgeScoreSummary(matchId);
-        Console.WriteLine("  " + new string('-', 84));
+        Console.WriteLine("  " + new string('-', 92));
         Console.ForegroundColor = ConsoleColor.Cyan;
         if (summary.DeductionEntries > 0)
         {
@@ -1150,7 +1300,7 @@ internal static class Program
             Console.WriteLine($"  SYNTHÈSE : {summary.TotalEntries} notation(s) au total | Points Rouge: {summary.RedEntries} | Points Bleu: {summary.BlueEntries}");
         }
         Console.ResetColor();
-        Console.WriteLine(new string('=', 84) + "\n");
+        Console.WriteLine(new string('=', 92) + "\n");
     }
 
     private static void PrintStatus()
@@ -1173,7 +1323,10 @@ internal static class Program
 
         if (_session.CurrentMatch != null)
         {
-            Console.WriteLine($"  Match courant    : #{_session.CurrentMatch.Id} - {_session.CurrentMatch.Category} ({_session.CurrentMatch.RedCompetitor} vs {_session.CurrentMatch.BlueCompetitor})");
+            string roundSuffix = _session.CurrentCompetitionType == CompetitionType.Sanda
+                ? $" [Round {_session.CurrentMatch.CurrentRound}/{_session.CurrentMatch.MaxRounds}]"
+                : "";
+            Console.WriteLine($"  Match courant    : #{_session.CurrentMatch.Id} - {_session.CurrentMatch.Category} ({_session.CurrentMatch.RedCompetitor} vs {_session.CurrentMatch.BlueCompetitor}){roundSuffix}");
         }
 
         PrintJudges();
@@ -1203,6 +1356,12 @@ internal static class Program
         Console.WriteLine("  winner <red|blue|auto> : Déclare le vainqueur du match (alias: w r, w b, w auto).");
         Console.WriteLine("  winner clear           : Annule le vainqueur et réouvre le match actif.");
         Console.WriteLine("  winner                 : Affiche l'état des scores actuels et qui mène.");
+        Console.WriteLine("  round next, r n, r     : Valide le round actuel et passe au round suivant (calcul auto).");
+        Console.WriteLine("  round red, r r         : Valide le round pour le coin ROUGE et passe au round suivant.");
+        Console.WriteLine("  round blue, r b        : Valide le round pour le coin BLEU et passe au round suivant.");
+        Console.WriteLine("  round draw, r d        : Valide le round en match nul / égalité et passe au round suivant.");
+        Console.WriteLine("  round                  : Affiche l'état des rounds du match actif (scores, victoires).");
+        Console.WriteLine("  round reset            : Réinitialise les scores et remet le match au Round 1.");
         Console.WriteLine("  history [cat|#id]      : Affiche l'historique complet d'une catégorie (alias: hist, h).");
         Console.WriteLine("  history list           : Liste toutes les catégories avec avancement et vainqueurs.");
         Console.WriteLine("  category list          : Liste synthétique des catégories (alias: cat l).");

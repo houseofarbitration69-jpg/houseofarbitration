@@ -18,4 +18,9 @@ public partial class TransfertScoreModel : ObservableObject
     /// Code de position du juge (ex: "1", "2", "A_1") pour identifier précisément le juge en multi-instances sur un même appareil.
     /// </summary>
     public string? JudgePosition { get; set; }
+
+    /// <summary>
+    /// Numéro de round lors duquel le score a été attribué
+    /// </summary>
+    public int? Round { get; set; }
 }

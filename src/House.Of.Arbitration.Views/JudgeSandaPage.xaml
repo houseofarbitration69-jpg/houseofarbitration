@@ -95,14 +95,24 @@
                         FontSize="30" 
                         FontAttributes="Bold" 
                     />
-                    <Label 
-                        Text="{Binding MatchStageName}"
-                        TextColor="LightGray"
-                        FontSize="18"
-                        FontAttributes="Bold"
-                        HorizontalOptions="Center"
-                        IsVisible="{Binding MatchStageName, Converter={StaticResource EmptyToBoolConverter}}"
-                    />
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Label 
+                            Text="{Binding MatchStageName}"
+                            TextColor="LightGray"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            IsVisible="{Binding MatchStageName, Converter={StaticResource EmptyToBoolConverter}}"
+                        />
+                        <Label 
+                            Text="{Binding CurrentRound, StringFormat='- ROUND {0}'}"
+                            TextColor="#FFD700"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            IsVisible="{Binding CurrentDraw, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
+                        />
+                    </HorizontalStackLayout>
                 </VerticalStackLayout>
             </Border>
 

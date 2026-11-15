@@ -11,4 +11,9 @@ public class MatchInfoData
     /// Obtient ou définit le type du match
     /// </summary>
     public RoundType Type { get; set; }
+
+    /// <summary>
+    /// Obtient ou définit le numéro de round en cours (1 par défaut)
+    /// </summary>
+    public int Round { get; set; } = 1;
 }

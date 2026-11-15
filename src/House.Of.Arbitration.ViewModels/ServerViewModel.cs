@@ -396,7 +396,7 @@ public partial class ServerViewModel : BaseViewModel
                 {
                     try
                     {
-                        var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
+                        var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type, Round = CurrentDraw.CurrentRound }, _jsonOptions);
                         await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
                         await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
                         if (IsTimerRunning)
@@ -638,7 +638,7 @@ public partial class ServerViewModel : BaseViewModel
                                 judge.RedPoints += scoreData.Score;
                                 if (competitor1 != null)
                                 {
-                                    await SaveRefereeData(judge, competitor1.Id, scoreData.Score);
+                                    await SaveRefereeData(judge, competitor1.Id, scoreData.Score, false, null, scoreData.Round);
                                 }
                                 OnPropertyChanged(nameof(Judges));
                                 UpdateCurrentRoundVotes();
@@ -648,7 +648,7 @@ public partial class ServerViewModel : BaseViewModel
                                 judge.BluePoints += scoreData.Score;
                                 if (competitor2 != null)
                                 {
-                                    await SaveRefereeData(judge, competitor2.Id, scoreData.Score);
+                                    await SaveRefereeData(judge, competitor2.Id, scoreData.Score, false, null, scoreData.Round);
                                 }
                                 OnPropertyChanged(nameof(Judges));
                                 UpdateCurrentRoundVotes();
@@ -670,7 +670,7 @@ public partial class ServerViewModel : BaseViewModel
 
                             if (competitor != null)
                             {
-                                await SaveRefereeData(judge, competitor.Id, scoreData.Score, false, scoreData.Code);
+                                await SaveRefereeData(judge, competitor.Id, scoreData.Score, false, scoreData.Code, scoreData.Round);
                             }
                         }
                     }
@@ -1198,7 +1198,7 @@ public partial class ServerViewModel : BaseViewModel
     /// <param name="isCorrection"></param>
     /// <param name="code"></param>
     /// <returns></returns>
-    private async Task SaveRefereeData(JudgeModel judge, int? competitorId, double score, bool isCorrection = false, MvtTimeCodeModel? code = null)
+    private async Task SaveRefereeData(JudgeModel judge, int? competitorId, double score, bool isCorrection = false, MvtTimeCodeModel? code = null, int? round = null)
     {
         if (CurrentDraw == null)
         {
@@ -1212,6 +1212,10 @@ public partial class ServerViewModel : BaseViewModel
 
         var elapsed = _totalRoundTime > _timeLeft ? (_totalRoundTime - _timeLeft) : TimeSpan.Zero;
 
+        int roundNumber = (round.HasValue && round.Value > 0)
+            ? round.Value
+            : (CurrentDraw.CurrentRound > 0 ? CurrentDraw.CurrentRound : 1);
+
         var data = new RefereeDataModel
         {
             Date = DateTime.Now,
@@ -1221,7 +1225,7 @@ public partial class ServerViewModel : BaseViewModel
             Data = (code != null) ? JsonSerializer.Serialize(code) : String.Empty,
             IsCorrection = isCorrection,
             CompetitorId = competitorId,
-            Round = CurrentDraw.CurrentRound
+            Round = roundNumber
         };
 
         if (CurrentDraw is DrawKnockoutModel k)
@@ -1265,7 +1269,7 @@ public partial class ServerViewModel : BaseViewModel
         {
             try
             {
-                var json = JsonSerializer.Serialize(new { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
+                var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type, Round = CurrentDraw.CurrentRound }, _jsonOptions);
                 await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{json}");
             }
             catch (Exception ex)

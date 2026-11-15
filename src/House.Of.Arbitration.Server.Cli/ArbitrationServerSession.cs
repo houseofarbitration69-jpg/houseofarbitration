@@ -25,6 +25,9 @@ public class MatchItem
     public Constants.Side? NextLoserMatchSide { get; set; }
     public bool IsBronzeMatch { get; set; }
     public string? StageName { get; set; }
+    public int CurrentRound { get; set; } = 1;
+    public int MaxRounds { get; set; } = 3;
+    public List<RoundResultModel> RoundResults { get; } = new();
 }
 
 /// <summary>
@@ -78,6 +81,7 @@ public class ArbitrationServerSession : IDisposable
     public event EventHandler<string>? TimerTick;
     public event EventHandler<(MatchItem Match, string Winner, string Reason)>? WinnerDeclared;
     public event EventHandler<JudgeScoreEntry>? JudgeScoreRecorded;
+    public event EventHandler<(MatchItem Match, int RoundNumber)>? RoundChanged;
 
     public ArbitrationServerSession(WindowsBluetoothServer bluetoothServer)
     {
@@ -321,6 +325,22 @@ public class ArbitrationServerSession : IDisposable
 
     public void ResetMatchScores()
     {
+        if (CurrentMatch != null)
+        {
+            CurrentMatch.CurrentRound = 1;
+            CurrentMatch.RoundResults.Clear();
+            UpdateUnderlyingDrawRound(CurrentMatch);
+        }
+
+        ResetRoundScores();
+        StatusChanged?.Invoke(this, "Scores, points et rounds réinitialisés pour le match en cours.");
+    }
+
+    /// <summary>
+    /// Réinitialise les scores des juges pour le round en cours sans modifier l'historique des rounds du match.
+    /// </summary>
+    public void ResetRoundScores()
+    {
         foreach (var j in Judges)
         {
             j.RedPoints = 0;
@@ -332,7 +352,150 @@ public class ArbitrationServerSession : IDisposable
             else if (j.Group == "C") j.Score = Constants.DEFAUTL_SCORE_GROUP_C;
             else j.Score = 10.0;
         }
-        StatusChanged?.Invoke(this, "Scores et points réinitialisés pour le match en cours.");
+    }
+
+    /// <summary>
+    /// Valide le round en cours et passe au round suivant pour le match actif.
+    /// Enregistre les scores du round (RoundResultModel), réinitialise les points des juges,
+    /// remet le chronomètre à zéro et diffuse l'état aux juges.
+    /// Si un combattant remporte 2 rounds sur 3 (ou le maximum de rounds), déclare la fin du match.
+    /// </summary>
+    /// <param name="forcedWinner">Vainqueur forcé du round ("red", "blue", "draw") ou null pour calcul automatique selon les juges.</param>
+    /// <returns>True si le round a été validé et passé au suivant (ou match terminé), false en cas d'erreur.</returns>
+    public async Task<bool> NextRoundAsync(string? forcedWinner = null)
+    {
+        var match = CurrentMatch;
+        if (match == null)
+        {
+            StatusChanged?.Invoke(this, "[ERREUR] Aucun match actif.");
+            return false;
+        }
+
+        if (match.IsFinished)
+        {
+            StatusChanged?.Invoke(this, $"[ATTENTION] Le match #{match.Id} est déjà terminé (Vainqueur : {match.Winner}).");
+            return false;
+        }
+
+        int redVotes = (int)Judges.Sum(j => j.RedPoints);
+        int blueVotes = (int)Judges.Sum(j => j.BluePoints);
+
+        string winnerColor;
+        if (!string.IsNullOrWhiteSpace(forcedWinner))
+        {
+            string f = forcedWinner.Trim().ToLowerInvariant();
+            if (f is "red" or "rouge" or "r") winnerColor = "Red";
+            else if (f is "blue" or "bleu" or "b") winnerColor = "Blue";
+            else if (f is "draw" or "nul" or "egalite" or "d") winnerColor = "Draw";
+            else winnerColor = "Draw";
+        }
+        else
+        {
+            // Évaluation automatique selon la majorité des juges ou départage aux points
+            var eval = EvaluateSandaScores();
+            if (eval.Leader == "Rouge") winnerColor = "Red";
+            else if (eval.Leader == "Bleu") winnerColor = "Blue";
+            else winnerColor = "Draw";
+        }
+
+        int completedRound = match.CurrentRound;
+
+        var roundResult = new RoundResultModel
+        {
+            RoundNumber = completedRound,
+            RedVotes = redVotes,
+            BlueVotes = blueVotes,
+            WinnerColor = winnerColor
+        };
+        match.RoundResults.Add(roundResult);
+
+        // Synchroniser avec l'entité sous-jacente du tirage si existante
+        UpdateUnderlyingDrawRound(match);
+
+        // Calcul des victoires de rounds
+        int redWins = match.RoundResults.Count(r => r.WinnerColor == "Red");
+        int blueWins = match.RoundResults.Count(r => r.WinnerColor == "Blue");
+
+        string roundWinnerName = winnerColor == "Red" ? match.RedCompetitor : (winnerColor == "Blue" ? match.BlueCompetitor : "Égalité");
+        StatusChanged?.Invoke(this, $"🏁 [ROUND {completedRound} VALIDÉ] Vainqueur : {roundWinnerName} ({winnerColor}) - Rouge {redVotes} vs {blueVotes} Bleu | Total rounds : Rouge {redWins} - {blueWins} Bleu");
+
+        // Vérification fin de match (best of 3 en Sanda)
+        if (redWins >= 2 || blueWins >= 2 || match.CurrentRound >= match.MaxRounds)
+        {
+            Constants.Side? finalWinnerSide = null;
+            if (redWins > blueWins) finalWinnerSide = Constants.Side.Red;
+            else if (blueWins > redWins) finalWinnerSide = Constants.Side.Blue;
+
+            if (finalWinnerSide.HasValue)
+            {
+                int winnerWins = finalWinnerSide == Constants.Side.Red ? redWins : blueWins;
+                int loserWins = finalWinnerSide == Constants.Side.Red ? blueWins : redWins;
+                await SetWinnerSideAsync(finalWinnerSide.Value, $"Victoire {winnerWins} rounds à {loserWins}");
+            }
+            else
+            {
+                match.WinnerSide = null;
+                match.Winner = "Égalité (Match nul)";
+                match.IsFinished = true;
+                match.DecisionReason = $"Égalité {redWins}-{blueWins} à l'issue de {match.CurrentRound} round(s)";
+                StatusChanged?.Invoke(this, $"⚖️ [MATCH NUL] Match #{match.Id} : {match.DecisionReason}");
+                WinnerDeclared?.Invoke(this, (match, match.Winner, match.DecisionReason));
+            }
+
+            await StopTimerAsync();
+            RoundChanged?.Invoke(this, (match, match.CurrentRound));
+            return true;
+        }
+
+        // Passage au round suivant
+        match.CurrentRound++;
+
+        // Réinitialiser les scores des juges pour le nouveau round
+        ResetRoundScores();
+
+        // Réinitialiser le chronomètre pour le nouveau round
+        await StopTimerAsync();
+        _timeLeft = _totalRoundTime;
+
+        // Diffuser aux juges BLE
+        if (_bluetoothServer.IsAdvertising)
+        {
+            await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
+            await BroadcastMatchInfoAsync();
+        }
+
+        RoundChanged?.Invoke(this, (match, match.CurrentRound));
+        StatusChanged?.Invoke(this, $"🔔 [ROUND {match.CurrentRound}] Début du round {match.CurrentRound}/{match.MaxRounds} pour le match #{match.Id} ({match.RedCompetitor} vs {match.BlueCompetitor}). Chronomètre réinitialisé à {TimeLeftDisplay}.");
+
+        return true;
+    }
+
+    private void UpdateUnderlyingDrawRound(MatchItem match)
+    {
+        foreach (var cat in _loadedCategories)
+        {
+            if (cat.Draw?.DrawKnockouts != null)
+            {
+                var ko = cat.Draw.DrawKnockouts.FirstOrDefault(k => k.Id == match.Id);
+                if (ko != null)
+                {
+                    ko.CurrentRound = match.CurrentRound;
+                    ko.RoundResultsJson = JsonSerializer.Serialize(match.RoundResults, _jsonOptions);
+                    return;
+                }
+            }
+
+            if (cat.Draw?.DrawPools != null)
+            {
+                var pool = cat.Draw.DrawPools.FirstOrDefault(p => p.Id == match.Id);
+                if (pool != null)
+                {
+                    pool.CurrentRound = match.CurrentRound;
+                    pool.RoundResultsJson = JsonSerializer.Serialize(match.RoundResults, _jsonOptions);
+                    return;
+                }
+            }
+        }
     }
 
     #region Winner & Scoring Methods
@@ -782,7 +945,8 @@ public class ArbitrationServerSession : IDisposable
         var data = new MatchInfoData
         {
             Id = CurrentMatch.Id,
-            Type = CurrentMatch.Type
+            Type = CurrentMatch.Type,
+            Round = CurrentMatch.CurrentRound
         };
 
         string json = JsonSerializer.Serialize(data, _jsonOptions);
@@ -808,7 +972,8 @@ public class ArbitrationServerSession : IDisposable
         var data = new MatchInfoData
         {
             Id = CurrentMatch.Id,
-            Type = CurrentMatch.Type
+            Type = CurrentMatch.Type,
+            Round = CurrentMatch.CurrentRound
         };
 
         string json = JsonSerializer.Serialize(data, _jsonOptions);
@@ -940,14 +1105,14 @@ public class ArbitrationServerSession : IDisposable
                     {
                         judge.RedPoints += scoreModel.Score;
                         string desc = $"+{scoreModel.Score:F0} Rouge (Total: {judge.RedPoints:F0})";
-                        RecordJudgeScore(judge, scoreModel.Side, scoreModel.Score, judge.RedPoints, null, "Point Rouge", desc);
+                        RecordJudgeScore(judge, scoreModel.Side, scoreModel.Score, judge.RedPoints, null, "Point Rouge", desc, scoreModel.Round);
                         ScoreUpdated?.Invoke(this, (judge, desc));
                     }
                     else if (scoreModel.Side == Constants.Side.Blue)
                     {
                         judge.BluePoints += scoreModel.Score;
                         string desc = $"+{scoreModel.Score:F0} Bleu (Total: {judge.BluePoints:F0})";
-                        RecordJudgeScore(judge, scoreModel.Side, scoreModel.Score, judge.BluePoints, null, "Point Bleu", desc);
+                        RecordJudgeScore(judge, scoreModel.Side, scoreModel.Score, judge.BluePoints, null, "Point Bleu", desc, scoreModel.Round);
                         ScoreUpdated?.Invoke(this, (judge, desc));
                     }
                     else
@@ -957,13 +1122,13 @@ public class ArbitrationServerSession : IDisposable
                         {
                             judge.Codes.Insert(0, scoreModel.Code);
                             string desc = $"Déduction {scoreModel.Code.Code?.Code} (-{scoreModel.Code.Code?.Value:F1}) => Nouveau score: {judge.Score:F2}";
-                            RecordJudgeScore(judge, null, -(scoreModel.Code.Code?.Value ?? 0), judge.Score, scoreModel.Code, "Déduction", desc);
+                            RecordJudgeScore(judge, null, -(scoreModel.Code.Code?.Value ?? 0), judge.Score, scoreModel.Code, "Déduction", desc, scoreModel.Round);
                             ScoreUpdated?.Invoke(this, (judge, desc));
                         }
                         else
                         {
                             string desc = $"Score fixé à {judge.Score:F2}";
-                            RecordJudgeScore(judge, null, scoreModel.Score, judge.Score, null, "Score", desc);
+                            RecordJudgeScore(judge, null, scoreModel.Score, judge.Score, null, "Score", desc, scoreModel.Round);
                             ScoreUpdated?.Invoke(this, (judge, desc));
                         }
                     }
@@ -1605,7 +1770,8 @@ public class ArbitrationServerSession : IDisposable
         double resultingScore,
         MvtTimeCodeModel? deductionCode,
         string actionType,
-        string description)
+        string description,
+        int? round = null)
     {
         var match = CurrentMatch;
         int nextId = _judgeScoreHistory.Count + 1;
@@ -1616,6 +1782,10 @@ public class ArbitrationServerSession : IDisposable
         var elapsed = _totalRoundTime > _timeLeft ? (_totalRoundTime - _timeLeft) : TimeSpan.Zero;
         string elapsedDisplay = $"{(int)elapsed.TotalMinutes:D2}:{elapsed.Seconds:D2}";
 
+        int roundNumber = (round.HasValue && round.Value > 0)
+            ? round.Value
+            : (match?.CurrentRound ?? 1);
+
         var entry = new JudgeScoreEntry
         {
             Id = nextId,
@@ -1623,6 +1793,7 @@ public class ArbitrationServerSession : IDisposable
             MatchTimer = elapsed,
             MatchTimeDisplay = elapsedDisplay,
             MatchId = match?.Id ?? 0,
+            Round = roundNumber,
             MatchCategory = match?.Category ?? "N/A",
             MatchCompetitors = competitors,
             JudgeName = judge.Name,

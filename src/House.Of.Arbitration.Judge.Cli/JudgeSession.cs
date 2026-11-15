@@ -8,6 +8,7 @@ public class MatchDisplayInfo
 {
     public int Id { get; set; }
     public RoundType Type { get; set; }
+    public int Round { get; set; } = 1;
     public string CategoryName { get; set; } = string.Empty;
     public string Competitor1Name { get; set; } = string.Empty;
     public string Competitor2Name { get; set; } = string.Empty;
@@ -216,7 +217,8 @@ public class JudgeSession : IDisposable
             Score = CurrentScore,
             CompetitorId = CurrentMatch?.Competitor1Id,
             Code = mvtTimeCode,
-            JudgePosition = PositionCode
+            JudgePosition = PositionCode,
+            Round = CurrentMatch?.Round ?? 1
         };
 
         if (!isConnected)
@@ -290,7 +292,8 @@ public class JudgeSession : IDisposable
             Score = CurrentScore,
             CompetitorId = CurrentMatch?.Competitor1Id,
             Code = mvtTimeCode,
-            JudgePosition = PositionCode
+            JudgePosition = PositionCode,
+            Round = CurrentMatch?.Round ?? 1
         };
 
         if (!isConnected)
@@ -343,7 +346,8 @@ public class JudgeSession : IDisposable
         {
             Score = CurrentScore,
             CompetitorId = CurrentMatch?.Competitor1Id,
-            JudgePosition = PositionCode
+            JudgePosition = PositionCode,
+            Round = CurrentMatch?.Round ?? 1
         };
 
         if (!_client.IsConnected)
@@ -405,7 +409,8 @@ public class JudgeSession : IDisposable
             Score = 1.0,
             Side = side,
             CompetitorId = compId,
-            JudgePosition = PositionCode
+            JudgePosition = PositionCode,
+            Round = CurrentMatch?.Round ?? 1
         };
 
         if (!_client.IsConnected)
@@ -798,10 +803,11 @@ public class JudgeSession : IDisposable
                     {
                         Id = matchData.Id,
                         Type = matchData.Type,
+                        Round = matchData.Round > 0 ? matchData.Round : 1,
                         Competitor1Id = matchData.Id
                     };
 
-                    // Réinitialisation des déductions pour un nouveau match
+                    // Réinitialisation des déductions pour un nouveau match ou nouveau round
                     DeductionsHistory.Clear();
                     RedPoints = 0;
                     BluePoints = 0;
@@ -811,7 +817,7 @@ public class JudgeSession : IDisposable
                     else if (JudgeGroup == "C") CurrentScore = Constants.DEFAUTL_SCORE_GROUP_C;
 
                     MatchUpdated?.Invoke(this, CurrentMatch);
-                    NotificationReceived?.Invoke(this, $"Nouveau match reçu : #{matchData.Id} ({matchData.Type})");
+                    NotificationReceived?.Invoke(this, $"Match / Round reçu : #{matchData.Id} (Round {CurrentMatch.Round}, {matchData.Type})");
                 }
             }
             else if (message.StartsWith(Constants.Message.TIMER_SET))

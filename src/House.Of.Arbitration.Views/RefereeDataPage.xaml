@@ -258,14 +258,21 @@
                                         TextColor="{DynamicResource InverseTextColor}"
                                     />
                                 </VerticalStackLayout>
-                                <Label 
-                                    Grid.Column="3" 
-                                    Text="{Binding Score}" 
-                                    HorizontalOptions="Center" 
-                                    VerticalOptions="Center" 
-                                    FontAttributes="Bold" 
-                                    TextColor="{DynamicResource InverseTextColor}" 
-                                />
+                                <VerticalStackLayout Grid.Column="3" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Score}" 
+                                        HorizontalOptions="Center" 
+                                        FontAttributes="Bold" 
+                                        TextColor="{DynamicResource InverseTextColor}" 
+                                    />
+                                    <Label 
+                                        Text="{Binding Round, StringFormat='R{0}'}" 
+                                        HorizontalOptions="Center" 
+                                        FontSize="10" 
+                                        TextColor="{DynamicResource PrimaryColor}" 
+                                        FontAttributes="Bold"
+                                    />
+                                </VerticalStackLayout>
                                 <VerticalStackLayout Grid.Column="4" VerticalOptions="Center">
                                     <Label Text="{Binding DrawKnockoutModel.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource InverseTextColor}" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
                                     <Label Text="{Binding DrawOrder.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource InverseTextColor}" IsVisible="{Binding DrawOrderId, Converter={StaticResource EmptyToBoolConverter}}" />

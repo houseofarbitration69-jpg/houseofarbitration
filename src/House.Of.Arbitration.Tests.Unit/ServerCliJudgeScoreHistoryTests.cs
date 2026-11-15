@@ -178,4 +178,26 @@ public class ServerCliJudgeScoreHistoryTests
         Assert.Equal(TimeSpan.FromSeconds(30), entry.MatchTimer);
         Assert.Equal("00:30", entry.MatchTimeDisplay);
     }
+
+    [Fact]
+    public async Task RecordJudgeScore_RoundTracking_StoresCorrectRoundNumber()
+    {
+        using var server = new WindowsBluetoothServer();
+        using var session = new ArbitrationServerSession(server);
+
+        var judge = session.Judges[0];
+
+        // 1. Round 1 par défaut
+        var entryR1 = session.RecordJudgeScore(judge, Constants.Side.Red, 1.0, 1.0, null, "Point Rouge", "+1 Rouge");
+        Assert.Equal(1, entryR1.Round);
+
+        // 2. Passage au Round 2
+        await session.NextRoundAsync();
+        var entryR2 = session.RecordJudgeScore(judge, Constants.Side.Red, 1.0, 1.0, null, "Point Rouge", "+1 Rouge");
+        Assert.Equal(2, entryR2.Round);
+
+        // 3. Spécification explicite d'un round (ex: note différée)
+        var entryExplicit = session.RecordJudgeScore(judge, Constants.Side.Blue, 1.0, 1.0, null, "Point Bleu", "+1 Bleu", round: 3);
+        Assert.Equal(3, entryExplicit.Round);
+    }
 }

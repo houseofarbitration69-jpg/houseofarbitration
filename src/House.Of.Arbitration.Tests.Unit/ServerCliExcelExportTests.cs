@@ -181,28 +181,31 @@ public class ServerCliExcelExportTests
             var wsCat = workbook.Worksheets.FirstOrDefault(w => w.Name.Contains("Sanda"));
             Assert.NotNull(wsCat);
 
-            // En-têtes : Date, Heure, Juge, Côté, Action, Valeur, Score cumulé, Match, Détails
+            // En-têtes : Date, Heure, Chrono, Round, Juge, Côté, Action, Valeur, Score cumulé, Match, Détails
             Assert.Equal("Date", wsCat.Cell(5, 1).GetString());
             Assert.Equal("Heure", wsCat.Cell(5, 2).GetString());
-            Assert.Equal("Juge / Arbitre", wsCat.Cell(5, 3).GetString());
-            Assert.Equal("Côté / Athlète", wsCat.Cell(5, 4).GetString());
-            Assert.Equal("Action", wsCat.Cell(5, 5).GetString());
-            Assert.Equal("Valeur", wsCat.Cell(5, 6).GetString());
-            Assert.Equal("Match", wsCat.Cell(5, 8).GetString());
+            Assert.Equal("Chrono", wsCat.Cell(5, 3).GetString());
+            Assert.Equal("Round", wsCat.Cell(5, 4).GetString());
+            Assert.Equal("Juge / Arbitre", wsCat.Cell(5, 5).GetString());
+            Assert.Equal("Côté / Athlète", wsCat.Cell(5, 6).GetString());
+            Assert.Equal("Action", wsCat.Cell(5, 7).GetString());
+            Assert.Equal("Valeur", wsCat.Cell(5, 8).GetString());
+            Assert.Equal("Match", wsCat.Cell(5, 10).GetString());
 
             // Lignes de notes
-            Assert.Equal("Juge 1", wsCat.Cell(6, 3).GetString());
-            Assert.Equal("Rouge", wsCat.Cell(6, 4).GetString());
-            Assert.Equal(2.0, wsCat.Cell(6, 6).GetDouble(), 2);
-            Assert.Equal("Match #10", wsCat.Cell(6, 8).GetString());
+            Assert.Equal(1, wsCat.Cell(6, 4).GetDouble()); // Round 1
+            Assert.Equal("Juge 1", wsCat.Cell(6, 5).GetString());
+            Assert.Equal("Rouge", wsCat.Cell(6, 6).GetString());
+            Assert.Equal(2.0, wsCat.Cell(6, 8).GetDouble(), 2);
+            Assert.Equal("Match #10", wsCat.Cell(6, 10).GetString());
 
-            Assert.Equal("Juge 1", wsCat.Cell(7, 3).GetString());
-            Assert.Equal("Bleu", wsCat.Cell(7, 4).GetString());
-            Assert.Equal(1.0, wsCat.Cell(7, 6).GetDouble(), 2);
+            Assert.Equal("Juge 1", wsCat.Cell(7, 5).GetString());
+            Assert.Equal("Bleu", wsCat.Cell(7, 6).GetString());
+            Assert.Equal(1.0, wsCat.Cell(7, 8).GetDouble(), 2);
 
-            Assert.Equal("Juge 2", wsCat.Cell(8, 3).GetString());
-            Assert.Equal("Rouge", wsCat.Cell(8, 4).GetString());
-            Assert.Equal(1.0, wsCat.Cell(8, 6).GetDouble(), 2);
+            Assert.Equal("Juge 2", wsCat.Cell(8, 5).GetString());
+            Assert.Equal("Rouge", wsCat.Cell(8, 6).GetString());
+            Assert.Equal(1.0, wsCat.Cell(8, 8).GetDouble(), 2);
         }
         finally
         {

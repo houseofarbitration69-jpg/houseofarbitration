@@ -1389,20 +1389,22 @@ public static class ExcelCompetitionLoader
         ws.Cell(3, 1).Style.Font.FontSize = 12;
         ws.Cell(3, 1).Style.Fill.BackgroundColor = XLColor.FromHtml("#1E3A5F");
         ws.Cell(3, 1).Style.Font.FontColor = XLColor.White;
-        ws.Range(3, 1, 3, 9).Merge();
+        ws.Range(3, 1, 3, 11).Merge();
 
         int headerRow = 5;
         ws.Cell(headerRow, 1).Value = "Date";
         ws.Cell(headerRow, 2).Value = "Heure";
-        ws.Cell(headerRow, 3).Value = "Juge / Arbitre";
-        ws.Cell(headerRow, 4).Value = "Côté / Athlète";
-        ws.Cell(headerRow, 5).Value = "Action";
-        ws.Cell(headerRow, 6).Value = "Valeur";
-        ws.Cell(headerRow, 7).Value = "Score cumulé";
-        ws.Cell(headerRow, 8).Value = "Match";
-        ws.Cell(headerRow, 9).Value = "Détails / Code";
+        ws.Cell(headerRow, 3).Value = "Chrono";
+        ws.Cell(headerRow, 4).Value = "Round";
+        ws.Cell(headerRow, 5).Value = "Juge / Arbitre";
+        ws.Cell(headerRow, 6).Value = "Côté / Athlète";
+        ws.Cell(headerRow, 7).Value = "Action";
+        ws.Cell(headerRow, 8).Value = "Valeur";
+        ws.Cell(headerRow, 9).Value = "Score cumulé";
+        ws.Cell(headerRow, 10).Value = "Match";
+        ws.Cell(headerRow, 11).Value = "Détails / Code";
 
-        var headerRange = ws.Range(headerRow, 1, headerRow, 9);
+        var headerRange = ws.Range(headerRow, 1, headerRow, 11);
         headerRange.Style.Font.Bold = true;
         headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#2C5F8A");
         headerRange.Style.Font.FontColor = XLColor.White;
@@ -1422,7 +1424,9 @@ public static class ExcelCompetitionLoader
 
             ws.Cell(row, 1).Value = sc.Timestamp.ToString("dd/MM/yyyy");
             ws.Cell(row, 2).Value = sc.Timestamp.ToString("HH:mm:ss");
-            ws.Cell(row, 3).Value = sc.JudgeName;
+            ws.Cell(row, 3).Value = !string.IsNullOrEmpty(sc.MatchTimeDisplay) ? sc.MatchTimeDisplay : "00:00";
+            ws.Cell(row, 4).Value = sc.Round;
+            ws.Cell(row, 5).Value = sc.JudgeName;
 
             string sideStr = sc.Side switch
             {
@@ -1430,21 +1434,21 @@ public static class ExcelCompetitionLoader
                 Constants.Side.Blue => "Bleu",
                 _ => (!string.IsNullOrWhiteSpace(sc.MatchCompetitors) ? sc.MatchCompetitors : "—")
             };
-            ws.Cell(row, 4).Value = sideStr;
-            ws.Cell(row, 5).Value = sc.ActionType;
+            ws.Cell(row, 6).Value = sideStr;
+            ws.Cell(row, 7).Value = sc.ActionType;
 
-            ws.Cell(row, 6).Value = sc.DeltaPoints;
-            ws.Cell(row, 6).Style.NumberFormat.Format = "0.00";
+            ws.Cell(row, 8).Value = sc.DeltaPoints;
+            ws.Cell(row, 8).Style.NumberFormat.Format = "0.00";
 
-            ws.Cell(row, 7).Value = sc.ResultingScore;
-            ws.Cell(row, 7).Style.NumberFormat.Format = "0.00";
+            ws.Cell(row, 9).Value = sc.ResultingScore;
+            ws.Cell(row, 9).Style.NumberFormat.Format = "0.00";
 
-            ws.Cell(row, 8).Value = $"Match #{sc.MatchId}";
-            ws.Cell(row, 9).Value = !string.IsNullOrWhiteSpace(sc.Description) 
+            ws.Cell(row, 10).Value = $"Match #{sc.MatchId}";
+            ws.Cell(row, 11).Value = !string.IsNullOrWhiteSpace(sc.Description) 
                 ? sc.Description 
                 : (sc.DeductionCode?.Code?.Description ?? sc.DeductionCode?.Code?.Code ?? "—");
 
-            var rowRange = ws.Range(row, 1, row, 9);
+            var rowRange = ws.Range(row, 1, row, 11);
             if (sc.DeductionCode != null || sc.ActionType.Contains("Déduction"))
             {
                 rowRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#FFE4E4");
@@ -1455,34 +1459,38 @@ public static class ExcelCompetitionLoader
             }
 
             if (sc.DeltaPoints < 0)
-                ws.Cell(row, 6).Style.Font.FontColor = XLColor.Red;
+                ws.Cell(row, 8).Style.Font.FontColor = XLColor.Red;
             else if (sc.DeltaPoints > 0)
-                ws.Cell(row, 6).Style.Font.FontColor = XLColor.FromHtml("#1B7A34");
+                ws.Cell(row, 8).Style.Font.FontColor = XLColor.FromHtml("#1B7A34");
 
             ws.Cell(row, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             ws.Cell(row, 2).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            ws.Cell(row, 6).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-            ws.Cell(row, 7).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Cell(row, 3).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Cell(row, 4).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             ws.Cell(row, 8).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Cell(row, 9).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            ws.Cell(row, 10).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
             row++;
         }
 
         if (row > headerRow + 1)
         {
-            ws.Range(headerRow, 1, row - 1, 9).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-            ws.Range(headerRow, 1, row - 1, 9).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            ws.Range(headerRow, 1, row - 1, 11).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            ws.Range(headerRow, 1, row - 1, 11).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
         }
 
         ws.Column(1).Width = 12;
         ws.Column(2).Width = 11;
-        ws.Column(3).Width = 16;
-        ws.Column(4).Width = 20;
-        ws.Column(5).Width = 15;
-        ws.Column(6).Width = 11;
-        ws.Column(7).Width = 13;
-        ws.Column(8).Width = 14;
-        ws.Column(9).Width = 32;
+        ws.Column(3).Width = 11;
+        ws.Column(4).Width = 8;
+        ws.Column(5).Width = 16;
+        ws.Column(6).Width = 20;
+        ws.Column(7).Width = 15;
+        ws.Column(8).Width = 11;
+        ws.Column(9).Width = 13;
+        ws.Column(10).Width = 14;
+        ws.Column(11).Width = 32;
 
         ws.SheetView.FreezeRows(headerRow);
     }

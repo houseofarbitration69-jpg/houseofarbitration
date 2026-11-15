@@ -66,6 +66,8 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     #region Attributs
     private IDrawModel? _currentDraw;
     private int _lastMatchId;
+    private int _lastRoundNumber = 1;
+    private int _currentRound = 1;
     private int _competitionId;
     private CompetitionModel? _competition;
     private string _serverId = String.Empty;
@@ -432,6 +434,15 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     {
         get => _blueScore;
         set => SetProperty(ref _blueScore, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le round en cours
+    /// </summary>
+    public int CurrentRound
+    {
+        get => _currentRound;
+        set => SetProperty(ref _currentRound, value);
     }
 
     /// <summary>
@@ -810,8 +821,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
                 if (matchData != null)
                 {
+                    int roundNum = matchData.Round > 0 ? matchData.Round : 1;
                     bool isNewMatch = _lastMatchId != matchData.Id;
+                    bool isNewRound = isNewMatch || _lastRoundNumber != roundNum;
                     _lastMatchId = matchData.Id;
+                    _lastRoundNumber = roundNum;
+                    CurrentRound = roundNum;
 
                     switch (matchData.Type)
                     {
@@ -844,6 +859,11 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                             break;
                     }
 
+                    if (CurrentDraw != null)
+                    {
+                        CurrentDraw.CurrentRound = roundNum;
+                    }
+
                     CategoryName = CurrentDraw?.Draw?.Category?.Name;
                     if (CurrentDraw is DrawKnockoutModel k)
                     {
@@ -857,12 +877,20 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                         Competitor2 = p.Competitor2;
                         MatchStageName = $"Poule - Match #{p.Order}";
                     }
+                    else if (CurrentDraw is DrawOrderModel o)
+                    {
+                        Competitor1 = o.Competitor;
+                        Competitor2 = null;
+                        MatchStageName = string.Empty;
+                    }
                     else
                     {
+                        Competitor1 = null;
+                        Competitor2 = null;
                         MatchStageName = string.Empty;
                     }
 
-                    if (isNewMatch)
+                    if (isNewRound)
                     {
                         RedScore = 0;
                         BlueScore = 0;
@@ -871,21 +899,6 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                             Codes.Clear();
                             HasUnsyncedChanges = false;
                         }
-                    }
-                    else if (CurrentDraw is DrawPoolsModel p)
-                    {
-                        Competitor1 = p.Competitor1;
-                        Competitor2 = p.Competitor2;
-                    }
-                    else if (CurrentDraw is DrawOrderModel o)
-                    {
-                        Competitor1 = o.Competitor;
-                        Competitor2 = null;
-                    }
-                    else
-                    {
-                        Competitor1 = null;
-                        Competitor2 = null;
                     }
 
                     if (Competition == null && CompetitionId > 0)
@@ -1313,7 +1326,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                 var unsynced = Codes.Where(c => !c.IsSynced).OrderBy(c => c.Date).ToList();
                 foreach (var c in unsynced)
                 {
-                    var model = new TransfertScoreModel { Score = c.Score, CompetitorId = competitorId, Code = c, JudgePosition = PositionCode };
+                    var model = new TransfertScoreModel { Score = c.Score, CompetitorId = competitorId, Code = c, JudgePosition = PositionCode, Round = CurrentRound };
                     var json = JsonSerializer.Serialize(model, _jsonOptions);
                     await _bluetoothClient.SendMessage(ServerId, $"{Constants.Message.JUDGE_SCORE}{json}");
                     c.IsSynced = true;
@@ -1396,7 +1409,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                 break;
         }
 
-        var scoreModel = new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId, Side = side, JudgePosition = PositionCode };
+        var scoreModel = new TransfertScoreModel() { Score = 1.0, CompetitorId = competitorId, Side = side, JudgePosition = PositionCode, Round = CurrentRound };
 
         if (!IsConnected || ServerId == null)
         {
@@ -1669,7 +1682,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
         Code = string.Empty;
         MatchingCodes = new List<MvtCodeModel>();
 
-        var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data, JudgePosition = PositionCode };
+        var scoreModel = new TransfertScoreModel() { Score = Score, CompetitorId = competitorId, Code = data, JudgePosition = PositionCode, Round = CurrentRound };
 
         if (!IsConnected || ServerId == null)
         {
@@ -2091,7 +2104,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
 
         PointsInput = string.Empty;
 
-        var scoreModel = new TransfertScoreModel { Score = Score, CompetitorId = competitorId, Code = data, JudgePosition = PositionCode };
+        var scoreModel = new TransfertScoreModel { Score = Score, CompetitorId = competitorId, Code = data, JudgePosition = PositionCode, Round = CurrentRound };
 
         if (!IsConnected || ServerId == null)
         {
