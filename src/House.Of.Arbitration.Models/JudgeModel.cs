@@ -12,6 +12,7 @@ public partial class JudgeModel : ObservableObject
     private double _bluePoints;
     private double _score;
     private bool _isConnected;
+    private bool _hasConnected;
     private string _name = string.Empty;
     private int _number;
     private string? _group;
@@ -51,7 +52,22 @@ public partial class JudgeModel : ObservableObject
     public bool IsConnected
     {
         get => _isConnected;
-        set => SetProperty(ref _isConnected, value);
+        set
+        {
+            if (SetProperty(ref _isConnected, value) && value)
+            {
+                HasConnected = true;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Obtient ou définit si le juge s'est connecté au moins une fois pendant la session
+    /// </summary>
+    public bool HasConnected
+    {
+        get => _hasConnected;
+        set => SetProperty(ref _hasConnected, value);
     }
 
     /// <summary>

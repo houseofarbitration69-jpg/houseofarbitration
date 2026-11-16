@@ -114,7 +114,14 @@ internal static class Program
 
         session.MatchUpdated += (_, match) =>
         {
-            LogColor(ConsoleColor.Green, $"[MATCH ACTIF] ID: #{match.Id} | Type: {match.Type} | Compétiteur: #{match.Competitor1Id}");
+            if (match != null)
+            {
+                LogColor(ConsoleColor.Green, $"[MATCH ACTIF] ID: #{match.Id} | Type: {match.Type} | Compétiteur: #{match.Competitor1Id}");
+            }
+            else
+            {
+                LogColor(ConsoleColor.Yellow, "🏁 [INFO] Il n'y a plus de match à arbitrer. En attente du serveur.");
+            }
         };
 
         session.TimerUpdated += (_, timer) =>
@@ -601,10 +608,14 @@ internal static class Program
         {
             Console.WriteLine($"  Match actuel     : #{_session.CurrentMatch.Id} ({_session.CurrentMatch.Type})");
             Console.WriteLine($"  Compétiteur 1    : #{_session.CurrentMatch.Competitor1Id} {_session.CurrentMatch.Competitor1Name}");
+            if (!string.IsNullOrEmpty(_session.CurrentMatch.Competitor2Name))
+            {
+                Console.WriteLine($"  Compétiteur 2    : #{_session.CurrentMatch.Competitor2Id} {_session.CurrentMatch.Competitor2Name}");
+            }
         }
         else
         {
-            Console.WriteLine("  Match actuel     : Aucun match actif");
+            Console.WriteLine("  Match actuel     : 🏁 Aucun match en cours (il n'y a plus de match à disputer)");
         }
 
         if (_session.CurrentCompetition != null)

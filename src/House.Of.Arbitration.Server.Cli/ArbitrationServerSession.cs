@@ -28,6 +28,8 @@ public class MatchItem
     public int CurrentRound { get; set; } = 1;
     public int MaxRounds { get; set; } = 3;
     public List<RoundResultModel> RoundResults { get; } = new();
+    public List<double> JudgeScores { get; set; } = new();
+    public Dictionary<string, double> JudgeScoresByJudge { get; set; } = new();
 }
 
 /// <summary>
@@ -288,16 +290,37 @@ public class ArbitrationServerSession : IDisposable
 
     public async Task NextMatchAsync()
     {
+        // En mode Taolu, finaliser et enregistrer le match précédent avant de passer au suivant
+        if (CurrentMatch != null && (CurrentCompetitionType == CompetitionType.Taolu || CurrentMatch.Type == RoundType.Order) && !CurrentMatch.IsFinished)
+        {
+            await SetTaoluScoreAsync();
+        }
+
         if (_currentMatchIndex + 1 < _matches.Count)
         {
             _currentMatchIndex++;
-            ResetMatchScores();
+            if (CurrentMatch != null && !CurrentMatch.IsFinished)
+            {
+                ResetMatchScores();
+            }
+            else
+            {
+                ResetRoundScores();
+                RestoreJudgeScoresForMatch(CurrentMatch);
+            }
             StatusChanged?.Invoke(this, $"Match suivant : #{CurrentMatch?.Id} - {CurrentMatch?.Category}");
+            await BroadcastMatchInfoAsync();
+        }
+        else if (_currentMatchIndex < _matches.Count)
+        {
+            _currentMatchIndex = _matches.Count;
+            ResetRoundScores();
+            StatusChanged?.Invoke(this, "🏁 Tous les matchs de la compétition sont terminés !");
             await BroadcastMatchInfoAsync();
         }
         else
         {
-            StatusChanged?.Invoke(this, "Dernier match déjà atteint.");
+            StatusChanged?.Invoke(this, "Il n'y a plus de match à disputer.");
         }
     }
 
@@ -305,8 +328,22 @@ public class ArbitrationServerSession : IDisposable
     {
         if (_currentMatchIndex > 0)
         {
+            // En mode Taolu, finaliser le match en cours si non terminé
+            if (CurrentMatch != null && (CurrentCompetitionType == CompetitionType.Taolu || CurrentMatch.Type == RoundType.Order) && !CurrentMatch.IsFinished)
+            {
+                await SetTaoluScoreAsync();
+            }
+
             _currentMatchIndex--;
-            ResetMatchScores();
+            if (CurrentMatch != null && !CurrentMatch.IsFinished)
+            {
+                ResetMatchScores();
+            }
+            else
+            {
+                ResetRoundScores();
+                RestoreJudgeScoresForMatch(CurrentMatch);
+            }
             StatusChanged?.Invoke(this, $"Match précédent : #{CurrentMatch?.Id} - {CurrentMatch?.Category}");
             await BroadcastMatchInfoAsync();
         }
@@ -314,12 +351,60 @@ public class ArbitrationServerSession : IDisposable
 
     public async Task SetMatchIndexAsync(int index)
     {
-        if (index >= 0 && index < _matches.Count)
+        if (index >= 0 && index <= _matches.Count)
         {
+            // En mode Taolu, finaliser le match en cours si non terminé avant de changer d'index
+            if (index != _currentMatchIndex && CurrentMatch != null && (CurrentCompetitionType == CompetitionType.Taolu || CurrentMatch.Type == RoundType.Order) && !CurrentMatch.IsFinished)
+            {
+                await SetTaoluScoreAsync();
+            }
+
             _currentMatchIndex = index;
-            ResetMatchScores();
-            StatusChanged?.Invoke(this, $"Match actif : #{CurrentMatch?.Id} - {CurrentMatch?.Category}");
+            if (CurrentMatch != null)
+            {
+                if (!CurrentMatch.IsFinished)
+                {
+                    ResetMatchScores();
+                }
+                else
+                {
+                    ResetRoundScores();
+                    RestoreJudgeScoresForMatch(CurrentMatch);
+                }
+                StatusChanged?.Invoke(this, $"Match actif : #{CurrentMatch?.Id} - {CurrentMatch?.Category}");
+            }
+            else
+            {
+                ResetRoundScores();
+                StatusChanged?.Invoke(this, "🏁 Tous les matchs de la compétition sont terminés !");
+            }
             await BroadcastMatchInfoAsync();
+        }
+    }
+
+    private void RestoreJudgeScoresForMatch(MatchItem? match)
+    {
+        if (match == null || !(CurrentCompetitionType == CompetitionType.Taolu || match.Type == RoundType.Order))
+            return;
+
+        var activeJudges = GetActiveJudges();
+
+        if (match.JudgeScoresByJudge.Count > 0)
+        {
+            foreach (var j in activeJudges)
+            {
+                if (!string.IsNullOrWhiteSpace(j.Name) && match.JudgeScoresByJudge.TryGetValue(j.Name, out double savedScore))
+                {
+                    j.Score = savedScore;
+                }
+            }
+        }
+        else if (match.JudgeScores.Count > 0)
+        {
+            for (int i = 0; i < Math.Min(activeJudges.Count, match.JudgeScores.Count); i++)
+            {
+                activeJudges[i].Score = match.JudgeScores[i];
+            }
         }
     }
 
@@ -498,7 +583,36 @@ public class ArbitrationServerSession : IDisposable
         }
     }
 
+    private void UpdateUnderlyingDrawOrder(MatchItem match)
+    {
+        var allCats = CurrentCompetition.Categories.Concat(_loadedCategories).Distinct();
+        foreach (var cat in allCats)
+        {
+            if (cat.Draw?.DrawOrders != null)
+            {
+                var order = cat.Draw.DrawOrders.FirstOrDefault(o => o.Id == match.Id);
+                if (order != null)
+                {
+                    order.IsFinished = match.IsFinished;
+                    order.CurrentRound = match.CurrentRound;
+                    order.RoundResultsJson = match.FinalScore.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                    return;
+                }
+            }
+        }
+    }
+
     #region Winner & Scoring Methods
+
+    /// <summary>
+    /// Récupère la liste des juges actifs (qui se sont connectés au moins une fois, ou actuellement connectés).
+    /// Si aucun juge ne s'est connecté (mode hors-ligne / tests unitaires), renvoie tous les juges configurés.
+    /// </summary>
+    public IReadOnlyList<JudgeModel> GetActiveJudges()
+    {
+        var connected = Judges.Where(j => j.IsConnected || j.HasConnected).ToList();
+        return connected.Count > 0 ? connected : Judges.ToList();
+    }
 
     /// <summary>
     /// Évalue la situation actuelle des scores pour le match Sanda actif.
@@ -506,19 +620,20 @@ public class ArbitrationServerSession : IDisposable
     /// </summary>
     public (string Leader, int RedVotes, int BlueVotes, int TotalRedPts, int TotalBluePts, string Summary) EvaluateSandaScores()
     {
+        var activeJudges = GetActiveJudges();
         int redVotes = 0;
         int blueVotes = 0;
         int drawVotes = 0;
 
-        foreach (var j in Judges)
+        foreach (var j in activeJudges)
         {
             if (j.RedPoints > j.BluePoints) redVotes++;
             else if (j.BluePoints > j.RedPoints) blueVotes++;
             else drawVotes++;
         }
 
-        int totalRed = (int)Judges.Sum(j => j.RedPoints);
-        int totalBlue = (int)Judges.Sum(j => j.BluePoints);
+        int totalRed = (int)activeJudges.Sum(j => j.RedPoints);
+        int totalBlue = (int)activeJudges.Sum(j => j.BluePoints);
 
         string leader;
         string reason;
@@ -561,13 +676,23 @@ public class ArbitrationServerSession : IDisposable
     /// </summary>
     public (double TotalScore, double ScoreA, double ScoreB, double ScoreC, string Summary) EvaluateTaoluScores()
     {
-        var groupA = Judges.Where(j => string.Equals(j.Group, "A", StringComparison.OrdinalIgnoreCase)).ToList();
-        var groupB = Judges.Where(j => string.Equals(j.Group, "B", StringComparison.OrdinalIgnoreCase)).ToList();
-        var groupC = Judges.Where(j => string.Equals(j.Group, "C", StringComparison.OrdinalIgnoreCase)).ToList();
+        var activeJudges = GetActiveJudges();
 
-        double scoreA = groupA.Count > 0 ? groupA.Average(j => j.Score) : Constants.DEFAULT_SCORE_GROUP_A;
-        double scoreB = groupB.Count > 0 ? groupB.Average(j => j.Score) : Constants.DEFAULT_SCORE_GROUP_B;
-        double scoreC = groupC.Count > 0 ? groupC.Average(j => j.Score) : Constants.DEFAUTL_SCORE_GROUP_C;
+        var groupA = activeJudges.Where(j => string.Equals(j.Group, "A", StringComparison.OrdinalIgnoreCase)).ToList();
+        var groupB = activeJudges.Where(j => string.Equals(j.Group, "B", StringComparison.OrdinalIgnoreCase)).ToList();
+        var groupC = activeJudges.Where(j => string.Equals(j.Group, "C", StringComparison.OrdinalIgnoreCase)).ToList();
+
+        if (groupA.Count == 0 && groupB.Count == 0 && groupC.Count == 0 && activeJudges.Count > 0)
+        {
+            double avg = Math.Round(activeJudges.Average(j => j.Score), 3);
+            return (avg, 0, 0, 0, $"Note finale : {avg:F2}");
+        }
+
+        bool hasConnectedAny = Judges.Any(j => j.IsConnected || j.HasConnected);
+
+        double scoreA = groupA.Count > 0 ? groupA.Average(j => j.Score) : (hasConnectedAny ? 0.0 : Constants.DEFAULT_SCORE_GROUP_A);
+        double scoreB = groupB.Count > 0 ? groupB.Average(j => j.Score) : (hasConnectedAny ? 0.0 : Constants.DEFAULT_SCORE_GROUP_B);
+        double scoreC = groupC.Count > 0 ? groupC.Average(j => j.Score) : (hasConnectedAny ? 0.0 : Constants.DEFAUTL_SCORE_GROUP_C);
 
         double total = Math.Round(scoreA + scoreB + scoreC, 3);
         string summary = $"Note finale : {total:F2} (Qualité A: {scoreA:F2} | Perf B: {scoreB:F2} | Diff C: {scoreC:F2})";
@@ -590,8 +715,9 @@ public class ArbitrationServerSession : IDisposable
         match.WinnerSide = side;
         match.Winner = (side == Constants.Side.Red) ? match.RedCompetitor : match.BlueCompetitor;
 
-        int judgesRed = (int)Judges.Sum(j => j.RedPoints);
-        int judgesBlue = (int)Judges.Sum(j => j.BluePoints);
+        var activeJudges = GetActiveJudges();
+        int judgesRed = (int)activeJudges.Sum(j => j.RedPoints);
+        int judgesBlue = (int)activeJudges.Sum(j => j.BluePoints);
         if (judgesRed > 0 || judgesBlue > 0 || (match.RedScore == 0 && match.BlueScore == 0))
         {
             match.RedScore = judgesRed;
@@ -671,11 +797,36 @@ public class ArbitrationServerSession : IDisposable
         double finalScore = manualScore ?? eval.TotalScore;
         string reason = customReason ?? (manualScore.HasValue ? $"Note manuelle : {finalScore:F2}" : eval.Summary);
 
+        var activeJudges = GetActiveJudges();
+
+        // Capturer les notes individuelles par juge connecté uniquement
+        match.JudgeScores.Clear();
+        match.JudgeScoresByJudge.Clear();
+        foreach (var j in activeJudges)
+        {
+            match.JudgeScores.Add(j.Score);
+            if (!string.IsNullOrWhiteSpace(j.Name))
+                match.JudgeScoresByJudge[j.Name] = j.Score;
+        }
+
         match.Winner = match.RedCompetitor; // En Taolu individuel, le compétiteur passe
         match.WinnerSide = null;
         match.FinalScore = finalScore;
         match.IsFinished = true;
         match.DecisionReason = reason;
+
+        UpdateUnderlyingDrawOrder(match);
+
+        // Enregistrer la note de chaque juge connecté dans l'historique si non déjà loguée
+        foreach (var j in activeJudges)
+        {
+            bool hasLog = _judgeScoreHistory.Any(h => h.MatchId == match.Id && h.JudgeName == j.Name);
+            if (!hasLog)
+            {
+                string desc = $"Note finale du juge : {j.Score:F2}";
+                RecordJudgeScore(j, null, j.Score, j.Score, null, "Score Final", desc, match.CurrentRound);
+            }
+        }
 
         PropagateWinnerToNextMatch(match);
 
@@ -1378,7 +1529,11 @@ public class ArbitrationServerSession : IDisposable
 
     public async Task BroadcastMatchInfoAsync()
     {
-        if (CurrentMatch == null) return;
+        if (CurrentMatch == null)
+        {
+            await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{{}}");
+            return;
+        }
 
         var data = CreateMatchInfoData(CurrentMatch);
         string json = JsonSerializer.Serialize(data, _jsonOptions);
@@ -1400,7 +1555,11 @@ public class ArbitrationServerSession : IDisposable
 
     public async Task SendMatchInfoToClientAsync(string clientId)
     {
-        if (CurrentMatch == null) return;
+        if (CurrentMatch == null)
+        {
+            await _bluetoothServer.SendToClientAsync(clientId, $"{Constants.Message.MATCH_INFO}{{}}");
+            return;
+        }
 
         var data = CreateMatchInfoData(CurrentMatch);
         string json = JsonSerializer.Serialize(data, _jsonOptions);
@@ -1492,7 +1651,8 @@ public class ArbitrationServerSession : IDisposable
             }
             else if (message.StartsWith(Constants.Message.JUDGE_SCORE))
             {
-                if (!IsTimerRunning || _timeLeft.TotalSeconds <= 0)
+                bool isTaolu = CurrentCompetition?.Type == CompetitionType.Taolu || CurrentMatch?.Type == RoundType.Order;
+                if (!isTaolu && (!IsTimerRunning || _timeLeft.TotalSeconds <= 0))
                 {
                     StatusChanged?.Invoke(this, $"[SCORE REFUSÉ] Note reçue de {clientId} alors que le chronomètre est inactif.");
                     return;
@@ -1848,22 +2008,48 @@ public class ArbitrationServerSession : IDisposable
                 CompetitorName = compName,
                 MatchesPlayed = m.IsFinished ? 1 : 0,
                 Score = m.FinalScore,
+                JudgeScores = new List<double>(m.JudgeScores),
+                JudgeScoresByJudge = new Dictionary<string, double>(m.JudgeScoresByJudge),
                 HasFinished = m.IsFinished,
                 Status = m.IsFinished ? $"Validé ({m.FinalScore:F2})" : "En attente"
             });
         }
 
-        var sorted = list
-            .OrderByDescending(x => x.HasFinished)
-            .ThenByDescending(x => x.Score)
+        var finished = list.Where(x => x.HasFinished).ToList();
+        var pending = list.Where(x => !x.HasFinished).ToList();
+
+        // Tri avec départage sur les notes individuelles des juges
+        var sortedFinished = finished
+            .OrderByDescending(x => x.Score)
+            .ThenByDescending(x => x.JudgeScores.Count > 0 ? x.JudgeScores.Max() : 0)
+            .ThenByDescending(x => x.JudgeScores.Count > 0 ? x.JudgeScores.Min() : 0)
             .ToList();
 
-        for (int i = 0; i < sorted.Count; i++)
+        // Attribution des rangs avec gestion des ex-æquo
+        int rank = 1;
+        for (int i = 0; i < sortedFinished.Count; i++)
         {
-            sorted[i].Rank = i + 1;
+            if (i > 0)
+            {
+                var prev = sortedFinished[i - 1];
+                var curr = sortedFinished[i];
+                bool sameTotal = Math.Abs(prev.Score - curr.Score) < 0.001;
+                bool sameMax = prev.JudgeScores.Count == 0 || curr.JudgeScores.Count == 0
+                    || Math.Abs(prev.JudgeScores.Max() - curr.JudgeScores.Max()) < 0.001;
+                bool sameMin = prev.JudgeScores.Count == 0 || curr.JudgeScores.Count == 0
+                    || Math.Abs(prev.JudgeScores.Min() - curr.JudgeScores.Min()) < 0.001;
+                if (!(sameTotal && sameMax && sameMin))
+                    rank = i + 1;
+            }
+            sortedFinished[i].Rank = rank;
         }
 
-        return sorted;
+        // Les non-terminés viennent après tous les classés
+        int pendingStart = sortedFinished.Count > 0 ? sortedFinished.Max(x => x.Rank) + 1 : 1;
+        for (int i = 0; i < pending.Count; i++)
+            pending[i].Rank = pendingStart + i;
+
+        return sortedFinished.Concat(pending).ToList();
     }
 
     private static List<CategoryStandingItem> ComputePoolStandings(IReadOnlyList<MatchItem> matches)
@@ -2302,6 +2488,10 @@ public class ArbitrationServerSession : IDisposable
     /// <returns>Chemin absolu du fichier généré</returns>
     public string ExportResults(string? filePath = null)
     {
+        if (CurrentMatch != null && (CurrentCompetitionType == CompetitionType.Taolu || CurrentMatch.Type == RoundType.Order) && !CurrentMatch.IsFinished)
+        {
+            _ = SetTaoluScoreAsync();
+        }
         return ExcelCompetitionLoader.ExportResults(this, filePath);
     }
 
@@ -2312,6 +2502,10 @@ public class ArbitrationServerSession : IDisposable
     /// <returns>Chemin absolu du fichier généré</returns>
     public string ExportJudgeScores(string? filePath = null)
     {
+        if (CurrentMatch != null && (CurrentCompetitionType == CompetitionType.Taolu || CurrentMatch.Type == RoundType.Order) && !CurrentMatch.IsFinished)
+        {
+            _ = SetTaoluScoreAsync();
+        }
         return ExcelCompetitionLoader.ExportJudgeScores(this, filePath);
     }
     #endregion

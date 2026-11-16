@@ -419,6 +419,36 @@
                     </Grid>
                 </Grid>
 
+                <!-- No Active Match / Matchs Terminés -->
+                <VerticalStackLayout 
+                    IsVisible="{Binding CurrentDraw, Converter={StaticResource IsNullOrEmptyConverter}}"
+                    VerticalOptions="Center" 
+                    HorizontalOptions="Center" 
+                    Spacing="15"
+                >
+                    <Label 
+                        Text="🏁" 
+                        FontSize="72" 
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                    />
+                    <Label 
+                        Text="PLUS DE MATCH EN COURS" 
+                        FontSize="32" 
+                        FontAttributes="Bold" 
+                        TextColor="{StaticResource PrimaryTextColor}" 
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                    />
+                    <Label 
+                        Text="Tous les matchs sont terminés ou en attente du serveur." 
+                        FontSize="18" 
+                        TextColor="LightGray" 
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                    />
+                </VerticalStackLayout>
+
                 <!-- Timer Overlay -->
                 <Border 
                     HorizontalOptions="Center" 
@@ -429,7 +459,7 @@
                     Stroke="{StaticResource PrimaryTextColor}" 
                     StrokeThickness="3" 
                     StrokeShape="RoundRectangle 20"
-                    IsVisible="True"
+                    IsVisible="{Binding HasActiveMatch}"
                 >
                     <Label 
                         Text="{Binding TimeLeftDisplay, Source={RelativeSource AncestorType={x:Type vm:JudgeViewModel}}}" 
@@ -440,7 +470,10 @@
                     />
 
                     <Border.Triggers>
-                        <DataTrigger TargetType="Border" Binding="{Binding ., Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                        <DataTrigger TargetType="Border" Binding="{Binding CurrentDraw, Converter={StaticResource CategoryTypeToBoolConverter}, ConverterParameter='Order'}" Value="True">
+                            <Setter Property="IsVisible" Value="False"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Border" Binding="{Binding HasActiveMatch}" Value="False">
                             <Setter Property="IsVisible" Value="False"/>
                         </DataTrigger>
                     </Border.Triggers>

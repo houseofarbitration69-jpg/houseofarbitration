@@ -153,6 +153,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             {
                 OnPropertyChanged(nameof(IsTaolu));
                 OnPropertyChanged(nameof(IsSanda));
+                OnPropertyChanged(nameof(CanSendScore));
             }
         }
     }
@@ -184,12 +185,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// <summary>
     /// Obtient si la compétition courante est de type TAOLU
     /// </summary>
-    public bool IsTaolu => Competition?.Type == CompetitionType.Taolu;
+    public bool IsTaolu => Competition?.Type == CompetitionType.Taolu || CurrentDraw?.Type == RoundType.Order || CurrentDraw is DrawOrderModel;
 
     /// <summary>
     /// Obtient si la compétition courante est de type SANDA
     /// </summary>
-    public bool IsSanda => Competition?.Type == CompetitionType.Sanda;
+    public bool IsSanda => Competition?.Type == CompetitionType.Sanda || (CurrentDraw != null && CurrentDraw.Type != RoundType.Order && !(CurrentDraw is DrawOrderModel));
 
     /// <summary>
     /// Obtient ou définit le tirage courant
@@ -197,8 +198,22 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     public IDrawModel? CurrentDraw
     {
         get => _currentDraw;
-        set => SetProperty(ref _currentDraw, value);
+        set
+        {
+            if (SetProperty(ref _currentDraw, value))
+            {
+                OnPropertyChanged(nameof(CanSendScore));
+                OnPropertyChanged(nameof(HasActiveMatch));
+                OnPropertyChanged(nameof(IsTaolu));
+                OnPropertyChanged(nameof(IsSanda));
+            }
+        }
     }
+
+    /// <summary>
+    /// Indique si un match actif est présent
+    /// </summary>
+    public bool HasActiveMatch => CurrentDraw != null;
 
     /// <summary>
     /// Obtient ou définit le nom de la catégorie
@@ -373,9 +388,13 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     }
 
     /// <summary>
-    /// Indique si les juges peuvent envoyer des notes (le chrono doit tourner et être > 0)
+    /// Indique si les juges peuvent envoyer des notes.
+    /// En Taolu, le chronomètre n'est pas utilisé : la notation est autorisée dès qu'un passage est actif.
+    /// En Sanda, le chronomètre doit tourner et être supérieur à 0.
     /// </summary>
-    public bool CanSendScore => IsTimerRunning && _timeLeft.TotalSeconds > 0;
+    public bool CanSendScore => IsTaolu
+        ? HasActiveMatch
+        : (IsTimerRunning && _timeLeft.TotalSeconds > 0);
 
     /// <summary>
     /// Obtient ou définit le groupe du juge si c'est une compétition Sanda la valeur est vide
@@ -817,9 +836,20 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             if (trimmed.StartsWith(Constants.Message.MATCH_INFO))
             {
                 var content = trimmed.Substring(Constants.Message.MATCH_INFO.Length);
-                var matchData = JsonSerializer.Deserialize<MatchInfoData>(content, _jsonOptions);
+                MatchInfoData? matchData = null;
+                if (!string.IsNullOrWhiteSpace(content) && content.Trim() != "{}")
+                {
+                    try
+                    {
+                        matchData = JsonSerializer.Deserialize<MatchInfoData>(content, _jsonOptions);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Erreur lors de la désérialisation de MATCH_INFO");
+                    }
+                }
 
-                if (matchData != null)
+                if (matchData != null && matchData.Id > 0)
                 {
                     int roundNum = matchData.Round > 0 ? matchData.Round : 1;
                     bool isNewMatch = _lastMatchId != matchData.Id;
@@ -947,6 +977,22 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                             Score = Constants.DEFAUTL_SCORE_GROUP_C;
                         }
                     }
+                }
+                else
+                {
+                    _lastMatchId = 0;
+                    _lastRoundNumber = 0;
+                    CurrentRound = 0;
+                    CurrentDraw = null;
+                    Competitor1 = null;
+                    Competitor2 = null;
+                    CategoryName = "Plus de match en cours";
+                    MatchStageName = "Fin des matchs";
+                    RedScore = 0;
+                    BlueScore = 0;
+                    Codes.Clear();
+                    HasUnsyncedChanges = false;
+                    _unsyncedScores.Clear();
                 }
 
                 IsReceivingMatch = false;

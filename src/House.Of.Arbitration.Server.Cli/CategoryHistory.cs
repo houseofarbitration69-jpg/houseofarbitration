@@ -37,6 +37,8 @@ public class CategoryStandingItem
     public int PointsAgainst { get; set; }
     public int PointDifference => PointsFor - PointsAgainst;
     public double Score { get; set; }
+    public List<double> JudgeScores { get; set; } = new();
+    public Dictionary<string, double> JudgeScoresByJudge { get; set; } = new();
     public bool HasFinished { get; set; }
     public string Status { get; set; } = string.Empty;
 }

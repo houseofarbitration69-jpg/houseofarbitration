@@ -36,5 +36,29 @@ public class AlertService : IAlertService
             }
         });
     }
+
+    /// <summary>
+    /// Affiche une boîte de dialogue de confirmation modale avec deux options.
+    /// </summary>
+    /// <param name="title">Titre de la boîte de dialogue.</param>
+    /// <param name="message">Message d'avertissement ou de confirmation.</param>
+    /// <param name="accept">Libellé du bouton de confirmation.</param>
+    /// <param name="cancel">Libellé du bouton d'annulation.</param>
+    /// <returns>True si l'utilisateur a confirmé, False s'il a annulé.</returns>
+    public Task<bool> ShowConfirmation(string title, string message, string accept = "Oui", string cancel = "Non")
+    {
+        return MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            if (Application.Current?.Windows.Count > 0 && Application.Current.Windows[0].Page != null)
+            {
+                return await Application.Current.Windows[0].Page!.DisplayAlertAsync(title, message, accept, cancel);
+            }
+            if (Shell.Current != null)
+            {
+                return await Shell.Current.DisplayAlertAsync(title, message, accept, cancel);
+            }
+            return false;
+        });
+    }
     #endregion
 }

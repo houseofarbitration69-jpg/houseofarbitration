@@ -55,11 +55,25 @@ public partial class JudgeGroupModel : ObservableObject
     public ObservableCollection<JudgeModel> Judges { get; } = new();
 
     /// <summary>
-    /// Obtient le score global du groupe (moyenne des juges arrondie à 2 décimales)
+    /// Obtient le score global du groupe (moyenne des juges connectés arrondie à 2 décimales)
     /// </summary>
-    public double GlobalScore => Judges.Count > 0
-        ? Math.Round(Judges.Average(j => j.Score), 2)
-        : InitialScore;
+    public double GlobalScore
+    {
+        get
+        {
+            var connectedJudges = Judges.Where(j => j.IsConnected || j.HasConnected).ToList();
+            if (connectedJudges.Count > 0)
+            {
+                return Math.Round(connectedJudges.Average(j => j.Score), 2);
+            }
+            bool anyConnectedInAll = Judges.Any(j => j.IsConnected || j.HasConnected);
+            if (!anyConnectedInAll && Judges.Count > 0)
+            {
+                return Math.Round(Judges.Average(j => j.Score), 2);
+            }
+            return 0.0;
+        }
+    }
     #endregion
 
     public JudgeGroupModel(string name, string description, double initialScore = 0.0)
@@ -90,7 +104,9 @@ public partial class JudgeGroupModel : ObservableObject
 
     private void Judge_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(JudgeModel.Score))
+        if (e.PropertyName == nameof(JudgeModel.Score) ||
+            e.PropertyName == nameof(JudgeModel.IsConnected) ||
+            e.PropertyName == nameof(JudgeModel.HasConnected))
         {
             OnPropertyChanged(nameof(GlobalScore));
         }

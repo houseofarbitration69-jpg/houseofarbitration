@@ -565,8 +565,9 @@ internal static class Program
         string timerStatus = _session.IsTimerRunning ? "EN COURS" : "ARRÊTÉ / PAUSE";
         Console.WriteLine($"  Chronomètre      : {_session.TimeLeftDisplay} ({timerStatus})");
 
-        int curRed = (int)_session.Judges.Sum(j => j.RedPoints);
-        int curBlue = (int)_session.Judges.Sum(j => j.BluePoints);
+        var activeJudges = _session.GetActiveJudges();
+        int curRed = (int)activeJudges.Sum(j => j.RedPoints);
+        int curBlue = (int)activeJudges.Sum(j => j.BluePoints);
         Console.WriteLine($"  Score Round {match.CurrentRound}  : Rouge {curRed} pts vs {curBlue} pts Bleu");
 
         if (match.RoundResults.Count > 0)
@@ -858,6 +859,16 @@ internal static class Program
                 if (m.Type == RoundType.Order)
                 {
                     Console.WriteLine($"Note finale : {m.FinalScore:F2} / 10.00");
+                    if (m.JudgeScoresByJudge.Count > 0)
+                    {
+                        string judgeScoresStr = string.Join(" | ", m.JudgeScoresByJudge.Select(kv => $"{kv.Key}: {kv.Value:F2}"));
+                        Console.WriteLine($"      Notes juges: {judgeScoresStr}");
+                    }
+                    else if (m.JudgeScores.Count > 0)
+                    {
+                        string judgeScoresStr = string.Join(", ", m.JudgeScores.Select(s => s.ToString("F2")));
+                        Console.WriteLine($"      Notes juges: {judgeScoresStr}");
+                    }
                 }
                 else
                 {
@@ -896,17 +907,21 @@ internal static class Program
             if (sum.RoundType == RoundType.Order)
             {
                 // Taolu
-                Console.WriteLine(string.Format("  {0,-6} | {1,-28} | {2,-14} | {3}", "Rang", "Athlète", "Note Finale", "Statut"));
-                Console.WriteLine("  " + new string('-', 65));
+                Console.WriteLine(string.Format("  {0,-6} | {1,-24} | {2,-12} | {3,-24} | {4}", "Rang", "Athlète", "Note Finale", "Notes juges", "Statut"));
+                Console.WriteLine("  " + new string('-', 84));
 
                 foreach (var row in report.Standings)
                 {
                     string medal = row.Rank == 1 ? "🥇 1" : (row.Rank == 2 ? "🥈 2" : (row.Rank == 3 ? "🥉 3" : $"   {row.Rank}"));
                     string scoreStr = row.HasFinished ? $"{row.Score:F2} / 10.00" : "--";
+                    string judgeNotes = row.JudgeScoresByJudge.Count > 0
+                        ? string.Join(" ", row.JudgeScoresByJudge.Select(kv => $"{kv.Key}:{kv.Value:F2}"))
+                        : (row.JudgeScores.Count > 0 ? string.Join(" ", row.JudgeScores.Select(s => s.ToString("F2"))) : "--");
+
                     ConsoleColor rCol = row.Rank == 1 ? ConsoleColor.Yellow : (row.HasFinished ? ConsoleColor.White : ConsoleColor.DarkGray);
 
                     Console.ForegroundColor = rCol;
-                    Console.WriteLine(string.Format("  {0,-6} | {1,-28} | {2,-14} | {3}", medal, Truncate(row.CompetitorName, 28), scoreStr, row.Status));
+                    Console.WriteLine(string.Format("  {0,-6} | {1,-24} | {2,-12} | {3,-24} | {4}", medal, Truncate(row.CompetitorName, 24), scoreStr, Truncate(judgeNotes, 24), row.Status));
                     Console.ResetColor();
                 }
             }
@@ -952,7 +967,14 @@ internal static class Program
         var m = _session!.CurrentMatch;
         if (m == null)
         {
-            LogInfo("Aucun match configuré.");
+            if (_session.Matches.Count > 0)
+            {
+                LogColor(ConsoleColor.Yellow, "🏁 [FIN DES MATCHS] Tous les matchs de la compétition sont terminés !");
+            }
+            else
+            {
+                LogInfo("Aucun match configuré.");
+            }
             return;
         }
 
@@ -1027,22 +1049,24 @@ internal static class Program
         Console.WriteLine($"\n--- ÉTAT DES JUGES ({_session!.CurrentCompetitionType}{roundInfo}) ---");
         Console.ResetColor();
 
+        var displayJudges = _session.GetActiveJudges();
+
         if (_session.CurrentCompetitionType == CompetitionType.Sanda)
         {
             Console.WriteLine(string.Format("  {0,-10} | {1,-12} | {2,10} | {3,10}", "Juge", "Statut", "Pts Rouge", "Pts Bleu"));
             Console.WriteLine("  " + new string('-', 52));
-            foreach (var j in _session.Judges)
+            foreach (var j in displayJudges)
             {
-                string status = j.IsConnected ? "CONNECTÉ" : "DÉCONNECTÉ";
-                ConsoleColor col = j.IsConnected ? ConsoleColor.Green : ConsoleColor.DarkGray;
+                string status = j.IsConnected ? "CONNECTÉ" : (j.HasConnected ? "DÉCONNECTÉ" : "NON CONNECTÉ");
+                ConsoleColor col = j.IsConnected ? ConsoleColor.Green : (j.HasConnected ? ConsoleColor.DarkYellow : ConsoleColor.DarkGray);
 
                 Console.ForegroundColor = col;
                 Console.WriteLine(string.Format("  {0,-10} | {1,-12} | {2,10:F0} | {3,10:F0}", j.Name, status, j.RedPoints, j.BluePoints));
                 Console.ResetColor();
             }
 
-            int totalRed = (int)_session.Judges.Sum(j => j.RedPoints);
-            int totalBlue = (int)_session.Judges.Sum(j => j.BluePoints);
+            int totalRed = (int)displayJudges.Sum(j => j.RedPoints);
+            int totalBlue = (int)displayJudges.Sum(j => j.BluePoints);
             Console.WriteLine("  " + new string('-', 52));
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine($"  TOTAL POINTS  : Rouge = {totalRed}  |  Bleu = {totalBlue}\n");
@@ -1052,10 +1076,10 @@ internal static class Program
         {
             Console.WriteLine(string.Format("  {0,-12} | {1,-8} | {2,-12} | {3,8} | {4,10}", "Juge", "Groupe", "Statut", "Score", "Pénalités"));
             Console.WriteLine("  " + new string('-', 62));
-            foreach (var j in _session.Judges)
+            foreach (var j in displayJudges)
             {
-                string status = j.IsConnected ? "CONNECTÉ" : "DÉCONNECTÉ";
-                ConsoleColor col = j.IsConnected ? ConsoleColor.Green : ConsoleColor.DarkGray;
+                string status = j.IsConnected ? "CONNECTÉ" : (j.HasConnected ? "DÉCONNECTÉ" : "NON CONNECTÉ");
+                ConsoleColor col = j.IsConnected ? ConsoleColor.Green : (j.HasConnected ? ConsoleColor.DarkYellow : ConsoleColor.DarkGray);
 
                 Console.ForegroundColor = col;
                 Console.WriteLine(string.Format("  {0,-12} | {1,-8} | {2,-12} | {3,8:F2} | {4,10}", j.Name, $"Grp {j.Group}", status, j.Score, j.Codes.Count));
@@ -1327,6 +1351,14 @@ internal static class Program
                 ? $" [Round {_session.CurrentMatch.CurrentRound}/{_session.CurrentMatch.MaxRounds}]"
                 : "";
             Console.WriteLine($"  Match courant    : #{_session.CurrentMatch.Id} - {_session.CurrentMatch.Category} ({_session.CurrentMatch.RedCompetitor} vs {_session.CurrentMatch.BlueCompetitor}){roundSuffix}");
+        }
+        else if (_session.Matches.Count > 0)
+        {
+            Console.WriteLine("  Match courant    : 🏁 [FIN DES MATCHS] Tous les matchs de la compétition sont terminés !");
+        }
+        else
+        {
+            Console.WriteLine("  Match courant    : Aucun match configuré");
         }
 
         PrintJudges();

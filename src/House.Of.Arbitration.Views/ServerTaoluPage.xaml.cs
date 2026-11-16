@@ -16,4 +16,18 @@ public partial class ServerTaoluPage : BasePage<ServerViewModel>
 	    _ = typeof(House.Of.Arbitration.Controls.FadeAction);
 	    _ = typeof(House.Of.Arbitration.Controls.TranslateAction);
 	}
+
+    protected override bool OnBackButtonPressed()
+    {
+        if (BindingContext is ServerViewModel vm && vm.IsServerStarted)
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await vm.RequestBackNavigationCommand.ExecuteAsync(null);
+            });
+            return true;
+        }
+
+        return base.OnBackButtonPressed();
+    }
 }

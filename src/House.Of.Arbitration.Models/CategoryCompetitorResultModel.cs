@@ -17,6 +17,8 @@ public partial class CategoryCompetitorResultModel : ObservableObject
 
     public double? NumericScore { get; set; }
     public string ScoreDisplay { get; set; } = string.Empty;
+    public List<double> JudgeScores { get; set; } = new();
+    public Dictionary<string, double> JudgeScoresByJudge { get; set; } = new();
     public string Status { get; set; } = string.Empty;
     public string StatusColorHex { get; set; } = "#808080";
 

@@ -53,12 +53,12 @@ public class JudgeSession : IDisposable
     public string ServerName { get; private set; } = string.Empty;
     public string TimerDisplay { get; private set; } = "02:00";
     public bool IsTimerRunning { get; private set; }
-    public bool CanSendScore => IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00";
+    public bool CanSendScore => CurrentMatch != null && (CurrentMatch.Type == RoundType.Order || CurrentCompetition?.Type == CompetitionType.Taolu || (IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00"));
 
     public List<MvtTimeCodeModel> DeductionsHistory { get; } = new();
 
     public event EventHandler<string>? StatusChanged;
-    public event EventHandler<MatchDisplayInfo>? MatchUpdated;
+    public event EventHandler<MatchDisplayInfo?>? MatchUpdated;
     public event EventHandler<string>? TimerUpdated;
     public event EventHandler<TimeSpan>? PongReceived;
     public event EventHandler<string>? NotificationReceived;
@@ -794,10 +794,12 @@ public class JudgeSession : IDisposable
         {
             if (message.StartsWith(Constants.Message.MATCH_INFO))
             {
-                string json = message.Substring(Constants.Message.MATCH_INFO.Length);
-                var matchData = JsonSerializer.Deserialize<MatchInfoData>(json, _jsonOptions);
+                string json = message.Substring(Constants.Message.MATCH_INFO.Length).Trim();
+                var matchData = !string.IsNullOrWhiteSpace(json) && json != "{}"
+                    ? JsonSerializer.Deserialize<MatchInfoData>(json, _jsonOptions)
+                    : null;
 
-                if (matchData != null)
+                if (matchData != null && matchData.Id > 0)
                 {
                     string c1Name = FormatCompetitor(matchData.Competitor1) switch
                     {
@@ -846,6 +848,20 @@ public class JudgeSession : IDisposable
                     string matchDesc = !string.IsNullOrEmpty(c2Name) ? $"{c1Name} vs {c2Name}" : c1Name;
                     string catDesc = !string.IsNullOrEmpty(catName) ? $" [{catName}]" : "";
                     NotificationReceived?.Invoke(this, $"Match / Round reçu : #{matchData.Id} (Round {CurrentMatch.Round}, {matchData.Type}){catDesc} {matchDesc}");
+                }
+                else
+                {
+                    CurrentMatch = null;
+                    DeductionsHistory.Clear();
+                    RedPoints = 0;
+                    BluePoints = 0;
+
+                    if (JudgeGroup == "A") CurrentScore = Constants.DEFAULT_SCORE_GROUP_A;
+                    else if (JudgeGroup == "B") CurrentScore = Constants.DEFAULT_SCORE_GROUP_B;
+                    else if (JudgeGroup == "C") CurrentScore = Constants.DEFAUTL_SCORE_GROUP_C;
+
+                    MatchUpdated?.Invoke(this, null);
+                    NotificationReceived?.Invoke(this, "🏁 [FIN DES MATCHS] Il n'y a plus de match en cours.");
                 }
             }
             else if (message.StartsWith(Constants.Message.TIMER_SET))

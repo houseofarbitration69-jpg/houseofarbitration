@@ -84,6 +84,7 @@ public partial class ServerViewModel : BaseViewModel
     private System.Collections.ObjectModel.ObservableCollection<JudgeGroupModel> _judgeGroups = new();
     private double _currentRedVotes;
     private double _currentBlueVotes;
+    private bool _isNavigatingBack;
     #endregion
 
     #region Properties
@@ -587,7 +588,8 @@ public partial class ServerViewModel : BaseViewModel
             }
             else if (args.Message.StartsWith(Constants.Message.JUDGE_SCORE))
             {
-                if (!IsTimerRunning || _timeLeft.TotalSeconds <= 0)
+                bool isTaolu = _currentCompetition?.Type == CompetitionType.Taolu || CurrentDraw?.Type == RoundType.Order || CurrentDraw is DrawOrderModel;
+                if (!isTaolu && (!IsTimerRunning || _timeLeft.TotalSeconds <= 0))
                 {
                     _logger.LogWarning("Score reçu du juge ({ClientId}) alors que le chronomètre est arrêté, en pause ou expiré. Ignoré.", args.ClientId);
                     return;
@@ -1405,6 +1407,17 @@ public partial class ServerViewModel : BaseViewModel
                 _logger.LogError(ex, "Error broadcasting match info");
             }
         }
+        else
+        {
+            try
+            {
+                await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{{}}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error broadcasting empty match info");
+            }
+        }
     }
     #endregion
 
@@ -1553,8 +1566,12 @@ public partial class ServerViewModel : BaseViewModel
         }
 
         // Optionally, add the final round result before setting the winner
-        int redVotes = (int)Judges.Sum(j => j.RedPoints);
-        int blueVotes = (int)Judges.Sum(j => j.BluePoints);
+        var activeJudges = Judges.Where(j => j.IsConnected || j.HasConnected).ToList();
+        if (activeJudges.Count == 0 && !Judges.Any(j => j.IsConnected || j.HasConnected))
+            activeJudges = Judges.ToList();
+
+        int redVotes = (int)activeJudges.Sum(j => j.RedPoints);
+        int blueVotes = (int)activeJudges.Sum(j => j.BluePoints);
         if (redVotes > 0 || blueVotes > 0 || CurrentDraw.Type == RoundType.Knockouts || CurrentDraw.Type == RoundType.Pools)
         {
             string roundWinner = color;
@@ -1866,8 +1883,12 @@ public partial class ServerViewModel : BaseViewModel
             return;
         }
 
-        int redVotes = (int)Judges.Sum(j => j.RedPoints);
-        int blueVotes = (int)Judges.Sum(j => j.BluePoints);
+        var activeJudges = Judges.Where(j => j.IsConnected || j.HasConnected).ToList();
+        if (activeJudges.Count == 0 && !Judges.Any(j => j.IsConnected || j.HasConnected))
+            activeJudges = Judges.ToList();
+
+        int redVotes = (int)activeJudges.Sum(j => j.RedPoints);
+        int blueVotes = (int)activeJudges.Sum(j => j.BluePoints);
 
         RoundResults.Add(new RoundResultModel
         {
@@ -1909,12 +1930,37 @@ public partial class ServerViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Commande permettant de passer au round suivant
+    /// Commande permettant de passer au match suivant
     /// </summary>
     /// <returns></returns>
     [RelayCommand]
     private async Task NextMatch()
     {
+        if (CurrentDraw != null)
+        {
+            CurrentDraw.IsFinished = true;
+            if (CurrentDraw is DrawKnockoutModel k)
+            {
+                await _drawKnockoutService.UpdateAsync(k);
+            }
+            else if (CurrentDraw is DrawPoolsModel p)
+            {
+                await _drawPoolsModel.UpdateAsync(p);
+            }
+            else if (CurrentDraw is DrawOrderModel o)
+            {
+                if (JudgeGroups.Count > 0 && string.IsNullOrEmpty(o.RoundResultsJson))
+                {
+                    double totalScore = Math.Round(JudgeGroups.Sum(g => g.GlobalScore), 2);
+                    o.RoundResultsJson = totalScore.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                }
+                await _drawOrderService.UpdateAsync(o);
+            }
+        }
+
+        ResetJudgeScores();
+        await ResetTimer();
+        await Init();
     }
     #endregion
 
@@ -1947,6 +1993,76 @@ public partial class ServerViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// Demande la navigation retour. Si le serveur est actif, affiche une popup d'avertissement.
+    /// Si confirmé, arrête le serveur et effectue le retour arrière.
+    /// </summary>
+    /// <returns>True si le retour arrière a été effectué, False si annulé.</returns>
+    [RelayCommand]
+    public async Task<bool> RequestBackNavigation()
+    {
+        if (_isNavigatingBack)
+        {
+            return false;
+        }
+
+        try
+        {
+            _isNavigatingBack = true;
+
+            if (IsServerStarted)
+            {
+                bool confirm = await _alertService.ShowConfirmation(
+                    "Serveur actif",
+                    "Le retour en arrière va arrêter le serveur. Voulez-vous continuer ?",
+                    "Oui",
+                    "Annuler");
+
+                if (!confirm)
+                {
+                    return false;
+                }
+
+                await StopServer();
+            }
+
+            await NavigateBackAsync();
+            return true;
+        }
+        finally
+        {
+            _isNavigatingBack = false;
+        }
+    }
+
+    private async Task NavigateBackAsync()
+    {
+        if (IsSideSheetOpen)
+        {
+            IsSideSheetOpen = false;
+        }
+
+        if (Shell.Current != null)
+        {
+            if (Shell.Current.Navigation.NavigationStack.Count > 1)
+            {
+                await Shell.Current.GoToAsync("..");
+            }
+            else
+            {
+                var location = Shell.Current.CurrentState?.Location?.OriginalString;
+                if (location != null && !location.Contains("MainPage"))
+                {
+                    await Shell.Current.GoToAsync("///MainPage");
+                }
+                else
+                {
+                    await Shell.Current.GoToAsync("..");
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// 
     /// </summary>
     /// <returns></returns>
@@ -1955,7 +2071,26 @@ public partial class ServerViewModel : BaseViewModel
     {
         IsSideSheetOpen = false;
 
-        await Shell.Current.GoToAsync($"DrawsManagementPage?CompetitionId={CompetitionId}");
+        if (IsServerStarted)
+        {
+            bool confirm = await _alertService.ShowConfirmation(
+                "Serveur actif",
+                "Le retour en arrière va arrêter le serveur. Voulez-vous continuer ?",
+                "Oui",
+                "Annuler");
+
+            if (!confirm)
+            {
+                return;
+            }
+
+            await StopServer();
+        }
+
+        if (Shell.Current != null)
+        {
+            await Shell.Current.GoToAsync($"DrawsManagementPage?CompetitionId={CompetitionId}");
+        }
     }
     #endregion
 }

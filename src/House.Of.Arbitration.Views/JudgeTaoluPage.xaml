@@ -675,6 +675,36 @@
                         </Grid.Triggers>
                     </Grid>
                 </Grid>
+
+                <!-- No Active Match / Passages Terminés -->
+                <VerticalStackLayout 
+                    IsVisible="{Binding CurrentDraw, Converter={StaticResource IsNullOrEmptyConverter}}"
+                    VerticalOptions="Center" 
+                    HorizontalOptions="Center" 
+                    Spacing="15"
+                >
+                    <Label 
+                        Text="🏁" 
+                        FontSize="72" 
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                    />
+                    <Label 
+                        Text="PLUS DE PASSAGE EN COURS" 
+                        FontSize="32" 
+                        FontAttributes="Bold" 
+                        TextColor="{StaticResource PrimaryTextColor}" 
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                    />
+                    <Label 
+                        Text="Tous les passages sont terminés ou en attente du serveur." 
+                        FontSize="18" 
+                        TextColor="LightGray" 
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center"
+                    />
+                </VerticalStackLayout>
             </Grid>
 
             <!-- Footer Info (Judge Position & Connection Status) -->

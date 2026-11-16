@@ -339,8 +339,31 @@
                     Grid.Row="0" 
                     Spacing="10" 
                     VerticalOptions="Center"
-                    IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                 >
+                    <!-- BOUTON RETOUR TABLET -->
+                    <Border
+                        StrokeShape="RoundRectangle 18"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
+                    >
+                        <Label 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.ARROW_LEFT}" 
+                            FontSize="16" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                        />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RequestBackNavigationCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
                     <!-- INDICATEUR STATUT SERVEUR -->
                     <Border
                         Grid.Column="{OnIdiom Tablet='2', Phone='1'}"
@@ -440,14 +463,40 @@
                 <Grid
                     Grid.Row="0"
                     Grid.ColumnSpan="5"
-                    ColumnDefinitions="{OnIdiom Tablet='Auto, *, Auto', Phone='*, Auto'}"
+                    ColumnDefinitions="{OnIdiom Tablet='Auto, *, Auto', Phone='Auto, *, Auto'}"
                     ColumnSpacing="10"
                     VerticalOptions="Center"
                     Margin="5,0"
                 >
+                    <!-- BOUTON RETOUR (PHONE) -->
+                    <Border 
+                        Grid.Column="0"
+                        StrokeShape="RoundRectangle 18"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
+                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                    >
+                        <Label 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.ARROW_LEFT}" 
+                            FontSize="16" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                        />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RequestBackNavigationCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
                     <!-- CATEGORIE & ETAPE DU MATCH -->
                     <Border 
-                        Grid.Column="{OnIdiom Tablet='1', Phone='0'}"
+                        Grid.Column="1"
                         HorizontalOptions="Center"
                         VerticalOptions="Center"
                         Margin="0,0,0,0"
@@ -1512,7 +1561,7 @@
                             <!-- ROUND -->
                             <Grid 
                                 Grid.Column="1" 
-                                RowDefinitions="Auto,*,Auto"
+                                RowDefinitions="Auto,*,95,45"
                                 HorizontalOptions="Center" 
                                 Padding="10,0"
                             >
@@ -1613,8 +1662,9 @@
                                 </VerticalStackLayout>
 
                                 <!-- Bottom: Ex-Aequo Button just above the timer -->
-                                <HorizontalStackLayout
+                                <VerticalStackLayout
                                     Grid.Row="2"
+                                    Spacing="5"
                                 >
                                     <Button 
                                         Text="EX-ÆQUO" 
@@ -1627,8 +1677,7 @@
                                         HeightRequest="40"
                                         WidthRequest="130"
                                         VerticalOptions="End"
-                                        Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
-                                        IsVisible="{OnIdiom Tablet='true', Phone='false'}" 
+                                        IsVisible="{OnIdiom Tablet='true', Phone='false'}"                                         
                                     />
 
                                     <Button 
@@ -1642,7 +1691,6 @@
                                         HeightRequest="40"
                                         WidthRequest="130"
                                         VerticalOptions="End"
-                                        Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
                                         IsVisible="{OnIdiom Tablet='true', Phone='false'}" 
                                     />
 
@@ -1657,10 +1705,9 @@
                                         HeightRequest="40"
                                         WidthRequest="60"
                                         VerticalOptions="End"
-                                        Margin="{OnIdiom Tablet='0,0,0,45', Phone='0,0,0,10'}" 
                                         IsVisible="{OnIdiom Tablet='false', Phone='true'}" 
                                     />
-                                </HorizontalStackLayout>
+                                </VerticalStackLayout>
                             </Grid>
 
                             <!-- Competitor 2 (Blue Side) -->
@@ -2579,16 +2626,32 @@
             </Grid>
 
             <!-- PAS DE MATCH DISPONIBLE -->
-            <Label 
+            <VerticalStackLayout 
                 Grid.ColumnSpan="2"
-                Text="{Binding Resources.EMPTY_MATCH}" 
-                TextColor="{DynamicResource PrimaryTextColor}" 
-                FontSize="28" 
-                FontAttributes="Bold" 
                 HorizontalOptions="Center"
                 VerticalOptions="Center" 
+                Spacing="20"
                 IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
-            />
+            >
+                <Label 
+                    Text="{Binding Resources.EMPTY_MATCH}" 
+                    TextColor="{DynamicResource PrimaryTextColor}" 
+                    FontSize="28" 
+                    FontAttributes="Bold" 
+                    HorizontalOptions="Center"
+                />
+                <Button 
+                    Text="RETOUR"
+                    Command="{Binding RequestBackNavigationCommand}"
+                    BackgroundColor="{DynamicResource PrimaryColor}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="10"
+                    WidthRequest="160"
+                    HeightRequest="46"
+                    HorizontalOptions="Center"
+                />
+            </VerticalStackLayout>
         </Grid>
     </Grid>
 </base:BasePage>

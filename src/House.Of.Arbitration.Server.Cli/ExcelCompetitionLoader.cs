@@ -1008,9 +1008,9 @@ public static class ExcelCompetitionLoader
         foreach (var sum in summaries)
         {
             var rep = session.GetCategoryHistory(sum.Name);
-            string first = rep?.Standings.FirstOrDefault(s => s.Rank == 1)?.CompetitorName ?? sum.LeaderOrWinner ?? "—";
-            string second = rep?.Standings.FirstOrDefault(s => s.Rank == 2)?.CompetitorName ?? "—";
-            string third = rep?.Standings.FirstOrDefault(s => s.Rank == 3)?.CompetitorName ?? "—";
+            string first = rep?.Standings.FirstOrDefault(s => s.Rank == 1 && s.HasFinished)?.CompetitorName ?? sum.LeaderOrWinner ?? "—";
+            string second = rep?.Standings.FirstOrDefault(s => s.Rank == 2 && s.HasFinished)?.CompetitorName ?? "—";
+            string third = rep?.Standings.FirstOrDefault(s => s.Rank == 3 && s.HasFinished)?.CompetitorName ?? "—";
 
             ws.Cell(row, 1).Value = sum.Name;
             ws.Cell(row, 2).Value = sum.RoundType.ToString();
@@ -1063,7 +1063,7 @@ public static class ExcelCompetitionLoader
         }
 
         bool isTaolu = summary.RoundType == RoundType.Order;
-        int colCount = isTaolu ? 5 : 11;
+        int colCount = isTaolu ? 6 : 11;
         ws.Range(1, 1, 1, colCount).Merge();
         ws.Range(2, 1, 2, colCount).Merge();
 
@@ -1093,7 +1093,8 @@ public static class ExcelCompetitionLoader
             ws.Cell(headerRow, 2).Value = "Médaille";
             ws.Cell(headerRow, 3).Value = "Compétiteur";
             ws.Cell(headerRow, 4).Value = "Score / Note finale";
-            ws.Cell(headerRow, 5).Value = "Statut";
+            ws.Cell(headerRow, 5).Value = "Notes par juge";
+            ws.Cell(headerRow, 6).Value = "Statut";
         }
         else
         {
@@ -1137,10 +1138,24 @@ public static class ExcelCompetitionLoader
 
             if (isTaolu)
             {
-                ws.Cell(row, 4).Value = st.Score;
-                ws.Cell(row, 4).Style.NumberFormat.Format = "0.00";
+                if (st.HasFinished)
+                {
+                    ws.Cell(row, 4).Value = st.Score;
+                    ws.Cell(row, 4).Style.NumberFormat.Format = "0.00";
+                }
+                else
+                {
+                    ws.Cell(row, 4).Value = "—";
+                }
                 ws.Cell(row, 4).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws.Cell(row, 5).Value = st.Status;
+
+                string judgeNotes = st.JudgeScoresByJudge.Count > 0
+                    ? string.Join(" | ", st.JudgeScoresByJudge.Select(kv => $"{kv.Key}: {kv.Value:F2}"))
+                    : (st.JudgeScores.Count > 0 ? string.Join(", ", st.JudgeScores.Select(s => s.ToString("F2"))) : string.Empty);
+
+                ws.Cell(row, 5).Value = judgeNotes;
+                ws.Cell(row, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Cell(row, 6).Value = st.Status;
             }
             else
             {
@@ -1182,7 +1197,8 @@ public static class ExcelCompetitionLoader
         if (isTaolu)
         {
             ws.Column(4).Width = 20;
-            ws.Column(5).Width = 22;
+            ws.Column(5).Width = 26;
+            ws.Column(6).Width = 22;
         }
         else
         {

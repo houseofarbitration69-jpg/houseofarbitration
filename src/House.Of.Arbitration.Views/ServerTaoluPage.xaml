@@ -307,6 +307,29 @@
                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
             >
                 <HorizontalStackLayout Grid.Row="0" Spacing="10" VerticalOptions="Center">
+                    <!-- RETOUR -->
+                    <Border
+                        StrokeShape="RoundRectangle 50"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                    >
+                        <Label 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.ARROW_LEFT}" 
+                            FontSize="20" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            FontAttributes="Bold"
+                        />
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RequestBackNavigationCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
                     <!-- MENU -->
                     <Border
                         StrokeShape="RoundRectangle 50"
@@ -798,30 +821,58 @@
                     </Grid>
                 </Grid>
 
-                <Border
+                <HorizontalStackLayout
                     Grid.Row="4"
-                    StrokeShape="RoundRectangle 50"
-                    HeightRequest="50"
-                    WidthRequest="50"
-                    BackgroundColor="{StaticResource ValidColor}"
-                    Stroke="{StaticResource ValidColor}"
+                    Spacing="10"
                     IsVisible="{OnIdiom Tablet='False', Phone='True'}"
                 >
-                    <Label 
-                        FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
-                        Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
-                        FontSize="25" 
-                        TextColor="{DynamicResource PrimaryTextColor}" 
-                        IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
-                        VerticalOptions="Center"
-                        HorizontalOptions="Center"
-                        FontAttributes="Bold"
-                    />
+                    <!-- RETOUR -->
+                    <Border
+                        StrokeShape="RoundRectangle 50"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                    >
+                        <Label 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.ARROW_LEFT}" 
+                            FontSize="20" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            FontAttributes="Bold"
+                        />
 
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
-                    </Border.GestureRecognizers>
-                </Border>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding RequestBackNavigationCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
+                    <!-- MENU -->
+                    <Border
+                        StrokeShape="RoundRectangle 50"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        BackgroundColor="{StaticResource ValidColor}"
+                        Stroke="{StaticResource ValidColor}"
+                    >
+                        <Label 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
+                            FontSize="25" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                            FontAttributes="Bold"
+                        />
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+                </HorizontalStackLayout>
             </Grid>
         </Grid>
 
@@ -878,6 +929,16 @@
                         Command="{Binding GoToDrawsCommand}"
                         BackgroundColor="{DynamicResource ValidColor}"
                         TextColor="Black"
+                        FontAttributes="Bold"
+                        CornerRadius="20"
+                        HeightRequest="50"
+                    />
+
+                    <Button 
+                        Text="RETOUR" 
+                        Command="{Binding RequestBackNavigationCommand}"
+                        BackgroundColor="{DynamicResource ErrorColor}"
+                        TextColor="White"
                         FontAttributes="Bold"
                         CornerRadius="20"
                         HeightRequest="50"

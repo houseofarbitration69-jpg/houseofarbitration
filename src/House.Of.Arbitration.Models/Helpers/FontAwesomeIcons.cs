@@ -35,4 +35,5 @@ public static class FontAwesomeIcons
     public const string ARROWS_SPIN = "\ue4bb";
     public const string SITEMAP = "\uf0e8";
     public const string ARROW_DOWN_1_9 = "\uf162";
+    public const string ARROW_LEFT = "\uf060";
 }

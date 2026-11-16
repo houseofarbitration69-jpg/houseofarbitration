@@ -385,6 +385,19 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
                 }
             }
 
+            // Récupérer les notes individuelles de chaque juge
+            var judgeScores = allRefDatas?
+                .Where(r => r.DrawOrderId == order.Id && r.CompetitorId == order.CompetitorId && !r.IsCorrection)
+                .Select(r => r.Score)
+                .ToList() ?? new List<double>();
+
+            var judgeScoresByJudge = allRefDatas?
+                .Where(r => r.DrawOrderId == order.Id && r.CompetitorId == order.CompetitorId && !r.IsCorrection
+                            && !string.IsNullOrWhiteSpace(r.Referee))
+                .GroupBy(r => r.Referee)
+                .ToDictionary(g => g.Key, g => g.First().Score)
+                ?? new Dictionary<string, double>();
+
             list.Add(new CategoryCompetitorResultModel
             {
                 CompetitorId = order.Competitor.Id,
@@ -394,29 +407,47 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
                 NumericScore = numericScore,
                 ScoreDisplay = numericScore.HasValue ? $"{numericScore.Value:F2} pts" : "—",
                 Status = order.IsFinished ? "Terminé" : "En attente",
-                StatusColorHex = order.IsFinished ? "#4CAF50" : "#808080"
+                StatusColorHex = order.IsFinished ? "#4CAF50" : "#808080",
+                JudgeScores = judgeScores,
+                JudgeScoresByJudge = judgeScoresByJudge
             });
         }
 
-        // Tri : les scores terminés les plus élevés en premier, puis les non-passés
-        var sorted = list
-            .OrderByDescending(r => r.NumericScore.HasValue)
-            .ThenByDescending(r => r.NumericScore ?? 0)
+        // Tri : finis d'abord, puis départage sur les notes individuelles
+        var finished = list.Where(r => r.NumericScore.HasValue).ToList();
+        var pending = list.Where(r => !r.NumericScore.HasValue).ToList();
+
+        var sortedFinished = finished
+            .OrderByDescending(r => r.NumericScore ?? 0)
+            .ThenByDescending(r => r.JudgeScores.Count > 0 ? r.JudgeScores.Max() : 0)
+            .ThenByDescending(r => r.JudgeScores.Count > 0 ? r.JudgeScores.Min() : 0)
             .ToList();
 
-        for (int i = 0; i < sorted.Count; i++)
+        int rank = 1;
+        for (int i = 0; i < sortedFinished.Count; i++)
         {
-            int rank = i + 1;
-            sorted[i].Position = rank;
-            sorted[i].RankDisplay = rank == 1 ? "1er" : $"{rank}e";
-            sorted[i].MedalIcon = rank switch
+            if (i > 0)
+            {
+                var prev = sortedFinished[i - 1];
+                var curr = sortedFinished[i];
+                bool sameTotal = Math.Abs((prev.NumericScore ?? 0) - (curr.NumericScore ?? 0)) < 0.001;
+                bool sameMax = prev.JudgeScores.Count == 0 || curr.JudgeScores.Count == 0
+                    || Math.Abs(prev.JudgeScores.Max() - curr.JudgeScores.Max()) < 0.001;
+                bool sameMin = prev.JudgeScores.Count == 0 || curr.JudgeScores.Count == 0
+                    || Math.Abs(prev.JudgeScores.Min() - curr.JudgeScores.Min()) < 0.001;
+                if (!(sameTotal && sameMax && sameMin))
+                    rank = i + 1;
+            }
+            sortedFinished[i].Position = rank;
+            sortedFinished[i].RankDisplay = rank == 1 ? "1er" : $"{rank}e";
+            sortedFinished[i].MedalIcon = rank switch
             {
                 1 => "🥇",
                 2 => "🥈",
                 3 => "🥉",
                 _ => string.Empty
             };
-            sorted[i].MedalColorHex = rank switch
+            sortedFinished[i].MedalColorHex = rank switch
             {
                 1 => "#FFD700",
                 2 => "#C0C0C0",
@@ -425,7 +456,18 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
             };
         }
 
-        return sorted;
+        // Les non-terminés viennent après
+        int pendingStart = sortedFinished.Count > 0 ? sortedFinished.Max(x => x.Position) + 1 : 1;
+        for (int i = 0; i < pending.Count; i++)
+        {
+            int pRank = pendingStart + i;
+            pending[i].Position = pRank;
+            pending[i].RankDisplay = $"{pRank}e";
+            pending[i].MedalIcon = string.Empty;
+            pending[i].MedalColorHex = "#808080";
+        }
+
+        return sortedFinished.Concat(pending).ToList();
     }
 
     private List<CategoryCompetitorResultModel> ComputeKnockoutResults(List<DrawKnockoutModel> matches, CategoryModel category)

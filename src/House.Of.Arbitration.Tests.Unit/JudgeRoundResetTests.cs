@@ -155,4 +155,80 @@ public class JudgeRoundResetTests
 
         Assert.Equal(2, matchInfo.Round);
     }
+
+    [Fact]
+    public async Task ArbitrationServerSession_NextMatchPastEnd_SetsCurrentMatchNull_AndBroadcastsEmptyMatchInfo()
+    {
+        using var server = new WindowsBluetoothServer();
+        using var session = new ArbitrationServerSession(server);
+
+        string lastStatus = string.Empty;
+        session.StatusChanged += (s, msg) => lastStatus = msg;
+
+        // Aller directement au dernier match
+        Assert.NotEmpty(session.Matches);
+        int lastIndex = session.Matches.Count - 1;
+        await session.SetMatchIndexAsync(lastIndex);
+        Assert.NotNull(session.CurrentMatch);
+
+        // Passer au match suivant (au-delà du dernier match)
+        await session.NextMatchAsync();
+
+        Assert.Null(session.CurrentMatch);
+        Assert.Contains("Tous les matchs", lastStatus);
+    }
+
+    [Fact]
+    public void JudgeSession_ReceivingEmptyMatchInfo_ClearsCurrentMatch_AndCanSendScoreFalse()
+    {
+        using var client = new WindowsBluetoothClient();
+        using var session = new JudgeSession(client);
+
+        var onMsgMethod = typeof(JudgeSession).GetMethod("OnBluetoothMessageReceived", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.NotNull(onMsgMethod);
+
+        // First set a match
+        var matchRound1 = new MatchInfoData { Id = 25, Type = RoundType.Knockouts, Round = 1, CategoryName = "Cat1" };
+        onMsgMethod.Invoke(session, new object?[] { null, $"{Constants.Message.MATCH_INFO}{JsonSerializer.Serialize(matchRound1)}" });
+        Assert.NotNull(session.CurrentMatch);
+
+        // Now receive empty MATCH_INFO{}
+        onMsgMethod.Invoke(session, new object?[] { null, $"{Constants.Message.MATCH_INFO}{{}}" });
+
+        Assert.Null(session.CurrentMatch);
+        Assert.False(session.CanSendScore);
+    }
+
+    [Fact]
+    public async Task JudgeViewModel_ReceivingEmptyMatchInfo_ClearsCurrentDraw_AndUpdatesDisplay()
+    {
+        var vm = CreateJudgeViewModel();
+
+        // 1. Initialiser avec un match actif
+        var match = new MatchInfoData
+        {
+            Id = 15,
+            Type = RoundType.Knockouts,
+            Round = 1,
+            CategoryName = "Sanda -70kg",
+            DrawKnockout = new DrawKnockoutModel { Id = 15, Order = 1 }
+        };
+        await vm.HandleMessageAsync($"{Constants.Message.MATCH_INFO}{JsonSerializer.Serialize(match)}");
+
+        Assert.NotNull(vm.CurrentDraw);
+        Assert.True(vm.HasActiveMatch);
+
+        // 2. Réception de MATCH_INFO{} signalant la fin des matchs
+        await vm.HandleMessageAsync($"{Constants.Message.MATCH_INFO}{{}}");
+
+        // Assert
+        Assert.Null(vm.CurrentDraw);
+        Assert.False(vm.HasActiveMatch);
+        Assert.False(vm.CanSendScore);
+        Assert.Null(vm.Competitor1);
+        Assert.Null(vm.Competitor2);
+        Assert.Equal("Plus de match en cours", vm.CategoryName);
+        Assert.Equal("Fin des matchs", vm.MatchStageName);
+        Assert.Equal(0, vm.CurrentRound);
+    }
 }

@@ -1,7 +1,9 @@
 using CommunityToolkit.Maui;
 using House.Of.Arbitration.Data.Abstractions;
+using House.Of.Arbitration.Judge.Cli;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Server.Cli;
 using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -546,5 +548,113 @@ public class JudgeTaoluModeTests
         //await _bluetoothClient.Received(1).SendMessage("device-server", Arg.Is<string>(s => s.StartsWith(Constants.Message.JUDGE_SCORE) && s.Contains("Blue")));
         //Assert.Empty(vm.UnsyncedScores);
         //Assert.False(vm.HasUnsyncedChanges);
+    }
+
+    [Fact]
+    public void JudgeViewModel_InTaoluMode_CanSendScoreIsTrueWithoutStartingTimer_WhenDrawIsActive()
+    {
+        var vm = CreateViewModel();
+        vm.Competition = new CompetitionModel { Id = 1, Type = CompetitionType.Taolu };
+
+        // Sans match actif : CanSendScore doit être false
+        Assert.Null(vm.CurrentDraw);
+        Assert.False(vm.CanSendScore);
+
+        // Avec un tirage actif en Taolu
+        vm.CurrentDraw = new DrawOrderModel { Id = 10, Order = 1 };
+
+        // Le chrono n'a PAS été démarré
+        Assert.False(vm.IsTimerRunning);
+
+        // CanSendScore doit être true immédiatement !
+        Assert.True(vm.IsTaolu);
+        Assert.True(vm.HasActiveMatch);
+        Assert.True(vm.CanSendScore);
+    }
+
+    [Fact]
+    public async Task JudgeViewModel_InTaoluMode_DeductPointsSucceedsWithoutTimerRunning()
+    {
+        var vm = CreateViewModel();
+        vm.ServerId = "server-001";
+        vm.IsConnected = true;
+        vm.Competition = new CompetitionModel { Id = 1, Type = CompetitionType.Taolu };
+        vm.CurrentDraw = new DrawOrderModel { Id = 10, Order = 1 };
+        vm.Score = 5.0;
+
+        // Le chrono n'est pas démarré
+        Assert.False(vm.IsTimerRunning);
+        Assert.True(vm.CanSendScore);
+
+        // Appliquer une déduction directe
+        await vm.DeductPointsCommand.ExecuteAsync(0.3);
+
+        Assert.Equal(4.7, vm.Score);
+        await _bluetoothClient.Received(1).SendMessage(
+            Arg.Is<string>(id => id == "server-001"),
+            Arg.Is<string>(msg => msg.StartsWith(Constants.Message.JUDGE_SCORE))
+        );
+    }
+
+    [Fact]
+    public void JudgeSession_InTaoluMode_CanSendScoreIsTrueWithoutTimerRunning()
+    {
+        using var client = new WindowsBluetoothClient();
+        using var session = new House.Of.Arbitration.Judge.Cli.JudgeSession(client);
+
+        var onMsgMethod = typeof(House.Of.Arbitration.Judge.Cli.JudgeSession).GetMethod("OnBluetoothMessageReceived", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.NotNull(onMsgMethod);
+
+        // Réception d'un match Taolu (RoundType.Order)
+        var taoluMatch = new MatchInfoData
+        {
+            Id = 30,
+            Type = RoundType.Order,
+            CategoryName = "Taolu Changquan"
+        };
+        onMsgMethod.Invoke(session, new object?[] { null, $"{Constants.Message.MATCH_INFO}{System.Text.Json.JsonSerializer.Serialize(taoluMatch)}" });
+
+        Assert.NotNull(session.CurrentMatch);
+        Assert.Equal(RoundType.Order, session.CurrentMatch.Type);
+        Assert.False(session.IsTimerRunning);
+
+        // En Taolu, le juge doit pouvoir envoyer des notes sans chrono
+        Assert.True(session.CanSendScore);
+    }
+
+    [Fact]
+    public async Task ArbitrationServerSession_InTaoluMode_AcceptsScoreWithoutTimerRunning()
+    {
+        using var server = new WindowsBluetoothServer();
+        using var session = new ArbitrationServerSession(server);
+
+        // Trouver un match Taolu parmi les matches par défaut
+        var taoluIndex = session.Matches.ToList().FindIndex(m => m.Type == RoundType.Order);
+        Assert.True(taoluIndex >= 0);
+
+        await session.SetMatchIndexAsync(taoluIndex);
+        Assert.NotNull(session.CurrentMatch);
+        Assert.Equal(RoundType.Order, session.CurrentMatch.Type);
+        Assert.False(session.IsTimerRunning);
+
+        string lastStatus = string.Empty;
+        session.StatusChanged += (s, msg) => lastStatus = msg;
+
+        // Simuler la réception d'une note Taolu du juge alors que le chronomètre est inactif
+        var onMsgMethod = typeof(ArbitrationServerSession).GetMethod("OnBluetoothMessageReceived", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        Assert.NotNull(onMsgMethod);
+
+        var scoreData = new TransfertScoreModel
+        {
+            Score = 4.85,
+            JudgePosition = "1",
+            Side = Constants.Side.Red
+        };
+        string msg = $"{Constants.Message.JUDGE_SCORE}{System.Text.Json.JsonSerializer.Serialize(scoreData)}";
+
+        onMsgMethod.Invoke(session, new object?[] { null, ("judge-client-1", msg) });
+
+        // Le score NE DOIT PAS être refusé
+        Assert.DoesNotContain("[SCORE REFUSÉ]", lastStatus);
     }
 }
