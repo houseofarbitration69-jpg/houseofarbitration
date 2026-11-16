@@ -447,5 +447,8 @@ public class ExcelImportExportServiceTests
         Assert.False(finalMatch.IsBronzeMatch);
         Assert.Equal("Finale", finalMatch.StageName);
         Assert.Equal(4, finalMatch.Order);
+
+        Assert.True(bronzeMatch.GlobalOrder < finalMatch.GlobalOrder,
+            $"L'ordre global de la petite finale ({bronzeMatch.GlobalOrder}) doit être strictement inférieur à celui de la finale ({finalMatch.GlobalOrder})");
     }
 }

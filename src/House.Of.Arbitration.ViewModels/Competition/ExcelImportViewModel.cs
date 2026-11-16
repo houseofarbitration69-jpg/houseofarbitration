@@ -118,6 +118,26 @@ public partial class ExcelImportViewModel : BaseViewModel
 
     #region Commands
     /// <summary>
+    /// Retourne à la page précédente de manière sécurisée
+    /// </summary>
+    [RelayCommand]
+    private async Task Back()
+    {
+        if (Shell.Current?.Navigation?.NavigationStack?.Count > 1)
+        {
+            await Shell.Current.GoToAsync("..");
+        }
+        else
+        {
+            var location = Shell.Current?.CurrentState?.Location?.OriginalString;
+            if (location != null && !location.Contains("MainPage"))
+            {
+                await Shell.Current.GoToAsync("//MainPage");
+            }
+        }
+    }
+
+    /// <summary>
     /// Génère et télécharge le template Excel directement dans le dossier Téléchargements
     /// </summary>
     [RelayCommand]

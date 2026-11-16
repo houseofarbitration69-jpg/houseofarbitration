@@ -754,4 +754,122 @@ public class ExcelCliLoaderTests
         Assert.NotNull(bronzeInfoAfter.DrawKnockout?.Competitor1);
         Assert.NotNull(bronzeInfoAfter.DrawKnockout?.Competitor2);
     }
+
+    [Fact]
+    public void LoadFromStream_MultiCategory_AllPetiteFinalesBeforeAllFinales()
+    {
+        using var workbook = new XLWorkbook();
+        var wsComp = workbook.Worksheets.Add("Compétition");
+        wsComp.Cell(1, 1).Value = "Nom";
+        wsComp.Cell(1, 3).Value = "Type";
+        wsComp.Cell(2, 1).Value = "Championnat Sanda Multi-Catégories";
+        wsComp.Cell(2, 3).Value = "Sanda";
+
+        var wsCat = workbook.Worksheets.Add("Catégories");
+        wsCat.Cell(1, 1).Value = "TypeCategorie";
+        wsCat.Cell(1, 2).Value = "Genre";
+        wsCat.Cell(1, 3).Value = "PoidsMin";
+        wsCat.Cell(1, 4).Value = "PoidsMax";
+        wsCat.Cell(1, 5).Value = "TrancheAge";
+        wsCat.Cell(1, 6).Value = "TypeRound";
+        wsCat.Cell(1, 7).Value = "NomCategorie";
+        wsCat.Cell(1, 8).Value = "Petite Finale (Oui/Non)";
+
+        // Catégorie 1 : Sanda -65kg avec Petite finale
+        wsCat.Cell(2, 1).Value = "Sanda";
+        wsCat.Cell(2, 2).Value = "Men";
+        wsCat.Cell(2, 3).Value = "60";
+        wsCat.Cell(2, 4).Value = "65";
+        wsCat.Cell(2, 5).Value = "Seniors";
+        wsCat.Cell(2, 6).Value = "Knockouts";
+        wsCat.Cell(2, 7).Value = "Sanda Seniors Hommes -65kg";
+        wsCat.Cell(2, 8).Value = "Oui";
+
+        // Catégorie 2 : Sanda -70kg avec Petite finale
+        wsCat.Cell(3, 1).Value = "Sanda";
+        wsCat.Cell(3, 2).Value = "Men";
+        wsCat.Cell(3, 3).Value = "65";
+        wsCat.Cell(3, 4).Value = "70";
+        wsCat.Cell(3, 5).Value = "Seniors";
+        wsCat.Cell(3, 6).Value = "Knockouts";
+        wsCat.Cell(3, 7).Value = "Sanda Seniors Hommes -70kg";
+        wsCat.Cell(3, 8).Value = "Oui";
+
+        var wsCompetitors = workbook.Worksheets.Add("Compétiteurs");
+        wsCompetitors.Cell(1, 1).Value = "Prénom";
+        wsCompetitors.Cell(1, 2).Value = "Nom";
+        wsCompetitors.Cell(1, 8).Value = "Catégorie";
+
+        // Compétiteurs Cat 1 (-65kg)
+        wsCompetitors.Cell(2, 1).Value = "A1"; wsCompetitors.Cell(2, 2).Value = "NomA1"; wsCompetitors.Cell(2, 8).Value = "Sanda Seniors Hommes -65kg";
+        wsCompetitors.Cell(3, 1).Value = "A2"; wsCompetitors.Cell(3, 2).Value = "NomA2"; wsCompetitors.Cell(3, 8).Value = "Sanda Seniors Hommes -65kg";
+        wsCompetitors.Cell(4, 1).Value = "A3"; wsCompetitors.Cell(4, 2).Value = "NomA3"; wsCompetitors.Cell(4, 8).Value = "Sanda Seniors Hommes -65kg";
+        wsCompetitors.Cell(5, 1).Value = "A4"; wsCompetitors.Cell(5, 2).Value = "NomA4"; wsCompetitors.Cell(5, 8).Value = "Sanda Seniors Hommes -65kg";
+
+        // Compétiteurs Cat 2 (-70kg)
+        wsCompetitors.Cell(6, 1).Value = "B1"; wsCompetitors.Cell(6, 2).Value = "NomB1"; wsCompetitors.Cell(6, 8).Value = "Sanda Seniors Hommes -70kg";
+        wsCompetitors.Cell(7, 1).Value = "B2"; wsCompetitors.Cell(7, 2).Value = "NomB2"; wsCompetitors.Cell(7, 8).Value = "Sanda Seniors Hommes -70kg";
+        wsCompetitors.Cell(8, 1).Value = "B3"; wsCompetitors.Cell(8, 2).Value = "NomB3"; wsCompetitors.Cell(8, 8).Value = "Sanda Seniors Hommes -70kg";
+        wsCompetitors.Cell(9, 1).Value = "B4"; wsCompetitors.Cell(9, 2).Value = "NomB4"; wsCompetitors.Cell(9, 8).Value = "Sanda Seniors Hommes -70kg";
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        ms.Position = 0;
+
+        var result = ExcelCompetitionLoader.LoadFromStream(ms);
+
+        Assert.True(result.Success);
+        Assert.Equal(2, result.Categories.Count);
+        Assert.Equal(8, result.Matches.Count);
+
+        string cat1Name = result.Categories[0].Name;
+        string cat2Name = result.Categories[1].Name;
+
+        // Vérifier les 4 demi-finales en premier
+        Assert.Equal("Demi-finale 1", result.Matches[0].StageName);
+        Assert.Equal(cat1Name, result.Matches[0].Category);
+        Assert.Equal("Demi-finale 2", result.Matches[1].StageName);
+        Assert.Equal(cat1Name, result.Matches[1].Category);
+        Assert.Equal("Demi-finale 1", result.Matches[2].StageName);
+        Assert.Equal(cat2Name, result.Matches[2].Category);
+        Assert.Equal("Demi-finale 2", result.Matches[3].StageName);
+        Assert.Equal(cat2Name, result.Matches[3].Category);
+
+        // Vérifier TOUTES les Petites finales (3e place) avant les finales
+        Assert.Equal("Petite finale", result.Matches[4].StageName);
+        Assert.True(result.Matches[4].IsBronzeMatch);
+        Assert.Equal(cat1Name, result.Matches[4].Category);
+
+        Assert.Equal("Petite finale", result.Matches[5].StageName);
+        Assert.True(result.Matches[5].IsBronzeMatch);
+        Assert.Equal(cat2Name, result.Matches[5].Category);
+
+        // Vérifier TOUTES les Finales en dernier
+        Assert.Equal("Finale", result.Matches[6].StageName);
+        Assert.False(result.Matches[6].IsBronzeMatch);
+        Assert.Equal(cat1Name, result.Matches[6].Category);
+
+        Assert.Equal("Finale", result.Matches[7].StageName);
+        Assert.False(result.Matches[7].IsBronzeMatch);
+        Assert.Equal(cat2Name, result.Matches[7].Category);
+
+        // Vérifier que chaque Petite finale a un Id strictement inférieur à TOUTE Finale
+        var bronzeMatches = result.Matches.Where(m => m.IsBronzeMatch).ToList();
+        var finalMatches = result.Matches.Where(m => !m.IsBronzeMatch && m.StageName == "Finale").ToList();
+
+        int maxBronzeId = bronzeMatches.Max(m => m.Id);
+        int minFinalId = finalMatches.Min(m => m.Id);
+
+        Assert.True(maxBronzeId < minFinalId, $"Le max ID des petites finales ({maxBronzeId}) doit être inférieur au min ID des finales ({minFinalId})");
+
+        // Vérifier que dans chaque catégorie, la petite finale a un Order < Finale.Order
+        foreach (var cat in result.Categories)
+        {
+            var catDraw = cat.Draw?.DrawKnockouts;
+            Assert.NotNull(catDraw);
+            var catBronze = catDraw.First(k => k.IsBronzeMatch);
+            var catFinal = catDraw.First(k => !k.IsBronzeMatch && k.StageName == "Finale");
+            Assert.True(catBronze.Order < catFinal.Order, $"Dans {cat.Name}, l'ordre de la petite finale ({catBronze.Order}) doit être inférieur à la finale ({catFinal.Order})");
+        }
+    }
 }

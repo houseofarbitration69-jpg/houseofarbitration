@@ -14,4 +14,13 @@ public partial class ExcelImportPage : BasePage<ExcelImportViewModel>
     {
         InitializeComponent();
     }
+
+    protected override bool OnBackButtonPressed()
+    {
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await OnBackButtonClicked();
+        });
+        return true;
+    }
 }

@@ -25,14 +25,37 @@
 
                 <!-- En-tête -->
                 <Grid ColumnDefinitions="Auto, *" ColumnSpacing="16">
-                    <Button Grid.Column="0"
+                    <Border
+                        StrokeShape="RoundRectangle 18"
+                        HeightRequest="36"
+                        WidthRequest="36"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
+                    >
+                        <Label 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.ARROW_LEFT}" 
+                            FontSize="16" 
+                            TextColor="{DynamicResource PrimaryTextColor}" 
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                        />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding BackCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
+                    <!--<Button Grid.Column="0"
                             Text="←"
                             FontSize="20"
                             BackgroundColor="Transparent"
                             TextColor="{DynamicResource PrimaryTextColor}"
                             Command="{Binding NavigateToCommand}"
                             CommandParameter=".."
-                            VerticalOptions="Center" />
+                            VerticalOptions="Center" />-->
                     <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                         <Label Text="Import Excel" Style="{DynamicResource Headline}" FontSize="28" />
                         <Label Text="Importez vos compétitions depuis un fichier Excel" Style="{DynamicResource SubHeadline}" FontSize="14" Opacity="0.7" />

@@ -19,8 +19,13 @@ public static class KnockoutStageHelper
             return "Combat";
         }
 
+        if (totalMatches <= 0)
+        {
+            return $"Combat {order}";
+        }
+
         // Déterminer la taille totale normalisée de l'arbre (2^k - 1)
-        int effectiveTotal = totalMatches > 0 ? totalMatches : order;
+        int effectiveTotal = totalMatches;
         int m = 1;
         while (m - 1 < Math.Max(effectiveTotal, order))
         {

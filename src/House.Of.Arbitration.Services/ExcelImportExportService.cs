@@ -582,6 +582,7 @@ public class ExcelImportExportService : IExcelImportExportService
 
             // ── 4. Generer les tirages pour chaque categorie importee ─────────
             int globalOrder = 1;
+            var generatedDraws = new List<(DrawModel Draw, string CategoryName)>();
 
             foreach (var category in categories)
             {
@@ -596,22 +597,56 @@ public class ExcelImportExportService : IExcelImportExportService
                         var draw = GenerateDrawForCategory(category, catCompetitors, ref globalOrder);
                         if (draw != null)
                         {
-                            _drawRepository.ClearTracker();
-                            var persistedDraw = await _drawRepository.AddAsync(draw);
-                            if (persistedDraw != null)
-                            {
-                                importedDraws++;
-                            }
-                            else
-                            {
-                                warnings.Add($"Impossible de persister le tirage pour la categorie {category.Name}.");
-                            }
+                            generatedDraws.Add((draw, category.Name));
                         }
                     }
                 }
                 catch (Exception ex)
                 {
                     warnings.Add($"Erreur lors de la generation du tirage pour la categorie {category.Name}: {ex.Message}");
+                }
+            }
+
+            // Ordonnancement global du tournoi :
+            // 1. Tous les matchs préliminaires / quarts / demis de toutes les catégories
+            // 2. TOUTES les Petites finales de toutes les catégories
+            // 3. TOUTES les Finales de toutes les catégories
+            var allKnockouts = generatedDraws
+                .Where(d => d.Draw.DrawKnockouts != null)
+                .SelectMany(d => d.Draw.DrawKnockouts!)
+                .ToList();
+
+            if (allKnockouts.Count > 0)
+            {
+                var prelimMatches = allKnockouts.Where(k => !k.IsBronzeMatch && !string.Equals(k.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
+                var bronzeMatches = allKnockouts.Where(k => k.IsBronzeMatch).ToList();
+                var finalMatches = allKnockouts.Where(k => !k.IsBronzeMatch && string.Equals(k.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
+
+                var scheduledMatches = prelimMatches.Concat(bronzeMatches).Concat(finalMatches).ToList();
+                for (int i = 0; i < scheduledMatches.Count; i++)
+                {
+                    scheduledMatches[i].GlobalOrder = i + 1;
+                }
+            }
+
+            foreach (var (draw, catName) in generatedDraws)
+            {
+                try
+                {
+                    _drawRepository.ClearTracker();
+                    var persistedDraw = await _drawRepository.AddAsync(draw);
+                    if (persistedDraw != null)
+                    {
+                        importedDraws++;
+                    }
+                    else
+                    {
+                        warnings.Add($"Impossible de persister le tirage pour la categorie {catName}.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    warnings.Add($"Erreur lors de la persistance du tirage pour la categorie {catName}: {ex.Message}");
                 }
             }
         }
@@ -724,15 +759,18 @@ public class ExcelImportExportService : IExcelImportExportService
             {
                 var finalMatch = draw.DrawKnockouts.Last();
                 int bronzeOrder = finalMatch.Order;
-                finalMatch.Order = bronzeOrder + 1;
+                int bronzeGlobalOrder = finalMatch.GlobalOrder;
 
                 var bronzeMatch = new DrawKnockoutModel
                 {
                     Draw = draw,
                     Order = bronzeOrder,
-                    GlobalOrder = globalOrder++,
+                    GlobalOrder = bronzeGlobalOrder,
                     IsBronzeMatch = true
                 };
+
+                finalMatch.Order = bronzeOrder + 1;
+                finalMatch.GlobalOrder = globalOrder++;
 
                 // Insérer la petite finale juste avant la finale
                 draw.DrawKnockouts.Insert(draw.DrawKnockouts.Count - 1, bronzeMatch);

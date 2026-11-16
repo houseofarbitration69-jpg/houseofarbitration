@@ -409,6 +409,7 @@ public static class ExcelCompetitionLoader
                                 Order = 1,
                                 GlobalOrder = currentMatchId,
                                 DrawId = draw.Id,
+                                Draw = draw,
                                 Competitor1Id = catCompetitors[0].Id,
                                 Competitor1 = catCompetitors[0],
                                 Competitor2Id = null,
@@ -590,6 +591,7 @@ public static class ExcelCompetitionLoader
                                     Order = koOrder++,
                                     GlobalOrder = match.Id,
                                     DrawId = draw.Id,
+                                    Draw = draw,
                                     Competitor1Id = c1?.Id,
                                     Competitor1 = c1,
                                     Competitor2Id = c2?.Id,
@@ -604,6 +606,72 @@ public static class ExcelCompetitionLoader
                     }
                 }
             }
+
+            // Ordonnancement global du tournoi :
+            // 1. Tous les matchs préliminaires / demi-finales (et Taolu/Poules) de toutes les catégories
+            // 2. TOUTES les Petites finales de toutes les catégories
+            // 3. TOUTES les Finales de toutes les catégories
+            var prelimMatches = matches.Where(m => !m.IsBronzeMatch && !string.Equals(m.StageName, "Petite finale", StringComparison.OrdinalIgnoreCase) && !string.Equals(m.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
+            var bronzeMatches = matches.Where(m => m.IsBronzeMatch || string.Equals(m.StageName, "Petite finale", StringComparison.OrdinalIgnoreCase)).ToList();
+            var finalMatches = matches.Where(m => !m.IsBronzeMatch && string.Equals(m.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
+
+            var scheduledMatches = prelimMatches
+                .Concat(bronzeMatches)
+                .Concat(finalMatches)
+                .ToList();
+
+            var idMap = new Dictionary<int, int>();
+            for (int i = 0; i < scheduledMatches.Count; i++)
+            {
+                int oldId = scheduledMatches[i].Id;
+                int newId = i + 1;
+                scheduledMatches[i].Id = newId;
+                idMap[oldId] = newId;
+            }
+
+            // Remap NextMatchId et NextLoserMatchId
+            foreach (var m in scheduledMatches)
+            {
+                if (m.NextMatchId.HasValue && idMap.TryGetValue(m.NextMatchId.Value, out int mappedNextId))
+                {
+                    m.NextMatchId = mappedNextId;
+                }
+                if (m.NextLoserMatchId.HasValue && idMap.TryGetValue(m.NextLoserMatchId.Value, out int mappedLoserId))
+                {
+                    m.NextLoserMatchId = mappedLoserId;
+                }
+            }
+
+            // Mettre à jour les DrawKnockouts pour chaque catégorie
+            foreach (var cat in categoriesList)
+            {
+                if (cat.Draw?.DrawKnockouts != null && cat.Draw.DrawKnockouts.Count > 0)
+                {
+                    foreach (var k in cat.Draw.DrawKnockouts)
+                    {
+                        if (idMap.TryGetValue(k.Id, out int newId))
+                        {
+                            k.Id = newId;
+                            k.GlobalOrder = newId;
+                        }
+                    }
+
+                    // Ré-ordonner l'ordre local dans la catégorie selon GlobalOrder (qui garantit Petite finale avant Finale)
+                    var catKo = cat.Draw.DrawKnockouts
+                        .OrderBy(k => k.GlobalOrder)
+                        .ToList();
+
+                    for (int i = 0; i < catKo.Count; i++)
+                    {
+                        catKo[i].Order = i + 1;
+                        catKo[i].Draw = cat.Draw;
+                    }
+
+                    cat.Draw.DrawKnockouts = catKo;
+                }
+            }
+
+            matches = scheduledMatches;
 
             result.Competition.Categories = categoriesList;
             result.Matches = matches;

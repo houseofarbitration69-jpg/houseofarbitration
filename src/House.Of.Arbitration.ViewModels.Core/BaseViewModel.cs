@@ -138,7 +138,33 @@ public partial class BaseViewModel : ObservableObject
     [RelayCommand]
     private async Task NavigateTo(string page)
     {
-        await Shell.Current.GoToAsync($"/{page}");
+        if (string.IsNullOrWhiteSpace(page)) return;
+
+        if (page == ".." || page.StartsWith("../"))
+        {
+            if (Shell.Current?.Navigation?.NavigationStack?.Count > 1)
+            {
+                await Shell.Current.GoToAsync("..");
+            }
+            else
+            {
+                var location = Shell.Current?.CurrentState?.Location?.OriginalString;
+                if (location != null && !location.Contains("MainPage"))
+                {
+                    await Shell.Current.GoToAsync("//MainPage");
+                }
+            }
+            return;
+        }
+
+        if (page.StartsWith("/") || page.StartsWith("//"))
+        {
+            await Shell.Current.GoToAsync(page);
+        }
+        else
+        {
+            await Shell.Current.GoToAsync($"/{page}");
+        }
     }
     #endregion
 

@@ -1204,7 +1204,7 @@ public partial class ServerViewModel : BaseViewModel
     /// 
     /// </summary>
     /// <returns></returns>
-    private async Task Init()
+    internal async Task Init()
     {
         if (CompetitionId > 0)
         {
@@ -1226,6 +1226,24 @@ public partial class ServerViewModel : BaseViewModel
         var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
         var orders = (await _drawOrderService.GetAllAsync("Draw.Category.AgeRange", "Competitor.Country"))?.ToList();
         var pools = (await _drawPoolsModel.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
+
+        // Lier les DrawKnockouts à leur Draw pour permettre le calcul dynamique correct de StageName
+        if (knockouts != null && knockouts.Count > 0)
+        {
+            var knockoutsByDraw = knockouts.GroupBy(k => k.DrawId);
+            foreach (var group in knockoutsByDraw)
+            {
+                var list = group.OrderBy(k => k.Order).ToList();
+                foreach (var k in list)
+                {
+                    if (k.Draw != null)
+                    {
+                        k.Draw.DrawKnockouts = list;
+                    }
+                }
+            }
+        }
+
         var allDraws = new List<IDrawModel>();
 
         if (CompetitionId > 0)
@@ -1263,7 +1281,19 @@ public partial class ServerViewModel : BaseViewModel
             }
         }
 
-        var sortedDraws = allDraws.OrderBy(d => d.GlobalOrder).ToList();
+        // Ordonnancement : Préliminaires (0) -> Petites finales (1) -> Finales (2)
+        var sortedDraws = allDraws
+            .OrderBy(d => GetDrawPhasePriority(d))
+            .ThenBy(d => d.GlobalOrder > 0 ? d.GlobalOrder : int.MaxValue)
+            .ThenBy(d => d.Draw?.CategoryId ?? 0)
+            .ThenBy(d => GetDrawLocalOrder(d))
+            .ToList();
+
+        for (int i = 0; i < sortedDraws.Count; i++)
+        {
+            sortedDraws[i].GlobalOrder = i + 1;
+        }
+
         TotalMatches = sortedDraws.Count;
 
         var firstUnfinished = sortedDraws.FirstOrDefault(d => !d.IsFinished);
@@ -1316,6 +1346,34 @@ public partial class ServerViewModel : BaseViewModel
         await BroadcastMatchInfo();
 
         UpdateCurrentRoundVotes();
+    }
+
+    /// <summary>
+    /// Calcule la priorité de phase pour un tirage : Préliminaires / Quarts / Demis (0) -> Petites finales (1) -> Finales (2)
+    /// </summary>
+    private static int GetDrawPhasePriority(IDrawModel draw)
+    {
+        if (draw is DrawKnockoutModel ko)
+        {
+            if (ko.IsBronzeMatch || string.Equals(ko.StageName, "Petite finale", StringComparison.OrdinalIgnoreCase)) return 1;
+            if (string.Equals(ko.StageName, "Finale", StringComparison.OrdinalIgnoreCase)) return 2;
+            return 0;
+        }
+        return 0;
+    }
+
+    /// <summary>
+    /// Retourne l'ordre local du combat dans sa catégorie
+    /// </summary>
+    private static int GetDrawLocalOrder(IDrawModel draw)
+    {
+        return draw switch
+        {
+            DrawKnockoutModel ko => ko.Order,
+            DrawPoolsModel pool => pool.Order,
+            DrawOrderModel order => order.Order,
+            _ => 0
+        };
     }
 
     /// <summary>
@@ -1644,8 +1702,18 @@ public partial class ServerViewModel : BaseViewModel
 
                             if (nextMatchesInRound > 0)
                             {
-                                int nextMatchOrder = nextRoundStart + (localIndex + 1) / 2;
-                                var nextMatch = allKnockouts.FirstOrDefault(k => k.Order == nextMatchOrder);
+                                DrawKnockoutModel? nextMatch;
+                                if (matchesInRound == 2)
+                                {
+                                    // Le vainqueur de demi-finale va en Finale (qui a lieu APRÈS la petite finale)
+                                    nextMatch = allKnockouts.LastOrDefault(k => !k.IsBronzeMatch);
+                                }
+                                else
+                                {
+                                    int nextMatchOrder = nextRoundStart + (localIndex + 1) / 2;
+                                    nextMatch = allKnockouts.FirstOrDefault(k => k.Order == nextMatchOrder);
+                                }
+
                                 if (nextMatch != null)
                                 {
                                     if (localIndex % 2 != 0)
@@ -1663,6 +1731,7 @@ public partial class ServerViewModel : BaseViewModel
 
                                 if (matchesInRound == 2 && looser != null)
                                 {
+                                    // Le perdant de demi-finale va en Petite finale (qui a lieu AVANT la finale)
                                     var bronzeMatch = allKnockouts.FirstOrDefault(k => k.IsBronzeMatch);
                                     if (bronzeMatch != null)
                                     {

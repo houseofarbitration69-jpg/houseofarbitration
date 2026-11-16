@@ -297,10 +297,10 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                 }
             }
 
-            // Sort matches: preserve existing GlobalOrder > 0, then by Category and local Order
+            // Sort matches: Phase (prelims: 0, petite finale: 1, finale: 2), then GlobalOrder (if > 0), Category and local Order
             _allMatches = _allMatches
-                .OrderBy(m => m.GlobalOrder > 0 ? 0 : 1)
-                .ThenBy(m => m.GlobalOrder > 0 ? m.GlobalOrder : 0)
+                .OrderBy(m => GetMatchPhasePriority(m))
+                .ThenBy(m => m.GlobalOrder > 0 ? m.GlobalOrder : int.MaxValue)
                 .ThenBy(m => m.CategoryId)
                 .ThenBy(m => m.Order)
                 .ToList();
@@ -342,7 +342,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
             {
                 m = 2;
             }
-            int totalMatches = m - 1;
+            int totalMatches = (category.HasBronzeMatch && m >= 4) ? m : (m - 1);
 
             int matchesInRound = m / 2;
             int matchOffset = 0;
@@ -385,27 +385,75 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
             while (currentMatches > 1)
             {
                 currentMatches /= 2;
-                for (int i = 0; i < currentMatches; i++)
+
+                if (currentMatches == 1 && category.HasBronzeMatch && m >= 4)
                 {
-                    var k = new DrawKnockoutModel
+                    // Petite finale avant la finale
+                    var bronzeK = new DrawKnockoutModel
                     {
-                        Order = matchOffset + i + 1,
-                        GlobalOrder = 0
+                        Order = matchOffset + 1,
+                        GlobalOrder = 0,
+                        IsBronzeMatch = true
                     };
 
                     _allMatches.Add(new DrawMatchItemViewModel
                     {
-                        DrawModel = k,
+                        DrawModel = bronzeK,
                         CategoryId = category.Id,
                         CategoryName = category.Name,
                         Category = category,
                         RoundType = RoundType.Knockouts,
-                        Order = k.Order,
+                        Order = bronzeK.Order,
                         GlobalOrder = 0,
                         TotalMatchesInCategory = totalMatches
                     });
+
+                    // Finale
+                    var finalK = new DrawKnockoutModel
+                    {
+                        Order = matchOffset + 2,
+                        GlobalOrder = 0,
+                        IsBronzeMatch = false
+                    };
+
+                    _allMatches.Add(new DrawMatchItemViewModel
+                    {
+                        DrawModel = finalK,
+                        CategoryId = category.Id,
+                        CategoryName = category.Name,
+                        Category = category,
+                        RoundType = RoundType.Knockouts,
+                        Order = finalK.Order,
+                        GlobalOrder = 0,
+                        TotalMatchesInCategory = totalMatches
+                    });
+
+                    matchOffset += 2;
                 }
-                matchOffset += currentMatches;
+                else
+                {
+                    for (int i = 0; i < currentMatches; i++)
+                    {
+                        var k = new DrawKnockoutModel
+                        {
+                            Order = matchOffset + i + 1,
+                            GlobalOrder = 0
+                        };
+
+                        _allMatches.Add(new DrawMatchItemViewModel
+                        {
+                            DrawModel = k,
+                            CategoryId = category.Id,
+                            CategoryName = category.Name,
+                            Category = category,
+                            RoundType = RoundType.Knockouts,
+                            Order = k.Order,
+                            GlobalOrder = 0,
+                            TotalMatchesInCategory = totalMatches
+                        });
+                    }
+                    matchOffset += currentMatches;
+                }
             }
         }
         else if (category.RoundType == RoundType.Pools)
@@ -763,6 +811,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                         Competitor2Id = k.Competitor2Id,
                         WinnerId = k.WinnerId,
                         LooserId = k.LooserId,
+                        IsBronzeMatch = k.IsBronzeMatch,
                         IsFinished = true
                     });
                 }
@@ -806,6 +855,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                             GlobalOrder = match.GlobalOrder,
                             Competitor1Id = match.Competitor1?.Id,
                             Competitor2Id = match.Competitor2?.Id,
+                            IsBronzeMatch = (match.DrawModel as DrawKnockoutModel)?.IsBronzeMatch ?? false,
                             IsFinished = match.IsFinished
                         };
 
@@ -873,6 +923,17 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
     {
         await Shell.Current.GoToAsync("..");
     }
+
+    private static int GetMatchPhasePriority(DrawMatchItemViewModel m)
+    {
+        if (m.DrawModel is DrawKnockoutModel k)
+        {
+            if (k.IsBronzeMatch) return 1;
+            if (k.StageName == "Finale") return 2;
+            return 0;
+        }
+        return 0;
+    }
     #endregion
 }
 
@@ -932,6 +993,11 @@ public partial class DrawMatchItemViewModel : ObservableObject
             {
                 //return $"Poule - Match #{Order}";
                 return $"Poule - Match";
+            }
+
+            if (DrawModel is DrawKnockoutModel ko)
+            {
+                return ko.StageName;
             }
 
             return KnockoutStageHelper.GetStageName(Order, TotalMatchesInCategory, false);

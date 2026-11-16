@@ -6,6 +6,7 @@
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Competition;assembly=House.Of.Arbitration.ViewModels"
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     x:TypeArguments="vm:ResultsViewModel"
     x:Class="House.Of.Arbitration.Views.Competition.ResultsPage"
@@ -24,13 +25,29 @@
     <Grid RowDefinitions="Auto, Auto, *" Padding="20" RowSpacing="16">
         <!-- Header -->
         <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" VerticalOptions="Center">
-            <Button Grid.Column="0" 
-                    Text="← Retour" 
-                    Command="{Binding BackCommand}" 
-                    BackgroundColor="Transparent" 
+            <Border
+                Grid.Column="0" 
+                StrokeShape="RoundRectangle 18"
+                HeightRequest="36"
+                WidthRequest="36"
+                BackgroundColor="{DynamicResource SurfaceElevation4}"
+                Stroke="{DynamicResource BorderMuted}"
+                StrokeThickness="1"
+                VerticalOptions="Center"
+                HorizontalOptions="Start"
+            >
+                <Label 
+                    FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                    Text="{x:Static helpers:FontAwesomeIcons.ARROW_LEFT}" 
+                    FontSize="16" 
                     TextColor="{DynamicResource PrimaryTextColor}" 
-                    FontAttributes="Bold"
-                    Padding="10, 5" />
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center"
+                />
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding BackCommand}"/>
+                </Border.GestureRecognizers>
+            </Border>
 
             <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="2">
                 <Label Text="CLASSEMENT ET RÉSULTATS" 
@@ -45,16 +62,20 @@
                        HorizontalOptions="Center" />
             </VerticalStackLayout>
 
-            <Button Grid.Column="2"
-                    Text="📊 Excel"
-                    Command="{Binding ExportToExcelCommand}"
-                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
-                    BackgroundColor="{DynamicResource MartialRed}"
-                    TextColor="White"
-                    FontSize="13"
-                    FontAttributes="Bold"
-                    CornerRadius="8"
-                    Padding="12, 6" />
+            <controls:IconButton 
+                Grid.Column="2"
+                Text="Export excel"
+                Style="{StaticResource PrimaryButtonStyle}"
+                Command="{Binding ExportToExcelCommand}"
+            >
+                <controls:IconButton.Icons>
+                    <controls:IconInfo 
+                        Icon="{x:Static helpers:FontCustomIcons.DOWNLOAD}" 
+                        Color="{StaticResource InverseTextColor}" 
+                        FontSize="16" 
+                    />
+                </controls:IconButton.Icons>
+            </controls:IconButton>
         </Grid>
 
         <!-- Category Selector Card -->
