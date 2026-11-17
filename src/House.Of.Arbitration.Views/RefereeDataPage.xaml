@@ -6,6 +6,8 @@
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     x:TypeArguments="vm:RefereeDataViewModel"
     x:Class="House.Of.Arbitration.Views.RefereeDataPage"
     x:DataType="vm:RefereeDataViewModel"
@@ -20,60 +22,87 @@
 
     <Grid RowDefinitions="Auto, Auto, *" Margin="10" RowSpacing="15">
         <!-- Header / Title -->
-        <Border Grid.Row="0" Padding="15" BackgroundColor="{DynamicResource SurfaceElevation6}" StrokeShape="RoundRectangle 10" Stroke="{DynamicResource BorderStrong}" StrokeThickness="1">
+        <Border 
+            Grid.Row="0" 
+            Padding="15" 
+            BackgroundColor="{DynamicResource SurfaceElevation6}" 
+            StrokeShape="RoundRectangle 10" 
+            Stroke="{DynamicResource BorderStrong}" 
+            StrokeThickness="1"
+        >
             <Grid ColumnDefinitions="*, Auto">
-                <Label Grid.Column="0"
-                       Text="LISTE DES SCORES (LOGS)"
-                       TextColor="{DynamicResource PrimaryTextColor}"
-                       FontSize="24"
-                       FontAttributes="Bold"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center" />
-                <Button Grid.Column="1"
-                        Text="📊 Excel"
-                        Command="{Binding ExportToExcelCommand}"
-                        IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBoolConverter}}"
-                        BackgroundColor="{DynamicResource MartialRed}"
-                        TextColor="White"
-                        FontSize="13"
-                        FontAttributes="Bold"
-                        CornerRadius="8"
-                        Padding="12, 6"
-                        VerticalOptions="Center" />
+                <Label 
+                    Grid.Column="0"
+                    Text="LISTE DES SCORES (LOGS)"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    FontSize="24"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" 
+                />
+
+                <controls:IconButton
+                    Grid.Column="1"
+                    Text="Télécharger les données"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding ExportToExcelCommand}"
+                >
+                    <controls:IconButton.Icons>
+                        <controls:IconInfo 
+                            Icon="{x:Static helpers:FontCustomIcons.DOWNLOAD}" 
+                            Color="{StaticResource InverseTextColor}" 
+                            FontSize="16" 
+                        />
+                    </controls:IconButton.Icons>
+                </controls:IconButton>
             </Grid>
         </Border>
 
         <!-- Filters -->
         <HorizontalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center" IsVisible="{OnIdiom Tablet=True, Phone=False}">
             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                <Label Text="Compétition :" VerticalOptions="Center" FontAttributes="Bold" />
+                <Label 
+                    Text="Compétition :"
+                    VerticalOptions="Center" 
+                    FontAttributes="Bold" 
+                    TextColor="White"
+                />
+
                 <Picker 
                     ItemsSource="{Binding Competitions}"
                     SelectedItem="{Binding SelectedCompetition}"
                     ItemDisplayBinding="{Binding Name}"
                     WidthRequest="250"
-                    Title="Toutes" 
+                    Title="Toutes"
+                    TextColor="White"
                 />
             </HorizontalStackLayout>
 
             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
-                <Label Text="Catégorie :" VerticalOptions="Center" FontAttributes="Bold" />
+                <Label 
+                    Text="Catégorie :" 
+                    VerticalOptions="Center" 
+                    FontAttributes="Bold" 
+                    TextColor="White"
+                />
+
                 <Picker 
                     ItemsSource="{Binding Categories}"
                     SelectedItem="{Binding SelectedCategory}"
                     ItemDisplayBinding="{Binding Name}"
                     WidthRequest="250"
                     Title="Toutes" 
+                    TextColor="White"
                 />
             </HorizontalStackLayout>
 
-            <Button Text="Réinitialiser" 
+            <!--<Button Text="Réinitialiser" 
                     Command="{Binding ResetFilterCommand}" 
                     BackgroundColor="Gray" 
                     TextColor="White" 
                     CornerRadius="5" 
                     Padding="15,0" 
-                    HeightRequest="40" />
+                    HeightRequest="40" />-->
         </HorizontalStackLayout>
 
         <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center" IsVisible="{OnIdiom Tablet=False, Phone=True}">

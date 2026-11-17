@@ -376,16 +376,50 @@ public class WindowsBluetoothClient : IDisposable
     }
 
     /// <summary>
-    /// Se connecte par chaîne d'adresse (ex: "AA:BB:CC:DD:EE:FF" ou "AABBCCDDEEFF").
+    /// Se connecte par chaîne d'adresse (ex: "AA:BB:CC:DD:EE:FF" ou "AABBCCDDEEFF") ou par nom de serveur.
+    /// Si aucune adresse n'est fournie ou si la cible est un nom, recherche automatiquement le serveur BLE.
     /// </summary>
-    public async Task<bool> ConnectAsync(string addressString)
+    public async Task<bool> ConnectAsync(string addressOrName)
     {
-        if (TryParseAddress(addressString, out ulong address))
+        if (string.IsNullOrWhiteSpace(addressOrName))
+        {
+            var server = await ScanForServerAsync(TimeSpan.FromSeconds(5));
+            if (server != null)
+            {
+                return await ConnectAsync(server);
+            }
+            LogMessage?.Invoke(this, "Aucun serveur d'arbitrage trouvé lors de la recherche automatique.");
+            return false;
+        }
+
+        if (TryParseAddress(addressOrName, out ulong address))
         {
             return await ConnectAsync(address);
         }
 
-        LogMessage?.Invoke(this, $"Format d'adresse Bluetooth invalide : '{addressString}'.");
+        // Recherche dans le cache de scan
+        DiscoveredDevice? match = null;
+        lock (_discoveredDevices)
+        {
+            match = _discoveredDevices.Values.FirstOrDefault(d =>
+                d.Name.Contains(addressOrName, StringComparison.OrdinalIgnoreCase) ||
+                d.DisplayName.Contains(addressOrName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (match != null)
+        {
+            return await ConnectAsync(match);
+        }
+
+        // Recherche active par scan BLE
+        LogMessage?.Invoke(this, $"Recherche du serveur BLE '{addressOrName}'...");
+        var scanned = await ScanForServerAsync(TimeSpan.FromSeconds(5));
+        if (scanned != null)
+        {
+            return await ConnectAsync(scanned);
+        }
+
+        LogMessage?.Invoke(this, $"Format d'adresse ou nom Bluetooth introuvable : '{addressOrName}'.");
         return false;
     }
 

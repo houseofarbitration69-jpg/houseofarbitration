@@ -51,6 +51,21 @@ internal static class Program
             {
                 initialExcelFile = args[++i];
             }
+            else if ((arg is "-s" or "--speed" or "-x") && i + 1 < args.Length)
+            {
+                if (int.TryParse(args[++i], out int sp) && sp is 1 or 2 or 4 or 6 or 8)
+                {
+                    await _session.SetTimeSpeedMultiplierAsync(sp);
+                }
+            }
+            else if (arg is "-b" or "--bot")
+            {
+                _session.SetJudgeBot(true);
+            }
+            else if (arg is "--strategy" && i + 1 < args.Length)
+            {
+                _session.SetJudgeBot(true, args[++i]);
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(initialExcelFile))
@@ -249,6 +264,17 @@ internal static class Program
                     await HandleTimerCommandAsync(args);
                     break;
 
+                case "speed":
+                case "vitesse":
+                case "x":
+                    await HandleSpeedCommandAsync(args);
+                    break;
+
+                case "bot":
+                case "robot":
+                    HandleBotCommandAsync(args);
+                    break;
+
                 case "match":
                 case "m":
                     await HandleMatchCommandAsync(args);
@@ -416,8 +442,92 @@ internal static class Program
                 await _session!.SetTimerDurationAsync(duration);
                 break;
 
+            case "speed":
+            case "x":
+                await HandleSpeedCommandAsync(args.Skip(1).ToArray());
+                break;
+
             default:
-                LogError($"Sous-commande timer inconnue : '{sub}'. Options: start, pause, stop, set mm:ss.");
+                LogError($"Sous-commande timer inconnue : '{sub}'. Options: start, pause, stop, set mm:ss, speed <1|2|4|6|8>.");
+                break;
+        }
+    }
+
+    private static async Task HandleSpeedCommandAsync(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            Console.WriteLine($"Vitesse actuelle du chronomètre : {_session!.TimeSpeedDisplay} (Multiplicateur: {_session.TimeSpeedMultiplier}x)");
+            Console.WriteLine("Usage: speed <1 | 2 | 4 | 6 | 8>");
+            return;
+        }
+
+        if (int.TryParse(args[0], out int multiplier) && multiplier is 1 or 2 or 4 or 6 or 8)
+        {
+            await _session!.SetTimeSpeedMultiplierAsync(multiplier);
+            LogSuccess($"Vitesse du chronomètre réglée à x{multiplier}.");
+        }
+        else
+        {
+            LogError("Multiplicateur de vitesse non valide. Valeurs acceptées : 1, 2, 4, 6, 8.");
+        }
+    }
+
+    private static void HandleBotCommandAsync(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            _session!.ToggleJudgeBot();
+            return;
+        }
+
+        string sub = args[0].ToLowerInvariant();
+        switch (sub)
+        {
+            case "on":
+            case "start":
+            case "1":
+                _session!.SetJudgeBot(true);
+                LogSuccess($"Robot simulateur de juge ACTIVÉ (Stratégie: {_session.JudgeBotStrategy}).");
+                break;
+
+            case "off":
+            case "stop":
+            case "0":
+                _session!.SetJudgeBot(false);
+                LogSuccess("Robot simulateur de juge DÉSACTIVÉ.");
+                break;
+
+            case "toggle":
+                _session!.ToggleJudgeBot();
+                break;
+
+            case "status":
+                Console.WriteLine($"Robot juge : {(_session!.IsJudgeBotEnabled ? "ACTIVÉ" : "DÉSACTIVÉ")}");
+                Console.WriteLine($"Stratégie  : {_session.JudgeBotStrategy}");
+                break;
+
+            case "strategy":
+            case "strat":
+                if (args.Length < 2)
+                {
+                    LogError("Usage: bot strategy <balanced | red | blue | random>");
+                    return;
+                }
+                string strat = args[1].ToLowerInvariant();
+                if (strat is "balanced" or "red" or "blue" or "random")
+                {
+                    _session!.SetJudgeBot(_session.IsJudgeBotEnabled, strat);
+                    LogSuccess($"Stratégie du robot réglée à : {strat}");
+                }
+                else
+                {
+                    LogError("Stratégie inconnue. Options valides : balanced, red, blue, random.");
+                }
+                break;
+
+            default:
+                LogError($"Sous-commande bot inconnue : '{sub}'. Options: on, off, toggle, status, strategy <nom>.");
                 break;
         }
     }
@@ -1381,6 +1491,9 @@ internal static class Program
         Console.WriteLine("  timer pause, t p       : Met en pause le chronomètre.");
         Console.WriteLine("  timer stop             : Arrête et remet le chronomètre à zéro.");
         Console.WriteLine("  timer set <mm:ss>      : Définit la durée du chrono (ex: timer set 02:00 ou 90).");
+        Console.WriteLine("  speed <1|2|4|6|8>, x   : Règle la vitesse du chronomètre (accélération x1 à x8).");
+        Console.WriteLine("  bot [on|off|status]    : Active/désactive le robot simulant les juges arbitres.");
+        Console.WriteLine("  bot strategy <strat>   : Règle la stratégie du robot (balanced, red, blue, random).");
         Console.WriteLine("  match next, m n        : Passe au match suivant et diffuse les infos aux juges.");
         Console.WriteLine("  match prev, m p        : Revient au match précédent.");
         Console.WriteLine("  match list             : Liste tous les matchs disponibles.");
@@ -1417,6 +1530,9 @@ internal static class Program
         Console.WriteLine("    --name, -n <nom>     : Nom BLE du serveur.");
         Console.WriteLine("    --excel, -e, -f <fic>: Fichier Excel à charger au lancement.");
         Console.WriteLine("    --mode, -m <mode>    : Mode sanda ou taolu.");
+        Console.WriteLine("    --speed, -s, -x <mul>: Vitesse du chronomètre (1, 2, 4, 6, 8).");
+        Console.WriteLine("    --bot, -b            : Active le robot de simulation de juge au démarrage.");
+        Console.WriteLine("    --strategy <strat>   : Stratégie du robot (balanced, red, blue, random).");
         Console.WriteLine("    --auto-start, -a     : Démarrer immédiatement la diffusion BLE.");
         Console.WriteLine();
     }

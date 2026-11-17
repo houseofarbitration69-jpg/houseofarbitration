@@ -53,10 +53,16 @@ public class ArbitrationServerSession : IDisposable
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private TimeSpan _totalRoundTime = TimeSpan.FromMinutes(2);
     private int _currentMatchIndex = 0;
+    private int _timeSpeedMultiplier = 1;
 
     public WindowsBluetoothServer BluetoothServer => _bluetoothServer;
     public IReadOnlyList<CategoryModel> LoadedCategories => _loadedCategories;
     public IReadOnlyList<JudgeScoreEntry> JudgeScoreHistory => _judgeScoreHistory;
+
+    public int TimeSpeedMultiplier => _timeSpeedMultiplier;
+    public string TimeSpeedDisplay => $"x{_timeSpeedMultiplier}";
+    public bool IsJudgeBotEnabled { get; private set; }
+    public string JudgeBotStrategy { get; private set; } = "balanced";
 
     public CompetitionModel CurrentCompetition { get; private set; } = new()
     {
@@ -1254,9 +1260,10 @@ public class ArbitrationServerSession : IDisposable
 
         IsTimerRunning = true;
         _timer?.Dispose();
-        _timer = new System.Threading.Timer(OnTimerCallback, null, 1000, 1000);
+        int intervalMs = (int)(1000.0 / Math.Max(1, _timeSpeedMultiplier));
+        _timer = new System.Threading.Timer(OnTimerCallback, null, intervalMs, intervalMs);
 
-        StatusChanged?.Invoke(this, $"Chronomètre DÉMARRÉ ({TimeLeftDisplay})");
+        StatusChanged?.Invoke(this, $"Chronomètre DÉMARRÉ ({TimeLeftDisplay}, Vitesse: x{_timeSpeedMultiplier})");
         await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_START);
     }
 
@@ -1291,12 +1298,118 @@ public class ArbitrationServerSession : IDisposable
         await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
     }
 
+    public async Task SetTimeSpeedMultiplierAsync(int multiplier)
+    {
+        if (multiplier is not (1 or 2 or 4 or 6 or 8)) return;
+
+        _timeSpeedMultiplier = multiplier;
+        StatusChanged?.Invoke(this, $"Vitesse du chronomètre réglée à x{_timeSpeedMultiplier}");
+
+        if (IsTimerRunning && _timer != null)
+        {
+            int intervalMs = (int)(1000.0 / _timeSpeedMultiplier);
+            _timer.Change(intervalMs, intervalMs);
+        }
+    }
+
+    public void ToggleJudgeBot()
+    {
+        IsJudgeBotEnabled = !IsJudgeBotEnabled;
+        StatusChanged?.Invoke(this, $"🤖 Robot simulateur de juge : {(IsJudgeBotEnabled ? "ACTIVÉ" : "DÉSACTIVÉ")} (Stratégie: {JudgeBotStrategy})");
+    }
+
+    public void SetJudgeBot(bool enabled, string? strategy = null)
+    {
+        IsJudgeBotEnabled = enabled;
+        if (!string.IsNullOrWhiteSpace(strategy))
+        {
+            JudgeBotStrategy = strategy.Trim().ToLowerInvariant();
+        }
+        StatusChanged?.Invoke(this, $"🤖 Robot simulateur de juge : {(IsJudgeBotEnabled ? "ACTIVÉ" : "DÉSACTIVÉ")} (Stratégie: {JudgeBotStrategy})");
+    }
+
+    public async Task ProcessJudgeBotTickAsync()
+    {
+        if (!IsJudgeBotEnabled || Judges.Count == 0 || CurrentMatch == null) return;
+
+        // 40% de chance d'action par seconde écoulée
+        if (Random.Shared.Next(100) >= 40) return;
+
+        var availableJudges = Judges.ToList();
+        if (availableJudges.Count == 0) return;
+
+        var judge = availableJudges[Random.Shared.Next(availableJudges.Count)];
+
+        bool isRed;
+        switch (JudgeBotStrategy.ToLowerInvariant())
+        {
+            case "red":
+                isRed = Random.Shared.Next(100) < 75;
+                break;
+            case "blue":
+                isRed = Random.Shared.Next(100) >= 75;
+                break;
+            case "random":
+            case "balanced":
+            default:
+                isRed = Random.Shared.Next(2) == 0;
+                break;
+        }
+
+        Constants.Side side = isRed ? Constants.Side.Red : Constants.Side.Blue;
+        double points = 1.0;
+
+        if (isRed)
+        {
+            judge.RedPoints += points;
+            string desc = $"🤖 [ROBOT {judge.Name}] +{points:F0} Rouge (Total: {judge.RedPoints:F0})";
+            RecordJudgeScore(judge, side, points, judge.RedPoints, null, "Point Rouge", desc, CurrentMatch.CurrentRound);
+            ScoreUpdated?.Invoke(this, (judge, desc));
+        }
+        else
+        {
+            judge.BluePoints += points;
+            string desc = $"🤖 [ROBOT {judge.Name}] +{points:F0} Bleu (Total: {judge.BluePoints:F0})";
+            RecordJudgeScore(judge, side, points, judge.BluePoints, null, "Point Bleu", desc, CurrentMatch.CurrentRound);
+            ScoreUpdated?.Invoke(this, (judge, desc));
+        }
+
+        // 30% de chance qu'un second juge valide le point
+        if (availableJudges.Count > 1 && Random.Shared.Next(100) < 30)
+        {
+            var otherJudges = availableJudges.Where(j => j != judge).ToList();
+            if (otherJudges.Count > 0)
+            {
+                var secondJudge = otherJudges[Random.Shared.Next(otherJudges.Count)];
+                if (isRed)
+                {
+                    secondJudge.RedPoints += points;
+                    string desc = $"🤖 [ROBOT {secondJudge.Name}] +{points:F0} Rouge (Total: {secondJudge.RedPoints:F0})";
+                    RecordJudgeScore(secondJudge, side, points, secondJudge.RedPoints, null, "Point Rouge", desc, CurrentMatch.CurrentRound);
+                    ScoreUpdated?.Invoke(this, (secondJudge, desc));
+                }
+                else
+                {
+                    secondJudge.BluePoints += points;
+                    string desc = $"🤖 [ROBOT {secondJudge.Name}] +{points:F0} Bleu (Total: {secondJudge.BluePoints:F0})";
+                    RecordJudgeScore(secondJudge, side, points, secondJudge.BluePoints, null, "Point Bleu", desc, CurrentMatch.CurrentRound);
+                    ScoreUpdated?.Invoke(this, (secondJudge, desc));
+                }
+            }
+        }
+    }
+
     private async void OnTimerCallback(object? state)
     {
         if (_timeLeft.TotalSeconds > 0)
         {
             _timeLeft = _timeLeft.Subtract(TimeSpan.FromSeconds(1));
             TimerTick?.Invoke(this, TimeLeftDisplay);
+
+            if (IsJudgeBotEnabled)
+            {
+                await ProcessJudgeBotTickAsync();
+            }
         }
         else
         {
@@ -2298,11 +2411,11 @@ public class ArbitrationServerSession : IDisposable
             }
             else if (bronzeWinner != null && string.Equals(comp, bronzeWinner, StringComparison.OrdinalIgnoreCase))
             {
-                item.Status = "3e 🥉";
+                item.Status = "3e place (Petite finale) 🥉";
             }
             else if (bronzeLoser != null && string.Equals(comp, bronzeLoser, StringComparison.OrdinalIgnoreCase))
             {
-                item.Status = "4e";
+                item.Status = "4e place (Petite finale)";
             }
             else if (bronzeMatch != null && (string.Equals(comp, bronzeMatch.RedCompetitor?.Trim(), StringComparison.OrdinalIgnoreCase) ||
                                              string.Equals(comp, bronzeMatch.BlueCompetitor?.Trim(), StringComparison.OrdinalIgnoreCase)))
@@ -2315,11 +2428,11 @@ public class ArbitrationServerSession : IDisposable
             }
             else if (bronzeMatch == null && bronzeByPoints != null && string.Equals(comp, bronzeByPoints, StringComparison.OrdinalIgnoreCase))
             {
-                item.Status = "3e 🥉";
+                item.Status = "3e place (Points cumulés) 🥉";
             }
             else if (bronzeMatch == null && fourthByPoints != null && string.Equals(comp, fourthByPoints, StringComparison.OrdinalIgnoreCase))
             {
-                item.Status = "4e";
+                item.Status = "4e place";
             }
             else if (semiFinalLosers.Contains(comp))
             {

@@ -330,6 +330,25 @@ public partial class ServerViewModel : BaseViewModel
     private async void OnDeviceConnected(object? sender, string clientId)
     {
         await SendCompetitionDataToClientAsync(clientId);
+
+        if (CurrentDraw != null)
+        {
+            try
+            {
+                var matchData = CreateMatchInfoData(CurrentDraw);
+                var json = JsonSerializer.Serialize(matchData, _jsonOptions);
+                await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", clientId);
+                await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", clientId);
+                if (IsTimerRunning)
+                {
+                    await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, clientId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending initial match info to client {ClientId}", clientId);
+            }
+        }
     }
 
     /// <summary>
@@ -462,28 +481,37 @@ public partial class ServerViewModel : BaseViewModel
                         _clientJudgeMapping.Remove(existingMapping.Key);
                     }
 
-                    judge.IsConnected = true;
-                    _clientJudgeMapping[sessionKey] = judge;
-                    OnPropertyChanged(nameof(Judges));
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        judge.IsConnected = true;
+                        OnPropertyChanged(nameof(Judges));
+                    });
 
-                    // Envoi du match courant
-                    //if (CurrentDraw != null)
-                    //{
-                    //    try
-                    //    {
-                    //        var json = JsonSerializer.Serialize(new MatchInfoData { Id = CurrentDraw.Id, Type = CurrentDraw.Type }, _jsonOptions);
-                    //        await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
-                    //        await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
-                    //}
+                    _clientJudgeMapping[sessionKey] = judge;
+
+                    // Envoi immédiat du match en cours au juge enregistré
+                    if (CurrentDraw != null)
+                    {
+                        try
+                        {
+                            var matchData = CreateMatchInfoData(CurrentDraw);
+                            var json = JsonSerializer.Serialize(matchData, _jsonOptions);
+                            await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
+                            await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
+                            if (IsTimerRunning)
+                            {
+                                await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, args.ClientId);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
+                        }
+                    }
+                    else
+                    {
+                        await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
+                    }
 
                     // Restore codes from repository if server in-memory codes are empty
                     if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order && judge.Codes.Count == 0)
@@ -1552,7 +1580,7 @@ public partial class ServerViewModel : BaseViewModel
     [RelayCommand]
     private async Task SetTimer()
     {
-        string result = await Shell.Current.DisplayActionSheetAsync("Définir le temps", "Annuler", null, "1:00", "1:30", "2:00", "3:00", "5:00");
+        string result = await Shell.Current.DisplayActionSheetAsync("Définir le temps", "Annuler", null, "0:10", "0:30", "1:00", "1:30", "2:00", "3:00", "5:00");
 
         if (result != null && result != "Annuler")
         {

@@ -9,6 +9,8 @@ internal static class Program
     private static readonly object ConsoleLock = new();
     private static WindowsBluetoothClient? _client;
     private static JudgeSession? _session;
+    private static JudgeBot? _bot;
+    private static JudgeBotManager? _botManager;
     private static bool _running = true;
 
     private static async Task<int> Main(string[] args)
@@ -18,6 +20,8 @@ internal static class Program
 
         _client = new WindowsBluetoothClient();
         _session = new JudgeSession(_client);
+        _bot = new JudgeBot(_session);
+        _bot.BotActivity += (_, msg) => LogInfo(msg);
 
         // Abonnement aux événements du client et de la session
         HookSessionEvents(_session, _client);
@@ -26,6 +30,10 @@ internal static class Program
         string? connectTarget = null;
         string? initialPosition = null;
         bool autoScan = false;
+        bool autoBot = false;
+        int? botCount = null;
+        int speedMultiplier = 1;
+        string strategy = "balanced";
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -47,7 +55,29 @@ internal static class Program
             {
                 initialPosition = args[++i];
             }
+            else if (arg is "-b" or "--bot")
+            {
+                autoBot = true;
+            }
+            else if (arg is "--bots" && i + 1 < args.Length && int.TryParse(args[i + 1], out int cnt))
+            {
+                botCount = cnt;
+                i++;
+            }
+            else if ((arg is "-x" or "--speed") && i + 1 < args.Length && int.TryParse(args[i + 1], out int spd))
+            {
+                speedMultiplier = spd;
+                i++;
+            }
+            else if (arg is "--strategy" && i + 1 < args.Length)
+            {
+                strategy = args[++i];
+            }
         }
+
+        // Configuration initiale du bot
+        _bot.SpeedMultiplier = speedMultiplier;
+        _bot.Strategy = strategy;
 
         // Si une position initiale a été précisée, l'appliquer dès maintenant
         if (!string.IsNullOrEmpty(initialPosition))
@@ -62,7 +92,36 @@ internal static class Program
 
         if (!string.IsNullOrEmpty(connectTarget))
         {
-            await TryConnectAsync(connectTarget);
+            if (botCount.HasValue && botCount.Value > 1)
+            {
+                _botManager = new JudgeBotManager();
+                _botManager.ManagerActivity += (_, msg) => LogInfo(msg);
+                await _botManager.ConnectBotsAsync(connectTarget, botCount.Value, speedMultiplier, strategy);
+            }
+            else
+            {
+                await TryConnectAsync(connectTarget);
+            }
+        }
+        else if (botCount.HasValue && botCount.Value > 1)
+        {
+            _botManager = new JudgeBotManager();
+            _botManager.ManagerActivity += (_, msg) => LogInfo(msg);
+            await _botManager.ConnectBotsAsync(null, botCount.Value, speedMultiplier, strategy);
+        }
+
+        if (autoBot && _bot != null)
+        {
+            if (_client != null && !_client.IsConnected)
+            {
+                LogInfo("Mode bot activé : recherche et connexion automatique au serveur d'arbitrage...");
+                bool ok = await _client.ConnectAsync(string.Empty);
+                if (ok)
+                {
+                    await OnConnectionResultAsync(true, _client.ConnectedDeviceName ?? "Serveur");
+                }
+            }
+            _bot.Start(strategy, speedMultiplier);
         }
 
         // Boucle interactive REPL
@@ -81,6 +140,9 @@ internal static class Program
         }
 
         // Nettoyage avant fermeture
+        _bot?.Dispose();
+        _botManager?.Dispose();
+
         if (_session != null)
         {
             if (_client?.IsConnected == true)
@@ -359,6 +421,27 @@ internal static class Program
                     }
                     break;
 
+                case "bot":
+                    await HandleBotCommandAsync(args);
+                    break;
+
+                case "speed":
+                    if (args.Length > 0 && int.TryParse(args[0], out int spd) && spd is 1 or 2 or 4 or 6 or 8)
+                    {
+                        if (_bot != null) _bot.SpeedMultiplier = spd;
+                        _botManager?.SetSpeedMultiplierAll(spd);
+                        LogSuccess($"Vitesse du robot réglée à x{spd}.");
+                    }
+                    else
+                    {
+                        LogError("Usage: speed <1 | 2 | 4 | 6 | 8>");
+                    }
+                    break;
+
+                case "bots":
+                    await HandleBotsManagerCommandAsync(args);
+                    break;
+
                 case "raw":
                     if (args.Length == 0)
                     {
@@ -625,6 +708,108 @@ internal static class Program
         Console.WriteLine();
     }
 
+    private static async Task HandleBotCommandAsync(string[] args)
+    {
+        if (args.Length == 0 || args[0].Equals("status", StringComparison.OrdinalIgnoreCase))
+        {
+            string state = (_bot?.IsRunning == true) ? "ACTIF [EN COURS]" : "INACTIF [ARRÊTÉ]";
+            LogInfo($"État du Robot : {state} | Stratégie: {_bot?.Strategy} | Vitesse: x{_bot?.SpeedMultiplier} | Total notes envoyées: {_bot?.TotalScoresSent}");
+            return;
+        }
+
+        string sub = args[0].ToLowerInvariant();
+        switch (sub)
+        {
+            case "start":
+            case "on":
+                string strat = args.Length > 1 ? args[1] : (_bot?.Strategy ?? "balanced");
+                int? spd = (args.Length > 2 && int.TryParse(args[2], out int s)) ? s : null;
+
+                if (_client != null && !_client.IsConnected)
+                {
+                    LogInfo("Robot : recherche et connexion automatique au serveur d'arbitrage...");
+                    bool ok = await _client.ConnectAsync(string.Empty);
+                    if (ok)
+                    {
+                        await OnConnectionResultAsync(true, _client.ConnectedDeviceName ?? "Serveur");
+                    }
+                    else
+                    {
+                        LogError("Impossible de se connecter au serveur d'arbitrage BLE.");
+                        return;
+                    }
+                }
+
+                _bot?.Start(strat, spd);
+                break;
+
+            case "stop":
+            case "off":
+                _bot?.Stop();
+                break;
+
+            case "speed":
+                if (args.Length > 1 && int.TryParse(args[1], out int spdVal) && spdVal is 1 or 2 or 4 or 6 or 8)
+                {
+                    if (_bot != null) _bot.SpeedMultiplier = spdVal;
+                    _botManager?.SetSpeedMultiplierAll(spdVal);
+                    LogSuccess($"Vitesse du robot réglée à x{spdVal}.");
+                }
+                else
+                {
+                    LogError("Usage: bot speed <1 | 2 | 4 | 6 | 8>");
+                }
+                break;
+
+            case "strategy":
+            case "strat":
+                if (args.Length > 1)
+                {
+                    string st = args[1].ToLowerInvariant();
+                    if (_bot != null) _bot.Strategy = st;
+                    _botManager?.SetStrategyAll(st);
+                    LogSuccess($"Stratégie du robot réglée à '{st}'.");
+                }
+                else
+                {
+                    LogError("Usage: bot strategy <balanced | red | blue | random>");
+                }
+                break;
+
+            default:
+                LogError($"Sous-commande bot inconnue: '{sub}'. Options: start, stop, status, speed, strategy.");
+                break;
+        }
+    }
+
+    private static async Task HandleBotsManagerCommandAsync(string[] args)
+    {
+        if (args.Length == 0)
+        {
+            LogError("Usage: bots <nombre_de_juges_1_a_5> [serveur]");
+            return;
+        }
+
+        if (!int.TryParse(args[0], out int count) || count < 1 || count > 5)
+        {
+            LogError("Le nombre de robots doit être compris entre 1 et 5.");
+            return;
+        }
+
+        string? target = args.Length > 1 ? args[1] : (_client?.LastConnectedDeviceAddress ?? _session?.ServerName);
+
+        _botManager?.Dispose();
+        _botManager = new JudgeBotManager();
+        _botManager.ManagerActivity += (_, msg) => LogInfo(msg);
+
+        int spd = _bot?.SpeedMultiplier ?? 1;
+        string strat = _bot?.Strategy ?? "balanced";
+        string targetLabel = string.IsNullOrEmpty(target) ? "(recherche automatique)" : $"vers '{target}'";
+        LogInfo($"Démarrage de {count} robots juges {targetLabel} (Vitesse: x{spd}, Stratégie: {strat})...");
+        int connected = await _botManager.ConnectBotsAsync(target, count, spd, strat);
+        LogSuccess($"{connected}/{count} robot(s) connecté(s) et actifs.");
+    }
+
     private static void PrintHelp()
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
@@ -639,6 +824,9 @@ internal static class Program
         Console.WriteLine("  score <valeur>         : Définit le score absolu du compétiteur (ex: score 4.85).");
         Console.WriteLine("  red, +r                : Ajoute 1 point au coin ROUGE (Sanda).");
         Console.WriteLine("  blue, +b               : Ajoute 1 point au coin BLEU (Sanda).");
+        Console.WriteLine("  bot [start|stop|status]: Contrôle le robot de simulation de juge.");
+        Console.WriteLine("  speed <1|2|4|6|8>      : Règle la vitesse d'accélération du robot (x1, x2, x4, x6, x8).");
+        Console.WriteLine("  bots <count> [serveur] : Démarre N robots juges connectés simultanément (ex: bots 3).");
         Console.WriteLine("  match, m               : Demande les infos du match en cours au serveur.");
         Console.WriteLine("  comp                   : Demande les données de la compétition.");
         Console.WriteLine("  codes [filtre]         : Affiche la liste des codes de mouvements Taolu.");

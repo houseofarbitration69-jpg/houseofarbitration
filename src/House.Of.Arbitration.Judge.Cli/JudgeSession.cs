@@ -37,7 +37,7 @@ public class JudgeSession : IDisposable
     public string InstanceId { get; } = Guid.NewGuid().ToString("N").Substring(0, 6);
 
     public string JudgeGroup { get; private set; } = string.Empty;
-    public int JudgePosition { get; private set; } = 1;
+    public int JudgePosition { get; set; } = 1;
     public string PositionCode => !string.IsNullOrEmpty(JudgeGroup) ? $"{JudgeGroup}_{JudgePosition}" : JudgePosition.ToString();
 
     public double CurrentScore { get; set; } = 10.0;
@@ -53,7 +53,9 @@ public class JudgeSession : IDisposable
     public string ServerName { get; private set; } = string.Empty;
     public string TimerDisplay { get; private set; } = "02:00";
     public bool IsTimerRunning { get; private set; }
-    public bool CanSendScore => CurrentMatch != null && (CurrentMatch.Type == RoundType.Order || CurrentCompetition?.Type == CompetitionType.Taolu || (IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00"));
+    public bool CanSendScore =>
+        (CurrentMatch != null && (CurrentMatch.Type == RoundType.Order || CurrentCompetition?.Type == CompetitionType.Taolu))
+        || (IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00");
 
     public List<MvtTimeCodeModel> DeductionsHistory { get; } = new();
 
@@ -159,6 +161,11 @@ public class JudgeSession : IDisposable
 
         return await SendCurrentPositionAsync();
     }
+
+    /// <summary>
+    /// Définit la position du juge pour le Sanda (numéro de juge 1 à 5).
+    /// </summary>
+    public Task<bool> SetPositionAsync(int position) => SetPositionAsync(string.Empty, position);
 
     /// <summary>
     /// Demande les données de la compétition au serveur.
@@ -382,9 +389,9 @@ public class JudgeSession : IDisposable
     }
 
     /// <summary>
-    /// Ajoute 1 point au coin Rouge ou Bleu (Sanda).
+    /// Ajoute 1 point (ou score spécifié) au coin Rouge ou Bleu (Sanda).
     /// </summary>
-    public async Task<bool> AddSandaPointAsync(Constants.Side side)
+    public async Task<bool> AddSandaPointAsync(Constants.Side side, double score = 1.0)
     {
         if (!CanSendScore)
         {
@@ -395,18 +402,18 @@ public class JudgeSession : IDisposable
         int? compId = null;
         if (side == Constants.Side.Red)
         {
-            RedPoints++;
+            RedPoints += score;
             compId = CurrentMatch?.Competitor1Id;
         }
         else
         {
-            BluePoints++;
+            BluePoints += score;
             compId = CurrentMatch?.Competitor2Id;
         }
 
         var scoreModel = new TransfertScoreModel
         {
-            Score = 1.0,
+            Score = score,
             Side = side,
             CompetitorId = compId,
             JudgePosition = PositionCode,
