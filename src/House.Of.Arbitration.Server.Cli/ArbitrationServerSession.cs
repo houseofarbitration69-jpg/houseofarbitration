@@ -2298,11 +2298,11 @@ public class ArbitrationServerSession : IDisposable
             }
             else if (bronzeWinner != null && string.Equals(comp, bronzeWinner, StringComparison.OrdinalIgnoreCase))
             {
-                item.Status = "3e place (Petite finale) 🥉";
+                item.Status = "3e 🥉";
             }
             else if (bronzeLoser != null && string.Equals(comp, bronzeLoser, StringComparison.OrdinalIgnoreCase))
             {
-                item.Status = "4e place (Petite finale)";
+                item.Status = "4e";
             }
             else if (bronzeMatch != null && (string.Equals(comp, bronzeMatch.RedCompetitor?.Trim(), StringComparison.OrdinalIgnoreCase) ||
                                              string.Equals(comp, bronzeMatch.BlueCompetitor?.Trim(), StringComparison.OrdinalIgnoreCase)))
@@ -2315,11 +2315,11 @@ public class ArbitrationServerSession : IDisposable
             }
             else if (bronzeMatch == null && bronzeByPoints != null && string.Equals(comp, bronzeByPoints, StringComparison.OrdinalIgnoreCase))
             {
-                item.Status = "3e place (Points cumulés) 🥉";
+                item.Status = "3e 🥉";
             }
             else if (bronzeMatch == null && fourthByPoints != null && string.Equals(comp, fourthByPoints, StringComparison.OrdinalIgnoreCase))
             {
-                item.Status = "4e place";
+                item.Status = "4e";
             }
             else if (semiFinalLosers.Contains(comp))
             {

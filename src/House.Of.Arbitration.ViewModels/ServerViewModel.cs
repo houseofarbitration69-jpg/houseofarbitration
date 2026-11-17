@@ -1033,6 +1033,11 @@ public partial class ServerViewModel : BaseViewModel
             }
         }
 
+        if (CompetitionId == 0 && _currentCompetition != null)
+        {
+            CompetitionId = _currentCompetition.Id;
+        }
+
         if (_currentCompetition != null)
         {
             try
@@ -1221,6 +1226,11 @@ public partial class ServerViewModel : BaseViewModel
             }
         }
 
+        if (CompetitionId == 0 && _currentCompetition != null)
+        {
+            CompetitionId = _currentCompetition.Id;
+        }
+
         SetupJudges(_currentCompetition?.Type ?? CompetitionType.Sanda);
 
         var knockouts = (await _drawKnockoutService.GetAllAsync("Draw.Category.AgeRange", "Competitor1.Country", "Competitor2.Country", "Winner", "Looser"))?.ToList();
@@ -1341,7 +1351,19 @@ public partial class ServerViewModel : BaseViewModel
             flattenedList.Add(draw);
         }
 
-        Draws = new System.Collections.ObjectModel.ObservableCollection<object>(flattenedList);
+        if (Draws == null)
+        {
+            Draws = new System.Collections.ObjectModel.ObservableCollection<object>(flattenedList);
+        }
+        else
+        {
+            Draws.Clear();
+            foreach (var item in flattenedList)
+            {
+                Draws.Add(item);
+            }
+        }
+        OnPropertyChanged(nameof(Draws));
 
         await BroadcastMatchInfo();
 
@@ -1626,7 +1648,9 @@ public partial class ServerViewModel : BaseViewModel
         // Optionally, add the final round result before setting the winner
         var activeJudges = Judges.Where(j => j.IsConnected || j.HasConnected).ToList();
         if (activeJudges.Count == 0 && !Judges.Any(j => j.IsConnected || j.HasConnected))
+        {
             activeJudges = Judges.ToList();
+        }
 
         int redVotes = (int)activeJudges.Sum(j => j.RedPoints);
         int blueVotes = (int)activeJudges.Sum(j => j.BluePoints);
@@ -1663,6 +1687,7 @@ public partial class ServerViewModel : BaseViewModel
                     ResetJudgeScores();
                     await ResetTimer();
                     await BroadcastMatchInfo();
+
                     return; // Continue match
                 }
             }
@@ -1673,6 +1698,11 @@ public partial class ServerViewModel : BaseViewModel
 
         if (CurrentDraw is DrawKnockoutModel knockout)
         {
+            // IMPORTANT : Récupérer targetDrawId et les concurrents AVANT de détacher quoi que ce soit
+            int targetDrawId = knockout.DrawId > 0 
+                ? knockout.DrawId 
+                : (knockout.Draw?.Id > 0 ? knockout.Draw.Id : (CurrentDraw?.Draw?.Id ?? 0));
+
             winner = color == "Red" ? knockout.Competitor1 : knockout.Competitor2;
             looser = color == "Red" ? knockout.Competitor2 : knockout.Competitor1;
 
@@ -1681,10 +1711,33 @@ public partial class ServerViewModel : BaseViewModel
                 knockout.WinnerId = winner.Id;
                 knockout.LooserId = looser?.Id;
                 knockout.IsFinished = true;
+                if (targetDrawId > 0 && knockout.DrawId == 0)
+                {
+                    knockout.DrawId = targetDrawId;
+                }
+
+                // Détacher les entités liées pour éviter les conflits d'attachement EF Core (IdentityConflict sur CompetitorModel)
+                knockout.Competitor1 = null;
+                knockout.Competitor2 = null;
+                knockout.Winner = null;
+                knockout.Looser = null;
+                knockout.Draw = null;
                 await _drawKnockoutService.UpdateAsync(knockout);
 
                 // Propagation logic for Knockouts
-                var allKnockouts = (await _drawKnockoutService.GetAllAsync())?.Where(k => k.DrawId == knockout.DrawId).OrderBy(k => k.Order).ToList();
+                if (targetDrawId == 0)
+                {
+                    var existingK = (await _drawKnockoutService.GetAllAsync("Draw"))?.FirstOrDefault(k => k.Id == knockout.Id);
+                    if (existingK != null)
+                    {
+                        targetDrawId = existingK.DrawId > 0 ? existingK.DrawId : (existingK.Draw?.Id ?? 0);
+                    }
+                }
+
+                var allKnockouts = (await _drawKnockoutService.GetAllAsync("Draw", "Competitor1", "Competitor2"))?
+                    .Where(k => targetDrawId > 0 ? (k.DrawId == targetDrawId || (k.Draw != null && k.Draw.Id == targetDrawId)) : true)
+                    .OrderBy(k => k.Order)
+                    .ToList();
                 if (allKnockouts != null && allKnockouts.Count > 0)
                 {
                     int m = allKnockouts.Max(k => k.Order) + 1;
@@ -1719,13 +1772,20 @@ public partial class ServerViewModel : BaseViewModel
                                     if (localIndex % 2 != 0)
                                     {
                                         nextMatch.Competitor1Id = winner.Id;
-                                        nextMatch.Competitor1 = winner;
                                     }
                                     else
                                     {
                                         nextMatch.Competitor2Id = winner.Id;
-                                        nextMatch.Competitor2 = winner;
                                     }
+                                    if (targetDrawId > 0 && nextMatch.DrawId == 0)
+                                    {
+                                        nextMatch.DrawId = targetDrawId;
+                                    }
+                                    nextMatch.Competitor1 = null;
+                                    nextMatch.Competitor2 = null;
+                                    nextMatch.Winner = null;
+                                    nextMatch.Looser = null;
+                                    nextMatch.Draw = null;
                                     await _drawKnockoutService.UpdateAsync(nextMatch);
                                 }
 
@@ -1738,13 +1798,20 @@ public partial class ServerViewModel : BaseViewModel
                                         if (localIndex % 2 != 0)
                                         {
                                             bronzeMatch.Competitor1Id = looser.Id;
-                                            bronzeMatch.Competitor1 = looser;
                                         }
                                         else
                                         {
                                             bronzeMatch.Competitor2Id = looser.Id;
-                                            bronzeMatch.Competitor2 = looser;
                                         }
+                                        if (targetDrawId > 0 && bronzeMatch.DrawId == 0)
+                                        {
+                                            bronzeMatch.DrawId = targetDrawId;
+                                        }
+                                        bronzeMatch.Competitor1 = null;
+                                        bronzeMatch.Competitor2 = null;
+                                        bronzeMatch.Winner = null;
+                                        bronzeMatch.Looser = null;
+                                        bronzeMatch.Draw = null;
                                         await _drawKnockoutService.UpdateAsync(bronzeMatch);
                                     }
                                 }
@@ -1767,19 +1834,26 @@ public partial class ServerViewModel : BaseViewModel
                 pool.WinnerId = winner.Id;
                 pool.LooserId = looser?.Id;
                 pool.IsFinished = true;
+                pool.Competitor1 = null;
+                pool.Competitor2 = null;
+                pool.Winner = null;
+                pool.Looser = null;
+                pool.Draw = null;
                 await _drawPoolsModel.UpdateAsync(pool);
             }
         }
         else if (CurrentDraw is DrawOrderModel order)
         {
+            winner = order.Competitor; // Sauvegarde avant détachement
             order.IsFinished = true;
             if (JudgeGroups.Count > 0)
             {
                 double totalScore = Math.Round(JudgeGroups.Sum(g => g.GlobalScore), 2);
                 order.RoundResultsJson = totalScore.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             }
+            order.Competitor = null;
+            order.Draw = null;
             await _drawOrderService.UpdateAsync(order);
-            winner = order.Competitor; // Just to trigger next
         }
 
         if (winner != null)
@@ -2007,10 +2081,37 @@ public partial class ServerViewModel : BaseViewModel
     {
         if (CurrentDraw != null)
         {
-            CurrentDraw.IsFinished = true;
-            if (CurrentDraw is DrawKnockoutModel k)
+            if (CurrentDraw is DrawKnockoutModel k && k.WinnerId == null)
             {
-                await _drawKnockoutService.UpdateAsync(k);
+                // Si l'utilisateur clique sur Next Match sans avoir déclaré de vainqueur via SetWinner,
+                // déterminer le vainqueur selon les votes/rounds ou les points des juges (par défaut Rouge si égalité/aucun vote)
+                int redWins = RoundResults.Count(r => r.WinnerColor == "Red");
+                int blueWins = RoundResults.Count(r => r.WinnerColor == "Blue");
+                string winningColor = (blueWins > redWins) ? "Blue" : "Red";
+                if (redWins == 0 && blueWins == 0)
+                {
+                    int redVotes = (int)Judges.Sum(j => j.RedPoints);
+                    int blueVotes = (int)Judges.Sum(j => j.BluePoints);
+                    winningColor = (blueVotes > redVotes) ? "Blue" : "Red";
+                }
+
+                while (RoundResults.Count(r => r.WinnerColor == winningColor) < 2)
+                {
+                    RoundResults.Add(new RoundResultModel
+                    {
+                        RoundNumber = CurrentDraw.CurrentRound,
+                        WinnerColor = winningColor
+                    });
+                }
+                CurrentDraw.RoundResultsJson = JsonSerializer.Serialize(RoundResults, _jsonOptions);
+                await SetWinner(winningColor);
+                return;
+            }
+
+            CurrentDraw.IsFinished = true;
+            if (CurrentDraw is DrawKnockoutModel kFinished)
+            {
+                await _drawKnockoutService.UpdateAsync(kFinished);
             }
             else if (CurrentDraw is DrawPoolsModel p)
             {

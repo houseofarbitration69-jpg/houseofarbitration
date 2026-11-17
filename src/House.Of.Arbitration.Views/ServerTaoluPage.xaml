@@ -314,6 +314,9 @@
                         WidthRequest="50"
                         BackgroundColor="{DynamicResource SurfaceElevation4}"
                         Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
                     >
                         <Label 
                             FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
@@ -330,51 +333,18 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <!-- MENU -->
+                    <!-- INDICATEUR STATUT SERVEUR -->
                     <Border
-                        StrokeShape="RoundRectangle 50"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        BackgroundColor="{StaticResource ValidColor}"
-                        Stroke="{StaticResource ValidColor}"
-                    >
-                        <Label 
-                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
-                            Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
-                            FontSize="25" 
-                            TextColor="{DynamicResource PrimaryTextColor}" 
-                            IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
-                            VerticalOptions="Center"
-                            HorizontalOptions="Center"
-                            FontAttributes="Bold"
-                        />
-
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
-                        </Border.GestureRecognizers>
-                    </Border>
-
-                    <!-- ETAT DU SERVEUR -->
-                    <Border
-                        HorizontalOptions="Center"
+                        Grid.Column="{OnIdiom Tablet='2', Phone='1'}"
+                        HorizontalOptions="End"
                         VerticalOptions="Center"
                         StrokeShape="RoundRectangle 18"
                         Padding="12,6"
                         StrokeThickness="1.5"
-                        BackgroundColor="{DynamicResource SurfaceElevation4}"
-                        Stroke="{DynamicResource BorderMuted}"
+                        BackgroundColor="{DynamicResource SuccessBg}"
+                        Stroke="{DynamicResource SuccessColor}"
+                        IsVisible="{Binding IsServerStarted}"
                     >
-                        <Border.Triggers>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="True">
-                                <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
-                                <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
-                            </DataTrigger>
-                            <DataTrigger TargetType="Border" Binding="{Binding IsServerStarted}" Value="False">
-                                <Setter Property="Stroke" Value="{DynamicResource ErrorColor}" />
-                                <Setter Property="BackgroundColor" Value="{DynamicResource ErrorBg}" />
-                            </DataTrigger>
-                        </Border.Triggers>
-
                         <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
                             <!-- Pastille de statut -->
                             <BoxView
@@ -382,22 +352,11 @@
                                 HeightRequest="10"
                                 CornerRadius="5"
                                 VerticalOptions="Center"
-                                Color="{DynamicResource ErrorColor}"
-                                BackgroundColor="Transparent"
-                            >
-                                <BoxView.Triggers>
-                                    <DataTrigger TargetType="BoxView" Binding="{Binding IsServerStarted}" Value="True">
-                                        <Setter Property="Color" Value="{DynamicResource SuccessColor}" />
-                                    </DataTrigger>
-                                </BoxView.Triggers>
-                            </BoxView>
+                                Color="{DynamicResource SuccessColor}"
+                            />
 
                             <!-- Texte statut DEMARRE -->
-                            <HorizontalStackLayout 
-                                Spacing="4" 
-                                VerticalOptions="Center" 
-                                IsVisible="{Binding IsServerStarted}"
-                            >
+                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
                                 <Label
                                     Text="Serveur actif"
                                     TextColor="{DynamicResource SuccessLight}"
@@ -406,6 +365,33 @@
                                     VerticalOptions="Center"
                                 />
                             </HorizontalStackLayout>
+                        </HorizontalStackLayout>
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding StopServerCommand}" />
+                        </Border.GestureRecognizers>
+                    </Border>
+
+                    <Border
+                        Grid.Column="{OnIdiom Tablet='2', Phone='1'}"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center"
+                        StrokeShape="RoundRectangle 18"
+                        Padding="12,6"
+                        StrokeThickness="1.5"
+                        BackgroundColor="{DynamicResource ErrorBg}"
+                        Stroke="{DynamicResource ErrorColor}"
+                        IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
+                    >
+                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                            <!-- Pastille de statut -->
+                            <BoxView
+                                WidthRequest="10"
+                                HeightRequest="10"
+                                CornerRadius="5"
+                                VerticalOptions="Center"
+                                Color="{DynamicResource ErrorColor}"
+                            />
 
                             <!-- Texte statut ARRETE -->
                             <Label
@@ -414,12 +400,11 @@
                                 FontAttributes="Bold"
                                 FontSize="13"
                                 VerticalOptions="Center"
-                                IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
                             />
                         </HorizontalStackLayout>
 
                         <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}" />
+                            <TapGestureRecognizer Command="{Binding StartServerCommand}" />
                         </Border.GestureRecognizers>
                     </Border>
                 </HorizontalStackLayout>
