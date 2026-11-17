@@ -306,7 +306,11 @@
                 RowSpacing="10"
                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
             >
-                <HorizontalStackLayout Grid.Row="0" Spacing="10" VerticalOptions="Center">
+                <HorizontalStackLayout 
+                    Grid.Row="0" 
+                    Spacing="10" 
+                    VerticalOptions="Center"
+                >
                     <!-- RETOUR -->
                     <Border
                         StrokeShape="RoundRectangle 50"
@@ -327,7 +331,6 @@
                             HorizontalOptions="Center"
                             FontAttributes="Bold"
                         />
-
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding RequestBackNavigationCommand}"/>
                         </Border.GestureRecognizers>
@@ -426,6 +429,7 @@
                 RowDefinitions="{OnIdiom Tablet='60,150,*,50', Phone='60,280,*,50'}" 
                 RowSpacing="{OnIdiom Tablet='15', Phone='5'}" 
                 ColumnDefinitions="{OnIdiom Tablet='85,80,*,80,85', Phone='*'}"
+                IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <!-- CATEGORIE -->
                 <Border 
@@ -664,21 +668,9 @@
                     Grid.ColumnSpan="3"
                     x:DataType="vm:ServerViewModel"
                 >
-                    <!-- Fallback when no matches are remaining -->
-                    <VerticalStackLayout 
-                        VerticalOptions="Center" 
-                        HorizontalOptions="Center" 
-                        Spacing="20"
-                        IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
-                    >
-                        <Label Text="Ã°Å¸Ââ€ " FontSize="64" HorizontalOptions="Center"/>
-                        <Label Text="Tous les matchs sont terminÃƒÂ©s" TextColor="White" FontSize="28" FontAttributes="Bold" HorizontalOptions="Center"/>
-                    </VerticalStackLayout>
-
                     <!-- Current Match Area -->
                     <Grid 
                         BindingContext="{Binding CurrentDraw}"
-                        IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
                         x:DataType="{x:Null}"
                     >
                         <!-- Background Layers (Red / Blue) -->
@@ -697,8 +689,6 @@
                                 StrokeShape="RoundRectangle 8"
                             />
                         </Grid>
-
-
 
                         <!-- Order Mode (Taolu) -->
                         <Grid x:DataType="models:DrawOrderModel">
@@ -785,16 +775,18 @@
                                 </VerticalStackLayout>
 
                                 <!-- Finish Button for Order mode -->
-                                <Button Text="VALIDER LE PASSAGE" 
-                                        Command="{Binding BindingContext.SetWinnerCommand, Source={x:Reference this}}"
-                                        CommandParameter="Finish"
-                                        BackgroundColor="{DynamicResource ValidColor}"
-                                        TextColor="Black"
-                                        FontAttributes="Bold"
-                                        CornerRadius="20"
-                                        HeightRequest="50"
-                                        WidthRequest="250"
-                                        Margin="0,0,0,0" />
+                                <Button 
+                                    Text="VALIDER LE PASSAGE" 
+                                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
+                                    CommandParameter="Finish"
+                                    BackgroundColor="{DynamicResource ValidColor}"
+                                    TextColor="Black"
+                                    FontAttributes="Bold"
+                                    CornerRadius="20"
+                                    HeightRequest="50"
+                                    WidthRequest="250"
+                                    Margin="0,0,0,0" 
+                                />
                             </VerticalStackLayout>
 
                             <Grid.Triggers>
@@ -859,6 +851,34 @@
                     </Border>
                 </HorizontalStackLayout>
             </Grid>
+
+            <!-- PAS DE MATCH DISPONIBLE -->
+            <VerticalStackLayout 
+                Grid.ColumnSpan="2"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" 
+                Spacing="20"
+                IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='Invert'}"
+            >
+                <Label 
+                    Text="{Binding Resources.EMPTY_MATCH}" 
+                    TextColor="{DynamicResource PrimaryTextColor}" 
+                    FontSize="28" 
+                    FontAttributes="Bold" 
+                    HorizontalOptions="Center"
+                />
+                <Button 
+                    Text="RETOUR"
+                    Command="{Binding RequestBackNavigationCommand}"
+                    BackgroundColor="{DynamicResource PrimaryColor}"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="10"
+                    WidthRequest="160"
+                    HeightRequest="46"
+                    HorizontalOptions="Center"
+                />
+            </VerticalStackLayout>
         </Grid>
 
         <!-- Side Sheet Control -->

@@ -1695,9 +1695,11 @@ public partial class ServerViewModel : BaseViewModel
 
         CompetitorModel? winner = null;
         CompetitorModel? looser = null;
+        bool _useTimer = false;
 
         if (CurrentDraw is DrawKnockoutModel knockout)
         {
+            _useTimer = true;
             // IMPORTANT : Récupérer targetDrawId et les concurrents AVANT de détacher quoi que ce soit
             int targetDrawId = knockout.DrawId > 0 
                 ? knockout.DrawId 
@@ -1826,6 +1828,8 @@ public partial class ServerViewModel : BaseViewModel
         }
         else if (CurrentDraw is DrawPoolsModel pool)
         {
+            _useTimer = true;
+
             winner = color == "Red" ? pool.Competitor1 : pool.Competitor2;
             looser = color == "Red" ? pool.Competitor2 : pool.Competitor1;
 
@@ -1859,7 +1863,12 @@ public partial class ServerViewModel : BaseViewModel
         if (winner != null)
         {
             ResetJudgeScores();
-            await ResetTimer();
+
+            if (_useTimer)
+            {
+                await ResetTimer();
+            }
+
             await Init();
         }
     }
