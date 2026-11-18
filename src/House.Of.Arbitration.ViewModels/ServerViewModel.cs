@@ -1379,18 +1379,7 @@ public partial class ServerViewModel : BaseViewModel
             flattenedList.Add(draw);
         }
 
-        if (Draws == null)
-        {
-            Draws = new System.Collections.ObjectModel.ObservableCollection<object>(flattenedList);
-        }
-        else
-        {
-            Draws.Clear();
-            foreach (var item in flattenedList)
-            {
-                Draws.Add(item);
-            }
-        }
+        Draws = new System.Collections.ObjectModel.ObservableCollection<object>(flattenedList);
         OnPropertyChanged(nameof(Draws));
 
         await BroadcastMatchInfo();
@@ -1705,11 +1694,40 @@ public partial class ServerViewModel : BaseViewModel
                     CurrentDraw.CurrentRound++;
                     if (CurrentDraw is DrawKnockoutModel k1)
                     {
-                        await _drawKnockoutService.UpdateAsync(k1);
+                        var koRoundUpdate = new DrawKnockoutModel
+                        {
+                            Id = k1.Id,
+                            DrawId = k1.DrawId > 0 ? k1.DrawId : (k1.Draw?.Id ?? 0),
+                            Order = k1.Order,
+                            IsBronzeMatch = k1.IsBronzeMatch,
+                            CurrentRound = k1.CurrentRound,
+                            RoundResultsJson = k1.RoundResultsJson,
+                            Competitor1Id = k1.Competitor1Id,
+                            Competitor2Id = k1.Competitor2Id,
+                            WinnerId = k1.WinnerId,
+                            LooserId = k1.LooserId,
+                            IsFinished = k1.IsFinished,
+                            GlobalOrder = k1.GlobalOrder
+                        };
+                        await _drawKnockoutService.UpdateAsync(koRoundUpdate);
                     }
                     else if (CurrentDraw is DrawPoolsModel p1)
                     {
-                        await _drawPoolsModel.UpdateAsync(p1);
+                        var poolRoundUpdate = new DrawPoolsModel
+                        {
+                            Id = p1.Id,
+                            DrawId = p1.DrawId > 0 ? p1.DrawId : (p1.Draw?.Id ?? 0),
+                            Order = p1.Order,
+                            CurrentRound = p1.CurrentRound,
+                            RoundResultsJson = p1.RoundResultsJson,
+                            Competitor1Id = p1.Competitor1Id,
+                            Competitor2Id = p1.Competitor2Id,
+                            WinnerId = p1.WinnerId,
+                            LooserId = p1.LooserId,
+                            IsFinished = p1.IsFinished,
+                            GlobalOrder = p1.GlobalOrder
+                        };
+                        await _drawPoolsModel.UpdateAsync(poolRoundUpdate);
                     }
 
                     ResetJudgeScores();
@@ -1746,13 +1764,24 @@ public partial class ServerViewModel : BaseViewModel
                     knockout.DrawId = targetDrawId;
                 }
 
-                // Détacher les entités liées pour éviter les conflits d'attachement EF Core (IdentityConflict sur CompetitorModel)
-                knockout.Competitor1 = null;
-                knockout.Competitor2 = null;
-                knockout.Winner = null;
-                knockout.Looser = null;
-                knockout.Draw = null;
-                await _drawKnockoutService.UpdateAsync(knockout);
+                // Utiliser une entité détachée sans propriétés de navigation pour la mise à jour EF Core
+                // afin d'éviter d'effacer les concurrents à l'écran pendant la transition de match
+                var updateKo = new DrawKnockoutModel
+                {
+                    Id = knockout.Id,
+                    DrawId = targetDrawId > 0 ? targetDrawId : knockout.DrawId,
+                    Order = knockout.Order,
+                    IsBronzeMatch = knockout.IsBronzeMatch,
+                    CurrentRound = knockout.CurrentRound,
+                    RoundResultsJson = knockout.RoundResultsJson,
+                    Competitor1Id = knockout.Competitor1Id,
+                    Competitor2Id = knockout.Competitor2Id,
+                    WinnerId = winner.Id,
+                    LooserId = looser?.Id,
+                    IsFinished = true,
+                    GlobalOrder = knockout.GlobalOrder
+                };
+                await _drawKnockoutService.UpdateAsync(updateKo);
 
                 // Propagation logic for Knockouts
                 if (targetDrawId == 0)
@@ -1799,24 +1828,26 @@ public partial class ServerViewModel : BaseViewModel
 
                                 if (nextMatch != null)
                                 {
-                                    if (localIndex % 2 != 0)
+                                    int targetNextDrawId = (targetDrawId > 0 && nextMatch.DrawId == 0) ? targetDrawId : nextMatch.DrawId;
+                                    int? nextComp1Id = (localIndex % 2 != 0) ? winner.Id : nextMatch.Competitor1Id;
+                                    int? nextComp2Id = (localIndex % 2 == 0) ? winner.Id : nextMatch.Competitor2Id;
+
+                                    var updateNextMatch = new DrawKnockoutModel
                                     {
-                                        nextMatch.Competitor1Id = winner.Id;
-                                    }
-                                    else
-                                    {
-                                        nextMatch.Competitor2Id = winner.Id;
-                                    }
-                                    if (targetDrawId > 0 && nextMatch.DrawId == 0)
-                                    {
-                                        nextMatch.DrawId = targetDrawId;
-                                    }
-                                    nextMatch.Competitor1 = null;
-                                    nextMatch.Competitor2 = null;
-                                    nextMatch.Winner = null;
-                                    nextMatch.Looser = null;
-                                    nextMatch.Draw = null;
-                                    await _drawKnockoutService.UpdateAsync(nextMatch);
+                                        Id = nextMatch.Id,
+                                        DrawId = targetNextDrawId,
+                                        Order = nextMatch.Order,
+                                        IsBronzeMatch = nextMatch.IsBronzeMatch,
+                                        CurrentRound = nextMatch.CurrentRound,
+                                        RoundResultsJson = nextMatch.RoundResultsJson,
+                                        Competitor1Id = nextComp1Id,
+                                        Competitor2Id = nextComp2Id,
+                                        WinnerId = nextMatch.WinnerId,
+                                        LooserId = nextMatch.LooserId,
+                                        IsFinished = nextMatch.IsFinished,
+                                        GlobalOrder = nextMatch.GlobalOrder
+                                    };
+                                    await _drawKnockoutService.UpdateAsync(updateNextMatch);
                                 }
 
                                 if (matchesInRound == 2 && looser != null)
@@ -1825,24 +1856,26 @@ public partial class ServerViewModel : BaseViewModel
                                     var bronzeMatch = allKnockouts.FirstOrDefault(k => k.IsBronzeMatch);
                                     if (bronzeMatch != null)
                                     {
-                                        if (localIndex % 2 != 0)
+                                        int targetBronzeDrawId = (targetDrawId > 0 && bronzeMatch.DrawId == 0) ? targetDrawId : bronzeMatch.DrawId;
+                                        int? bronzeComp1Id = (localIndex % 2 != 0) ? looser.Id : bronzeMatch.Competitor1Id;
+                                        int? bronzeComp2Id = (localIndex % 2 == 0) ? looser.Id : bronzeMatch.Competitor2Id;
+
+                                        var updateBronze = new DrawKnockoutModel
                                         {
-                                            bronzeMatch.Competitor1Id = looser.Id;
-                                        }
-                                        else
-                                        {
-                                            bronzeMatch.Competitor2Id = looser.Id;
-                                        }
-                                        if (targetDrawId > 0 && bronzeMatch.DrawId == 0)
-                                        {
-                                            bronzeMatch.DrawId = targetDrawId;
-                                        }
-                                        bronzeMatch.Competitor1 = null;
-                                        bronzeMatch.Competitor2 = null;
-                                        bronzeMatch.Winner = null;
-                                        bronzeMatch.Looser = null;
-                                        bronzeMatch.Draw = null;
-                                        await _drawKnockoutService.UpdateAsync(bronzeMatch);
+                                            Id = bronzeMatch.Id,
+                                            DrawId = targetBronzeDrawId,
+                                            Order = bronzeMatch.Order,
+                                            IsBronzeMatch = bronzeMatch.IsBronzeMatch,
+                                            CurrentRound = bronzeMatch.CurrentRound,
+                                            RoundResultsJson = bronzeMatch.RoundResultsJson,
+                                            Competitor1Id = bronzeComp1Id,
+                                            Competitor2Id = bronzeComp2Id,
+                                            WinnerId = bronzeMatch.WinnerId,
+                                            LooserId = bronzeMatch.LooserId,
+                                            IsFinished = bronzeMatch.IsFinished,
+                                            GlobalOrder = bronzeMatch.GlobalOrder
+                                        };
+                                        await _drawKnockoutService.UpdateAsync(updateBronze);
                                     }
                                 }
                             }
@@ -1866,26 +1899,45 @@ public partial class ServerViewModel : BaseViewModel
                 pool.WinnerId = winner.Id;
                 pool.LooserId = looser?.Id;
                 pool.IsFinished = true;
-                pool.Competitor1 = null;
-                pool.Competitor2 = null;
-                pool.Winner = null;
-                pool.Looser = null;
-                pool.Draw = null;
-                await _drawPoolsModel.UpdateAsync(pool);
+
+                var updatePool = new DrawPoolsModel
+                {
+                    Id = pool.Id,
+                    DrawId = pool.DrawId,
+                    Order = pool.Order,
+                    CurrentRound = pool.CurrentRound,
+                    RoundResultsJson = pool.RoundResultsJson,
+                    Competitor1Id = pool.Competitor1Id,
+                    Competitor2Id = pool.Competitor2Id,
+                    WinnerId = winner.Id,
+                    LooserId = looser?.Id,
+                    IsFinished = true,
+                    GlobalOrder = pool.GlobalOrder
+                };
+                await _drawPoolsModel.UpdateAsync(updatePool);
             }
         }
         else if (CurrentDraw is DrawOrderModel order)
         {
-            winner = order.Competitor; // Sauvegarde avant détachement
+            winner = order.Competitor;
             order.IsFinished = true;
             if (JudgeGroups.Count > 0)
             {
                 double totalScore = Math.Round(JudgeGroups.Sum(g => g.GlobalScore), 2);
                 order.RoundResultsJson = totalScore.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
             }
-            order.Competitor = null;
-            order.Draw = null;
-            await _drawOrderService.UpdateAsync(order);
+
+            var updateOrder = new DrawOrderModel
+            {
+                Id = order.Id,
+                DrawId = order.DrawId,
+                Order = order.Order,
+                CompetitorId = order.CompetitorId,
+                RoundResultsJson = order.RoundResultsJson,
+                IsFinished = true,
+                GlobalOrder = order.GlobalOrder
+            };
+            await _drawOrderService.UpdateAsync(updateOrder);
         }
 
         if (winner != null)

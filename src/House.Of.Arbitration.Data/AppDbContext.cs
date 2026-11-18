@@ -45,18 +45,70 @@ public class AppDbContext : DbContext
     private void InitializeDatabase()
     {
         Database.EnsureCreated();
-        try { Database.ExecuteSqlRaw("ALTER TABLE Categories ADD COLUMN HasBronzeMatch INTEGER NOT NULL DEFAULT 0;"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN IsBronzeMatch INTEGER NOT NULL DEFAULT 0;"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE RefereeDatas ADD COLUMN Round INTEGER NOT NULL DEFAULT 1;"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE RefereeDatas ADD COLUMN MatchTimer TEXT NULL;"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsPools ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsOrders ADD COLUMN CurrentRound INTEGER NOT NULL DEFAULT 1;"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsKnockouts ADD COLUMN RoundResultsJson TEXT NOT NULL DEFAULT '';"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsPools ADD COLUMN RoundResultsJson TEXT NOT NULL DEFAULT '';"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE DrawsOrders ADD COLUMN RoundResultsJson TEXT NOT NULL DEFAULT '';"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE MvtCodes ADD COLUMN GroupName TEXT NOT NULL DEFAULT '';"); } catch { }
-        try { Database.ExecuteSqlRaw("ALTER TABLE MvtCodes ADD COLUMN Movement TEXT NOT NULL DEFAULT '';"); } catch { }
+        EnsureColumnExists(this, "Categories", "HasBronzeMatch", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumnExists(this, "DrawsKnockouts", "IsBronzeMatch", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumnExists(this, "RefereeDatas", "Round", "INTEGER NOT NULL DEFAULT 1");
+        EnsureColumnExists(this, "RefereeDatas", "MatchTimer", "TEXT NULL");
+        EnsureColumnExists(this, "DrawsKnockouts", "CurrentRound", "INTEGER NOT NULL DEFAULT 1");
+        EnsureColumnExists(this, "DrawsPools", "CurrentRound", "INTEGER NOT NULL DEFAULT 1");
+        EnsureColumnExists(this, "DrawsOrders", "CurrentRound", "INTEGER NOT NULL DEFAULT 1");
+        EnsureColumnExists(this, "DrawsKnockouts", "RoundResultsJson", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumnExists(this, "DrawsPools", "RoundResultsJson", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumnExists(this, "DrawsOrders", "RoundResultsJson", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumnExists(this, "MvtCodes", "GroupName", "TEXT NOT NULL DEFAULT ''");
+        EnsureColumnExists(this, "MvtCodes", "Movement", "TEXT NOT NULL DEFAULT ''");
+    }
+
+    private static void EnsureColumnExists(DbContext context, string tableName, string columnName, string columnDefinition)
+    {
+        try
+        {
+            var conn = context.Database.GetDbConnection();
+            bool shouldClose = false;
+            if (conn.State != System.Data.ConnectionState.Open)
+            {
+                conn.Open();
+                shouldClose = !conn.ConnectionString.Contains(":memory:", StringComparison.OrdinalIgnoreCase);
+            }
+
+            try
+            {
+                using var cmd = conn.CreateCommand();
+                cmd.CommandText = $"PRAGMA table_info({tableName});";
+
+                bool columnExists = false;
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        var colName = reader.GetString(1);
+                        if (string.Equals(colName, columnName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            columnExists = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!columnExists)
+                {
+                    using var alterCmd = conn.CreateCommand();
+                    alterCmd.CommandText = $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnDefinition};";
+                    alterCmd.ExecuteNonQuery();
+                }
+            }
+            finally
+            {
+                if (shouldClose)
+                {
+                    conn.Close();
+                }
+            }
+        }
+        catch
+        {
+            // Ignore if table does not exist yet or other non-critical error
+        }
     }
     #endregion
 

@@ -251,6 +251,69 @@ public class ExcelImportExportService : IExcelImportExportService
         return Task.FromResult<Stream>(stream);
     }
 
+    private sealed class ParsedCategory
+    {
+        public int RowIndex { get; set; }
+        public CategoryModel Model { get; set; } = null!;
+        public AgeRangeModel? AgeRange { get; set; }
+        public string DisplayName { get; set; } = string.Empty;
+        public CategoryModel? PersistedModel { get; set; }
+    }
+
+    private sealed class ParsedCompetitor
+    {
+        public int RowIndex { get; set; }
+        public CompetitorModel Model { get; set; } = null!;
+        public ParsedCategory TargetCategory { get; set; } = null!;
+    }
+
+    private static IXLWorksheet? FindWorksheet(XLWorkbook workbook, params string[] candidateNames)
+    {
+        foreach (var name in candidateNames)
+        {
+            var ws = workbook.Worksheets.FirstOrDefault(w =>
+                string.Equals(w.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (ws != null) return ws;
+        }
+        return null;
+    }
+
+    private async Task RollbackAsync(
+        CompetitionModel? competition,
+        IEnumerable<CategoryModel> categories,
+        IEnumerable<CompetitorModel> competitors,
+        IEnumerable<CompetitorCategoryModel> links,
+        IEnumerable<DrawModel> draws)
+    {
+        try
+        {
+            foreach (var draw in draws)
+            {
+                try { await _drawRepository.DeleteAsync(draw); } catch { }
+            }
+            foreach (var link in links)
+            {
+                try { await _competitorCategoryRepository.DeleteAsync(link); } catch { }
+            }
+            foreach (var comp in competitors)
+            {
+                try { await _competitorRepository.DeleteAsync(comp); } catch { }
+            }
+            foreach (var cat in categories)
+            {
+                try { await _categoryRepository.DeleteAsync(cat); } catch { }
+            }
+            if (competition != null)
+            {
+                try { await _competitionRepository.DeleteAsync(competition); } catch { }
+            }
+        }
+        catch
+        {
+            // Ignore rollback exceptions
+        }
+    }
+
     /// <inheritdoc/>
     public async Task<ImportResult> ImportAsync(Stream excelStream)
     {
@@ -260,12 +323,23 @@ public class ExcelImportExportService : IExcelImportExportService
         int importedCompetitors = 0;
         int importedDraws = 0;
 
+        CompetitionModel? competition = null;
+        var parsedCategories = new List<ParsedCategory>();
+        var parsedCompetitors = new List<ParsedCompetitor>();
+
         try
         {
             using var workbook = new XLWorkbook(excelStream);
 
-            // ── 1. Lire onglet "Competition" ─────────────────────────────
-            var wsComp = workbook.Worksheet("Compétition");
+            // ── PHASE 1 : VALIDATION COMPLÈTE EN MÉMOIRE SANS MODIFICATION EN BASE ──
+
+            // 1. Lire et valider l'onglet "Compétition"
+            var wsComp = FindWorksheet(workbook, "Compétition", "Competition");
+            if (wsComp == null)
+            {
+                errors.Add("Onglet Competition: feuille introuvable dans le classeur.");
+                return BuildResult(false, 0, 0, 0, errors, warnings);
+            }
 
             var competitionName = wsComp.Cell(2, 1).GetString();
             var competitionTypeStr = wsComp.Cell(2, 3).GetString();
@@ -273,44 +347,37 @@ public class ExcelImportExportService : IExcelImportExportService
             if (string.IsNullOrWhiteSpace(competitionName))
             {
                 errors.Add("Onglet Competition: le nom de la competition est vide.");
-                return BuildResult(false, importedCategories, importedCompetitors, importedDraws, errors, warnings);
             }
 
             if (!TryParseCellDate(wsComp.Cell(2, 2), out DateTime competitionDate))
             {
                 errors.Add($"Onglet Competition: date invalide '{wsComp.Cell(2, 2).GetString()}'. Format attendu: JJ/MM/AAAA.");
-                return BuildResult(false, importedCategories, importedCompetitors, importedDraws, errors, warnings);
             }
 
-            CompetitionType competitionType;
-            if (competitionTypeStr == "Taolu")
+            CompetitionType competitionType = CompetitionType.Sanda;
+            if (string.Equals(competitionTypeStr, "Taolu", StringComparison.OrdinalIgnoreCase))
                 competitionType = CompetitionType.Taolu;
-            else if (competitionTypeStr == "Sanda")
+            else if (string.Equals(competitionTypeStr, "Sanda", StringComparison.OrdinalIgnoreCase))
                 competitionType = CompetitionType.Sanda;
             else
             {
                 errors.Add($"Onglet Competition: type inconnu '{competitionTypeStr}'. Valeurs acceptees: Sanda, Taolu.");
-                return BuildResult(false, importedCategories, importedCompetitors, importedDraws, errors, warnings);
             }
 
-            var competition = new CompetitionModel
+            competition = new CompetitionModel
             {
-                Name = competitionName,
+                Name = competitionName ?? string.Empty,
                 Date = competitionDate,
                 Type = competitionType
             };
 
-            var persistedCompetition = await _competitionRepository.AddAsync(competition);
-            if (persistedCompetition == null)
+            // 2. Lire et valider l'onglet "Catégories"
+            var wsCat = FindWorksheet(workbook, "Catégories", "Categories");
+            if (wsCat == null)
             {
-                errors.Add("Impossible de persister la competition en base de donnees.");
-                return BuildResult(false, importedCategories, importedCompetitors, importedDraws, errors, warnings);
+                errors.Add("Onglet Categories: feuille introuvable dans le classeur.");
+                return BuildResult(false, 0, 0, 0, errors, warnings);
             }
-            competition = persistedCompetition;
-
-            // ── 2. Lire onglet "Categories" ───────────────────────────────
-            var wsCat = workbook.Worksheet("Catégories");
-            var categories = new List<CategoryModel>();
 
             int catRow = 2;
             while (!string.IsNullOrWhiteSpace(wsCat.Cell(catRow, 1).GetString()))
@@ -330,25 +397,23 @@ public class ExcelImportExportService : IExcelImportExportService
                                                                 bronzeStr.Equals("1", StringComparison.OrdinalIgnoreCase) ||
                                                                 bronzeStr.Equals("vrai", StringComparison.OrdinalIgnoreCase));
 
+                    bool catRowOk = true;
                     if (!TryParseCategoryType(typeStr, out var categoryType))
                     {
                         errors.Add($"Categories ligne {catRow}: TypeCategorie inconnu '{typeStr}'.");
-                        catRow++;
-                        continue;
+                        catRowOk = false;
                     }
 
                     if (!Enum.TryParse<Genre>(genreStr, out var genre))
                     {
                         errors.Add($"Categories ligne {catRow}: Genre inconnu '{genreStr}'.");
-                        catRow++;
-                        continue;
+                        catRowOk = false;
                     }
 
                     if (!Enum.TryParse<RoundType>(roundTypeStr, out var roundType))
                     {
                         errors.Add($"Categories ligne {catRow}: TypeRound inconnu '{roundTypeStr}'.");
-                        catRow++;
-                        continue;
+                        catRowOk = false;
                     }
 
                     double weightMin = 0;
@@ -365,30 +430,28 @@ public class ExcelImportExportService : IExcelImportExportService
                         ? null
                         : AgeRangeModel.DefaultRanges.FirstOrDefault(r => r.Label == ageLabel);
 
-                    var category = new CategoryModel
+                    if (catRowOk)
                     {
-                        Type = categoryType,
-                        Genre = genre,
-                        WeightMin = weightMin,
-                        WeightMax = weightMax,
-                        AgeRangeId = ageRange?.Id,
-                        RoundType = roundType,
-                        HasBronzeMatch = hasBronzeMatch,
-                        CompetitionId = competition.Id
-                    };
+                        var category = new CategoryModel
+                        {
+                            Type = categoryType,
+                            Genre = genre,
+                            WeightMin = weightMin,
+                            WeightMax = weightMax,
+                            AgeRangeId = ageRange?.Id,
+                            RoundType = roundType,
+                            HasBronzeMatch = hasBronzeMatch
+                        };
 
-                    var persistedCategory = await _categoryRepository.AddAsync(category);
-                    if (persistedCategory != null)
-                    {
-                        persistedCategory.AgeRange = ageRange;
-                        categories.Add(persistedCategory);
-                        importedCategories++;
-                    }
-                    else
-                    {
-                        category.AgeRange = ageRange;
-                        errors.Add($"Categories ligne {catRow}: impossible de persister la categorie.");
-                        categories.Add(category); // conserver l'alignement d'index
+                        var displayName = BuildCategoryDisplayName(category.Type, category.Genre, category.WeightMin, category.WeightMax, ageRange?.Label);
+
+                        parsedCategories.Add(new ParsedCategory
+                        {
+                            RowIndex = catRow,
+                            Model = category,
+                            AgeRange = ageRange,
+                            DisplayName = displayName
+                        });
                     }
                 }
                 catch (Exception ex)
@@ -399,24 +462,24 @@ public class ExcelImportExportService : IExcelImportExportService
                 catRow++;
             }
 
-            // ── 3. Lire onglet "Competiteurs" ─────────────────────────────
-            var wsComp2 = workbook.Worksheet("Compétiteurs");
-            int compRow = 2;
-
-            // Construire un dictionnaire nom affiche → CategoryModel pour le matching par nom
-            var categoryByName = new Dictionary<string, CategoryModel>(StringComparer.OrdinalIgnoreCase);
-            // Dictionnaire pour collecter les compétiteurs par catégorie pour la génération des tirages
-            var competitorsByCategoryId = new Dictionary<int, List<CompetitorModel>>();
-
-            foreach (var cat in categories)
+            // Dictionnaires pour le matching des catégories
+            var categoryByName = new Dictionary<string, ParsedCategory>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < parsedCategories.Count; i++)
             {
-                var displayName = BuildCategoryDisplayName(cat.Type, cat.Genre, cat.WeightMin, cat.WeightMax, cat.AgeRange?.Label);
-                if (!categoryByName.ContainsKey(displayName))
-                    categoryByName[displayName] = cat;
-
-                competitorsByCategoryId[cat.Id] = new List<CompetitorModel>();
+                var pCat = parsedCategories[i];
+                if (!categoryByName.ContainsKey(pCat.DisplayName))
+                    categoryByName[pCat.DisplayName] = pCat;
             }
 
+            // 3. Lire et valider l'onglet "Compétiteurs"
+            var wsComp2 = FindWorksheet(workbook, "Compétiteurs", "Competiteurs", "Competitors");
+            if (wsComp2 == null)
+            {
+                errors.Add("Onglet Competiteurs: feuille introuvable dans le classeur.");
+                return BuildResult(false, 0, 0, 0, errors, warnings);
+            }
+
+            int compRow = 2;
             while (!string.IsNullOrWhiteSpace(wsComp2.Cell(compRow, 1).GetString()))
             {
                 try
@@ -442,32 +505,38 @@ public class ExcelImportExportService : IExcelImportExportService
                         rowHasError = true;
                     }
 
-                    // Resolution de la categorie par nom (dropdown) ou par index numerique (retro-compat)
                     if (string.IsNullOrWhiteSpace(catNameStr))
                     {
                         errors.Add($"Competiteurs ligne {compRow}: la categorie est vide. Selectionnez une categorie dans la liste deroulante.");
+                        rowHasError = true;
+                    }
+
+                    ParsedCategory? targetCategory = null;
+                    if (!string.IsNullOrWhiteSpace(catNameStr))
+                    {
+                        if (!categoryByName.TryGetValue(catNameStr, out targetCategory))
+                        {
+                            // Fallback numéro de catégorie (ancien format 1-based)
+                            if (int.TryParse(catNameStr, out int catIdx) && catIdx >= 1 && catIdx <= parsedCategories.Count)
+                                targetCategory = parsedCategories[catIdx - 1];
+                            else
+                            {
+                                errors.Add($"Competiteurs ligne {compRow}: categorie introuvable '{catNameStr}'. Utilisez la liste deroulante issue de l'onglet Categories.");
+                                rowHasError = true;
+                            }
+                        }
+                    }
+
+                    if (rowHasError || targetCategory == null)
+                    {
                         compRow++;
                         continue;
                     }
 
-                    CategoryModel? category = null;
-                    if (!categoryByName.TryGetValue(catNameStr, out category))
-                    {
-                        // Fallback : si l'utilisateur a saisi un numero (ancien format)
-                        if (int.TryParse(catNameStr, out int catIdx) && catIdx >= 1 && catIdx <= categories.Count)
-                            category = categories[catIdx - 1];
-                        else
-                        {
-                            errors.Add($"Competiteurs ligne {compRow}: categorie introuvable '{catNameStr}'. Utilisez la liste deroulante issue de l'onglet Categories.");
-                            compRow++;
-                            continue;
-                        }
-                    }
-
                     bool isTaolu = competition.Type == CompetitionType.Taolu ||
-                                   category.Type == CategoryType.Taolu ||
-                                   category.Type == CategoryType.TaoluModerneNord ||
-                                   category.Type == CategoryType.TaoluModerneSud;
+                                   targetCategory.Model.Type == CategoryType.Taolu ||
+                                   targetCategory.Model.Type == CategoryType.TaoluModerneNord ||
+                                   targetCategory.Model.Type == CategoryType.TaoluModerneSud;
 
                     var weightCell = wsComp2.Cell(compRow, 7);
                     double weight = 0;
@@ -475,7 +544,6 @@ public class ExcelImportExportService : IExcelImportExportService
 
                     if (isTaolu && (weightCell.IsEmpty() || string.IsNullOrWhiteSpace(weightCell.GetString())))
                     {
-                        // En mode Taolu, le poids est optionnel et peut etre vide
                         weight = 0;
                         weightOk = true;
                     }
@@ -502,44 +570,36 @@ public class ExcelImportExportService : IExcelImportExportService
                     if (!weightOk)
                     {
                         errors.Add($"Competiteurs ligne {compRow}: poids invalide '{weightCell.GetString()}'.");
-                        rowHasError = true;
-                    }
-
-                    if (rowHasError)
-                    {
                         compRow++;
                         continue;
                     }
 
-                    var categoryName = BuildCategoryDisplayName(category.Type, category.Genre, category.WeightMin, category.WeightMax, category.AgeRange?.Label);
+                    var categoryName = targetCategory.DisplayName;
 
-                    // Validation age
+                    // Validation âge
                     int age = competition.Date.Year - birthDate.Year;
                     if (birthDate.AddYears(age) > competition.Date) age--;
 
                     int errorsBeforeValidation = errors.Count;
 
-                    if (category.AgeRange != null && category.AgeRange.Id != -1)
+                    if (targetCategory.AgeRange != null && targetCategory.AgeRange.Id != -1)
                     {
-                        if (age < category.AgeRange.MinAge)
-                            errors.Add($"Ligne {compRow}: {firstName} {lastName} trop jeune ({age} ans) pour la categorie {categoryName} (minimum {category.AgeRange.MinAge} ans)");
-                        if (category.AgeRange.MaxAge > 0 && age > category.AgeRange.MaxAge)
-                            errors.Add($"Ligne {compRow}: {firstName} {lastName} trop age ({age} ans) pour la categorie {categoryName} (maximum {category.AgeRange.MaxAge} ans)");
+                        if (age < targetCategory.AgeRange.MinAge)
+                            errors.Add($"Ligne {compRow}: {firstName} {lastName} trop jeune ({age} ans) pour la categorie {categoryName} (minimum {targetCategory.AgeRange.MinAge} ans)");
+                        if (targetCategory.AgeRange.MaxAge > 0 && age > targetCategory.AgeRange.MaxAge)
+                            errors.Add($"Ligne {compRow}: {firstName} {lastName} trop age ({age} ans) pour la categorie {categoryName} (maximum {targetCategory.AgeRange.MaxAge} ans)");
                     }
 
-                    // Validation poids (uniquement pour les categories de combat comme le Sanda)
+                    // Validation poids (uniquement pour les catégories de combat comme le Sanda)
                     if (!isTaolu)
                     {
-                        if (category.WeightMin > 0 && weight < category.WeightMin)
-                            errors.Add($"Ligne {compRow}: {firstName} {lastName} sous le poids minimum ({weight} kg) pour la categorie {categoryName} (minimum {category.WeightMin} kg)");
-                        if (category.WeightMax > 0 && weight > category.WeightMax)
-                            errors.Add($"Ligne {compRow}: {firstName} {lastName} au-dessus du poids maximum ({weight} kg) pour la categorie {categoryName} (maximum {category.WeightMax} kg)");
+                        if (targetCategory.Model.WeightMin > 0 && weight < targetCategory.Model.WeightMin)
+                            errors.Add($"Ligne {compRow}: {firstName} {lastName} sous le poids minimum ({weight} kg) pour la categorie {categoryName} (minimum {targetCategory.Model.WeightMin} kg)");
+                        if (targetCategory.Model.WeightMax > 0 && weight > targetCategory.Model.WeightMax)
+                            errors.Add($"Ligne {compRow}: {firstName} {lastName} au-dessus du poids maximum ({weight} kg) pour la categorie {categoryName} (maximum {targetCategory.Model.WeightMax} kg)");
                     }
 
-                    // Si des erreurs de validation ont ete ajoutees pour cette ligne, skip l'insertion
-                    bool hasValidationErrors = errors.Count > errorsBeforeValidation;
-
-                    if (!hasValidationErrors)
+                    if (errors.Count == errorsBeforeValidation)
                     {
                         var competitor = new CompetitorModel
                         {
@@ -552,24 +612,12 @@ public class ExcelImportExportService : IExcelImportExportService
                             Weight = weight
                         };
 
-                        var persistedCompetitor = await _competitorRepository.AddAsync(competitor);
-                        if (persistedCompetitor != null)
+                        parsedCompetitors.Add(new ParsedCompetitor
                         {
-                            var competitorCategory = new CompetitorCategoryModel
-                            {
-                                CompetitorId = persistedCompetitor.Id,
-                                CategoryId = category.Id
-                            };
-                            await _competitorCategoryRepository.AddAsync(competitorCategory);
-                            importedCompetitors++;
-
-                            // Enregistrer le compétiteur pour la génération des tirages
-                            competitorsByCategoryId[category.Id].Add(persistedCompetitor);
-                        }
-                        else
-                        {
-                            errors.Add($"Competiteurs ligne {compRow}: impossible de persister le competiteur {firstName} {lastName}.");
-                        }
+                            RowIndex = compRow,
+                            Model = competitor,
+                            TargetCategory = targetCategory
+                        });
                     }
                 }
                 catch (Exception ex)
@@ -580,80 +628,173 @@ public class ExcelImportExportService : IExcelImportExportService
                 compRow++;
             }
 
-            // ── 4. Generer les tirages pour chaque categorie importee ─────────
-            int globalOrder = 1;
-            var generatedDraws = new List<(DrawModel Draw, string CategoryName)>();
-
-            foreach (var category in categories)
+            // SI DES ERREURS ONT ÉTÉ DÉTECTÉES PENDANT LA VALIDATION :
+            // NE RIEN ENREGISTRER DU TOUT EN BASE DE DONNÉES (AUCUNE CRÉATION DE COMPÉTITION) !
+            if (errors.Count > 0)
             {
-                try
-                {
-                    var catCompetitors = competitorsByCategoryId.TryGetValue(category.Id, out var compList)
-                        ? compList
-                        : new List<CompetitorModel>();
-
-                    if (catCompetitors.Count > 0)
-                    {
-                        var draw = GenerateDrawForCategory(category, catCompetitors, ref globalOrder);
-                        if (draw != null)
-                        {
-                            generatedDraws.Add((draw, category.Name));
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    warnings.Add($"Erreur lors de la generation du tirage pour la categorie {category.Name}: {ex.Message}");
-                }
+                return BuildResult(false, 0, 0, 0, errors, warnings);
             }
 
-            // Ordonnancement global du tournoi :
-            // 1. Tous les matchs préliminaires / quarts / demis de toutes les catégories
-            // 2. TOUTES les Petites finales de toutes les catégories
-            // 3. TOUTES les Finales de toutes les catégories
-            var allKnockouts = generatedDraws
-                .Where(d => d.Draw.DrawKnockouts != null)
-                .SelectMany(d => d.Draw.DrawKnockouts!)
-                .ToList();
+            // ── PHASE 2 : PERSISTANCE EN BASE DE DONNÉES (SEULEMENT SI 0 ERREUR) ──
+            CompetitionModel? persistedCompetition = null;
+            var persistedCategories = new List<CategoryModel>();
+            var persistedCompetitors = new List<CompetitorModel>();
+            var persistedLinks = new List<CompetitorCategoryModel>();
+            var persistedDraws = new List<DrawModel>();
 
-            if (allKnockouts.Count > 0)
+            try
             {
-                var prelimMatches = allKnockouts.Where(k => !k.IsBronzeMatch && !string.Equals(k.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
-                var bronzeMatches = allKnockouts.Where(k => k.IsBronzeMatch).ToList();
-                var finalMatches = allKnockouts.Where(k => !k.IsBronzeMatch && string.Equals(k.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
-
-                var scheduledMatches = prelimMatches.Concat(bronzeMatches).Concat(finalMatches).ToList();
-                for (int i = 0; i < scheduledMatches.Count; i++)
+                persistedCompetition = await _competitionRepository.AddAsync(competition);
+                if (persistedCompetition == null)
                 {
-                    scheduledMatches[i].GlobalOrder = i + 1;
+                    errors.Add("Impossible de persister la competition en base de donnees.");
+                    return BuildResult(false, 0, 0, 0, errors, warnings);
                 }
-            }
 
-            foreach (var (draw, catName) in generatedDraws)
-            {
-                try
+                foreach (var pCat in parsedCategories)
                 {
-                    _drawRepository.ClearTracker();
-                    var persistedDraw = await _drawRepository.AddAsync(draw);
-                    if (persistedDraw != null)
+                    pCat.Model.CompetitionId = persistedCompetition.Id;
+                    var persistedCat = await _categoryRepository.AddAsync(pCat.Model);
+                    if (persistedCat != null)
                     {
-                        importedDraws++;
+                        persistedCat.AgeRange = pCat.AgeRange;
+                        pCat.PersistedModel = persistedCat;
+                        persistedCategories.Add(persistedCat);
+                        importedCategories++;
                     }
                     else
                     {
-                        warnings.Add($"Impossible de persister le tirage pour la categorie {catName}.");
+                        errors.Add($"Categories ligne {pCat.RowIndex}: impossible de persister la categorie.");
+                        break;
                     }
                 }
-                catch (Exception ex)
+
+                if (errors.Count > 0)
                 {
-                    warnings.Add($"Erreur lors de la persistance du tirage pour la categorie {catName}: {ex.Message}");
+                    await RollbackAsync(persistedCompetition, persistedCategories, persistedCompetitors, persistedLinks, persistedDraws);
+                    return BuildResult(false, 0, 0, 0, errors, warnings);
                 }
+
+                var competitorsByCategoryId = new Dictionary<int, List<CompetitorModel>>();
+                foreach (var cat in persistedCategories)
+                {
+                    competitorsByCategoryId[cat.Id] = new List<CompetitorModel>();
+                }
+
+                foreach (var pComp in parsedCompetitors)
+                {
+                    var persistedComp = await _competitorRepository.AddAsync(pComp.Model);
+                    if (persistedComp != null)
+                    {
+                        persistedCompetitors.Add(persistedComp);
+                        var link = new CompetitorCategoryModel
+                        {
+                            CompetitorId = persistedComp.Id,
+                            CategoryId = pComp.TargetCategory.PersistedModel!.Id
+                        };
+                        var persistedLink = await _competitorCategoryRepository.AddAsync(link);
+                        if (persistedLink != null)
+                        {
+                            persistedLinks.Add(persistedLink);
+                        }
+                        importedCompetitors++;
+                        competitorsByCategoryId[pComp.TargetCategory.PersistedModel.Id].Add(persistedComp);
+                    }
+                    else
+                    {
+                        errors.Add($"Competiteurs ligne {pComp.RowIndex}: impossible de persister le competiteur {pComp.Model.FirstName} {pComp.Model.LastName}.");
+                        break;
+                    }
+                }
+
+                if (errors.Count > 0)
+                {
+                    await RollbackAsync(persistedCompetition, persistedCategories, persistedCompetitors, persistedLinks, persistedDraws);
+                    return BuildResult(false, 0, 0, 0, errors, warnings);
+                }
+
+                // Génération des tirages pour chaque catégorie
+                int globalOrder = 1;
+                var generatedDraws = new List<(DrawModel Draw, string CategoryName)>();
+
+                foreach (var category in persistedCategories)
+                {
+                    try
+                    {
+                        var catCompetitors = competitorsByCategoryId.TryGetValue(category.Id, out var compList)
+                            ? compList
+                            : new List<CompetitorModel>();
+
+                        if (catCompetitors.Count > 0)
+                        {
+                            var draw = GenerateDrawForCategory(category, catCompetitors, ref globalOrder);
+                            if (draw != null)
+                            {
+                                generatedDraws.Add((draw, category.Name));
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        warnings.Add($"Erreur lors de la generation du tirage pour la categorie {category.Name}: {ex.Message}");
+                    }
+                }
+
+                // Ordonnancement global du tournoi :
+                // 1. Tous les matchs préliminaires / quarts / demis de toutes les catégories
+                // 2. TOUTES les Petites finales de toutes les catégories
+                // 3. TOUTES les Finales de toutes les catégories
+                var allKnockouts = generatedDraws
+                    .Where(d => d.Draw.DrawKnockouts != null)
+                    .SelectMany(d => d.Draw.DrawKnockouts!)
+                    .ToList();
+
+                if (allKnockouts.Count > 0)
+                {
+                    var prelimMatches = allKnockouts.Where(k => !k.IsBronzeMatch && !string.Equals(k.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
+                    var bronzeMatches = allKnockouts.Where(k => k.IsBronzeMatch).ToList();
+                    var finalMatches = allKnockouts.Where(k => !k.IsBronzeMatch && string.Equals(k.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
+
+                    var scheduledMatches = prelimMatches.Concat(bronzeMatches).Concat(finalMatches).ToList();
+                    for (int i = 0; i < scheduledMatches.Count; i++)
+                    {
+                        scheduledMatches[i].GlobalOrder = i + 1;
+                    }
+                }
+
+                foreach (var (draw, catName) in generatedDraws)
+                {
+                    try
+                    {
+                        _drawRepository.ClearTracker();
+                        var persistedDraw = await _drawRepository.AddAsync(draw);
+                        if (persistedDraw != null)
+                        {
+                            persistedDraws.Add(persistedDraw);
+                            importedDraws++;
+                        }
+                        else
+                        {
+                            warnings.Add($"Impossible de persister le tirage pour la categorie {catName}.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        warnings.Add($"Erreur lors de la persistance du tirage pour la categorie {catName}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Erreur lors de la persistance en base de donnees: {ex.Message}");
+                await RollbackAsync(persistedCompetition, persistedCategories, persistedCompetitors, persistedLinks, persistedDraws);
+                return BuildResult(false, 0, 0, 0, errors, warnings);
             }
         }
         catch (Exception ex)
         {
             errors.Add($"Erreur lors de l'ouverture ou du traitement du fichier Excel: {ex.Message}");
-            return BuildResult(false, importedCategories, importedCompetitors, importedDraws, errors, warnings);
+            return BuildResult(false, 0, 0, 0, errors, warnings);
         }
 
         return BuildResult(!errors.Any(), importedCategories, importedCompetitors, importedDraws, errors, warnings);

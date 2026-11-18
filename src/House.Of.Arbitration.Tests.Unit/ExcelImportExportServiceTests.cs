@@ -451,4 +451,162 @@ public class ExcelImportExportServiceTests
         Assert.True(bronzeMatch.GlobalOrder < finalMatch.GlobalOrder,
             $"L'ordre global de la petite finale ({bronzeMatch.GlobalOrder}) doit être strictement inférieur à celui de la finale ({finalMatch.GlobalOrder})");
     }
+
+    [Fact]
+    public async Task ImportAsync_CompetitorValidationError_DoesNotCreateCompetition()
+    {
+        var compRepo = Substitute.For<IRepository<CompetitionModel>>();
+        var catRepo = Substitute.For<IRepository<CategoryModel>>();
+        var comporRepo = Substitute.For<IRepository<CompetitorModel>>();
+        var compCatRepo = Substitute.For<IRepository<CompetitorCategoryModel>>();
+        var drawRepo = Substitute.For<IRepository<DrawModel>>();
+
+        var service = new ExcelImportExportService(compRepo, catRepo, comporRepo, compCatRepo, drawRepo);
+
+        using var workbook = new XLWorkbook();
+        var wsComp = workbook.Worksheets.Add("Compétition");
+        wsComp.Cell(1, 1).Value = "Nom";
+        wsComp.Cell(1, 2).Value = "Date (JJ/MM/AAAA)";
+        wsComp.Cell(1, 3).Value = "Type";
+        wsComp.Cell(2, 1).Value = "Compétition Test Erreur";
+        wsComp.Cell(2, 2).Value = "15/03/2026";
+        wsComp.Cell(2, 3).Value = "Sanda";
+
+        var wsCat = workbook.Worksheets.Add("Catégories");
+        wsCat.Cell(1, 1).Value = "TypeCategorie";
+        wsCat.Cell(1, 2).Value = "Genre";
+        wsCat.Cell(1, 3).Value = "PoidsMin";
+        wsCat.Cell(1, 4).Value = "PoidsMax";
+        wsCat.Cell(1, 5).Value = "TrancheAge";
+        wsCat.Cell(1, 6).Value = "TypeRound";
+        wsCat.Cell(1, 7).Value = "NomCategorie (auto)";
+
+        wsCat.Cell(2, 1).Value = "Sanda";
+        wsCat.Cell(2, 2).Value = "Men";
+        wsCat.Cell(2, 3).Value = "60";
+        wsCat.Cell(2, 4).Value = "65";
+        wsCat.Cell(2, 5).Value = "Seniors";
+        wsCat.Cell(2, 6).Value = "Knockouts";
+        wsCat.Cell(2, 7).Value = "Sanda Seniors Hommes -65kg";
+
+        var wsCompetitors = workbook.Worksheets.Add("Compétiteurs");
+        wsCompetitors.Cell(1, 1).Value = "Prénom";
+        wsCompetitors.Cell(1, 2).Value = "Nom";
+        wsCompetitors.Cell(1, 3).Value = "Genre";
+        wsCompetitors.Cell(1, 4).Value = "DateNaissance (JJ/MM/AAAA)";
+        wsCompetitors.Cell(1, 5).Value = "Club";
+        wsCompetitors.Cell(1, 6).Value = "PaysISO";
+        wsCompetitors.Cell(1, 7).Value = "Poids (kg)";
+        wsCompetitors.Cell(1, 8).Value = "Catégorie";
+
+        // Compétiteur 1 : OK (26 ans, 63 kg)
+        wsCompetitors.Cell(2, 1).Value = "Lucas";
+        wsCompetitors.Cell(2, 2).Value = "Dupont";
+        wsCompetitors.Cell(2, 3).Value = "Men";
+        wsCompetitors.Cell(2, 4).Value = "15/03/2000";
+        wsCompetitors.Cell(2, 5).Value = "Club Paris";
+        wsCompetitors.Cell(2, 6).Value = "FRA";
+        wsCompetitors.Cell(2, 7).Value = "63";
+        wsCompetitors.Cell(2, 8).Value = "Sanda Seniors Hommes -65kg";
+
+        // Compétiteur 2 : ERREUR (10 ans, trop jeune pour Seniors !)
+        wsCompetitors.Cell(3, 1).Value = "Enfant";
+        wsCompetitors.Cell(3, 2).Value = "Test";
+        wsCompetitors.Cell(3, 3).Value = "Men";
+        wsCompetitors.Cell(3, 4).Value = "15/03/2016"; // 10 ans !
+        wsCompetitors.Cell(3, 5).Value = "Club Junior";
+        wsCompetitors.Cell(3, 6).Value = "FRA";
+        wsCompetitors.Cell(3, 7).Value = "62";
+        wsCompetitors.Cell(3, 8).Value = "Sanda Seniors Hommes -65kg";
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        ms.Position = 0;
+
+        var result = await service.ImportAsync(ms);
+
+        // L'import doit échouer avec une erreur explicite
+        Assert.False(result.Success);
+        Assert.NotEmpty(result.Errors);
+        Assert.Contains(result.Errors, e => e.Contains("trop jeune"));
+
+        // IMPORTANT : La compétition, les catégories et les compétiteurs NE DOIVENT PAS être persistés !
+        await compRepo.DidNotReceive().AddAsync(Arg.Any<CompetitionModel>());
+        await catRepo.DidNotReceive().AddAsync(Arg.Any<CategoryModel>());
+        await comporRepo.DidNotReceive().AddAsync(Arg.Any<CompetitorModel>());
+        await drawRepo.DidNotReceive().AddAsync(Arg.Any<DrawModel>());
+    }
+
+    [Fact]
+    public async Task ImportAsync_CompetitorWeightError_DoesNotCreateCompetition()
+    {
+        var compRepo = Substitute.For<IRepository<CompetitionModel>>();
+        var catRepo = Substitute.For<IRepository<CategoryModel>>();
+        var comporRepo = Substitute.For<IRepository<CompetitorModel>>();
+        var compCatRepo = Substitute.For<IRepository<CompetitorCategoryModel>>();
+        var drawRepo = Substitute.For<IRepository<DrawModel>>();
+
+        var service = new ExcelImportExportService(compRepo, catRepo, comporRepo, compCatRepo, drawRepo);
+
+        using var workbook = new XLWorkbook();
+        var wsComp = workbook.Worksheets.Add("Compétition");
+        wsComp.Cell(1, 1).Value = "Nom";
+        wsComp.Cell(1, 2).Value = "Date (JJ/MM/AAAA)";
+        wsComp.Cell(1, 3).Value = "Type";
+        wsComp.Cell(2, 1).Value = "Compétition Test Poids Invalide";
+        wsComp.Cell(2, 2).Value = "15/03/2026";
+        wsComp.Cell(2, 3).Value = "Sanda";
+
+        var wsCat = workbook.Worksheets.Add("Catégories");
+        wsCat.Cell(1, 1).Value = "TypeCategorie";
+        wsCat.Cell(1, 2).Value = "Genre";
+        wsCat.Cell(1, 3).Value = "PoidsMin";
+        wsCat.Cell(1, 4).Value = "PoidsMax";
+        wsCat.Cell(1, 5).Value = "TrancheAge";
+        wsCat.Cell(1, 6).Value = "TypeRound";
+        wsCat.Cell(1, 7).Value = "NomCategorie (auto)";
+
+        wsCat.Cell(2, 1).Value = "Sanda";
+        wsCat.Cell(2, 2).Value = "Men";
+        wsCat.Cell(2, 3).Value = "60";
+        wsCat.Cell(2, 4).Value = "65";
+        wsCat.Cell(2, 5).Value = "Seniors";
+        wsCat.Cell(2, 6).Value = "Knockouts";
+        wsCat.Cell(2, 7).Value = "Sanda Seniors Hommes -65kg";
+
+        var wsCompetitors = workbook.Worksheets.Add("Compétiteurs");
+        wsCompetitors.Cell(1, 1).Value = "Prénom";
+        wsCompetitors.Cell(1, 2).Value = "Nom";
+        wsCompetitors.Cell(1, 3).Value = "Genre";
+        wsCompetitors.Cell(1, 4).Value = "DateNaissance (JJ/MM/AAAA)";
+        wsCompetitors.Cell(1, 5).Value = "Club";
+        wsCompetitors.Cell(1, 6).Value = "PaysISO";
+        wsCompetitors.Cell(1, 7).Value = "Poids (kg)";
+        wsCompetitors.Cell(1, 8).Value = "Catégorie";
+
+        // Compétiteur avec poids hors limites (80 kg pour une catégorie max 65 kg)
+        wsCompetitors.Cell(2, 1).Value = "Lucas";
+        wsCompetitors.Cell(2, 2).Value = "Lourd";
+        wsCompetitors.Cell(2, 3).Value = "Men";
+        wsCompetitors.Cell(2, 4).Value = "15/03/2000";
+        wsCompetitors.Cell(2, 5).Value = "Club Paris";
+        wsCompetitors.Cell(2, 6).Value = "FRA";
+        wsCompetitors.Cell(2, 7).Value = "80"; // Poids hors limite !
+        wsCompetitors.Cell(2, 8).Value = "Sanda Seniors Hommes -65kg";
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        ms.Position = 0;
+
+        var result = await service.ImportAsync(ms);
+
+        Assert.False(result.Success);
+        Assert.NotEmpty(result.Errors);
+        Assert.Contains(result.Errors, e => e.Contains("au-dessus du poids maximum"));
+
+        // Aucune entité ne doit être persistée
+        await compRepo.DidNotReceive().AddAsync(Arg.Any<CompetitionModel>());
+        await catRepo.DidNotReceive().AddAsync(Arg.Any<CategoryModel>());
+        await comporRepo.DidNotReceive().AddAsync(Arg.Any<CompetitorModel>());
+    }
 }
