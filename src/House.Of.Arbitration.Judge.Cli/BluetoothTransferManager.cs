@@ -8,11 +8,12 @@ namespace House.Of.Arbitration.Judge.Cli;
 /// </summary>
 public class BluetoothTransferManager
 {
-    private const int MaxPayloadSize = 400;
+    private const int MaxPayloadSize = 200;
     private const int CompressionThreshold = 100;
     private const string ZipPrefix = "GZ:";
     private const string ChunkPrefix = "CH:";
 
+    private readonly object _lock = new();
     private readonly Dictionary<string, string?[]> _pendingChunks = new();
 
     /// <summary>
@@ -66,21 +67,29 @@ public class BluetoothTransferManager
 
             string payload = parts[3];
 
-            if (!_pendingChunks.ContainsKey(id))
+            string? assembled = null;
+            lock (_lock)
             {
-                _pendingChunks[id] = new string?[total];
+                if (!_pendingChunks.ContainsKey(id))
+                {
+                    _pendingChunks[id] = new string?[total];
+                }
+
+                var chunks = _pendingChunks[id];
+                if (index >= 0 && index < total)
+                {
+                    chunks[index] = payload;
+                }
+
+                if (chunks.All(c => c != null))
+                {
+                    assembled = string.Join("", chunks);
+                    _pendingChunks.Remove(id);
+                }
             }
 
-            var chunks = _pendingChunks[id];
-            if (index >= 0 && index < total)
+            if (assembled != null)
             {
-                chunks[index] = payload;
-            }
-
-            if (chunks.All(c => c != null))
-            {
-                string assembled = string.Join("", chunks);
-                _pendingChunks.Remove(id);
                 return FinalizeMessage(assembled);
             }
             return null;
@@ -94,7 +103,10 @@ public class BluetoothTransferManager
     /// </summary>
     public void Clear()
     {
-        _pendingChunks.Clear();
+        lock (_lock)
+        {
+            _pendingChunks.Clear();
+        }
     }
 
     private string FinalizeMessage(string message)

@@ -46,6 +46,7 @@ public static class BuilderExtensions
         builder.Services.AddTransientPopup<ServerSetupPopup, ServerSetupPopupViewModel>();
         builder.Services.AddTransientPopup<ChangeOrderPopup, ChangeOrderPopupViewModel>();
         builder.Services.AddTransientPopup<TaoluCodePopup, TaoluCodePopupViewModel>();
+        builder.Services.AddTransientPopup<TimerPickerPopup, TimerPickerPopupViewModel>();
         return builder;
     }
 }

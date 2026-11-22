@@ -48,6 +48,8 @@ public static class BuilderExtensions
 
         builder.Services.AddTransient<ExcelImportViewModel>();
 
+        builder.Services.AddTransient<TimerPickerPopupViewModel>();
+
         return builder;
     }
 }

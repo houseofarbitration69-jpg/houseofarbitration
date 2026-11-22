@@ -309,6 +309,43 @@ internal static class Program
                     }
                     break;
 
+                case "autoreconnect":
+                case "autorec":
+                    if (_session != null)
+                    {
+                        if (args.Length > 0)
+                        {
+                            if (args[0].Equals("on", StringComparison.OrdinalIgnoreCase) ||
+                                args[0].Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                                args[0].Equals("true", StringComparison.OrdinalIgnoreCase))
+                            {
+                                _session.AutoReconnectEnabled = true;
+                                if (!_client!.IsConnected)
+                                {
+                                    _session.StartAutoReconnect();
+                                }
+                                LogSuccess("Reconnexion automatique ACTIVÉE.");
+                            }
+                            else if (args[0].Equals("off", StringComparison.OrdinalIgnoreCase) ||
+                                     args[0].Equals("0", StringComparison.OrdinalIgnoreCase) ||
+                                     args[0].Equals("false", StringComparison.OrdinalIgnoreCase))
+                            {
+                                _session.AutoReconnectEnabled = false;
+                                _session.StopAutoReconnect();
+                                LogSuccess("Reconnexion automatique DÉSACTIVÉE.");
+                            }
+                            else
+                            {
+                                LogError("Usage: autoreconnect <on|off>");
+                            }
+                        }
+                        else
+                        {
+                            LogInfo($"Reconnexion automatique : {(_session.AutoReconnectEnabled ? "ACTIVÉE" : "DÉSACTIVÉE")}");
+                        }
+                    }
+                    break;
+
                 case "sync":
                     if (_session != null)
                     {
@@ -560,14 +597,6 @@ internal static class Program
 
             // Maintien actif de la liaison
             _session!.StartWatchdog(4);
-
-            // Transmission immédiate de la position pour que le serveur allume le statut du juge !
-            LogInfo($"Officialisation de la présence : Juge {_session.PositionCode}...");
-            await _session.SendCurrentPositionAsync();
-
-            // Demande des données de match et de compétition
-            await _session.RequestMatchAsync();
-            await _session.RequestCompetitionAsync();
         }
         else
         {
@@ -686,6 +715,7 @@ internal static class Program
         Console.WriteLine($"  Points Sanda     : Rouge={_session.RedPoints:F0} | Bleu={_session.BluePoints:F0}");
         Console.WriteLine($"  Chronomètre      : {_session.TimerDisplay} {(_session.IsTimerRunning ? "[ACTIF]" : "[STOP]")}");
         Console.WriteLine($"  Watchdog ping    : {(_session.IsWatchdogActive ? "ACTIF (toutes les 4s)" : "INACTIF")}");
+        Console.WriteLine($"  Reconnexion auto : {(_session.AutoReconnectEnabled ? (_session.IsAutoReconnecting ? "EN COURS" : "ACTIVÉE") : "DÉSACTIVÉE")}");
 
         if (_session.CurrentMatch != null)
         {
@@ -817,6 +847,8 @@ internal static class Program
         Console.ResetColor();
         Console.WriteLine("  scan [sec]             : Scanne les serveurs d'arbitrage BLE (défaut: 5s).");
         Console.WriteLine("  connect <#|addr>       : Connecte au périphérique scanné par numéro ou adresse.");
+        Console.WriteLine("  reconnect, rec         : Tente une reconnexion manuelle au dernier serveur.");
+        Console.WriteLine("  autoreconnect <on|off> : Active/désactive la reconnexion automatique (défaut: désactivé).");
         Console.WriteLine("  disconnect             : Déconnecte la liaison BLE.");
         Console.WriteLine("  pos <groupe> <num>     : Spécifie la position (ex: pos A 1, pos B 2, pos 1).");
         Console.WriteLine("  code <code>            : Applique une pénalité Taolu (ex: code 01, code 30, code 50).");

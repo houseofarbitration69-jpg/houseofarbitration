@@ -85,6 +85,8 @@ public class JudgeBot : IDisposable
 
     private async Task BotLoopAsync(CancellationToken token)
     {
+        bool wasActive = false;
+
         while (!token.IsCancellationRequested)
         {
             try
@@ -92,6 +94,12 @@ public class JudgeBot : IDisposable
                 // Vérifier si le chrono est en cours et si on peut noter
                 if (_session.IsTimerRunning && _session.CanSendScore)
                 {
+                    if (!wasActive)
+                    {
+                        wasActive = true;
+                        BotActivity?.Invoke(this, $"🤖 [ROBOT {_session.PositionCode}] Chronomètre actif ! Début de la simulation (Stratégie: {Strategy}, Vitesse: x{SpeedMultiplier}).");
+                    }
+
                     int speed = Math.Clamp(SpeedMultiplier, 1, 8);
                     int baseInterval = Random.Shared.Next(MinIntervalMs, MaxIntervalMs);
                     int actualInterval = Math.Max(120, baseInterval / speed);
@@ -143,6 +151,12 @@ public class JudgeBot : IDisposable
                 }
                 else
                 {
+                    if (wasActive)
+                    {
+                        wasActive = false;
+                        BotActivity?.Invoke(this, $"🤖 [ROBOT {_session.PositionCode}] Chronomètre arrêté ou en pause. En attente...");
+                    }
+
                     // Attendre le démarrage du chrono
                     await Task.Delay(200, token);
                 }

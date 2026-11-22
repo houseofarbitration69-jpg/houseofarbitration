@@ -34,7 +34,7 @@ public class JudgeBotManager : IDisposable
         {
             ManagerActivity?.Invoke(this, $"[BOT-MANAGER] Recherche du serveur BLE{(string.IsNullOrWhiteSpace(serverAddressOrName) ? "" : $" '{serverAddressOrName}'")}...");
             using var scanner = new WindowsBluetoothClient();
-            var found = await scanner.ScanForServerAsync(TimeSpan.FromSeconds(6));
+            var found = await scanner.ScanForServerAsync(TimeSpan.FromSeconds(3));
             if (found != null)
             {
                 targetAddress = found.Address;
@@ -68,11 +68,7 @@ public class JudgeBotManager : IDisposable
             if (ok)
             {
                 connectedCount++;
-                // Officialiser la présence et la position auprès du serveur
-                await session.SetPositionAsync(i);
-                session.StartWatchdog(4);
-                await session.RequestMatchAsync();
-                await session.RequestCompetitionAsync();
+                session.StartWatchdog();
 
                 ManagerActivity?.Invoke(this, $"[BOT-MANAGER] Robot #{i} (Juge {i}) connecté et position enregistrée.");
                 bot.Start(strategy, speedMultiplier);
@@ -83,7 +79,7 @@ public class JudgeBotManager : IDisposable
             }
 
             _managedBots.Add((client, session, bot));
-            await Task.Delay(250);
+            await Task.Delay(100);
         }
 
         return connectedCount;

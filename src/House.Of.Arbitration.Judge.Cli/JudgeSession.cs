@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using House.Of.Arbitration.Models;
 
 namespace House.Of.Arbitration.Judge.Cli;
@@ -22,7 +23,11 @@ public class MatchDisplayInfo
 public class JudgeSession : IDisposable
 {
     private readonly WindowsBluetoothClient _client;
-    private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        ReferenceHandler = ReferenceHandler.IgnoreCycles
+    };
     private Stopwatch? _pingStopwatch;
     private CancellationTokenSource? _watchdogCts;
     private CancellationTokenSource? _autoReconnectCts;
@@ -48,14 +53,21 @@ public class JudgeSession : IDisposable
     public IReadOnlyList<TransfertScoreModel> UnsyncedScores => _unsyncedScores.AsReadOnly();
     public bool IsAutoReconnecting => _autoReconnectCts != null && !_autoReconnectCts.IsCancellationRequested;
 
+    /// <summary>
+    /// Active ou désactive la reconnexion automatique en arrière-plan.
+    /// Par défaut : false (désactivée).
+    /// </summary>
+    public bool AutoReconnectEnabled { get; set; } = false;
+
     public MatchDisplayInfo? CurrentMatch { get; private set; }
     public CompetitionModel? CurrentCompetition { get; private set; }
     public string ServerName { get; private set; } = string.Empty;
     public string TimerDisplay { get; private set; } = "02:00";
     public bool IsTimerRunning { get; private set; }
     public bool CanSendScore =>
-        (CurrentMatch != null && (CurrentMatch.Type == RoundType.Order || CurrentCompetition?.Type == CompetitionType.Taolu))
-        || (IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00");
+        CurrentMatch != null &&
+        ((CurrentMatch.Type == RoundType.Order || CurrentCompetition?.Type == CompetitionType.Taolu)
+        || (IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00"));
 
     public List<MvtTimeCodeModel> DeductionsHistory { get; } = new();
 
@@ -80,8 +92,8 @@ public class JudgeSession : IDisposable
         {
             StopWatchdog();
             StatusChanged?.Invoke(this, $"Déconnecté du serveur [{e}]. Mode hors-ligne actif : vos notes seront mémorisées.");
-            // Ne démarrer la reconnexion automatique que si HandleReconnectedAsync n'est pas en cours
-            if (_isHandlingReconnection == 0)
+            // Ne démarrer la reconnexion automatique que si elle est activée et que HandleReconnectedAsync n'est pas en cours
+            if (AutoReconnectEnabled && _isHandlingReconnection == 0)
             {
                 StartAutoReconnect();
             }
@@ -106,6 +118,11 @@ public class JudgeSession : IDisposable
                 {
                     StartWatchdog(); // redémarre proprement
                 }
+                return;
+            }
+
+            if (!AutoReconnectEnabled)
+            {
                 return;
             }
 
@@ -481,7 +498,7 @@ public class JudgeSession : IDisposable
     /// <summary>
     /// Active le watchdog keep-alive automatique (ping toutes les X secondes).
     /// </summary>
-    public void StartWatchdog(int intervalSeconds = 4)
+    public void StartWatchdog(int intervalSeconds = 15)
     {
         StopWatchdog();
         _lastServerContactTime = DateTime.UtcNow;
@@ -507,11 +524,11 @@ public class JudgeSession : IDisposable
 
                     StatusChanged?.Invoke(this, $"[{ts}] [WATCHDOG-TICK#{tickCount}] IsConnected={isConn} | consecutiveFails={_consecutiveFailedPings} | secondsSinceContact={secondsSinceContact:F1}s");
 
-                    if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(20))
+                    if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(45))
                     {
-                        StatusChanged?.Invoke(this, $"[{ts}] Expiration du heartbeat serveur (>20s sans réponse). Déconnexion.");
+                        StatusChanged?.Invoke(this, $"[{ts}] Expiration du heartbeat serveur (>45s sans réponse). Déconnexion.");
                         StopWatchdog();
-                        await _client.DisconnectAsync(reason: "Heartbeat expiré (>20s sans réponse serveur)");
+                        await _client.DisconnectAsync(reason: "Heartbeat expiré (>45s sans réponse serveur)");
                         continue;
                     }
 
@@ -542,7 +559,7 @@ public class JudgeSession : IDisposable
                         // Cela ne devrait pas arriver normalement (IsConnected = _characteristic != null).
                         StatusChanged?.Invoke(this, $"[{ts}] [WATCHDOG] ANOMALIE — IsConnected=false sans déconnexion explicite ! _isHandlingReconnection={_isHandlingReconnection} IsAutoReconnecting={IsAutoReconnecting}");
 
-                        if (_isHandlingReconnection == 0 && !IsAutoReconnecting)
+                        if (AutoReconnectEnabled && _isHandlingReconnection == 0 && !IsAutoReconnecting)
                         {
                             StopWatchdog();
                             StatusChanged?.Invoke(this, "[WATCHDOG] Connexion perdue, démarrage de la reconnexion automatique.");
@@ -550,7 +567,6 @@ public class JudgeSession : IDisposable
                         }
                         else
                         {
-                            // Reconnexion déjà en cours — arrêter le watchdog
                             StopWatchdog();
                         }
                     }
@@ -586,6 +602,7 @@ public class JudgeSession : IDisposable
     /// </summary>
     public void StartAutoReconnect(int intervalSeconds = 2)
     {
+        if (!AutoReconnectEnabled) return;
         if (IsAutoReconnecting) return;
 
         // Guard : si le client est déjà connecté, ne pas démarrer la reconnexion
@@ -675,7 +692,7 @@ public class JudgeSession : IDisposable
 
             StatusChanged?.Invoke(this, $"[{tsStart}] [RECONNEXION RÉUSSIE] Connecté au serveur [{address}] ! Réenregistrement...");
 
-            // 1. Réenregistrer la position auprès du serveur
+            // 1. Réenregistrer la position auprès du serveur (qui renvoie automatiquement MATCH_INFO et TIMER_SET)
             await SendCurrentPositionAsync();
             await Task.Delay(150);
 
@@ -685,10 +702,12 @@ public class JudgeSession : IDisposable
                 await SyncUnsyncedScoresAsync();
             }
 
-            // 3. Demander les données courantes du match et de la compétition
-            await Task.Delay(100);
-            await RequestMatchAsync();
-            await RequestCompetitionAsync();
+            // 3. Demander les données de la compétition seulement si elles ne sont pas encore reçues
+            if (CurrentCompetition == null)
+            {
+                await Task.Delay(100);
+                await RequestCompetitionAsync();
+            }
 
             // 4. Démarrer le watchdog seulement si on est encore connecté à l'issue du traitement
             string tsEnd = DateTime.Now.ToString("HH:mm:ss.fff");
@@ -701,8 +720,11 @@ public class JudgeSession : IDisposable
             }
             else
             {
-                StatusChanged?.Invoke(this, $"[{tsEnd}] [RECONNEXION] Connexion perdue pendant le traitement post-reconnexion. Reprise de la reconnexion automatique.");
-                StartAutoReconnect();
+                if (AutoReconnectEnabled)
+                {
+                    StatusChanged?.Invoke(this, $"[{tsEnd}] [RECONNEXION] Connexion perdue pendant le traitement post-reconnexion. Reprise de la reconnexion automatique.");
+                    StartAutoReconnect();
+                }
             }
         }
         catch (Exception ex)
@@ -808,6 +830,14 @@ public class JudgeSession : IDisposable
 
                 if (matchData != null && matchData.Id > 0)
                 {
+                    int round = matchData.Round > 0 ? matchData.Round : 1;
+                    if (CurrentMatch != null && CurrentMatch.Id == matchData.Id && CurrentMatch.Round == round)
+                    {
+                        // Le match et le round sont déjà actifs sur ce juge : ignorer la notification redondante
+                        return;
+                    }
+
+                    Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.MATCH_INFO}");
                     string c1Name = FormatCompetitor(matchData.Competitor1) switch
                     {
                         { Length: > 0 } s => s,
@@ -859,6 +889,7 @@ public class JudgeSession : IDisposable
                 else
                 {
                     CurrentMatch = null;
+                    IsTimerRunning = false;
                     DeductionsHistory.Clear();
                     RedPoints = 0;
                     BluePoints = 0;
@@ -873,27 +904,42 @@ public class JudgeSession : IDisposable
             }
             else if (message.StartsWith(Constants.Message.TIMER_SET))
             {
-                TimerDisplay = message.Substring(Constants.Message.TIMER_SET.Length);
+                var newTimer = message.Substring(Constants.Message.TIMER_SET.Length);
+                if (TimerDisplay == newTimer && !IsTimerRunning)
+                {
+                    // Déjà à jour, ignorer la notification redondante
+                    return;
+                }
+
+                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.TIMER_SET}");
+
+                TimerDisplay = newTimer;
                 if (TimerDisplay == "00:00" || TimerDisplay == "0:00")
                 {
                     IsTimerRunning = false;
                 }
                 TimerUpdated?.Invoke(this, TimerDisplay);
             }
-            else if (message == Constants.Message.TIMER_START)
+            else if (message.Trim().StartsWith(Constants.Message.TIMER_START))
             {
+                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.TIMER_START}");
+                
                 IsTimerRunning = true;
                 TimerUpdated?.Invoke(this, TimerDisplay);
                 NotificationReceived?.Invoke(this, "Chronomètre DÉMARRÉ.");
             }
-            else if (message == Constants.Message.TIMER_PAUSE)
+            else if (message.Trim().StartsWith(Constants.Message.TIMER_PAUSE))
             {
+                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.TIMER_PAUSE}");
+
                 IsTimerRunning = false;
                 TimerUpdated?.Invoke(this, TimerDisplay);
                 NotificationReceived?.Invoke(this, "Chronomètre EN PAUSE.");
             }
-            else if (message == Constants.Message.TIMER_STOP)
+            else if (message.Trim().StartsWith(Constants.Message.TIMER_STOP))
             {
+                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.TIMER_STOP}");
+
                 IsTimerRunning = false;
                 TimerDisplay = "00:00";
                 TimerUpdated?.Invoke(this, TimerDisplay);
@@ -901,6 +947,8 @@ public class JudgeSession : IDisposable
             }
             else if (message == Constants.Message.PONG)
             {
+                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.PONG}");
+
                 _lastServerContactTime = DateTime.UtcNow;
                 _consecutiveFailedPings = 0;
                 TimeSpan latency = _pingStopwatch?.Elapsed ?? TimeSpan.Zero;
@@ -908,25 +956,54 @@ public class JudgeSession : IDisposable
             }
             else if (message.StartsWith(Constants.Message.SERVER_NAME))
             {
-                ServerName = message.Substring(Constants.Message.SERVER_NAME.Length).Trim();
+                var newServerName = message.Substring(Constants.Message.SERVER_NAME.Length).Trim();
+                if (ServerName == newServerName)
+                {
+                    // Nom du serveur déjà configuré
+                    return;
+                }
+
+                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.SERVER_NAME}");
+
+                ServerName = newServerName;
                 NotificationReceived?.Invoke(this, $"Serveur connecté : {ServerName}");
             }
             else if (message.StartsWith(Constants.Message.COMPETITION_DATA))
             {
-                string json = message.Substring(Constants.Message.COMPETITION_DATA.Length);
-                CurrentCompetition = JsonSerializer.Deserialize<CompetitionModel>(json, _jsonOptions);
-                NotificationReceived?.Invoke(this, $"Compétition reçue : {CurrentCompetition?.Name ?? "Inconnue"} ({CurrentCompetition?.Type})");
-
-                // Si la compétition est Taolu et que le juge n'a pas encore spécifié de groupe, affecter par défaut Groupe A
-                if (CurrentCompetition?.Type == CompetitionType.Taolu && string.IsNullOrEmpty(JudgeGroup))
+                try
                 {
-                    JudgeGroup = "A";
-                    CurrentScore = Constants.DEFAULT_SCORE_GROUP_A;
-                    _ = SendCurrentPositionAsync();
+                    string json = message.Substring(Constants.Message.COMPETITION_DATA.Length);
+                    var comp = JsonSerializer.Deserialize<CompetitionModel>(json, _jsonOptions);
+                    if (comp != null)
+                    {
+                        if (CurrentCompetition != null && CurrentCompetition.Id == comp.Id)
+                        {
+                            // Compétition déjà chargée pour ce juge : ignorer la notification redondante
+                            return;
+                        }
+
+                        Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.COMPETITION_DATA}");
+                        CurrentCompetition = comp;
+                        NotificationReceived?.Invoke(this, $"Compétition reçue : {CurrentCompetition.Name ?? "Inconnue"} ({CurrentCompetition.Type})");
+
+                        // Si la compétition est Taolu et que le juge n'a pas encore spécifié de groupe, affecter par défaut Groupe A
+                        if (CurrentCompetition.Type == CompetitionType.Taolu && string.IsNullOrEmpty(JudgeGroup))
+                        {
+                            JudgeGroup = "A";
+                            CurrentScore = Constants.DEFAULT_SCORE_GROUP_A;
+                            _ = SendCurrentPositionAsync();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Juge {JudgePosition} : Erreur lors de la désérialisation de COMPETITION_DATA : {ex.Message}");
                 }
             }
             else if (message == Constants.Message.SERVER_STOPPED)
             {
+                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.SERVER_STOPPED}");
+
                 StopWatchdog();
                 StopAutoReconnect();
                 StatusChanged?.Invoke(this, "ALERTE : Le serveur d'arbitrage s'est arrêté. Déconnexion et arrêt de l'écoute.");
@@ -939,6 +1016,8 @@ public class JudgeSession : IDisposable
             }
             else
             {
+                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {message}");
+
                 NotificationReceived?.Invoke(this, $"Message reçu du serveur : {message}");
             }
         }

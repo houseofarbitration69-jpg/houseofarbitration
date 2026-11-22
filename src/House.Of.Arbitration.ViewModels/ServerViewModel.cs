@@ -7,6 +7,7 @@ using House.Of.Arbitration.Models;
 using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 #endregion
@@ -75,12 +76,17 @@ public partial class ServerViewModel : BaseViewModel
     private int _totalMatches;
     private int _currentMatchNumber;
     private CompetitionModel? _currentCompetition;
-    private readonly Dictionary<string, JudgeModel> _clientJudgeMapping = new();
+    private readonly ConcurrentDictionary<string, JudgeModel> _clientJudgeMapping = new();
+    private readonly SemaphoreSlim _dbSemaphore = new(1, 1);
+    private readonly object _judgesLock = new();
+    private List<JudgeModel> _judgesSnapshot = new();
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
         WriteIndented = false
     };
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _lastSentServerNameToClient = new();
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> _lastSentCompToClient = new();
     private System.Collections.ObjectModel.ObservableCollection<JudgeGroupModel> _judgeGroups = new();
     private double _currentRedVotes;
     private double _currentBlueVotes;
@@ -289,13 +295,17 @@ public partial class ServerViewModel : BaseViewModel
         {
             Judges.Add(new JudgeModel { Name = $"JUGE {i}", Number = i });
         }
+        lock (_judgesLock)
+        {
+            _judgesSnapshot = Judges.ToList();
+        }
 
         _timer = Application.Current?.Dispatcher.CreateTimer();
 
         if (_timer != null)
         {
             _timer.Interval = TimeSpan.FromSeconds(1);
-            _timer.Tick += async (s, e) =>
+            _timer.Tick += (s, e) =>
             {
                 if (_timeLeft.TotalSeconds > 0)
                 {
@@ -306,14 +316,21 @@ public partial class ServerViewModel : BaseViewModel
                     // Resynchronisation périodique toutes les 5 secondes
                     if ((int)_timeLeft.TotalSeconds % 5 == 0)
                     {
-                        _ = _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
+                        string syncMsg = $"{Constants.Message.TIMER_SET}{TimeLeftDisplay}";
+                        _ = Task.Run(async () =>
+                        {
+                            await _bluetoothServer.SendToAllAsync(syncMsg);
+                        });
                     }
                 }
                 else
                 {
-                    await StopTimer();
+                    _ = StopTimer();
 
-                    await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_STOP);
+                    _ = Task.Run(async () =>
+                    {
+                        await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_STOP);
+                    });
                 }
             };
         }
@@ -327,28 +344,19 @@ public partial class ServerViewModel : BaseViewModel
     /// </summary>
     /// <param name="sender">L'objet emetteur</param>
     /// <param name="clientId">Identifiant du device</param>
-    private async void OnDeviceConnected(object? sender, string clientId)
+    private void OnDeviceConnected(object? sender, string clientId)
     {
-        await SendCompetitionDataToClientAsync(clientId);
-
-        if (CurrentDraw != null)
+        _ = Task.Run(async () =>
         {
             try
             {
-                var matchData = CreateMatchInfoData(CurrentDraw);
-                var json = JsonSerializer.Serialize(matchData, _jsonOptions);
-                await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", clientId);
-                await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", clientId);
-                if (IsTimerRunning)
-                {
-                    await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, clientId);
-                }
+                await SendCompetitionDataToClientAsync(clientId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error sending initial match info to client {ClientId}", clientId);
+                _logger.LogError(ex, "Error sending initial competition data to client {ClientId}", clientId);
             }
-        }
+        });
     }
 
     /// <summary>
@@ -358,27 +366,21 @@ public partial class ServerViewModel : BaseViewModel
     /// <param name="clientId">Idenifiant du device</param>
     private void OnDeviceDisconnected(object? sender, string clientId)
     {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            var matchingKeys = _clientJudgeMapping
-                .Where(kvp => kvp.Key == clientId || kvp.Key.StartsWith(clientId + "#"))
-                .Select(kvp => kvp.Key)
-                .ToList();
+        var matchingKeys = _clientJudgeMapping
+            .Where(kvp => kvp.Key == clientId || kvp.Key.StartsWith(clientId + "#"))
+            .Select(kvp => kvp.Key)
+            .ToList();
 
-            foreach (var key in matchingKeys)
+        foreach (var key in matchingKeys)
+        {
+            if (_clientJudgeMapping.TryRemove(key, out var judge))
             {
-                if (_clientJudgeMapping.TryGetValue(key, out var judge))
+                MainThread.BeginInvokeOnMainThread(() =>
                 {
                     judge.IsConnected = false;
-                    _clientJudgeMapping.Remove(key);
-                }
+                });
             }
-
-            if (matchingKeys.Count > 0)
-            {
-                OnPropertyChanged(nameof(Judges));
-            }
-        });
+        }
     }
 
     /// <summary>
@@ -388,30 +390,118 @@ public partial class ServerViewModel : BaseViewModel
     /// <param name="args"></param>
     private async void OnMessageReceived(object? sender, (string ClientId, string Message) args)
     {
-        MainThread.BeginInvokeOnMainThread(async () =>
+        // Répondre au PING directement, sans passer par le thread UI :
+        // le PONG n'a pas besoin de toucher l'UI et évite ainsi de saturer
+        // MainThread.BeginInvokeOnMainThread avec des lambdas async fréquentes.
+        if (args.Message == Constants.Message.PING)
         {
-            if (args.Message == Constants.Message.PING)
+            try
+            {
+                await _bluetoothServer.SendToClientAsync(Constants.Message.PONG, args.ClientId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error replying PONG to client {ClientId}", args.ClientId);
+            }
+
+            return;
+        }
+
+        // Snapshot thread-safe de Judges sans solliciter le thread UI
+        List<JudgeModel> judgesSnapshot;
+        lock (_judgesLock)
+        {
+            judgesSnapshot = _judgesSnapshot;
+        }
+
+        if (args.Message == Constants.Message.GET_COMPETITION)
+        {
+            if (_lastSentCompToClient.TryGetValue(args.ClientId, out var lastTime) && (DateTime.UtcNow - lastTime).TotalSeconds < 2)
+            {
+                return;
+            }
+            await SendCompetitionDataToClientAsync(args.ClientId);
+            return;
+        }
+        else if (args.Message.StartsWith(Constants.Message.GET_MATCH))
+        {
+            // Envoi du match courant
+            if (CurrentDraw != null)
             {
                 try
                 {
-                    await _bluetoothServer.SendToClientAsync(Constants.Message.PONG, args.ClientId);
+                    var matchData = CreateMatchInfoData(CurrentDraw);
+                    var json = JsonSerializer.Serialize(matchData, _jsonOptions);
+                    await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
+                    await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
+                    if (IsTimerRunning)
+                    {
+                        await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, args.ClientId);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error replying PONG to client {ClientId}", args.ClientId);
+                    _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
+                }
+            }
+            else
+            {
+                await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
+            }
+        }
+        else if (args.Message.StartsWith(Constants.Message.JUDGE_POSITION))
+        {
+            var posStr = args.Message.Substring(Constants.Message.JUDGE_POSITION.Length);
+
+            // Support du session ID pour permettre plusieurs juges sur un même PC (ex: "1#instA")
+            string sessionKey = args.ClientId;
+            if (posStr.Contains('#'))
+            {
+                var segs = posStr.Split('#', 2);
+                posStr = segs[0];
+                sessionKey = $"{args.ClientId}#{segs[1]}";
+            }
+
+            JudgeModel? judge = null;
+            var parts = posStr.Split('_');
+
+            if (parts.Length == 2 && int.TryParse(parts[1], out int num))
+            {
+                judge = judgesSnapshot.FirstOrDefault(j => j.Group == parts[0] && j.Number == num);
+            }
+            else if (int.TryParse(posStr, out int position))
+            {
+                judge = judgesSnapshot.FirstOrDefault(j => string.IsNullOrEmpty(j.Group) && j.Number == position)
+                     ?? judgesSnapshot.FirstOrDefault(j => j.Number == position);
+            }
+            else
+            {
+                judge = judgesSnapshot.FirstOrDefault(j => j.Name == posStr);
+            }
+
+            if (judge != null)
+            {
+                // Remove previous mapping for this client session if any
+                if (_clientJudgeMapping.TryGetValue(sessionKey, out var oldJudge) && oldJudge != judge)
+                {
+                    MainThread.BeginInvokeOnMainThread(() => oldJudge.IsConnected = false);
                 }
 
-                return;
-            }
+                // Remove mapping for this judge if another client was using it
+                var existingMapping = _clientJudgeMapping.FirstOrDefault(x => x.Value == judge);
+                if (existingMapping.Key != null && existingMapping.Key != sessionKey)
+                {
+                    _clientJudgeMapping.TryRemove(existingMapping.Key, out _);
+                }
 
-            if (args.Message == Constants.Message.GET_COMPETITION)
-            {
-                await SendCompetitionDataToClientAsync(args.ClientId);
-                return;
-            }
-            else if (args.Message.StartsWith(Constants.Message.GET_MATCH))
-            {
-                // Envoi du match courant
+                _clientJudgeMapping[sessionKey] = judge;
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    judge.IsConnected = true;
+                });
+
+                // Envoi immédiat du match en cours au juge enregistré
                 if (CurrentDraw != null)
                 {
                     try
@@ -434,101 +524,35 @@ public partial class ServerViewModel : BaseViewModel
                 {
                     await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
                 }
-            }
-            else if (args.Message.StartsWith(Constants.Message.JUDGE_POSITION))
-            {
-                var posStr = args.Message.Substring(Constants.Message.JUDGE_POSITION.Length);
 
-                // Support du session ID pour permettre plusieurs juges sur un même PC (ex: "1#instA")
-                string sessionKey = args.ClientId;
-                if (posStr.Contains('#'))
+                // Restore codes from repository if server in-memory codes are empty
+                if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order && judge.Codes.Count == 0)
                 {
-                    var segs = posStr.Split('#', 2);
-                    posStr = segs[0];
-                    sessionKey = $"{args.ClientId}#{segs[1]}";
-                }
-
-                JudgeModel? judge = null;
-
-                var parts = posStr.Split('_');
-
-                if (parts.Length == 2 && int.TryParse(parts[1], out int num))
-                {
-                    judge = Judges.FirstOrDefault(j => j.Group == parts[0] && j.Number == num);
-                }
-                else if (int.TryParse(posStr, out int position))
-                {
-                    judge = Judges.FirstOrDefault(j => string.IsNullOrEmpty(j.Group) && j.Number == position)
-                         ?? Judges.FirstOrDefault(j => j.Number == position);
-                }
-                else
-                {
-                    judge = Judges.FirstOrDefault(j => j.Name == posStr);
-                }
-
-                if (judge != null)
-                {
-                    // Remove previous mapping for this client session if any
-                    if (_clientJudgeMapping.TryGetValue(sessionKey, out var oldJudge) && oldJudge != judge)
+                    try
                     {
-                        oldJudge.IsConnected = false;
-                    }
-
-                    // Remove mapping for this judge if another client was using it
-                    var existingMapping = _clientJudgeMapping.FirstOrDefault(x => x.Value == judge);
-                    if (existingMapping.Key != null && existingMapping.Key != sessionKey)
-                    {
-                        _clientJudgeMapping.Remove(existingMapping.Key);
-                    }
-
-                    MainThread.BeginInvokeOnMainThread(() =>
-                    {
-                        judge.IsConnected = true;
-                        OnPropertyChanged(nameof(Judges));
-                    });
-
-                    _clientJudgeMapping[sessionKey] = judge;
-
-                    // Envoi immédiat du match en cours au juge enregistré
-                    if (CurrentDraw != null)
-                    {
+                        await _dbSemaphore.WaitAsync();
+                        IReadOnlyList<RefereeDataModel>? allData;
                         try
                         {
-                            var matchData = CreateMatchInfoData(CurrentDraw);
-                            var json = JsonSerializer.Serialize(matchData, _jsonOptions);
-                            await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
-                            await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
-                            if (IsTimerRunning)
-                            {
-                                await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, args.ClientId);
-                            }
+                            allData = await _refereeDataRepository.GetAllAsync();
                         }
-                        catch (Exception ex)
+                        finally
                         {
-                            _logger.LogError(ex, "Error sending match info to client {ClientId}", args.ClientId);
+                            _dbSemaphore.Release();
                         }
-                    }
-                    else
-                    {
-                        await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{{}}", args.ClientId);
-                    }
 
-                    // Restore codes from repository if server in-memory codes are empty
-                    if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order && judge.Codes.Count == 0)
-                    {
-                        try
+                        if (allData != null)
                         {
-                            var allData = await _refereeDataRepository.GetAllAsync();
-                            if (allData != null)
-                            {
-                                var judgeHistory = allData
-                                    .Where(d => d.Referee == judge.Name &&
-                                        ((CurrentDraw is DrawOrderModel o && d.DrawOrderId == o.Id) ||
-                                         (CurrentDraw is DrawKnockoutModel k && d.DrawKnockoutId == k.Id) ||
-                                         (CurrentDraw is DrawPoolsModel p && d.DrawPoolsId == p.Id)))
-                                    .OrderBy(d => d.Date)
-                                    .ToList();
+                            var judgeHistory = allData
+                                .Where(d => d.Referee == judge.Name &&
+                                    ((CurrentDraw is DrawOrderModel o && d.DrawOrderId == o.Id) ||
+                                     (CurrentDraw is DrawKnockoutModel k && d.DrawKnockoutId == k.Id) ||
+                                     (CurrentDraw is DrawPoolsModel p && d.DrawPoolsId == p.Id)))
+                                .OrderBy(d => d.Date)
+                                .ToList();
 
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
                                 foreach (var item in judgeHistory)
                                 {
                                     if (!string.IsNullOrEmpty(item.Data))
@@ -544,148 +568,153 @@ public partial class ServerViewModel : BaseViewModel
                                         judge.Score = item.Score;
                                     }
                                 }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Error restoring judge history from repository for client {ClientId}", args.ClientId);
+                            });
                         }
                     }
-
-                    await SendJudgeStateAsync(judge, args.ClientId);
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error restoring judge history from repository for client {ClientId}", args.ClientId);
+                    }
                 }
+
+                await SendJudgeStateAsync(judge, args.ClientId);
             }
-            else if (args.Message.StartsWith(Constants.Message.JUDGE_DISCONNECT))
+        }
+        else if (args.Message.StartsWith(Constants.Message.JUDGE_DISCONNECT))
+        {
+            var payload = args.Message.Substring(Constants.Message.JUDGE_DISCONNECT.Length).TrimStart(':');
+            List<string> keysToRemove = new();
+
+            if (!string.IsNullOrEmpty(payload))
             {
-                var payload = args.Message.Substring(Constants.Message.JUDGE_DISCONNECT.Length).TrimStart(':');
-                List<string> keysToRemove = new();
-
-                if (!string.IsNullOrEmpty(payload))
+                string posPart = payload;
+                string? instPart = null;
+                if (payload.Contains('#'))
                 {
-                    string posPart = payload;
-                    string? instPart = null;
-                    if (payload.Contains('#'))
-                    {
-                        var segs = payload.Split('#', 2);
-                        posPart = segs[0];
-                        instPart = segs[1];
-                    }
+                    var segs = payload.Split('#', 2);
+                    posPart = segs[0];
+                    instPart = segs[1];
+                }
 
-                    if (!string.IsNullOrEmpty(instPart))
+                if (!string.IsNullOrEmpty(instPart))
+                {
+                    string targetKey = $"{args.ClientId}#{instPart}";
+                    if (_clientJudgeMapping.TryGetValue(targetKey, out var j))
                     {
-                        string targetKey = $"{args.ClientId}#{instPart}";
-                        if (_clientJudgeMapping.TryGetValue(targetKey, out var j))
-                        {
-                            j.IsConnected = false;
-                            keysToRemove.Add(targetKey);
-                        }
-                    }
-
-                    if (keysToRemove.Count == 0 && !string.IsNullOrEmpty(posPart))
-                    {
-                        foreach (var kvp in _clientJudgeMapping.Where(k => k.Key == args.ClientId || k.Key.StartsWith(args.ClientId + "#")))
-                        {
-                            var j = kvp.Value;
-                            if (j.Name == posPart || j.Number.ToString() == posPart || $"{j.Group}_{j.Number}" == posPart)
-                            {
-                                j.IsConnected = false;
-                                keysToRemove.Add(kvp.Key);
-                            }
-                        }
+                        MainThread.BeginInvokeOnMainThread(() => j.IsConnected = false);
+                        keysToRemove.Add(targetKey);
                     }
                 }
 
-                if (keysToRemove.Count == 0)
+                if (keysToRemove.Count == 0 && !string.IsNullOrEmpty(posPart))
                 {
                     foreach (var kvp in _clientJudgeMapping.Where(k => k.Key == args.ClientId || k.Key.StartsWith(args.ClientId + "#")))
                     {
-                        kvp.Value.IsConnected = false;
-                        keysToRemove.Add(kvp.Key);
+                        var j = kvp.Value;
+                        if (j.Name == posPart || j.Number.ToString() == posPart || $"{j.Group}_{j.Number}" == posPart)
+                        {
+                            MainThread.BeginInvokeOnMainThread(() => j.IsConnected = false);
+                            keysToRemove.Add(kvp.Key);
+                        }
                     }
-                }
-
-                foreach (var k in keysToRemove)
-                {
-                    _clientJudgeMapping.Remove(k);
-                }
-
-                if (keysToRemove.Count > 0)
-                {
-                    OnPropertyChanged(nameof(Judges));
                 }
             }
-            else if (args.Message.StartsWith(Constants.Message.JUDGE_SCORE))
+
+            if (keysToRemove.Count == 0)
             {
-                bool isTaolu = _currentCompetition?.Type == CompetitionType.Taolu || CurrentDraw?.Type == RoundType.Order || CurrentDraw is DrawOrderModel;
-                if (!isTaolu && (!IsTimerRunning || _timeLeft.TotalSeconds <= 0))
+                foreach (var kvp in _clientJudgeMapping.Where(k => k.Key == args.ClientId || k.Key.StartsWith(args.ClientId + "#")))
                 {
-                    _logger.LogWarning("Score reçu du juge ({ClientId}) alors que le chronomètre est arrêté, en pause ou expiré. Ignoré.", args.ClientId);
-                    return;
+                    var j = kvp.Value;
+                    MainThread.BeginInvokeOnMainThread(() => j.IsConnected = false);
+                    keysToRemove.Add(kvp.Key);
+                }
+            }
+
+            foreach (var k in keysToRemove)
+            {
+                _clientJudgeMapping.TryRemove(k, out _);
+            }
+        }
+        else if (args.Message.StartsWith(Constants.Message.JUDGE_SCORE))
+        {
+            bool isTaolu = _currentCompetition?.Type == CompetitionType.Taolu || CurrentDraw?.Type == RoundType.Order || CurrentDraw is DrawOrderModel;
+            if (!isTaolu && (!IsTimerRunning || _timeLeft.TotalSeconds <= 0))
+            {
+                _logger.LogWarning("Score reçu du juge ({ClientId}) alors que le chronomètre est arrêté, en pause ou expiré. Ignoré.", args.ClientId);
+                return;
+            }
+
+            try
+            {
+                var json = args.Message.Substring(Constants.Message.JUDGE_SCORE.Length);
+                var scoreData = JsonSerializer.Deserialize<TransfertScoreModel>(json, _jsonOptions);
+
+                JudgeModel? judge = null;
+                // Recherche par position explicite (prioritaire pour multi-instances sur un même PC)
+                if (!string.IsNullOrEmpty(scoreData?.JudgePosition))
+                {
+                    var parts = scoreData.JudgePosition.Split('_');
+                    if (parts.Length == 2 && int.TryParse(parts[1], out int num))
+                    {
+                        judge = judgesSnapshot.FirstOrDefault(j => j.Group == parts[0] && j.Number == num);
+                    }
+                    else if (int.TryParse(scoreData.JudgePosition, out int posNum))
+                    {
+                        judge = judgesSnapshot.FirstOrDefault(j => string.IsNullOrEmpty(j.Group) && j.Number == posNum)
+                             ?? judgesSnapshot.FirstOrDefault(j => j.Number == posNum);
+                    }
+                    else
+                    {
+                        judge = judgesSnapshot.FirstOrDefault(j => j.Name == scoreData.JudgePosition);
+                    }
                 }
 
-                try
+                // Repli sur le mapping d'adresse client
+                if (judge == null)
                 {
-                    var json = args.Message.Substring(Constants.Message.JUDGE_SCORE.Length);
-                    var scoreData = JsonSerializer.Deserialize<TransfertScoreModel>(json, _jsonOptions);
+                    _clientJudgeMapping.TryGetValue(args.ClientId, out judge);
+                }
 
-                    JudgeModel? judge = null;
-                    // Recherche par position explicite (prioritaire pour multi-instances sur un même PC)
-                    if (!string.IsNullOrEmpty(scoreData?.JudgePosition))
+                if (judge != null && scoreData != null)
+                {
+                    if (CurrentDraw != null && CurrentDraw.Type != RoundType.Order)
                     {
-                        var parts = scoreData.JudgePosition.Split('_');
-                        if (parts.Length == 2 && int.TryParse(parts[1], out int num))
-                        {
-                            judge = Judges.FirstOrDefault(j => j.Group == parts[0] && j.Number == num);
-                        }
-                        else if (int.TryParse(scoreData.JudgePosition, out int posNum))
-                        {
-                            judge = Judges.FirstOrDefault(j => string.IsNullOrEmpty(j.Group) && j.Number == posNum)
-                                 ?? Judges.FirstOrDefault(j => j.Number == posNum);
-                        }
-                        else
-                        {
-                            judge = Judges.FirstOrDefault(j => j.Name == scoreData.JudgePosition);
-                        }
-                    }
+                        var competitor1 = GetCompetitor(CurrentDraw, true);
+                        var competitor2 = GetCompetitor(CurrentDraw, false);
 
-                    // Repli sur le mapping d'adresse client
-                    if (judge == null)
-                    {
-                        _clientJudgeMapping.TryGetValue(args.ClientId, out judge);
-                    }
+                        bool isRed = (competitor1 != null && scoreData.CompetitorId == competitor1.Id) || scoreData.Side == Constants.Side.Red;
+                        bool isBlue = (competitor2 != null && scoreData.CompetitorId == competitor2.Id) || scoreData.Side == Constants.Side.Blue;
 
-                    if (judge != null && scoreData != null)
-                    {
-                        if (CurrentDraw != null && CurrentDraw.Type != RoundType.Order)
+                        if (isRed)
                         {
-                            var competitor1 = GetCompetitor(CurrentDraw, true);
-                            var competitor2 = GetCompetitor(CurrentDraw, false);
-
-                            bool isRed = (competitor1 != null && scoreData.CompetitorId == competitor1.Id) || scoreData.Side == Constants.Side.Red;
-                            bool isBlue = (competitor2 != null && scoreData.CompetitorId == competitor2.Id) || scoreData.Side == Constants.Side.Blue;
-
-                            if (isRed)
+                            MainThread.BeginInvokeOnMainThread(() =>
                             {
                                 judge.RedPoints += scoreData.Score;
-                                if (competitor1 != null)
-                                {
-                                    await SaveRefereeData(judge, competitor1.Id, scoreData.Score, false, null, scoreData.Round);
-                                }
-                                OnPropertyChanged(nameof(Judges));
                                 UpdateCurrentRoundVotes();
-                            }
-                            else if (isBlue)
+                            });
+
+                            if (competitor1 != null)
                             {
-                                judge.BluePoints += scoreData.Score;
-                                if (competitor2 != null)
-                                {
-                                    await SaveRefereeData(judge, competitor2.Id, scoreData.Score, false, null, scoreData.Round);
-                                }
-                                OnPropertyChanged(nameof(Judges));
-                                UpdateCurrentRoundVotes();
+                                await SaveRefereeData(judge, competitor1.Id, scoreData.Score, false, null, scoreData.Round);
                             }
                         }
-                        else if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                        else if (isBlue)
+                        {
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                judge.BluePoints += scoreData.Score;
+                                UpdateCurrentRoundVotes();
+                            });
+
+                            if (competitor2 != null)
+                            {
+                                await SaveRefereeData(judge, competitor2.Id, scoreData.Score, false, null, scoreData.Round);
+                            }
+                        }
+                    }
+                    else if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
                         {
                             judge.Score = scoreData.Score;
                             if (scoreData.Code != null)
@@ -696,45 +725,47 @@ public partial class ServerViewModel : BaseViewModel
                             {
                                 judge.Codes.RemoveAt(0);
                             }
-                            OnPropertyChanged(nameof(Judges));
-                            var competitor = GetCompetitor(CurrentDraw, true);
+                        });
 
-                            if (competitor != null)
-                            {
-                                await SaveRefereeData(judge, competitor.Id, scoreData.Score, false, scoreData.Code, scoreData.Round);
-                            }
+                        var competitor = GetCompetitor(CurrentDraw, true);
+                        if (competitor != null)
+                        {
+                            await SaveRefereeData(judge, competitor.Id, scoreData.Score, false, scoreData.Code, scoreData.Round);
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error processing judge score from client {ClientId}", args.ClientId);
-                }
             }
-            else if (args.Message.StartsWith(Constants.Message.JUDGE_SYNC_STATE))
+            catch (Exception ex)
             {
-                try
+                _logger.LogError(ex, "Error processing judge score from client {ClientId}", args.ClientId);
+            }
+        }
+        else if (args.Message.StartsWith(Constants.Message.JUDGE_SYNC_STATE))
+        {
+            try
+            {
+                var json = args.Message.Substring(Constants.Message.JUDGE_SYNC_STATE.Length);
+                var clientState = JsonSerializer.Deserialize<JudgeStateModel>(json, _jsonOptions);
+                if (clientState != null)
                 {
-                    var json = args.Message.Substring(Constants.Message.JUDGE_SYNC_STATE.Length);
-                    var clientState = JsonSerializer.Deserialize<JudgeStateModel>(json, _jsonOptions);
-                    if (clientState != null)
+                    JudgeModel? judge = null;
+                    if (!string.IsNullOrEmpty(clientState.Group))
                     {
-                        JudgeModel? judge = null;
-                        if (!string.IsNullOrEmpty(clientState.Group))
-                        {
-                            judge = Judges.FirstOrDefault(j => j.Group == clientState.Group && j.Number == clientState.Number);
-                        }
-                        else
-                        {
-                            judge = Judges.FirstOrDefault(j => j.Number == clientState.Number)
-                                 ?? Judges.FirstOrDefault(j => j.Name == clientState.Name);
-                        }
+                        judge = judgesSnapshot.FirstOrDefault(j => j.Group == clientState.Group && j.Number == clientState.Number);
+                    }
+                    else
+                    {
+                        judge = judgesSnapshot.FirstOrDefault(j => j.Number == clientState.Number)
+                             ?? judgesSnapshot.FirstOrDefault(j => j.Name == clientState.Name);
+                    }
 
-                        if (judge != null)
+                    if (judge != null)
+                    {
+                        _clientJudgeMapping[args.ClientId] = judge;
+
+                        MainThread.BeginInvokeOnMainThread(() =>
                         {
                             judge.IsConnected = true;
-                            _clientJudgeMapping[args.ClientId] = judge;
-
                             judge.Score = clientState.Score;
                             judge.RedPoints = clientState.RedPoints;
                             judge.BluePoints = clientState.BluePoints;
@@ -749,46 +780,57 @@ public partial class ServerViewModel : BaseViewModel
                                         judge.Codes.Add(c);
                                     }
                                 }
-
-                                var competitor = GetCompetitor(CurrentDraw, true);
-                                if (competitor != null && clientState.Codes != null)
-                                {
-                                    var existingData = await _refereeDataRepository.GetAllAsync();
-                                    var savedDates = existingData?
-                                        .Where(d => d.Referee == judge.Name &&
-                                            ((CurrentDraw is DrawOrderModel o && d.DrawOrderId == o.Id) ||
-                                             (CurrentDraw is DrawKnockoutModel k && d.DrawKnockoutId == k.Id) ||
-                                             (CurrentDraw is DrawPoolsModel p && d.DrawPoolsId == p.Id)))
-                                        .Select(d => d.Date)
-                                        .ToHashSet() ?? new HashSet<DateTime>();
-
-                                    foreach (var code in clientState.Codes)
-                                    {
-                                        if (!savedDates.Contains(code.Date))
-                                        {
-                                            await SaveRefereeData(judge, competitor.Id, code.Score, false, code);
-                                        }
-                                    }
-                                }
                             }
                             else
                             {
                                 UpdateCurrentRoundVotes();
                             }
+                        });
 
-                            OnPropertyChanged(nameof(Judges));
+                        if (CurrentDraw != null && CurrentDraw.Type == RoundType.Order)
+                        {
+                            var competitor = GetCompetitor(CurrentDraw, true);
+                            if (competitor != null && clientState.Codes != null)
+                            {
+                                await _dbSemaphore.WaitAsync();
+                                IReadOnlyList<RefereeDataModel>? existingData;
+                                try
+                                {
+                                    existingData = await _refereeDataRepository.GetAllAsync();
+                                }
+                                finally
+                                {
+                                    _dbSemaphore.Release();
+                                }
 
-                            // Send sync ACK
-                            await _bluetoothServer.SendToClientAsync(Constants.Message.JUDGE_SYNC_ACK, args.ClientId);
+                                var savedDates = existingData?
+                                    .Where(d => d.Referee == judge.Name &&
+                                        ((CurrentDraw is DrawOrderModel o && d.DrawOrderId == o.Id) ||
+                                         (CurrentDraw is DrawKnockoutModel k && d.DrawKnockoutId == k.Id) ||
+                                         (CurrentDraw is DrawPoolsModel p && d.DrawPoolsId == p.Id)))
+                                    .Select(d => d.Date)
+                                    .ToHashSet() ?? new HashSet<DateTime>();
+
+                                foreach (var code in clientState.Codes)
+                                {
+                                    if (!savedDates.Contains(code.Date))
+                                    {
+                                        await SaveRefereeData(judge, competitor.Id, code.Score, false, code);
+                                    }
+                                }
+                            }
                         }
+
+                        // Send sync ACK
+                        await _bluetoothServer.SendToClientAsync(Constants.Message.JUDGE_SYNC_ACK, args.ClientId);
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error processing judge sync state from client {ClientId}", args.ClientId);
-                }
             }
-        });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing judge sync state from client {ClientId}", args.ClientId);
+            }
+        }
     }
     #endregion
 
@@ -815,25 +857,12 @@ public partial class ServerViewModel : BaseViewModel
     {
         if (IsServerStarted)
         {
-            try
-            {
-                await _bluetoothServer.SendToAllAsync(Constants.Message.SERVER_STOPPED);
-                await Task.Delay(250);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error notifying clients on server disappearing");
-            }
-
-            // Marquer tous les juges comme déconnectés localement
-            foreach (var judge in Judges)
-            {
-                judge.IsConnected = false;
-            }
-            _clientJudgeMapping.Clear();
-
-            await _bluetoothServer.StopAdvertising();
-            IsServerStarted = false;
+            // Le serveur est actif : ne pas l'arrêter lors d'un OnDisappearing
+            // (qui est déclenché par l'affichage d'un Popup CommunityToolkit comme TimerPickerPopup
+            // ou la perte temporaire de focus de la fenêtre).
+            // L'arrêt contrôlé est géré explicitement par StopServerCommand / RequestBackNavigationCommand.
+            await base.OnDisappearing();
+            return;
         }
 
         _bluetoothServer.DeviceConnected -= OnDeviceConnected;
@@ -1030,6 +1059,11 @@ public partial class ServerViewModel : BaseViewModel
             }
         }
 
+        lock (_judgesLock)
+        {
+            _judgesSnapshot = Judges.ToList();
+        }
+
         OnPropertyChanged(nameof(Judges));
         OnPropertyChanged(nameof(JudgeGroups));
     }
@@ -1070,9 +1104,15 @@ public partial class ServerViewModel : BaseViewModel
         {
             try
             {
+                _lastSentCompToClient[clientId] = DateTime.UtcNow;
+
                 if (!string.IsNullOrWhiteSpace(ServerName))
                 {
-                    await _bluetoothServer.SendToClientAsync($"{Constants.Message.SERVER_NAME}{ServerName}", clientId);
+                    if (!_lastSentServerNameToClient.TryGetValue(clientId, out var lastSent) || lastSent != ServerName)
+                    {
+                        _lastSentServerNameToClient[clientId] = ServerName;
+                        await _bluetoothServer.SendToClientAsync($"{Constants.Message.SERVER_NAME}{ServerName}", clientId);
+                    }
                 }
 
                 var lightComp = GetCompetitionWithoutMatches(_currentCompetition);
@@ -1115,7 +1155,26 @@ public partial class ServerViewModel : BaseViewModel
                     HasBronzeMatch = cat.HasBronzeMatch,
                     CompetitionId = cat.CompetitionId,
                     Competitors = cat.Competitors != null
-                        ? new List<CompetitorCategoryModel>(cat.Competitors)
+                        ? cat.Competitors.Select(cc => new CompetitorCategoryModel
+                        {
+                            Id = cc.Id,
+                            CompetitorId = cc.CompetitorId,
+                            CategoryId = cc.CategoryId,
+                            Category = null,
+                            Competitor = cc.Competitor != null ? new CompetitorModel
+                            {
+                                Id = cc.Competitor.Id,
+                                FirstName = cc.Competitor.FirstName,
+                                LastName = cc.Competitor.LastName,
+                                Club = cc.Competitor.Club,
+                                BirthDate = cc.Competitor.BirthDate,
+                                Genre = cc.Competitor.Genre,
+                                Weight = cc.Competitor.Weight,
+                                CountryIsoCode = cc.Competitor.CountryIsoCode,
+                                Photo = cc.Competitor.Photo
+                            } : null,
+                            Warnings = cc.Warnings
+                        }).ToList()
                         : new List<CompetitorCategoryModel>()
                 };
 
@@ -1467,7 +1526,22 @@ public partial class ServerViewModel : BaseViewModel
             data.DrawPoolsId = p.Id;
         }
 
-        await _refereeDataRepository.AddAsync(data);
+        await Task.Run(async () =>
+        {
+            await _dbSemaphore.WaitAsync();
+            try
+            {
+                await _refereeDataRepository.AddAsync(data);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving referee data asynchronously");
+            }
+            finally
+            {
+                _dbSemaphore.Release();
+            }
+        });
     }
 
     /// <summary>
@@ -1477,9 +1551,15 @@ public partial class ServerViewModel : BaseViewModel
     {
         _timer?.Stop();
         IsTimerRunning = false;
+        string timerMsg = $"{Constants.Message.TIMER_SET}{TimeLeftDisplay}";
 
-        await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
-        await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
+        _ = Task.Run(async () =>
+        {
+            await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_PAUSE);
+            await _bluetoothServer.SendToAllAsync(timerMsg);
+        });
+
+        await Task.CompletedTask;
     }
     #endregion
 
@@ -1497,7 +1577,11 @@ public partial class ServerViewModel : BaseViewModel
             {
                 var matchData = CreateMatchInfoData(CurrentDraw);
                 var json = JsonSerializer.Serialize(matchData, _jsonOptions);
-                await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{json}");
+                // Fire-and-forget pour ne pas bloquer le thread UI sur _sendSemaphore
+                _ = Task.Run(async () =>
+                {
+                    await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{json}");
+                });
             }
             catch (Exception ex)
             {
@@ -1506,15 +1590,20 @@ public partial class ServerViewModel : BaseViewModel
         }
         else
         {
-            try
+            _ = Task.Run(async () =>
             {
-                await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{{}}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error broadcasting empty match info");
-            }
+                try
+                {
+                    await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_INFO}{{}}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error broadcasting empty match info");
+                }
+            });
         }
+
+        await Task.CompletedTask;
     }
     #endregion
 
@@ -1530,9 +1619,17 @@ public partial class ServerViewModel : BaseViewModel
         {
             _timer?.Start();
             IsTimerRunning = true;
-            await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
-            await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_START);
+            string timerMsg = $"{Constants.Message.TIMER_SET}{TimeLeftDisplay}";
+
+            _ = Task.Run(async () =>
+            {
+                await _bluetoothServer.SendToAllAsync(timerMsg);
+                await Task.Delay(50);
+                await _bluetoothServer.SendToAllAsync(Constants.Message.TIMER_START);
+            });
         }
+
+        await Task.CompletedTask;
     }
 
     /// <summary>
@@ -1558,8 +1655,12 @@ public partial class ServerViewModel : BaseViewModel
         _timeLeft = TimeSpan.FromMinutes(2); // Default reset
 
         OnPropertyChanged(nameof(TimeLeftDisplay));
+        string timerMsg = $"{Constants.Message.TIMER_SET}{TimeLeftDisplay}";
 
-        await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
+        _ = Task.Run(async () =>
+        {
+            await _bluetoothServer.SendToAllAsync(timerMsg);
+        });
     }
 
     /// <summary>
@@ -1569,9 +1670,18 @@ public partial class ServerViewModel : BaseViewModel
     [RelayCommand]
     private async Task SetTimer()
     {
-        string result = await Shell.Current.DisplayActionSheetAsync("Définir le temps", "Annuler", null, "0:10", "0:30", "1:00", "1:30", "2:00", "3:00", "5:00");
+        // Utilise un Popup dédié plutôt que DisplayActionSheetAsync
+        // pour éviter le bug MAUI où le dialog Shell ne s'ouvre pas
+        // la 2ème fois quand des handlers Bluetooth async sont actifs
+        // sur le thread principal (MainThread.BeginInvokeOnMainThread).
+        var popupResult = await _popupService.ShowPopupAsync<TimerPickerPopupViewModel, string>(
+            Shell.Current,
+            options: new PopupOptions() { Shadow = null }
+        );
 
-        if (result != null && result != "Annuler")
+        var result = popupResult.Result;
+
+        if (!string.IsNullOrEmpty(result))
         {
             await StopTimer();
 
@@ -1581,8 +1691,12 @@ public partial class ServerViewModel : BaseViewModel
                 _timeLeft = newTime;
 
                 OnPropertyChanged(nameof(TimeLeftDisplay));
+                string timerMsg = $"{Constants.Message.TIMER_SET}{TimeLeftDisplay}";
 
-                await _bluetoothServer.SendToAllAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}");
+                _ = Task.Run(async () =>
+                {
+                    await _bluetoothServer.SendToAllAsync(timerMsg);
+                });
             }
         }
     }

@@ -192,4 +192,77 @@ public class JudgeCompetitionDataTests
         Assert.Equal(5, vm.CurrentDraw.Id);
         Assert.Equal("Sanda -70kg", vm.CategoryName);
     }
+
+    [Fact]
+    public void BluetoothTransferManager_ChunksLargeCompetitionData_AndReassemblesCorrectly()
+    {
+        // Arrange
+        var transferManager = new House.Of.Arbitration.Services.BluetoothTransferManager();
+        var competition = new CompetitionModel
+        {
+            Id = 1,
+            Name = "Grand Tournoi National de Sanda & Taolu - Edition 2026",
+            Type = CompetitionType.Sanda,
+            Categories = new List<CategoryModel>()
+        };
+
+        for (int i = 1; i <= 10; i++)
+        {
+            competition.Categories.Add(new CategoryModel
+            {
+                Id = i,
+                Genre = Genre.Men,
+                WeightMin = 60 + i,
+                WeightMax = 65 + i,
+                RoundType = RoundType.Knockouts,
+                Competitors = new List<CompetitorCategoryModel>
+                {
+                    new CompetitorCategoryModel
+                    {
+                        Id = i * 2,
+                        CompetitorId = i * 2,
+                        CategoryId = i,
+                        Competitor = new CompetitorModel
+                        {
+                            Id = i * 2,
+                            FirstName = $"Jean-{i}",
+                            LastName = $"Dupont-{i}",
+                            Club = $"Club Dragon Kung Fu {i}"
+                        }
+                    }
+                }
+            });
+        }
+
+        var json = JsonSerializer.Serialize(competition);
+        var originalMessage = $"{Constants.Message.COMPETITION_DATA}{json}";
+
+        // Act: Préparer les paquets
+        var chunks = transferManager.PrepareMessagesForSending(originalMessage).ToList();
+
+        // Assert: Doit être découpé en plusieurs chunks de taille <= 250 octets
+        Assert.True(chunks.Count > 1, $"Devrait être découpé en plusieurs chunks mais Count={chunks.Count}");
+        foreach (var chunk in chunks)
+        {
+            Assert.StartsWith("CH:", chunk);
+            Assert.True(chunk.Length <= 250, $"Chaque chunk doit être <= 250 caractères, mais longueur = {chunk.Length}");
+        }
+
+        // Act: Réassembler côté récepteur
+        var receiverManager = new House.Of.Arbitration.Services.BluetoothTransferManager();
+        string? reassembled = null;
+        for (int i = 0; i < chunks.Count; i++)
+        {
+            reassembled = receiverManager.ProcessReceivedData(chunks[i]);
+            if (i < chunks.Count - 1)
+            {
+                Assert.Null(reassembled);
+            }
+        }
+
+        // Assert: Message final réassemblé et identique
+        Assert.NotNull(reassembled);
+        Assert.Equal(originalMessage, reassembled);
+        Assert.StartsWith(Constants.Message.COMPETITION_DATA, reassembled);
+    }
 }

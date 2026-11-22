@@ -1135,7 +1135,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     }
 
     /// <summary>
-    /// Démarre le watchdog : envoie un PING toutes les 4s.
+    /// Démarre le watchdog : envoie un PING toutes les 15s.
     /// Après 3 PINGs consécutifs sans réponse → déconnecté.
     /// </summary>
     private void StartWatchdog()
@@ -1148,7 +1148,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             _watchdogTimer = Application.Current?.Dispatcher?.CreateTimer();
             if (_watchdogTimer != null)
             {
-                _watchdogTimer.Interval = TimeSpan.FromSeconds(4);
+                _watchdogTimer.Interval = TimeSpan.FromSeconds(15);
                 _watchdogTimer.Tick += async (s, e) => await PerformWatchdogTickAsync();
             }
         }
@@ -1191,10 +1191,10 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
             }
 
             // Détection via timeout PONG :
-            // Le watchdog tick toutes les 4s. On accorde un délai de 7 secondes
-            // (1 cycle complet + 3s de marge pour l'aller-retour BLE et la gigue du dispatcher)
+            // Le watchdog tick toutes les 15s. On accorde un délai de 20 secondes
+            // (1 cycle complet + 5s de marge pour l'aller-retour BLE et la gigue du dispatcher)
             var elapsed = DateTime.UtcNow - _lastServerContactTime;
-            if (elapsed > TimeSpan.FromSeconds(7))
+            if (elapsed > TimeSpan.FromSeconds(20))
             {
                 _consecutiveFailedPings++;
                 _logger.LogWarning("Pas de PONG depuis {Elapsed:F0}s (tentative {N}/3).", elapsed.TotalSeconds, _consecutiveFailedPings);

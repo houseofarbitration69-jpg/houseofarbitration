@@ -17,7 +17,11 @@ public class BluetoothServer : IBluetoothServer, IDisposable
 
     private readonly IAlertService _alertService;
     private readonly BluetoothTransferManager _transferManager = new();
-    private readonly SemaphoreSlim _sendSemaphore = new(1, 1);
+    // Sémaphore dédié aux broadcasts (SendToAllAsync) : séparé du sémaphore unicast
+    // pour que TIMER_START ne soit jamais bloqué par un envoi de données matchs/compétition.
+    private readonly SemaphoreSlim _broadcastSemaphore = new(1, 1);
+    // Sémaphore dédié aux envois ciblés (SendToClientAsync).
+    private readonly SemaphoreSlim _unicastSemaphore = new(1, 1);
     private readonly HashSet<string> _knownSubscribedClients = new();
 
     private GattServiceProvider? _serviceProvider;
@@ -161,7 +165,13 @@ public class BluetoothServer : IBluetoothServer, IDisposable
     {
         if (_characteristic == null) return;
 
-        await _sendSemaphore.WaitAsync();
+        // Sémaphore broadcast indépendant du sémaphore unicast :
+        // TIMER_START ne sera jamais bloqué par un envoi de COMPETITION_DATA/MATCH_INFO.
+        // Timeout 1s : si un autre broadcast est en cours depuis plus d'1s, on abandonne.
+        if (!await _broadcastSemaphore.WaitAsync(TimeSpan.FromSeconds(1)))
+        {
+            return;
+        }
         try
         {
             var chunks = _transferManager.PrepareMessagesForSending(message).ToList();
@@ -171,43 +181,86 @@ public class BluetoothServer : IBluetoothServer, IDisposable
                 writer.WriteBytes(Encoding.UTF8.GetBytes(chunk));
                 var buffer = writer.DetachBuffer();
 
-                var subscribers = _characteristic.SubscribedClients.ToList();
-                if (subscribers.Count == 0)
+                bool notified = false;
+                try
                 {
-                    try { await _characteristic.NotifyValueAsync(buffer); } catch { }
+                    using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(800));
+                    await _characteristic.NotifyValueAsync(buffer).AsTask(cts.Token);
+                    notified = true;
                 }
-                else
+                catch { }
+
+                if (!notified)
                 {
+                    var subscribers = _characteristic.SubscribedClients.ToList();
                     foreach (var client in subscribers)
                     {
-                        try { await _characteristic.NotifyValueAsync(buffer, client); } catch { }
+                        for (int attempt = 0; attempt < 2; attempt++)
+                        {
+                            try
+                            {
+                                using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+                                await _characteristic.NotifyValueAsync(buffer, client).AsTask(cts.Token);
+                                break;
+                            }
+                            catch
+                            {
+                                if (attempt == 0)
+                                {
+                                    await Task.Delay(30);
+                                }
+                            }
+                        }
                     }
                 }
 
                 if (chunks.Count > 1)
                 {
-                    await Task.Delay(30);
+                    await Task.Delay(60);
                 }
             }
         }
         finally
         {
-            _sendSemaphore.Release();
+            _broadcastSemaphore.Release();
         }
     }
 
     public async Task SendToClientAsync(string message, string clientId)
     {
         if (_characteristic == null) return;
+        if (string.IsNullOrWhiteSpace(clientId)) return;
 
-        await _sendSemaphore.WaitAsync();
+        string targetAddress = FormatClientId(clientId.Contains('#') ? clientId.Split('#')[0] : clientId);
+        if (string.IsNullOrWhiteSpace(targetAddress) || targetAddress.Equals("Client", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (!await _unicastSemaphore.WaitAsync(TimeSpan.FromSeconds(2)))
+        {
+            return;
+        }
         try
         {
-            var matchingClients = _characteristic.SubscribedClients.Where(c =>
-                c.Session?.DeviceId?.Id != null &&
-                (c.Session.DeviceId.Id.Contains(clientId, StringComparison.OrdinalIgnoreCase) ||
-                 FormatClientId(c.Session.DeviceId.Id).Contains(clientId, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
+            // Trouver le client abonné correspondant à l'adresse ciblée
+            var targetClient = _characteristic.SubscribedClients
+                .LastOrDefault(c =>
+                {
+                    var devId = c.Session?.DeviceId?.Id;
+                    if (string.IsNullOrWhiteSpace(devId)) return false;
+
+                    string clientAddr = FormatClientId(devId);
+                    return string.Equals(clientAddr, targetAddress, StringComparison.OrdinalIgnoreCase)
+                        || devId.EndsWith(targetAddress, StringComparison.OrdinalIgnoreCase);
+                });
+
+            if (targetClient == null)
+            {
+                // Envoi ciblé : si le client n'est pas trouvé parmi les abonnés,
+                // NE JAMAIS broadcaster aux autres juges !
+                return;
+            }
 
             var chunks = _transferManager.PrepareMessagesForSending(message).ToList();
             foreach (var chunk in chunks)
@@ -216,39 +269,33 @@ public class BluetoothServer : IBluetoothServer, IDisposable
                 writer.WriteBytes(Encoding.UTF8.GetBytes(chunk));
                 var buffer = writer.DetachBuffer();
 
-                if (matchingClients.Count > 0)
+                bool notified = false;
+                for (int attempt = 0; attempt < 2 && !notified; attempt++)
                 {
-                    bool sent = false;
-                    for (int i = matchingClients.Count - 1; i >= 0; i--)
+                    try
                     {
-                        try
+                        using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(800));
+                        await _characteristic.NotifyValueAsync(buffer, targetClient).AsTask(cts.Token);
+                        notified = true;
+                    }
+                    catch
+                    {
+                        if (attempt == 0)
                         {
-                            await _characteristic.NotifyValueAsync(buffer, matchingClients[i]);
-                            sent = true;
-                            break;
+                            await Task.Delay(50);
                         }
-                        catch { }
                     }
-
-                    if (!sent)
-                    {
-                        try { await _characteristic.NotifyValueAsync(buffer); } catch { }
-                    }
-                }
-                else
-                {
-                    try { await _characteristic.NotifyValueAsync(buffer); } catch { }
                 }
 
                 if (chunks.Count > 1)
                 {
-                    await Task.Delay(30);
+                    await Task.Delay(60);
                 }
             }
         }
         finally
         {
-            _sendSemaphore.Release();
+            _unicastSemaphore.Release();
         }
     }
 
@@ -362,19 +409,33 @@ public class BluetoothServer : IBluetoothServer, IDisposable
     {
         if (string.IsNullOrWhiteSpace(rawId)) return "Client";
 
-        if (rawId.Contains('#'))
+        string cleaned = rawId.Trim();
+
+        // Supprimer le préfixe avant '#' si présent (ex: "Bluetooth#Bluetooth<adapter>-<remote>")
+        if (cleaned.Contains('#'))
         {
-            var parts = rawId.Split('#');
-            if (parts.Length >= 2) return parts[1];
+            var parts = cleaned.Split('#');
+            cleaned = parts.Length >= 2 ? parts[^1] : cleaned;
         }
 
-        return rawId.Length > 17 ? rawId.Substring(rawId.Length - 17) : rawId;
+        // Si le format contient un séparateur '-' entre l'adaptateur local et l'adresse distante
+        if (cleaned.Contains('-'))
+        {
+            var parts = cleaned.Split('-');
+            if (parts.Length >= 2 && !string.IsNullOrWhiteSpace(parts[^1]))
+            {
+                cleaned = parts[^1];
+            }
+        }
+
+        return cleaned;
     }
 
     public void Dispose()
     {
         _ = StopAdvertising();
-        _sendSemaphore.Dispose();
+        _broadcastSemaphore.Dispose();
+        _unicastSemaphore.Dispose();
         GC.SuppressFinalize(this);
     }
 }
