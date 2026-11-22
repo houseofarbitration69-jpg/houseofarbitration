@@ -498,7 +498,7 @@ public class JudgeSession : IDisposable
     /// <summary>
     /// Active le watchdog keep-alive automatique (ping toutes les X secondes).
     /// </summary>
-    public void StartWatchdog(int intervalSeconds = 15)
+    public void StartWatchdog(int intervalSeconds = 3)
     {
         StopWatchdog();
         _lastServerContactTime = DateTime.UtcNow;
@@ -524,11 +524,11 @@ public class JudgeSession : IDisposable
 
                     StatusChanged?.Invoke(this, $"[{ts}] [WATCHDOG-TICK#{tickCount}] IsConnected={isConn} | consecutiveFails={_consecutiveFailedPings} | secondsSinceContact={secondsSinceContact:F1}s");
 
-                    if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(45))
+                    if (DateTime.UtcNow - _lastServerContactTime > TimeSpan.FromSeconds(10))
                     {
-                        StatusChanged?.Invoke(this, $"[{ts}] Expiration du heartbeat serveur (>45s sans réponse). Déconnexion.");
+                        StatusChanged?.Invoke(this, $"[{ts}] Expiration du heartbeat serveur (>10s sans réponse). Déconnexion.");
                         StopWatchdog();
-                        await _client.DisconnectAsync(reason: "Heartbeat expiré (>45s sans réponse serveur)");
+                        await _client.DisconnectAsync(reason: "Heartbeat expiré (>10s sans réponse serveur)");
                         continue;
                     }
 
@@ -947,8 +947,6 @@ public class JudgeSession : IDisposable
             }
             else if (message == Constants.Message.PONG)
             {
-                Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.PONG}");
-
                 _lastServerContactTime = DateTime.UtcNow;
                 _consecutiveFailedPings = 0;
                 TimeSpan latency = _pingStopwatch?.Elapsed ?? TimeSpan.Zero;

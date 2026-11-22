@@ -596,7 +596,7 @@ internal static class Program
             LogSuccess($"Connecté avec succès à {deviceLabel} !");
 
             // Maintien actif de la liaison
-            _session!.StartWatchdog(4);
+            _session!.StartWatchdog(3);
         }
         else
         {
@@ -714,7 +714,7 @@ internal static class Program
         Console.WriteLine($"  Score courant    : {_session.CurrentScore:F2}");
         Console.WriteLine($"  Points Sanda     : Rouge={_session.RedPoints:F0} | Bleu={_session.BluePoints:F0}");
         Console.WriteLine($"  Chronomètre      : {_session.TimerDisplay} {(_session.IsTimerRunning ? "[ACTIF]" : "[STOP]")}");
-        Console.WriteLine($"  Watchdog ping    : {(_session.IsWatchdogActive ? "ACTIF (toutes les 4s)" : "INACTIF")}");
+        Console.WriteLine($"  Watchdog ping    : {(_session.IsWatchdogActive ? "ACTIF (toutes les 3s)" : "INACTIF")}");
         Console.WriteLine($"  Reconnexion auto : {(_session.AutoReconnectEnabled ? (_session.IsAutoReconnecting ? "EN COURS" : "ACTIVÉE") : "DÉSACTIVÉE")}");
 
         if (_session.CurrentMatch != null)
