@@ -998,6 +998,44 @@ public class JudgeSession : IDisposable
                     Console.WriteLine($"Juge {JudgePosition} : Erreur lors de la désérialisation de COMPETITION_DATA : {ex.Message}");
                 }
             }
+            else if (message.StartsWith(Constants.Message.JUDGE_STATE))
+            {
+                try
+                {
+                    string json = message.Substring(Constants.Message.JUDGE_STATE.Length);
+                    var state = JsonSerializer.Deserialize<JudgeStateModel>(json, _jsonOptions);
+                    if (state != null)
+                    {
+                        // Vérifier si cet état concerne bien ce juge !
+                        // Si le message est destiné à un autre juge (ex: multi-instances sur la même machine de test),
+                        // l'ignorer silencieusement sans polluer la console ni écraser les notes locales.
+                        bool isForThisJudge = (string.IsNullOrEmpty(JudgeGroup) || string.Equals(state.Group, JudgeGroup, StringComparison.OrdinalIgnoreCase))
+                                           && state.Number == JudgePosition;
+
+                        if (!isForThisJudge)
+                        {
+                            return;
+                        }
+
+                        Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.JUDGE_STATE}");
+
+                        CurrentScore = state.Score;
+                        RedPoints = state.RedPoints;
+                        BluePoints = state.BluePoints;
+                        if (state.Codes != null && state.Codes.Count > 0)
+                        {
+                            DeductionsHistory.Clear();
+                            DeductionsHistory.AddRange(state.Codes);
+                        }
+
+                        NotificationReceived?.Invoke(this, $"État synchronisé depuis le serveur : Score={CurrentScore:F2}, Rouge={RedPoints:F0}, Bleu={BluePoints:F0}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Juge {JudgePosition} : Erreur lors du traitement de JUDGE_STATE : {ex.Message}");
+                }
+            }
             else if (message == Constants.Message.SERVER_STOPPED)
             {
                 Console.WriteLine($"Juge {JudgePosition} : Message reçu du serveur : {Constants.Message.SERVER_STOPPED}");

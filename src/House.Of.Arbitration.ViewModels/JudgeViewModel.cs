@@ -1063,6 +1063,32 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                     await _alertService.ShowToast($"Compétition reçue : {competition.Name}");
                 }
             }
+            else if (trimmed.StartsWith(Constants.Message.JUDGE_STATE))
+            {
+                var content = trimmed.Substring(Constants.Message.JUDGE_STATE.Length);
+                var state = JsonSerializer.Deserialize<JudgeStateModel>(content, _jsonOptions);
+                if (state != null)
+                {
+                    bool isForThisJudge = (string.IsNullOrEmpty(JudgeGroup) || string.Equals(state.Group, JudgeGroup, StringComparison.OrdinalIgnoreCase))
+                                       && state.Number == JudgePosition;
+                    if (!isForThisJudge)
+                    {
+                        return;
+                    }
+
+                    if (state.Codes != null)
+                    {
+                        Codes.Clear();
+                        foreach (var c in state.Codes)
+                        {
+                            Codes.Add(c);
+                        }
+                    }
+                    Score = state.Score;
+                    RedScore = state.RedPoints;
+                    BlueScore = state.BluePoints;
+                }
+            }
             else if (trimmed == Constants.Message.SERVER_STOPPED)
             {
                 _logger.LogInformation("Server announced it has stopped.");
