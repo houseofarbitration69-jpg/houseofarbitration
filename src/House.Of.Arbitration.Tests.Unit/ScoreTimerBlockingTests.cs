@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using CommunityToolkit.Maui;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
@@ -185,7 +185,9 @@ public class ScoreTimerBlockingTests
             drawKoRepo,
             drawOrderRepo,
             drawPoolsRepo,
-            refDataRepo
+            refDataRepo,
+            Substitute.For<IDrawPdfExportService>(),
+            Substitute.For<IFileDownloadService>()
         );
 
         vm.Judges.Add(new JudgeModel { Number = 1, Group = "", Name = "Juge 1", RedPoints = 0, BluePoints = 0 });

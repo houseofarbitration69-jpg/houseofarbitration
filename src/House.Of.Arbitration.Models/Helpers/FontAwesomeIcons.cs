@@ -36,4 +36,5 @@ public static class FontAwesomeIcons
     public const string SITEMAP = "\uf0e8";
     public const string ARROW_DOWN_1_9 = "\uf162";
     public const string ARROW_LEFT = "\uf060";
+    public const string FILE_PDF = "\uf1c1";
 }

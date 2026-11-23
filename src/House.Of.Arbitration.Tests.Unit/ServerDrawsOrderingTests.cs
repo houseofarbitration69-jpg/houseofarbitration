@@ -1,4 +1,4 @@
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using House.Of.Arbitration.Data;
 using House.Of.Arbitration.Data.Abstractions;
@@ -46,7 +46,9 @@ public class ServerDrawsOrderingTests
             drawKnockoutRepo,
             drawOrderRepo,
             drawPoolsRepo,
-            refereeDataRepo
+            refereeDataRepo,
+            Substitute.For<IDrawPdfExportService>(),
+            Substitute.For<IFileDownloadService>()
         );
 
         return (vm, drawKnockoutRepo, competitionRepo);
@@ -201,7 +203,9 @@ public class ServerDrawsOrderingTests
             koRepo,
             orderRepo,
             poolRepo,
-            refereeRepo
+            refereeRepo,
+            Substitute.For<IDrawPdfExportService>(),
+            Substitute.For<IFileDownloadService>()
         );
 
         // Données du tournoi
@@ -393,7 +397,9 @@ public class ServerDrawsOrderingTests
             koRepo,
             orderRepo,
             poolRepo,
-            refereeRepo
+            refereeRepo,
+            Substitute.For<IDrawPdfExportService>(),
+            Substitute.For<IFileDownloadService>()
         );
 
         var competition = new CompetitionModel

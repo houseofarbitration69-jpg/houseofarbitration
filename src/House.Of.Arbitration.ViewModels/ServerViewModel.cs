@@ -58,6 +58,16 @@ public partial class ServerViewModel : BaseViewModel
     /// Service d'accès aux données pour les informations des juges
     /// </summary>
     private readonly IRepository<RefereeDataModel> _refereeDataRepository;
+
+    /// <summary>
+    /// Service d'export PDF des tirages
+    /// </summary>
+    private readonly IDrawPdfExportService _drawPdfExportService;
+
+    /// <summary>
+    /// Service de téléchargement de fichiers
+    /// </summary>
+    private readonly IFileDownloadService _fileDownloadService;
     #endregion
 
     #region Attributs
@@ -263,6 +273,8 @@ public partial class ServerViewModel : BaseViewModel
     /// <param name="drawOrderService">Service d'accès aux données pour les tirages par ordre</param>
     /// <param name="drawPoolsService">Service d'accès aux données pour les tirages par poule</param>
     /// <param name="refereeDataRepository">Servide d'accès aux données pour les données des juges</param>
+    /// <param name="drawPdfExportService">Service d'export PDF des tirages</param>
+    /// <param name="fileDownloadService">Service de téléchargement de fichiers</param>
     public ServerViewModel(
         ILogger<ServerViewModel> logger,
         ResourceProvider resourceProvider,
@@ -274,7 +286,9 @@ public partial class ServerViewModel : BaseViewModel
         IRepository<DrawKnockoutModel> drawKnockoutService,
         IRepository<DrawOrderModel> drawOrderService,
         IRepository<DrawPoolsModel> drawPoolsService,
-        IRepository<RefereeDataModel> refereeDataRepository
+        IRepository<RefereeDataModel> refereeDataRepository,
+        IDrawPdfExportService drawPdfExportService,
+        IFileDownloadService fileDownloadService
     ) : base(logger, resourceProvider, popupService)
     {
         Title = "SERVER";
@@ -290,6 +304,8 @@ public partial class ServerViewModel : BaseViewModel
         _drawOrderService = drawOrderService;
         _drawPoolsModel = drawPoolsService;
         _refereeDataRepository = refereeDataRepository;
+        _drawPdfExportService = drawPdfExportService;
+        _fileDownloadService = fileDownloadService;
 
         for (int i = 1; i <= 5; i++)
         {
@@ -2464,6 +2480,105 @@ public partial class ServerViewModel : BaseViewModel
         {
             await Shell.Current.GoToAsync($"DrawsManagementPage?CompetitionId={CompetitionId}");
         }
+    }
+
+    /// <summary>
+    /// Commande permettant d'exporter les tirages de la compétition en PDF.
+    /// Adapte le format selon le type de tirage (knockout = arbre, pools = tableau, order/taolu = liste avec notes).
+    /// </summary>
+    [RelayCommand]
+    private async Task ExportDrawsToPdf()
+    {
+        try
+        {
+            IsBusy = true;
+
+            // Charger tous les tirages de la compétition
+            var allDraws = new List<DrawModel>();
+
+            if (CompetitionId > 0)
+            {
+                var knockouts = await _drawKnockoutService.GetAllAsync(
+                    "Draw.Category", "Competitor1", "Competitor2", "Winner", "Looser");
+                var orders = await _drawOrderService.GetAllAsync(
+                    "Draw.Category", "Competitor");
+                var pools = await _drawPoolsModel.GetAllAsync(
+                    "Draw.Category", "Competitor1", "Competitor2", "Winner", "Looser");
+
+                // Regrouper par DrawId -> DrawModel
+                var drawDict = new Dictionary<int, DrawModel>();
+
+                foreach (var k in knockouts?.Where(k => k.Draw?.Category?.CompetitionId == CompetitionId) ?? Enumerable.Empty<DrawKnockoutModel>())
+                {
+                    if (k.Draw == null) continue;
+                    if (!drawDict.TryGetValue(k.DrawId, out var d))
+                    {
+                        d = new DrawModel { Id = k.DrawId, CategoryId = k.Draw.CategoryId, Category = k.Draw.Category, DrawKnockouts = new() };
+                        drawDict[k.DrawId] = d;
+                    }
+                    d.DrawKnockouts ??= new();
+                    d.DrawKnockouts.Add(k);
+                }
+
+                foreach (var p in pools?.Where(p => p.Draw?.Category?.CompetitionId == CompetitionId) ?? Enumerable.Empty<DrawPoolsModel>())
+                {
+                    if (p.Draw == null) continue;
+                    if (!drawDict.TryGetValue(p.DrawId, out var d))
+                    {
+                        d = new DrawModel { Id = p.DrawId, CategoryId = p.Draw.CategoryId, Category = p.Draw.Category, DrawPools = new() };
+                        drawDict[p.DrawId] = d;
+                    }
+                    d.DrawPools ??= new();
+                    d.DrawPools.Add(p);
+                }
+
+                foreach (var o in orders?.Where(o => o.Draw?.Category?.CompetitionId == CompetitionId) ?? Enumerable.Empty<DrawOrderModel>())
+                {
+                    if (o.Draw == null) continue;
+                    if (!drawDict.TryGetValue(o.DrawId, out var d))
+                    {
+                        d = new DrawModel { Id = o.DrawId, CategoryId = o.Draw.CategoryId, Category = o.Draw.Category, DrawOrders = new() };
+                        drawDict[o.DrawId] = d;
+                    }
+                    d.DrawOrders ??= new();
+                    d.DrawOrders.Add(o);
+                }
+
+                allDraws = drawDict.Values.OrderBy(d => d.Category?.Name).ToList();
+            }
+
+            if (allDraws.Count == 0)
+            {
+                await _alertService.ShowAlert("Export PDF", "Aucun tirage disponible pour cette compétition.", "OK");
+                return;
+            }
+
+            string competitionName = _currentCompetition?.Name ?? "Compétition";
+            var stream = await _drawPdfExportService.ExportAllDrawsAsync(allDraws, competitionName);
+            string fileName = $"Tirages_{SanitizeFileName(competitionName)}_{DateTime.Now:yyyyMMdd_HHmm}.pdf";
+            string? savedPath = await _fileDownloadService.SaveToDownloadsAsync(stream, fileName, "application/pdf");
+
+            if (savedPath != null)
+                await _alertService.ShowAlert("Export réussi", $"PDF sauvegardé :\n{savedPath}", "OK");
+            else
+                await _alertService.ShowAlert("Export", "Le fichier PDF n'a pas pu être sauvegardé.", "OK");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur lors de l'export PDF des tirages");
+            await _alertService.ShowAlert("Erreur", "Une erreur est survenue lors de l'export PDF.", "OK");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private static string SanitizeFileName(string name)
+    {
+        foreach (char c in Path.GetInvalidFileNameChars())
+            name = name.Replace(c, '_');
+        return name.Replace(' ', '_');
     }
     #endregion
 }

@@ -1,4 +1,4 @@
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
@@ -40,7 +40,9 @@ public class ServerBackNavigationTests
             drawKnockoutRepo,
             drawOrderRepo,
             drawPoolsRepo,
-            refereeDataRepo
+            refereeDataRepo,
+            Substitute.For<IDrawPdfExportService>(),
+            Substitute.For<IFileDownloadService>()
         );
 
         return (vm, alertService, bluetoothServer);

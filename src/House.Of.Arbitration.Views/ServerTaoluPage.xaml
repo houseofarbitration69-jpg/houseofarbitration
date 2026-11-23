@@ -336,6 +336,31 @@
                         </Border.GestureRecognizers>
                     </Border>
 
+                    <!-- BOUTON EXPORT PDF -->
+                    <Border
+                        StrokeShape="RoundRectangle 50"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
+                        ToolTipProperties.Text="Exporter les tirages en PDF"
+                    >
+                        <Label 
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.FILE_PDF}" 
+                            FontSize="22" 
+                            TextColor="#D32F2F"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                        />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ExportDrawsToPdfCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
                     <!-- INDICATEUR STATUT SERVEUR -->
                     <Border
                         Grid.Column="{OnIdiom Tablet='2', Phone='1'}"

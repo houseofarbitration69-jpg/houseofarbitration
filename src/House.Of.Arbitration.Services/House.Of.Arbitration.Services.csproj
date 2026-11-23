@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" />
+    <PackageReference Include="iTextSharp.LGPLv2.Core" />
     <PackageReference Include="CommunityToolkit.Maui" />
     <PackageReference Include="Microsoft.Maui.Controls" />
   </ItemGroup>

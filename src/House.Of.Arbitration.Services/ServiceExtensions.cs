@@ -29,6 +29,7 @@ public static class ServicesExtensions
         builder.Services.AddScoped<IWarningService, WarningService>();
         builder.Services.AddScoped<IAlertService, AlertService>();
         builder.Services.AddTransient<IExcelImportExportService, ExcelImportExportService>();
+        builder.Services.AddTransient<IDrawPdfExportService, DrawPdfExportService>();
 
 #if ANDROID
         builder.Services.AddTransient<IFileDownloadService, AndroidFileDownload>();

@@ -1,4 +1,4 @@
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Judge.Cli;
@@ -45,7 +45,9 @@ public class ServerTimeAccelerationAndBotTests
             drawKnockoutRepo,
             drawOrderRepo,
             drawPoolsRepo,
-            refereeDataRepo
+            refereeDataRepo,
+            Substitute.For<IDrawPdfExportService>(),
+            Substitute.For<IFileDownloadService>()
         );
     }
 
