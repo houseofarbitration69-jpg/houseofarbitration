@@ -540,8 +540,12 @@ public class DrawPdfExportService : IDrawPdfExportService
         float headerHeight = cardHeight * 0.28f;
         float rowHeight = (cardHeight - headerHeight) / 2f;
 
-        // Top bar : StageName / N° à gauche, Résultat à droite
-        string stageLabel = !string.IsNullOrEmpty(match.StageName) ? match.StageName : $"Combat #{match.Order}";
+        // Top bar : StageName / N° d'ordre du combat à gauche, Résultat à droite
+        string matchOrderLabel = match.GlobalOrder > 0 ? $"Combat #{match.GlobalOrder}" : $"Combat #{match.Order}";
+        string stageLabel = !string.IsNullOrEmpty(match.StageName)
+            ? $"{matchOrderLabel} • {match.StageName}"
+            : matchOrderLabel;
+
         string scoreSummary = "";
         if (match.IsFinished && !string.IsNullOrEmpty(match.RoundResultsJson))
         {
@@ -561,9 +565,16 @@ public class DrawPdfExportService : IDrawPdfExportService
         }
 
         var headerTable = new PdfPTable(2) { WidthPercentage = 100 };
-        headerTable.SetWidths(new float[] { 60f, 40f });
+        if (string.IsNullOrEmpty(scoreSummary))
+        {
+            headerTable.SetWidths(new float[] { 99.9f, 0.1f });
+        }
+        else
+        {
+            headerTable.SetWidths(new float[] { 68f, 32f });
+        }
 
-        var hLeft = new PdfPCell(new Phrase(stageLabel, new Font(_bfHelveticaBold, Math.Max(5.5f, fontSize - 1.5f), Font.NORMAL, ColorMuted)))
+        var hLeft = new PdfPCell(new Phrase(stageLabel, new Font(_bfHelveticaBold, Math.Max(5.2f, fontSize - 1.5f), Font.NORMAL, ColorMuted)))
         {
             BackgroundColor = ColorRowAlt,
             Border = Rectangle.NO_BORDER,
@@ -639,7 +650,7 @@ public class DrawPdfExportService : IDrawPdfExportService
         {
             flagImg.ScaleToFit(fontSize * 1.25f, fontSize * 0.9f);
             p.Add(new Chunk(flagImg, 0, -1f));
-            p.Add(new Chunk(" ", new Font(_bfHelvetica, fontSize * 0.4f)));
+            p.Add(new Chunk("   ", new Font(_bfHelvetica, fontSize * 0.8f)));
         }
 
         string fullName = $"{competitor.LastName?.ToUpperInvariant()} {competitor.FirstName}";
@@ -754,7 +765,7 @@ public class DrawPdfExportService : IDrawPdfExportService
     {
         // 1. Liste des combats de la poule
         var table = new PdfPTable(5) { WidthPercentage = 100 };
-        table.SetWidths(new float[] { 8f, 35f, 35f, 14f, 8f });
+        table.SetWidths(new float[] { 13f, 32.5f, 32.5f, 14f, 8f });
 
         void AddHeader(string text)
         {
@@ -766,7 +777,7 @@ public class DrawPdfExportService : IDrawPdfExportService
             });
         }
 
-        AddHeader("N°");
+        AddHeader("Combat");
         AddHeader("Compétiteur 1 (Rouge)");
         AddHeader("Compétiteur 2 (Bleu)");
         AddHeader("Vainqueur");
@@ -778,7 +789,8 @@ public class DrawPdfExportService : IDrawPdfExportService
             rowIdx++;
             var bg = rowIdx % 2 == 0 ? ColorRowAlt : BaseColor.White;
 
-            table.AddCell(new PdfPCell(new Phrase($"{pool.Order}", new Font(_bfHelvetica, 9, Font.NORMAL, BaseColor.Black)))
+            string orderDisplay = pool.GlobalOrder > 0 ? $"Combat #{pool.GlobalOrder}" : $"Combat #{pool.Order}";
+            table.AddCell(new PdfPCell(new Phrase(orderDisplay, new Font(_bfHelveticaBold, 8.5f, Font.NORMAL, BaseColor.Black)))
             {
                 BackgroundColor = bg,
                 Padding = 5,
@@ -879,7 +891,7 @@ public class DrawPdfExportService : IDrawPdfExportService
             {
                 standingFlag.ScaleToFit(13f, 9f);
                 athletePhrase.Add(new Chunk(standingFlag, 0, -1.5f));
-                athletePhrase.Add(new Chunk(" "));
+                athletePhrase.Add(new Chunk("   "));
             }
             athletePhrase.Add(new Chunk($"{model.LastName?.ToUpperInvariant()} {model.FirstName}", new Font(_bfHelveticaBold, 9, Font.NORMAL, BaseColor.Black)));
 
@@ -959,7 +971,8 @@ public class DrawPdfExportService : IDrawPdfExportService
             string scoreDisplay = score.HasValue ? $"{score.Value:F2} pts" : "En attente";
 
             // Ordre
-            table.AddCell(new PdfPCell(new Phrase($"{order.Order}", new Font(_bfHelvetica, 9, Font.NORMAL, BaseColor.Black)))
+            string orderDisplay = order.GlobalOrder > 0 ? $"#{order.GlobalOrder}" : $"#{order.Order}";
+            table.AddCell(new PdfPCell(new Phrase(orderDisplay, new Font(_bfHelveticaBold, 9, Font.NORMAL, BaseColor.Black)))
             {
                 BackgroundColor = bg,
                 Padding = 5,
@@ -1021,7 +1034,7 @@ public class DrawPdfExportService : IDrawPdfExportService
         {
             flagImg.ScaleToFit(14f, 10f);
             p.Add(new Chunk(flagImg, 0, -1.5f));
-            p.Add(new Chunk(" "));
+            p.Add(new Chunk("   "));
         }
 
         p.Add(new Chunk($"{competitor.LastName?.ToUpperInvariant()} {competitor.FirstName}", new Font(_bfHelveticaBold, 9, Font.NORMAL, BaseColor.Black)));
