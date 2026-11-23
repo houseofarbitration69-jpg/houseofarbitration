@@ -2,6 +2,7 @@
 using ClosedXML.Excel;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.Services.Abstractions;
 #endregion
 
@@ -839,6 +840,23 @@ public class ExcelImportExportService : IExcelImportExportService
         if (roundType == RoundType.Knockouts)
         {
             int n = shuffled.Count;
+
+            // Cas particulier : 1 seul compétiteur → passage direct, 1 match finale auto-gagnée
+            if (n == 1)
+            {
+                draw.DrawKnockouts!.Add(new DrawKnockoutModel
+                {
+                    Draw = draw,
+                    Order = 1,
+                    GlobalOrder = globalOrder++,
+                    Competitor1Id = shuffled[0].Id,
+                    Competitor2Id = null,
+                    IsFinished = true,
+                    WinnerId = shuffled[0].Id
+                });
+            }
+            else
+            {
             // Trouver la prochaine puissance de 2
             int m = 1;
             while (m < n) m *= 2;
@@ -846,12 +864,15 @@ public class ExcelImportExportService : IExcelImportExportService
             int matchesInRound = m / 2;
 
             // Premier tour : inclure les byes (passages automatiques)
+            // Utilisation de DistributeFirstRoundCompetitors pour garantir qu'aucun match n'a deux compétiteurs null
             int matchOrder = 1;
-            for (int i = 0; i < matchesInRound; i++)
+            var firstRoundPairs = KnockoutStageHelper.DistributeFirstRoundCompetitors(shuffled, matchesInRound);
+            var byeWinners = new Dictionary<int, CompetitorModel>(); // key = index match (0-based dans le tour 1)
+
+            foreach (var (comp1, comp2) in firstRoundPairs)
             {
-                var comp1 = (i * 2 < n) ? shuffled[i * 2] : null;
-                var comp2 = (i * 2 + 1 < n) ? shuffled[i * 2 + 1] : null;
                 bool hasRealMatch = comp1 != null && comp2 != null;
+                int pairIndex = matchOrder - 1; // index 0-based du match courant
 
                 var knockout = new DrawKnockoutModel
                 {
@@ -867,11 +888,7 @@ public class ExcelImportExportService : IExcelImportExportService
                 {
                     knockout.WinnerId = comp1.Id;
                     knockout.IsFinished = true;
-                }
-                else if (comp1 == null && comp2 != null)
-                {
-                    knockout.WinnerId = comp2.Id;
-                    knockout.IsFinished = true;
+                    byeWinners[pairIndex] = comp1; // mémorisé pour propagation vers tour 2
                 }
 
                 draw.DrawKnockouts!.Add(knockout);
@@ -895,6 +912,31 @@ public class ExcelImportExportService : IExcelImportExportService
                 offset += currentMatches;
             }
 
+            // Propager les vainqueurs des byes du tour 1 vers le tour 2 (demi-finales, etc.)
+            // Le match i (0-based) du tour 1 alimente Competitor1Id si pair, Competitor2Id si impair
+            // du match i/2 (0-based) du tour 2 dans draw.DrawKnockouts (index = matchesInRound + i/2)
+            if (byeWinners.Count > 0)
+            {
+                foreach (var kvp in byeWinners)
+                {
+                    int matchIdx = kvp.Key;
+                    var winner = kvp.Value;
+                    int nextMatchIdx = matchesInRound + matchIdx / 2;
+
+                    if (nextMatchIdx >= draw.DrawKnockouts!.Count) continue;
+
+                    var nextKo = draw.DrawKnockouts[nextMatchIdx];
+                    if (matchIdx % 2 == 0)
+                    {
+                        nextKo.Competitor1Id = winner.Id;
+                    }
+                    else
+                    {
+                        nextKo.Competitor2Id = winner.Id;
+                    }
+                }
+            }
+
             // Si la catégorie a une petite finale et au moins 4 compétiteurs (au moins des demi-finales)
             if (category.HasBronzeMatch && matchesInRound >= 2 && draw.DrawKnockouts!.Count > 0)
             {
@@ -916,6 +958,7 @@ public class ExcelImportExportService : IExcelImportExportService
                 // Insérer la petite finale juste avant la finale
                 draw.DrawKnockouts.Insert(draw.DrawKnockouts.Count - 1, bronzeMatch);
             }
+            } // end else n > 1
         }
         else if (roundType == RoundType.Pools)
         {

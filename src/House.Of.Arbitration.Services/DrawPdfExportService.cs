@@ -253,6 +253,10 @@ public class DrawPdfExportService : IDrawPdfExportService
         }
 
         float d0 = cardHeight + gap0;
+        float headerHeight = cardHeight * 0.28f;
+        float rowHeight = (cardHeight - headerHeight) / 2f;
+        // Ligne de démarcation entre les deux combattants (Rouge et Bleu) au sein d'une fiche de combat
+        float competitorDividerFromCardTop = headerHeight + rowHeight;
 
         // Configuration de la table principale : colonnes de tours alternées avec colonnes de connecteurs (arborescence)
         // Pour R tours, il y a (2 * R - 1) colonnes
@@ -352,14 +356,17 @@ public class DrawPdfExportService : IDrawPdfExportService
                 colTable.AddCell(bCardCell);
             }
 
-            var roundContainerCell = new PdfPCell(colTable)
+            // Cellule conteneur en mode composite (AddElement) pour éviter tout étirement vertical forcé
+            var roundContainerCell = new PdfPCell
             {
                 Border = Rectangle.NO_BORDER,
                 PaddingLeft = 3f,
                 PaddingRight = 3f,
                 PaddingTop = 0,
-                PaddingBottom = 0
+                PaddingBottom = 0,
+                VerticalAlignment = Element.ALIGN_TOP
             };
+            roundContainerCell.AddElement(colTable);
             bracketTable.AddCell(roundContainerCell);
 
             // 2. Colonne de connecteurs d'arbre entre tour r et r+1
@@ -370,9 +377,8 @@ public class DrawPdfExportService : IDrawPdfExportService
                 // Aligner avec l'en-tête du tour
                 connTable.AddCell(CreateSpacerCell(roundHeaderHeight));
 
-                // Espacement jusqu'au centre du 1er match du tour r
-                // Y(centre match 0) = topOffset + cardHeight / 2
-                float connTopSpacer = topOffset + (cardHeight / 2f);
+                // Espacement jusqu'au milieu des deux combattants du 1er match du tour r
+                float connTopSpacer = topOffset + competitorDividerFromCardTop;
                 if (connTopSpacer > 0)
                 {
                     connTable.AddCell(CreateSpacerCell(connTopSpacer));
@@ -407,23 +413,33 @@ public class DrawPdfExportService : IDrawPdfExportService
                     }
                     else
                     {
-                        // Match orphelin (bye / nombre impair de matches) : trait droit
-                        var straightCell = new PdfPCell(new Phrase("", new Font(_bfHelvetica, 1)))
+                        // Match orphelin (bye / nombre impair de matches)
+                        var singleCell = new PdfPCell(new Phrase("", new Font(_bfHelvetica, 1)))
                         {
                             Border = Rectangle.NO_BORDER,
                             Padding = 0,
                             FixedHeight = currentD,
-                            CellEvent = new BracketStraightEvent(ColorBorder, 1.2f, pad: 3f)
+                            CellEvent = new BracketSingleToNextEvent(ColorBorder, 1.2f, pad: 3f)
                         };
-                        connTable.AddCell(straightCell);
+                        connTable.AddCell(singleCell);
                     }
                 }
 
-                var connContainerCell = new PdfPCell(connTable)
+                // Cellule finale vide pour absorber l'espace restant sans étirer la dernière fourche
+                connTable.AddCell(new PdfPCell(new Phrase("", new Font(_bfHelvetica, 1)))
                 {
                     Border = Rectangle.NO_BORDER,
                     Padding = 0
+                });
+
+                // Conteneur en mode composite (AddElement) pour que la table conserve sa hauteur exacte sans étirement
+                var connContainerCell = new PdfPCell
+                {
+                    Border = Rectangle.NO_BORDER,
+                    Padding = 0,
+                    VerticalAlignment = Element.ALIGN_TOP
                 };
+                connContainerCell.AddElement(connTable);
                 bracketTable.AddCell(connContainerCell);
             }
         }
@@ -608,13 +624,13 @@ public class DrawPdfExportService : IDrawPdfExportService
         }
     }
 
-    private class BracketStraightEvent : IPdfPCellEvent
+    private class BracketSingleToNextEvent : IPdfPCellEvent
     {
         private readonly BaseColor _lineColor;
         private readonly float _lineWidth;
         private readonly float _pad;
 
-        public BracketStraightEvent(BaseColor lineColor, float lineWidth = 1.2f, float pad = 3f)
+        public BracketSingleToNextEvent(BaseColor lineColor, float lineWidth = 1.2f, float pad = 3f)
         {
             _lineColor = lineColor;
             _lineWidth = lineWidth;
@@ -631,9 +647,20 @@ public class DrawPdfExportService : IDrawPdfExportService
             float left = position.Left - _pad;
             float right = position.Right + _pad;
             float top = position.Top;
+            float midX = (position.Left + position.Right) / 2f;
+            float midY = (position.Top + position.Bottom) / 2f;
 
+            // Départ au milieu des deux combattants du combat 2p
             cb.MoveTo(left, top);
-            cb.LineTo(right, top);
+            cb.LineTo(midX, top);
+
+            // Descente vers le niveau médian du match suivant
+            cb.MoveTo(midX, top);
+            cb.LineTo(midX, midY);
+
+            // Sortie vers le match suivant
+            cb.MoveTo(midX, midY);
+            cb.LineTo(right, midY);
 
             cb.Stroke();
             cb.RestoreState();

@@ -514,12 +514,13 @@ public static class ExcelCompetitionLoader
                         }
 
                         // Remplir le premier tour avec les compétiteurs réels et gérer les exemptions (BYEs)
+                        // Utilisation de DistributeFirstRoundCompetitors pour garantir qu'aucun match n'a deux compétiteurs null
                         var firstRoundMatches = rounds[0];
+                        var firstRoundPairs = KnockoutStageHelper.DistributeFirstRoundCompetitors(catCompetitors, firstRoundMatches.Count);
                         for (int i = 0; i < firstRoundMatches.Count; i++)
                         {
                             var match = firstRoundMatches[i];
-                            CompetitorModel? c1 = (i * 2 < n) ? catCompetitors[i * 2] : null;
-                            CompetitorModel? c2 = (i * 2 + 1 < n) ? catCompetitors[i * 2 + 1] : null;
+                            var (c1, c2) = firstRoundPairs[i];
 
                             if (c1 != null && c2 != null)
                             {

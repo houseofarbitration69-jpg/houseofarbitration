@@ -206,6 +206,28 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         var newRounds = new ObservableCollection<BracketRoundViewModel>();
 
         int n = Category.Competitors.Count;
+
+        // Cas particulier : 1 seul compétiteur → passage direct, 1 match finale auto-gagnée
+        if (n == 1)
+        {
+            var soleCompetitor = Category.Competitors[0].Competitor;
+            var soleRound = new BracketRoundViewModel { Name = "Finale" };
+            var soleMatch = new BracketMatchViewModel { Order = 1, IsBye = true };
+            soleMatch.Slot1.Competitor = soleCompetitor;
+            soleRound.Matches.Add(soleMatch);
+            newRounds.Add(soleRound);
+
+            var soleWinnerRound = new BracketRoundViewModel { Name = "Vainqueur" };
+            soleWinnerRound.Matches.Add(new BracketMatchViewModel { IsWinnerSlot = true });
+            newRounds.Add(soleWinnerRound);
+
+            CalculateMargins(newRounds);
+            Rounds = newRounds;
+            if (existingDraw == null) RefreshAdvancements();
+            else UpdateByeFlags();
+            return;
+        }
+
         int m = 1;
         while (m < n) m *= 2;
         if (m < 2) m = 2; // Min 1 match
@@ -215,6 +237,9 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
         // Prepare Round 1 matches
         var matchesInRound = m / 2;
         var round1 = new BracketRoundViewModel { Name = House.Of.Arbitration.Models.Helpers.KnockoutStageHelper.GetRoundName(matchesInRound) };
+
+        var competitorList = Category.Competitors.Select(c => c.Competitor).Where(c => c != null).ToList()!;
+        var pairs = House.Of.Arbitration.Models.Helpers.KnockoutStageHelper.DistributeFirstRoundCompetitors(competitorList!, matchesInRound);
 
         for (int i = 0; i < matchesInRound; i++)
         {
@@ -234,8 +259,9 @@ public partial class DrawPageViewModel : BaseViewModel, IQueryAttributable
             }
             else
             {
-                match.Slot1.Competitor = (i * 2 < n) ? Category.Competitors[i * 2].Competitor : null;
-                match.Slot2.Competitor = (i * 2 + 1 < n) ? Category.Competitors[i * 2 + 1].Competitor : null;
+                var (c1, c2) = i < pairs.Count ? pairs[i] : (null, null);
+                match.Slot1.Competitor = c1;
+                match.Slot2.Competitor = c2;
             }
             round1.Matches.Add(match);
         }

@@ -331,6 +331,38 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         if (category.RoundType == RoundType.Knockouts)
         {
             int n = category.Competitors.Count;
+
+            // Cas particulier : 1 seul compétiteur → passage direct en finale automatique
+            if (n == 1)
+            {
+                var soleCompetitor = category.Competitors[0].Competitor;
+                var k = new DrawKnockoutModel
+                {
+                    Order = 1,
+                    GlobalOrder = 0,
+                    Competitor1 = soleCompetitor,
+                    Competitor1Id = soleCompetitor?.Id,
+                    Competitor2Id = null,
+                    IsFinished = true,
+                    WinnerId = soleCompetitor?.Id
+                };
+                _allMatches.Add(new DrawMatchItemViewModel
+                {
+                    DrawModel = k,
+                    CategoryId = category.Id,
+                    CategoryName = category.Name,
+                    Category = category,
+                    RoundType = RoundType.Knockouts,
+                    Order = 1,
+                    GlobalOrder = 0,
+                    Competitor1 = soleCompetitor,
+                    IsFinished = true,
+                    IsBye = true,
+                    TotalMatchesInCategory = 1
+                });
+                return;
+            }
+
             int m = 1;
 
             while (m < n)
@@ -348,11 +380,16 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
             int matchOffset = 0;
             int currentMatches = matchesInRound;
 
-            // Round 1
+            var competitorList = category.Competitors.Select(c => c.Competitor).Where(c => c != null).ToList()!;
+            var pairs = KnockoutStageHelper.DistributeFirstRoundCompetitors(competitorList!, matchesInRound);
+
+            // Round 1 — on mémorise les vainqueurs de bye (index de match → compétiteur)
+            var byeWinners = new Dictionary<int, CompetitorModel>(); // key = index match (0-based dans le tour 1)
+            int round1StartIdx = _allMatches.Count; // index global dans _allMatches du premier match du tour 1
+
             for (int i = 0; i < matchesInRound; i++)
             {
-                var comp1 = (i * 2 < n) ? category.Competitors[i * 2].Competitor : null;
-                var comp2 = (i * 2 + 1 < n) ? category.Competitors[i * 2 + 1].Competitor : null;
+                var (comp1, comp2) = i < pairs.Count ? pairs[i] : (null, null);
                 int compCount = (comp1 != null ? 1 : 0) + (comp2 != null ? 1 : 0);
 
                 var k = new DrawKnockoutModel
@@ -365,6 +402,13 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                     Competitor2Id = comp2?.Id
                 };
 
+                if (compCount == 1 && comp1 != null)
+                {
+                    k.WinnerId = comp1.Id;
+                    k.IsFinished = true;
+                    byeWinners[i] = comp1; // mémorisé pour propagation vers tour 2
+                }
+
                 _allMatches.Add(new DrawMatchItemViewModel
                 {
                     DrawModel = k,
@@ -376,6 +420,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                     GlobalOrder = 0,
                     Competitor1 = comp1,
                     Competitor2 = comp2,
+                    IsFinished = (compCount == 1),
                     IsBye = (compCount == 1),
                     TotalMatchesInCategory = totalMatches
                 });
@@ -453,6 +498,43 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                         });
                     }
                     matchOffset += currentMatches;
+                }
+            }
+
+            // Propager les vainqueurs des byes du tour 1 vers le tour 2.
+            // Le match i (0-based) du tour 1 alimente :
+            //   → Competitor1 si i est pair, Competitor2 si i est impair
+            //   → du match i/2 (0-based) du tour 2 (index global = round1StartIdx + matchesInRound + i/2)
+            if (byeWinners.Count > 0)
+            {
+                int round2StartIdx = round1StartIdx + matchesInRound;
+                foreach (var kvp in byeWinners)
+                {
+                    int matchIdx = kvp.Key;
+                    var winner = kvp.Value;
+                    int nextMatchGlobalIdx = round2StartIdx + matchIdx / 2;
+
+                    if (nextMatchGlobalIdx >= _allMatches.Count) continue;
+
+                    var nextMatch = _allMatches[nextMatchGlobalIdx];
+                    if (matchIdx % 2 == 0)
+                    {
+                        nextMatch.Competitor1 = winner;
+                        if (nextMatch.DrawModel is DrawKnockoutModel nextKo1)
+                        {
+                            nextKo1.Competitor1 = winner;
+                            nextKo1.Competitor1Id = winner.Id;
+                        }
+                    }
+                    else
+                    {
+                        nextMatch.Competitor2 = winner;
+                        if (nextMatch.DrawModel is DrawKnockoutModel nextKo2)
+                        {
+                            nextKo2.Competitor2 = winner;
+                            nextKo2.Competitor2Id = winner.Id;
+                        }
+                    }
                 }
             }
         }

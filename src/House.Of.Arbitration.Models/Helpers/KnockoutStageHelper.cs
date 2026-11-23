@@ -91,4 +91,94 @@ public static class KnockoutStageHelper
             _ => $"Tour ({matchesInRound} matches)"
         };
     }
+
+    /// <summary>
+    /// Distribue les compétiteurs dans les matches du premier tour d'un tableau éliminatoire (knockout).
+    /// Garantit qu'aucun combat du premier tour n'a 2 combattants inconnus (chaque combat a au moins 1 combattant).
+    /// </summary>
+    /// <param name="competitors">Liste des compétiteurs engagés dans la catégorie.</param>
+    /// <param name="matchesInRound">Nombre de combats dans le premier tour (m / 2).</param>
+    /// <returns>Une liste de paires (Compétiteur 1, Compétiteur 2 ou null si bye/exempt).</returns>
+    public static List<(CompetitorModel Comp1, CompetitorModel? Comp2)> DistributeFirstRoundCompetitors(
+        IList<CompetitorModel> competitors,
+        int matchesInRound)
+    {
+        var result = new List<(CompetitorModel Comp1, CompetitorModel? Comp2)>();
+        if (competitors == null || competitors.Count == 0 || matchesInRound <= 0)
+        {
+            return result;
+        }
+
+        int n = competitors.Count;
+        int m = matchesInRound * 2;
+        int numByes = Math.Max(0, m - n);
+
+        // Déterminer quels matches sont des exemptions (Byes)
+        // Les exemptions sont réparties équitablement entre les moitiés haute et basse du tableau
+        var isBye = new bool[matchesInRound];
+        if (numByes > 0)
+        {
+            var byeOrder = GetByePriorityOrder(matchesInRound);
+            for (int b = 0; b < Math.Min(numByes, matchesInRound); b++)
+            {
+                isBye[byeOrder[b]] = true;
+            }
+        }
+
+        // Assigner les compétiteurs :
+        // Chaque match i a toujours Comp1 (au moins 1 combattant).
+        // Si le match i n'est pas une exemption, il a également Comp2.
+        int compIdx = 0;
+        for (int i = 0; i < matchesInRound; i++)
+        {
+            if (compIdx >= n)
+            {
+                break;
+            }
+
+            if (isBye[i])
+            {
+                // Match avec 1 seul compétiteur (Exempt / Bye)
+                var comp1 = competitors[compIdx++];
+                result.Add((comp1, null));
+            }
+            else
+            {
+                // Match complet avec 2 compétiteurs
+                var comp1 = competitors[compIdx++];
+                CompetitorModel? comp2 = (compIdx < n) ? competitors[compIdx++] : null;
+                result.Add((comp1, comp2));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Ordre de priorité des positions d'exemptions (Byes) pour équilibrer l'arbre (alternance haut / bas).
+    /// </summary>
+    public static int[] GetByePriorityOrder(int matchesInRound)
+    {
+        if (matchesInRound <= 1) return new[] { 0 };
+        if (matchesInRound == 2) return new[] { 0, 1 };
+        if (matchesInRound == 4) return new[] { 0, 3, 1, 2 };
+
+        var list = new List<int>();
+        void AddRecursive(int start, int end)
+        {
+            if (start == end)
+            {
+                list.Add(start);
+                return;
+            }
+            list.Add(start);
+            list.Add(end);
+            int mid = (start + end) / 2;
+            if (mid > start) AddRecursive(start + 1, mid);
+            if (end > mid + 1) AddRecursive(mid + 1, end - 1);
+        }
+
+        AddRecursive(0, matchesInRound - 1);
+        return list.Distinct().Take(matchesInRound).ToArray();
+    }
 }
