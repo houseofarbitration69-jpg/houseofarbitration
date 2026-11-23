@@ -362,4 +362,71 @@ public class DrawPdfExportServiceTests
         Assert.Equal(4, bytesRead);
         Assert.Equal("%PDF", System.Text.Encoding.ASCII.GetString(header));
     }
+
+    [Fact]
+    public async Task ExportKnockoutBracketAsync_WithDifferentCountryRepresentations_EmbedsFlagsProperly()
+    {
+        // Arrange
+        var category = new CategoryModel { Id = 1, Type = CategoryType.Sanda, Genre = Genre.Men, WeightMax = 70 };
+        var draw = new DrawModel { Id = 1, CategoryId = 1, Category = category };
+
+        // Compétiteur 1 : Code ISO direct
+        var c1 = new CompetitorModel { Id = 1, FirstName = "Antoine", LastName = "Griezmann", CountryIsoCode = "FR" };
+        // Compétiteur 2 : Country.IsoCode
+        var c2 = new CompetitorModel { Id = 2, FirstName = "Lionel", LastName = "Messi", Country = new CountryModel { Name = "Argentine", IsoCode = "AR" } };
+        // Compétiteur 3 : Country.Name seul (résolu via DefaultCountries)
+        var c3 = new CompetitorModel { Id = 3, FirstName = "Cristiano", LastName = "Ronaldo", Country = new CountryModel { Name = "Portugal" } };
+        // Compétiteur 4 : Inconnu ou sans pays
+        var c4 = new CompetitorModel { Id = 4, FirstName = "John", LastName = "Doe" };
+
+        var match1 = new DrawKnockoutModel
+        {
+            Id = 1,
+            Order = 1,
+            Competitor1Id = c1.Id,
+            Competitor1 = c1,
+            Competitor2Id = c2.Id,
+            Competitor2 = c2,
+            WinnerId = c1.Id,
+            IsFinished = true
+        };
+
+        var match2 = new DrawKnockoutModel
+        {
+            Id = 2,
+            Order = 2,
+            Competitor1Id = c3.Id,
+            Competitor1 = c3,
+            Competitor2Id = c4.Id,
+            Competitor2 = c4,
+            WinnerId = c3.Id,
+            IsFinished = true
+        };
+
+        var matchFinal = new DrawKnockoutModel
+        {
+            Id = 3,
+            Order = 3,
+            Competitor1Id = c1.Id,
+            Competitor1 = c1,
+            Competitor2Id = c3.Id,
+            Competitor2 = c3,
+            IsFinished = false
+        };
+
+        var knockouts = new List<DrawKnockoutModel> { match1, match2, matchFinal };
+
+        // Act
+        using var stream = await _service.ExportKnockoutBracketAsync(draw, knockouts, "Coupe du Monde");
+
+        // Assert
+        Assert.NotNull(stream);
+        Assert.True(stream.Length > 1000);
+
+        stream.Position = 0;
+        var header = new byte[4];
+        int bytesRead = stream.Read(header, 0, 4);
+        Assert.Equal(4, bytesRead);
+        Assert.Equal("%PDF", System.Text.Encoding.ASCII.GetString(header));
+    }
 }

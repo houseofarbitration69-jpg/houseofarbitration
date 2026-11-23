@@ -10,6 +10,7 @@ using System.Globalization;
 using Font = iTextSharp.text.Font;
 using Element = iTextSharp.text.Element;
 using Rectangle = iTextSharp.text.Rectangle;
+using Image = iTextSharp.text.Image;
 #endregion
 
 namespace House.Of.Arbitration.Services;
@@ -34,11 +35,83 @@ public class DrawPdfExportService : IDrawPdfExportService
     private readonly BaseFont _bfHelveticaBold;
     private readonly BaseFont _bfHelveticaOblique;
 
+    private static readonly Dictionary<string, byte[]> _flagBytesCache = new(StringComparer.OrdinalIgnoreCase);
+
     public DrawPdfExportService()
     {
         _bfHelvetica = BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
         _bfHelveticaBold = BaseFont.CreateFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
         _bfHelveticaOblique = BaseFont.CreateFont(BaseFont.HELVETICA_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+    }
+
+    /// <summary>
+    /// Résout le code ISO (2 lettres, minuscules) du pays d'un compétiteur.
+    /// </summary>
+    private static string? ResolveIsoCode(CompetitorModel? competitor)
+    {
+        if (competitor == null) return null;
+
+        if (!string.IsNullOrWhiteSpace(competitor.CountryIsoCode))
+        {
+            return competitor.CountryIsoCode.Trim().ToLowerInvariant();
+        }
+
+        if (!string.IsNullOrWhiteSpace(competitor.Country?.IsoCode))
+        {
+            return competitor.Country.IsoCode.Trim().ToLowerInvariant();
+        }
+
+        if (!string.IsNullOrWhiteSpace(competitor.Country?.Name))
+        {
+            var found = CountryModel.DefaultCountries
+                .FirstOrDefault(c => string.Equals(c.Name, competitor.Country.Name, StringComparison.OrdinalIgnoreCase));
+            if (found != null)
+            {
+                return found.IsoCode.ToLowerInvariant();
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Charge l'image du drapeau correspondante depuis les ressources embarquées.
+    /// </summary>
+    private static Image? GetFlagImage(string? isoCode)
+    {
+        if (string.IsNullOrWhiteSpace(isoCode)) return null;
+        string code = isoCode.Trim().ToLowerInvariant();
+
+        byte[]? bytes;
+        lock (_flagBytesCache)
+        {
+            if (!_flagBytesCache.TryGetValue(code, out bytes))
+            {
+                string resName = $"House.Of.Arbitration.Services.Flags.{code}.png";
+                using var stream = typeof(DrawPdfExportService).Assembly.GetManifestResourceStream(resName);
+                if (stream == null)
+                {
+                    _flagBytesCache[code] = Array.Empty<byte>();
+                    return null;
+                }
+
+                using var ms = new MemoryStream();
+                stream.CopyTo(ms);
+                bytes = ms.ToArray();
+                _flagBytesCache[code] = bytes;
+            }
+        }
+
+        if (bytes == null || bytes.Length == 0) return null;
+
+        try
+        {
+            return Image.GetInstance(bytes);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public Task<Stream> ExportKnockoutBracketAsync(DrawModel draw, List<DrawKnockoutModel> knockouts, string competitionName)
@@ -561,6 +634,14 @@ public class DrawPdfExportService : IDrawPdfExportService
             p.Add(new Chunk(isRed ? "● " : "○ ", new Font(_bfHelvetica, fontSize - 1, Font.NORMAL, isRed ? ColorRed : ColorPrimary)));
         }
 
+        var flagImg = GetFlagImage(ResolveIsoCode(competitor));
+        if (flagImg != null)
+        {
+            flagImg.ScaleToFit(fontSize * 1.25f, fontSize * 0.9f);
+            p.Add(new Chunk(flagImg, 0, -1f));
+            p.Add(new Chunk(" ", new Font(_bfHelvetica, fontSize * 0.4f)));
+        }
+
         string fullName = $"{competitor.LastName?.ToUpperInvariant()} {competitor.FirstName}";
         var nameFont = isWinner ? new Font(_bfHelveticaBold, fontSize, Font.NORMAL, ColorPrimary) : new Font(_bfHelvetica, fontSize, Font.NORMAL, BaseColor.Black);
         p.Add(new Chunk(fullName, nameFont));
@@ -791,7 +872,18 @@ public class DrawPdfExportService : IDrawPdfExportService
                 Padding = 4,
                 HorizontalAlignment = Element.ALIGN_CENTER
             });
-            standingsTable.AddCell(new PdfPCell(new Phrase($"{model.LastName?.ToUpperInvariant()} {model.FirstName}", new Font(_bfHelveticaBold, 9, Font.NORMAL, BaseColor.Black)))
+
+            var athletePhrase = new Phrase();
+            var standingFlag = GetFlagImage(ResolveIsoCode(model));
+            if (standingFlag != null)
+            {
+                standingFlag.ScaleToFit(13f, 9f);
+                athletePhrase.Add(new Chunk(standingFlag, 0, -1.5f));
+                athletePhrase.Add(new Chunk(" "));
+            }
+            athletePhrase.Add(new Chunk($"{model.LastName?.ToUpperInvariant()} {model.FirstName}", new Font(_bfHelveticaBold, 9, Font.NORMAL, BaseColor.Black)));
+
+            standingsTable.AddCell(new PdfPCell(athletePhrase)
             {
                 BackgroundColor = bg,
                 Padding = 4
@@ -923,6 +1015,15 @@ public class DrawPdfExportService : IDrawPdfExportService
         }
 
         var p = new Paragraph();
+
+        var flagImg = GetFlagImage(ResolveIsoCode(competitor));
+        if (flagImg != null)
+        {
+            flagImg.ScaleToFit(14f, 10f);
+            p.Add(new Chunk(flagImg, 0, -1.5f));
+            p.Add(new Chunk(" "));
+        }
+
         p.Add(new Chunk($"{competitor.LastName?.ToUpperInvariant()} {competitor.FirstName}", new Font(_bfHelveticaBold, 9, Font.NORMAL, BaseColor.Black)));
         if (!string.IsNullOrEmpty(competitor.CountryIsoCode))
         {
