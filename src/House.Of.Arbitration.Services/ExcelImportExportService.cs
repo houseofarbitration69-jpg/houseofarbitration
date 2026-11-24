@@ -742,24 +742,36 @@ public class ExcelImportExportService : IExcelImportExportService
                 }
 
                 // Ordonnancement global du tournoi :
-                // 1. Tous les matchs préliminaires / quarts / demis de toutes les catégories
-                // 2. TOUTES les Petites finales de toutes les catégories
-                // 3. TOUTES les Finales de toutes les catégories
-                var allKnockouts = generatedDraws
+                // Règle officielle : toutes les 32èmes de finale (toutes catégories),
+                // puis toutes les 16èmes, toutes les 8èmes, les quarts, les demi-finales,
+                // les petites finales et enfin les finales.
+                // Ordonnancement officiel : mélange knockout + poules + ordre (Taolu),
+                // poules espacées d'au moins 3-4 combats entre elles par catégorie.
+                var allKnockoutModels = generatedDraws
                     .Where(d => d.Draw.DrawKnockouts != null)
                     .SelectMany(d => d.Draw.DrawKnockouts!)
-                    .ToList();
+                    .Cast<IDrawModel>();
+                var allPoolModels = generatedDraws
+                    .Where(d => d.Draw.DrawPools != null)
+                    .SelectMany(d => d.Draw.DrawPools!)
+                    .Cast<IDrawModel>();
+                var allOrderModels = generatedDraws
+                    .Where(d => d.Draw.DrawOrders != null)
+                    .SelectMany(d => d.Draw.DrawOrders!)
+                    .Cast<IDrawModel>();
 
-                if (allKnockouts.Count > 0)
+                var allDrawModels = allKnockoutModels.Concat(allPoolModels).Concat(allOrderModels).ToList();
+
+                if (allDrawModels.Count > 0)
                 {
-                    var prelimMatches = allKnockouts.Where(k => !k.IsBronzeMatch && !string.Equals(k.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
-                    var bronzeMatches = allKnockouts.Where(k => k.IsBronzeMatch).ToList();
-                    var finalMatches = allKnockouts.Where(k => !k.IsBronzeMatch && string.Equals(k.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
-
-                    var scheduledMatches = prelimMatches.Concat(bronzeMatches).Concat(finalMatches).ToList();
-                    for (int i = 0; i < scheduledMatches.Count; i++)
+                    var scheduledAll = KnockoutStageHelper.ScheduleTournamentDraws(allDrawModels);
+                    int matchNumber = 1;
+                    foreach (var d in scheduledAll)
                     {
-                        scheduledMatches[i].GlobalOrder = i + 1;
+                        if (d is DrawKnockoutModel k && KnockoutStageHelper.IsByeMatch(k))
+                            d.GlobalOrder = 0;
+                        else
+                            d.GlobalOrder = matchNumber++;
                     }
                 }
 
@@ -848,10 +860,11 @@ public class ExcelImportExportService : IExcelImportExportService
                 {
                     Draw = draw,
                     Order = 1,
-                    GlobalOrder = globalOrder++,
+                    GlobalOrder = 0,
                     Competitor1Id = shuffled[0].Id,
                     Competitor2Id = null,
                     IsFinished = true,
+                    IsBye = true,
                     WinnerId = shuffled[0].Id
                 });
             }
@@ -880,7 +893,8 @@ public class ExcelImportExportService : IExcelImportExportService
                     Order = matchOrder++,
                     GlobalOrder = hasRealMatch ? globalOrder++ : 0,
                     Competitor1Id = comp1?.Id,
-                    Competitor2Id = comp2?.Id
+                    Competitor2Id = comp2?.Id,
+                    IsBye = !hasRealMatch
                 };
 
                 // Si un seul competiteur dans ce match : bye automatique
@@ -888,6 +902,7 @@ public class ExcelImportExportService : IExcelImportExportService
                 {
                     knockout.WinnerId = comp1.Id;
                     knockout.IsFinished = true;
+                    knockout.IsBye = true;
                     byeWinners[pairIndex] = comp1; // mémorisé pour propagation vers tour 2
                 }
 

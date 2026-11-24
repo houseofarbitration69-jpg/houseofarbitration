@@ -297,13 +297,17 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                 }
             }
 
-            // Sort matches: Phase (prelims: 0, petite finale: 1, finale: 2), then GlobalOrder (if > 0), Category and local Order
-            _allMatches = _allMatches
-                .OrderBy(m => GetMatchPhasePriority(m))
-                .ThenBy(m => m.GlobalOrder > 0 ? m.GlobalOrder : int.MaxValue)
-                .ThenBy(m => m.CategoryId)
-                .ThenBy(m => m.Order)
-                .ToList();
+            // Ordonnancement officiel : mélange des catégories par phase, poules espacées d'au moins 3-4 combats
+            _allMatches = KnockoutStageHelper.ScheduleTournamentMatches(
+                _allMatches,
+                m => m.RoundType,
+                m => m.CategoryId,
+                m => m.Order,
+                m => m.DrawModel is DrawKnockoutModel ko
+                    ? KnockoutStageHelper.GetStagePhasePriority(ko, m.TotalMatchesInCategory)
+                    : 0,
+                m => m.IsBye
+            ).ToList();
 
             RefreshDisplayList();
         }
@@ -608,11 +612,22 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
     private void RefreshDisplayList()
     {
         // Re-index all matches sequentially: 1, 2, 3, ..., N and wire commands
+        // Matches with only one competitor in the first round (byes) do NOT get a match number (GlobalOrder = 0).
+        int currentOrder = 1;
         for (int i = 0; i < _allMatches.Count; i++)
         {
             var match = _allMatches[i];
-            match.GlobalOrder = i + 1;
-            match.DrawModel.GlobalOrder = i + 1;
+            if (match.IsBye)
+            {
+                match.GlobalOrder = 0;
+                match.DrawModel.GlobalOrder = 0;
+            }
+            else
+            {
+                match.GlobalOrder = currentOrder;
+                match.DrawModel.GlobalOrder = currentOrder;
+                currentOrder++;
+            }
             match.OnMoveUp = MoveUp;
             match.OnMoveDown = MoveDown;
             match.OnEditOrder = EditOrder;
@@ -639,7 +654,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
 
         DisplayItems = new ObservableCollection<object>(items);
 
-        TotalMatchesCount = _allMatches.Count;
+        TotalMatchesCount = _allMatches.Count(m => !m.IsBye);
         TotalCategoriesCount = _categories.Count;
         OnPropertyChanged(nameof(TotalMatchesCount));
         OnPropertyChanged(nameof(TotalCategoriesCount));
@@ -663,9 +678,10 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
         }
 
         
+        int totalRealMatches = _allMatches.Count(m => !m.IsBye);
         string? result = await Shell.Current.DisplayPromptAsync(
             Resources.GO_TO_ORDER,
-            $"{Resources.ENTER_ORDER_NUM} (1 à {_allMatches.Count}) :",
+            $"{Resources.ENTER_ORDER_NUM} (1 à {totalRealMatches}) :",
             Resources.GO_TO,
             Resources.CANCEL,
             placeholder: "1",
@@ -776,17 +792,18 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
     [RelayCommand]
     private async Task EditOrder(DrawMatchItemViewModel match)
     {
-        if (match == null || _allMatches.Count == 0)
+        if (match == null || match.IsBye || _allMatches.Count == 0)
         {
             return;
         }
 
         try
         {
+            int totalRealMatches = _allMatches.Count(m => !m.IsBye);
             var parameters = new Dictionary<string, object>
             {
                 { "Match", match },
-                { "TotalMatches", _allMatches.Count }
+                { "TotalMatches", totalRealMatches }
             };
 
             var popupResult = await _popupService.ShowPopupAsync<ChangeOrderPopupViewModel, int?>(
@@ -1008,11 +1025,10 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
 
     private static int GetMatchPhasePriority(DrawMatchItemViewModel m)
     {
+        // Méthode conservée pour compatibilité éventuelle
         if (m.DrawModel is DrawKnockoutModel k)
         {
-            if (k.IsBronzeMatch) return 1;
-            if (k.StageName == "Finale") return 2;
-            return 0;
+            return KnockoutStageHelper.GetStagePhasePriority(k, m.TotalMatchesInCategory);
         }
         return 0;
     }
@@ -1031,6 +1047,7 @@ public partial class DrawMatchItemViewModel : ObservableObject
 {
     private int _globalOrder;
     private bool _isFinished;
+    private bool _isBye;
 
     public IDrawModel DrawModel { get; set; } = null!;
     public int CategoryId { get; set; }
@@ -1042,8 +1059,16 @@ public partial class DrawMatchItemViewModel : ObservableObject
     public int GlobalOrder
     {
         get => _globalOrder;
-        set => SetProperty(ref _globalOrder, value);
+        set
+        {
+            if (SetProperty(ref _globalOrder, value))
+            {
+                OnPropertyChanged(nameof(DisplayGlobalOrder));
+            }
+        }
     }
+
+    public string DisplayGlobalOrder => (IsBye || GlobalOrder <= 0) ? "-" : GlobalOrder.ToString();
 
     public bool IsFinished
     {
@@ -1051,7 +1076,18 @@ public partial class DrawMatchItemViewModel : ObservableObject
         set => SetProperty(ref _isFinished, value);
     }
 
-    public bool IsBye { get; set; }
+    public bool IsBye
+    {
+        get => _isBye || (DrawModel is DrawKnockoutModel ko && KnockoutStageHelper.IsByeMatch(ko));
+        set
+        {
+            if (SetProperty(ref _isBye, value))
+            {
+                OnPropertyChanged(nameof(DisplayGlobalOrder));
+                OnPropertyChanged(nameof(MatchTitle));
+            }
+        }
+    }
 
     public CompetitorModel? Competitor1 { get; set; }
     public CompetitorModel? Competitor2 { get; set; }
@@ -1079,10 +1115,12 @@ public partial class DrawMatchItemViewModel : ObservableObject
 
             if (DrawModel is DrawKnockoutModel ko)
             {
-                return ko.StageName;
+                return IsBye ? $"{ko.StageName} (Exempt)" : ko.StageName;
             }
 
-            return KnockoutStageHelper.GetStageName(Order, TotalMatchesInCategory, false);
+            return IsBye
+                ? $"{KnockoutStageHelper.GetStageName(Order, TotalMatchesInCategory, false)} (Exempt)"
+                : KnockoutStageHelper.GetStageName(Order, TotalMatchesInCategory, false);
         }
     }
 

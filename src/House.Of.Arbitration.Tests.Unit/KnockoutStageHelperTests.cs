@@ -135,4 +135,65 @@ public class KnockoutStageHelperTests
         Assert.Null(pairs[0].Comp2);
         Assert.Equal(1, pairs[0].Comp1.Id);
     }
+
+    [Fact]
+    public void GetStagePhasePriority_ReturnsStrictChronologicalOrder_From32emeToFinale()
+    {
+        // Règle demandée :
+        // 32èmes de finale < 16èmes de finale < 8èmes de finale < Quarts < Demis < Petites finales < Finales
+        int p32 = KnockoutStageHelper.GetStagePhasePriority("32ème de finale 1");
+        int p16 = KnockoutStageHelper.GetStagePhasePriority("16ème de finale 3");
+        int p8 = KnockoutStageHelper.GetStagePhasePriority("8ème de finale 2");
+        int pQuart = KnockoutStageHelper.GetStagePhasePriority("Quart de finale 4");
+        int pDemi = KnockoutStageHelper.GetStagePhasePriority("Demi-finale 1");
+        int pPetite = KnockoutStageHelper.GetStagePhasePriority("Petite finale", isBronzeMatch: true);
+        int pFinale = KnockoutStageHelper.GetStagePhasePriority("Finale");
+
+        Assert.True(p32 < p16, "Les 32èmes doivent se dérouler avant les 16èmes");
+        Assert.True(p16 < p8, "Les 16èmes doivent se dérouler avant les 8èmes");
+        Assert.True(p8 < pQuart, "Les 8èmes doivent se dérouler avant les quarts");
+        Assert.True(pQuart < pDemi, "Les quarts doivent se dérouler avant les demis");
+        Assert.True(pDemi < pPetite, "Les demis doivent se dérouler avant les petites finales");
+        Assert.True(pPetite < pFinale, "Les petites finales doivent se dérouler avant les finales");
+    }
+
+    [Fact]
+    public void IsByeMatch_WithSingleCompetitorAndFinished_ReturnsTrue()
+    {
+        var comp = new Models.CompetitorModel { Id = 1, LastName = "Dupont", FirstName = "Jean" };
+        var byeMatch = new Models.DrawKnockoutModel
+        {
+            Order = 1,
+            GlobalOrder = 0,
+            Competitor1 = comp,
+            Competitor1Id = comp.Id,
+            Competitor2 = null,
+            Competitor2Id = null,
+            IsFinished = true,
+            WinnerId = comp.Id
+        };
+
+        Assert.True(KnockoutStageHelper.IsByeMatch(byeMatch));
+        Assert.True(byeMatch.IsBye);
+    }
+
+    [Fact]
+    public void IsByeMatch_WithTwoCompetitors_ReturnsFalse()
+    {
+        var comp1 = new Models.CompetitorModel { Id = 1, LastName = "Dupont", FirstName = "Jean" };
+        var comp2 = new Models.CompetitorModel { Id = 2, LastName = "Martin", FirstName = "Paul" };
+        var match = new Models.DrawKnockoutModel
+        {
+            Order = 1,
+            GlobalOrder = 1,
+            Competitor1 = comp1,
+            Competitor1Id = comp1.Id,
+            Competitor2 = comp2,
+            Competitor2Id = comp2.Id,
+            IsFinished = false
+        };
+
+        Assert.False(KnockoutStageHelper.IsByeMatch(match));
+        Assert.False(match.IsBye);
+    }
 }

@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <resources>
-  <!-- Thème principal : hérite explicitement de MaterialComponents pour garantir la compatibilité
-       des composants natifs Android (Picker, DatePicker, Snackbar, AlertDialog, etc.) -->
-  <style name="Maui.MainTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+  <!-- Thème principal : hérite de Maui.MainTheme.Base (lui-même basé sur Theme.MaterialComponents.DayNight)
+       pour conserver toutes les définitions MAUI (boutons, checkbox, app bar, etc.) tout en appliquant
+       les exigences MaterialComponents nécessaires aux composants natifs (DisplayPromptAsync, dialogues, popups). -->
+  <style name="Maui.MainTheme" parent="Maui.MainTheme.Base">
     <item name="android:navigationBarColor">#121212</item>
     <item name="android:windowLightNavigationBar">false</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
+
+    <!-- Thèmes des dialogues, popups et alertes (DisplayPromptAsync, DisplayAlert, etc.) -->
+    <item name="android:dialogTheme">@style/AppDialogTheme</item>
+    <item name="dialogTheme">@style/AppDialogTheme</item>
+    <item name="android:alertDialogTheme">@style/MauiAlertDialogTheme</item>
+    <item name="alertDialogTheme">@style/MauiAlertDialogTheme</item>
+    <item name="materialAlertDialogTheme">@style/MauiAlertDialogTheme</item>
   </style>
 
   <style name="Maui.MainTheme.NoActionBar" parent="Maui.MainTheme">
@@ -14,6 +23,7 @@
     <item name="android:navigationBarColor">#121212</item>
     <item name="android:windowLightNavigationBar">false</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
   </style>
 
   <!-- Splash theme -->
@@ -22,13 +32,23 @@
     <item name="android:navigationBarColor">#121212</item>
     <item name="android:windowLightNavigationBar">false</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
   </style>
 
-  <!-- Thème des dialogues / alertes avec la couleur de la barre de navigation -->
+  <!-- Thème appliqué aux dialogues / popups -->
+  <style name="AppDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
+    <item name="android:navigationBarColor">#121212</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
+  </style>
+
+  <!-- Thème des alertes et prompts (DisplayPromptAsync, DisplayAlert) -->
   <style name="MauiAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
     <item name="colorPrimary">?attr/colorOnSurface</item>
     <item name="android:navigationBarColor">#121212</item>
     <item name="android:windowLightNavigationBar">false</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
   </style>
 </resources>

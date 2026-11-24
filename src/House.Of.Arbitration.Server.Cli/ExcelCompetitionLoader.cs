@@ -609,17 +609,27 @@ public static class ExcelCompetitionLoader
             }
 
             // Ordonnancement global du tournoi :
-            // 1. Tous les matchs préliminaires / demi-finales (et Taolu/Poules) de toutes les catégories
-            // 2. TOUTES les Petites finales de toutes les catégories
-            // 3. TOUTES les Finales de toutes les catégories
-            var prelimMatches = matches.Where(m => !m.IsBronzeMatch && !string.Equals(m.StageName, "Petite finale", StringComparison.OrdinalIgnoreCase) && !string.Equals(m.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
-            var bronzeMatches = matches.Where(m => m.IsBronzeMatch || string.Equals(m.StageName, "Petite finale", StringComparison.OrdinalIgnoreCase)).ToList();
-            var finalMatches = matches.Where(m => !m.IsBronzeMatch && string.Equals(m.StageName, "Finale", StringComparison.OrdinalIgnoreCase)).ToList();
+            // Règle officielle : toutes les 32èmes de finale (toutes catégories),
+            // puis toutes les 16èmes, toutes les 8èmes, les quarts, les demi-finales,
+            // les petites finales et enfin les finales.
+            // Ordonnancement officiel : mélange knockout + poules + ordre,
+            // catégories interleaved par phase, poules espacées d'au moins 3-4 combats.
+            var categoryOrder = matches
+                .Select(m => m.Category)
+                .Distinct()
+                .Select((name, idx) => (name, idx))
+                .ToDictionary(x => x.name, x => x.idx);
 
-            var scheduledMatches = prelimMatches
-                .Concat(bronzeMatches)
-                .Concat(finalMatches)
-                .ToList();
+            var scheduledMatches = KnockoutStageHelper.ScheduleTournamentMatches(
+                matches,
+                m => m.Type,
+                m => categoryOrder.TryGetValue(m.Category, out int idx) ? idx : 0,
+                m => m.Id,
+                m => m.Type == RoundType.Knockouts
+                    ? KnockoutStageHelper.GetStagePhasePriority(m.StageName, m.IsBronzeMatch)
+                    : 0,
+                m => m.Type == RoundType.Knockouts && m.BlueCompetitor == "[EXEMPTÉ / BYE]"
+            ).ToList();
 
             var idMap = new Dictionary<int, int>();
             for (int i = 0; i < scheduledMatches.Count; i++)
@@ -653,13 +663,15 @@ public static class ExcelCompetitionLoader
                         if (idMap.TryGetValue(k.Id, out int newId))
                         {
                             k.Id = newId;
-                            k.GlobalOrder = newId;
+                            k.GlobalOrder = KnockoutStageHelper.IsByeMatch(k) ? 0 : newId;
                         }
                     }
 
                     // Ré-ordonner l'ordre local dans la catégorie selon GlobalOrder (qui garantit Petite finale avant Finale)
                     var catKo = cat.Draw.DrawKnockouts
-                        .OrderBy(k => k.GlobalOrder)
+                        .OrderBy(k => KnockoutStageHelper.GetStagePhasePriority(k))
+                        .ThenBy(k => k.GlobalOrder > 0 ? k.GlobalOrder : int.MinValue)
+                        .ThenBy(k => k.Order)
                         .ToList();
 
                     for (int i = 0; i < catKo.Count; i++)

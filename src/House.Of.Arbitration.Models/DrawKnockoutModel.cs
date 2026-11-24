@@ -49,6 +49,18 @@ public partial class DrawKnockoutModel : ObservableObject, IDrawModel
         }
     }
 
+    private bool _isBye = false;
+    /// <summary>
+    /// Indique si ce match est une exemption (Bye) du premier tour sans adversaire réel.
+    /// Ces matches ne se déroulent pas sur le tatami et ne reçoivent pas de numéro de combat.
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public bool IsBye
+    {
+        get => _isBye || (IsFinished && ((Competitor1Id.HasValue || Competitor1 != null) ^ (Competitor2Id.HasValue || Competitor2 != null)));
+        set => SetProperty(ref _isBye, value);
+    }
+
     /// <summary>
     /// Obtient le nom d'étape du combat (ex: "Finale", "Petite finale", "Demi-finale 1", "Quart de finale 2")
     /// </summary>

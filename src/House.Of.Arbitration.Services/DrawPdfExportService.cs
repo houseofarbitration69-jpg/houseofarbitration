@@ -165,6 +165,63 @@ public class DrawPdfExportService : IDrawPdfExportService
         return Task.FromResult<Stream>(stream);
     }
 
+    /// <summary>
+    /// Calcule le numéro d'ordre chronologique du premier combat d'un tirage (catégorie).
+    /// Permet de classer les tirages dans l'ordre chronologique de leur entrée dans la compétition.
+    /// </summary>
+    public static int GetFirstMatchOrder(DrawModel draw)
+    {
+        int minOrder = int.MaxValue;
+
+        if (draw.DrawKnockouts != null && draw.DrawKnockouts.Count > 0)
+        {
+            var realMatches = draw.DrawKnockouts.Where(k => k.GlobalOrder > 0).ToList();
+            if (realMatches.Count > 0)
+            {
+                int minGlobal = realMatches.Min(k => k.GlobalOrder);
+                if (minGlobal < minOrder) minOrder = minGlobal;
+            }
+            else
+            {
+                var nonByes = draw.DrawKnockouts.Where(k => !KnockoutStageHelper.IsByeMatch(k)).ToList();
+                int minLocal = nonByes.Count > 0 ? nonByes.Min(k => k.Order) : draw.DrawKnockouts.Min(k => k.Order);
+                if (minLocal < minOrder) minOrder = minLocal;
+            }
+        }
+
+        if (draw.DrawPools != null && draw.DrawPools.Count > 0)
+        {
+            var realPools = draw.DrawPools.Where(p => p.GlobalOrder > 0).ToList();
+            if (realPools.Count > 0)
+            {
+                int minGlobal = realPools.Min(p => p.GlobalOrder);
+                if (minGlobal < minOrder) minOrder = minGlobal;
+            }
+            else
+            {
+                int minLocal = draw.DrawPools.Min(p => p.Order);
+                if (minLocal < minOrder) minOrder = minLocal;
+            }
+        }
+
+        if (draw.DrawOrders != null && draw.DrawOrders.Count > 0)
+        {
+            var realOrders = draw.DrawOrders.Where(o => o.GlobalOrder > 0).ToList();
+            if (realOrders.Count > 0)
+            {
+                int minGlobal = realOrders.Min(o => o.GlobalOrder);
+                if (minGlobal < minOrder) minOrder = minGlobal;
+            }
+            else
+            {
+                int minLocal = draw.DrawOrders.Min(o => o.Order);
+                if (minLocal < minOrder) minOrder = minLocal;
+            }
+        }
+
+        return minOrder;
+    }
+
     public Task<Stream> ExportAllDrawsAsync(List<DrawModel> draws, string competitionName)
     {
         var stream = new MemoryStream();
@@ -175,7 +232,13 @@ public class DrawPdfExportService : IDrawPdfExportService
         doc.Open();
         bool isFirstPage = true;
 
-        foreach (var draw in draws)
+        // Trier les tirages selon l'ordre chronologique de leur premier combat (puis nom de catégorie)
+        var orderedDraws = draws
+            .OrderBy(d => GetFirstMatchOrder(d))
+            .ThenBy(d => d.Category?.Name ?? string.Empty)
+            .ToList();
+
+        foreach (var draw in orderedDraws)
         {
             if (draw.DrawKnockouts != null && draw.DrawKnockouts.Count > 0)
             {
@@ -541,10 +604,21 @@ public class DrawPdfExportService : IDrawPdfExportService
         float rowHeight = (cardHeight - headerHeight) / 2f;
 
         // Top bar : StageName / N° d'ordre du combat à gauche, Résultat à droite
-        string matchOrderLabel = match.GlobalOrder > 0 ? $"Combat #{match.GlobalOrder}" : $"Combat #{match.Order}";
-        string stageLabel = !string.IsNullOrEmpty(match.StageName)
-            ? $"{matchOrderLabel} • {match.StageName}"
-            : matchOrderLabel;
+        bool isBye = KnockoutStageHelper.IsByeMatch(match);
+        string stageLabel;
+        if (isBye)
+        {
+            stageLabel = !string.IsNullOrEmpty(match.StageName)
+                ? $"{match.StageName} (Exempt)"
+                : "Exempt";
+        }
+        else
+        {
+            string matchOrderLabel = match.GlobalOrder > 0 ? $"Combat #{match.GlobalOrder}" : $"Combat #{match.Order}";
+            stageLabel = !string.IsNullOrEmpty(match.StageName)
+                ? $"{matchOrderLabel} • {match.StageName}"
+                : matchOrderLabel;
+        }
 
         string scoreSummary = "";
         if (match.IsFinished && !string.IsNullOrEmpty(match.RoundResultsJson))
@@ -561,7 +635,7 @@ public class DrawPdfExportService : IDrawPdfExportService
         }
         else if (match.IsFinished)
         {
-            scoreSummary = "Terminé";
+            scoreSummary = isBye ? "Exempté" : "Terminé";
         }
 
         var headerTable = new PdfPTable(2) { WidthPercentage = 100 };

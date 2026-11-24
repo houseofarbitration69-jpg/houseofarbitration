@@ -135,7 +135,7 @@
                                 </Border.GestureRecognizers>
                             
                                 <Label 
-                                    Text="{Binding GlobalOrder}" 
+                                    Text="{Binding DisplayGlobalOrder}" 
                                     TextColor="{DynamicResource PrimaryTextColor}" 
                                     FontSize="15" 
                                     FontAttributes="Bold"

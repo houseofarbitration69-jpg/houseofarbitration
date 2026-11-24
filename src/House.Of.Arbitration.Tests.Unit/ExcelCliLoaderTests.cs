@@ -825,7 +825,9 @@ public class ExcelCliLoaderTests
         string cat1Name = result.Categories[0].Name;
         string cat2Name = result.Categories[1].Name;
 
-        // Vérifier les 4 demi-finales en premier
+        // Vérifier les 4 demi-finales en premier (toute Cat1 puis toute Cat2 au sein de la phase)
+        // Le nouvel algorithme groupe tous les matches d'une catégorie ensemble dans chaque phase :
+        // Cat1-Demi1, Cat1-Demi2, Cat2-Demi1, Cat2-Demi2
         Assert.Equal("Demi-finale 1", result.Matches[0].StageName);
         Assert.Equal(cat1Name, result.Matches[0].Category);
         Assert.Equal("Demi-finale 2", result.Matches[1].StageName);

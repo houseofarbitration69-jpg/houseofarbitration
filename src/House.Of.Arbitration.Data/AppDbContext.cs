@@ -185,6 +185,7 @@ public class AppDbContext : DbContext
         {
             item.HasKey(i => i.Id);
             item.Property(i => i.Id).ValueGeneratedOnAdd();
+            item.Ignore(i => i.IsBye);
             item.HasOne(i => i.Draw)
                 .WithMany(d => d.DrawKnockouts)
                 .HasForeignKey(i => i.DrawId);

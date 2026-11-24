@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
@@ -1394,20 +1395,24 @@ public partial class ServerViewModel : BaseViewModel
             }
         }
 
-        // Ordonnancement : Préliminaires (0) -> Petites finales (1) -> Finales (2)
-        var sortedDraws = allDraws
-            .OrderBy(d => GetDrawPhasePriority(d))
-            .ThenBy(d => d.GlobalOrder > 0 ? d.GlobalOrder : int.MaxValue)
-            .ThenBy(d => d.Draw?.CategoryId ?? 0)
-            .ThenBy(d => GetDrawLocalOrder(d))
-            .ToList();
+        // Ordonnancement officiel : mélange des catégories par phase, poules espacées d'au moins 3-4 combats
+        var sortedDraws = KnockoutStageHelper.ScheduleTournamentDraws(allDraws);
 
+        int matchNumber = 1;
         for (int i = 0; i < sortedDraws.Count; i++)
         {
-            sortedDraws[i].GlobalOrder = i + 1;
+            var d = sortedDraws[i];
+            if (d is DrawKnockoutModel k && KnockoutStageHelper.IsByeMatch(k))
+            {
+                d.GlobalOrder = 0;
+            }
+            else
+            {
+                d.GlobalOrder = matchNumber++;
+            }
         }
 
-        TotalMatches = sortedDraws.Count;
+        TotalMatches = sortedDraws.Count(d => !(d is DrawKnockoutModel k && KnockoutStageHelper.IsByeMatch(k)));
 
         var firstUnfinished = sortedDraws.FirstOrDefault(d => !d.IsFinished);
         CurrentDraw = firstUnfinished;
@@ -1463,15 +1468,13 @@ public partial class ServerViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Calcule la priorité de phase pour un tirage : Préliminaires / Quarts / Demis (0) -> Petites finales (1) -> Finales (2)
+    /// Calcule la priorité de phase pour un tirage : 32èmes (20), 16èmes (30), 8èmes (40), Quarts (50), Demis (60), Petites finales (70), Finales (80)
     /// </summary>
     private static int GetDrawPhasePriority(IDrawModel draw)
     {
         if (draw is DrawKnockoutModel ko)
         {
-            if (ko.IsBronzeMatch || string.Equals(ko.StageName, "Petite finale", StringComparison.OrdinalIgnoreCase)) return 1;
-            if (string.Equals(ko.StageName, "Finale", StringComparison.OrdinalIgnoreCase)) return 2;
-            return 0;
+            return KnockoutStageHelper.GetStagePhasePriority(ko);
         }
         return 0;
     }

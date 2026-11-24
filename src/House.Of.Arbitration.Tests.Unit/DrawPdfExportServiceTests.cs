@@ -429,4 +429,140 @@ public class DrawPdfExportServiceTests
         Assert.Equal(4, bytesRead);
         Assert.Equal("%PDF", System.Text.Encoding.ASCII.GetString(header));
     }
+
+    [Fact]
+    public void GetFirstMatchOrder_ReturnsLowestGlobalOrder_OrOrder()
+    {
+        // Tirage 1 : match commence au GlobalOrder 15
+        var draw1 = new DrawModel
+        {
+            Id = 1,
+            CategoryId = 1,
+            DrawKnockouts = new List<DrawKnockoutModel>
+            {
+                new() { Order = 1, GlobalOrder = 15 },
+                new() { Order = 2, GlobalOrder = 20 }
+            }
+        };
+
+        // Tirage 2 : match commence au GlobalOrder 3
+        var draw2 = new DrawModel
+        {
+            Id = 2,
+            CategoryId = 2,
+            DrawKnockouts = new List<DrawKnockoutModel>
+            {
+                new() { Order = 1, GlobalOrder = 3 },
+                new() { Order = 2, GlobalOrder = 12 }
+            }
+        };
+
+        // Tirage 3 : Poule avec GlobalOrder 1
+        var draw3 = new DrawModel
+        {
+            Id = 3,
+            CategoryId = 3,
+            DrawPools = new List<DrawPoolsModel>
+            {
+                new() { Order = 1, GlobalOrder = 1 }
+            }
+        };
+
+        int order1 = DrawPdfExportService.GetFirstMatchOrder(draw1);
+        int order2 = DrawPdfExportService.GetFirstMatchOrder(draw2);
+        int order3 = DrawPdfExportService.GetFirstMatchOrder(draw3);
+
+        Assert.Equal(15, order1);
+        Assert.Equal(3, order2);
+        Assert.Equal(1, order3);
+
+        // Tri des tirages selon l'ordre du premier combat
+        var list = new List<DrawModel> { draw1, draw2, draw3 };
+        var sorted = list.OrderBy(d => DrawPdfExportService.GetFirstMatchOrder(d)).ToList();
+
+        Assert.Equal(3, sorted[0].Id); // Combat 1
+        Assert.Equal(2, sorted[1].Id); // Combat 3
+        Assert.Equal(1, sorted[2].Id); // Combat 15
+    }
+
+    [Fact]
+    public async Task ExportKnockoutBracketAsync_WithByeMatch_GeneratesPdfSuccessfully()
+    {
+        // 3 compétiteurs dans un tableau à 4 : 1 quart avec match réel, 1 quart avec bye (1 seul compétiteur)
+        var category = new CategoryModel { Id = 1, Type = CategoryType.Sanda, Genre = Genre.Men, WeightMax = 65 };
+        var draw = new DrawModel { Id = 1, CategoryId = 1, Category = category };
+
+        var c1 = new CompetitorModel { Id = 1, FirstName = "Jean", LastName = "Dupont", CountryIsoCode = "FR" };
+        var c2 = new CompetitorModel { Id = 2, FirstName = "Pierre", LastName = "Durand", CountryIsoCode = "FR" };
+        var c3 = new CompetitorModel { Id = 3, FirstName = "Paul", LastName = "Moreau", CountryIsoCode = "FR" };
+
+        // Match 1 : Bye (1 seul compétiteur) -> GlobalOrder = 0, IsBye = true
+        var byeMatch = new DrawKnockoutModel
+        {
+            Id = 1,
+            Order = 1,
+            GlobalOrder = 0,
+            Competitor1 = c1,
+            Competitor1Id = c1.Id,
+            Competitor2 = null,
+            Competitor2Id = null,
+            IsFinished = true,
+            IsBye = true,
+            WinnerId = c1.Id
+        };
+
+        // Match 2 : Duel réel -> GlobalOrder = 1
+        var realMatch = new DrawKnockoutModel
+        {
+            Id = 2,
+            Order = 2,
+            GlobalOrder = 1,
+            Competitor1 = c2,
+            Competitor1Id = c2.Id,
+            Competitor2 = c3,
+            Competitor2Id = c3.Id,
+            IsFinished = false
+        };
+
+        // Match 3 : Finale
+        var finale = new DrawKnockoutModel
+        {
+            Id = 3,
+            Order = 3,
+            GlobalOrder = 2,
+            Competitor1 = c1,
+            Competitor1Id = c1.Id,
+            Competitor2 = null,
+            Competitor2Id = null,
+            IsFinished = false
+        };
+
+        var knockouts = new List<DrawKnockoutModel> { byeMatch, realMatch, finale };
+
+        using var stream = await _service.ExportKnockoutBracketAsync(draw, knockouts, "Tournoi Test Byes");
+
+        Assert.NotNull(stream);
+        Assert.True(stream.Length > 0);
+    }
+
+    [Fact]
+    public void GetFirstMatchOrder_WithByesHavingZeroGlobalOrder_PicksFirstRealMatch()
+    {
+        // Catégorie avec 1 bye (GlobalOrder = 0) et 1 match réel (GlobalOrder = 5)
+        var draw = new DrawModel
+        {
+            Id = 1,
+            CategoryId = 1,
+            DrawKnockouts = new List<DrawKnockoutModel>
+            {
+                new() { Order = 1, GlobalOrder = 0, IsFinished = true, Competitor1Id = 1, Competitor2Id = null, IsBye = true },
+                new() { Order = 2, GlobalOrder = 5, Competitor1Id = 2, Competitor2Id = 3 }
+            }
+        };
+
+        int firstMatchOrder = DrawPdfExportService.GetFirstMatchOrder(draw);
+
+        // L'ordre du premier combat doit être 5 (et non 0 car le bye ne combat pas!)
+        Assert.Equal(5, firstMatchOrder);
+    }
 }

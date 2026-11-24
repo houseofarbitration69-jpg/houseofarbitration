@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+  <style name="Maui.MainTheme" parent="Maui.MainTheme.Base">
+    <item name="android:navigationBarColor">#121212</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
+
+    <item name="android:dialogTheme">@style/AppDialogTheme</item>
+    <item name="dialogTheme">@style/AppDialogTheme</item>
+    <item name="android:alertDialogTheme">@style/MauiAlertDialogTheme</item>
+    <item name="alertDialogTheme">@style/MauiAlertDialogTheme</item>
+    <item name="materialAlertDialogTheme">@style/MauiAlertDialogTheme</item>
+  </style>
+
+  <style name="Maui.MainTheme.NoActionBar" parent="Maui.MainTheme">
+    <item name="windowActionBar">false</item>
+    <item name="windowNoTitle">true</item>
+    <item name="android:navigationBarColor">#121212</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
+  </style>
+
+  <style name="Maui.SplashTheme" parent="Maui.MainTheme.NoActionBar">
+    <item name="maui_splash">true</item>
+    <item name="android:navigationBarColor">#121212</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
+  </style>
+
+  <style name="AppDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog">
+    <item name="android:navigationBarColor">#121212</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
+  </style>
+
+  <style name="MauiAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+    <item name="colorPrimary">?attr/colorOnSurface</item>
+    <item name="android:navigationBarColor">#121212</item>
+    <item name="android:windowLightNavigationBar">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="isMaterialTheme">true</item>
+  </style>
+</resources>
