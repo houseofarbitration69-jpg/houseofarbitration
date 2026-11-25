@@ -287,6 +287,7 @@ public static class ExcelCompetitionLoader
                 {
                     Id = cat.Id,
                     CategoryId = cat.Id,
+                    Category = cat,
                     DrawKnockouts = new List<DrawKnockoutModel>(),
                     DrawPools = new List<DrawPoolsModel>(),
                     DrawOrders = new List<DrawOrderModel>()
@@ -613,17 +614,18 @@ public static class ExcelCompetitionLoader
             // puis toutes les 16èmes, toutes les 8èmes, les quarts, les demi-finales,
             // les petites finales et enfin les finales.
             // Ordonnancement officiel : mélange knockout + poules + ordre,
-            // catégories interleaved par phase, poules espacées d'au moins 3-4 combats.
-            var categoryOrder = matches
-                .Select(m => m.Category)
-                .Distinct()
-                .Select((name, idx) => (name, idx))
-                .ToDictionary(x => x.name, x => x.idx);
+            // catégories ordonnées par priorité (femmes en premier, âge croissant) puis interleaved par phase.
+            var categoryRank = categoriesList
+                .OrderBy(c => KnockoutStageHelper.GetCategoryPriority(c).GenderPriority)
+                .ThenBy(c => KnockoutStageHelper.GetCategoryPriority(c).MinAge)
+                .ThenBy(c => c.Id)
+                .Select((c, idx) => (c.Name, idx))
+                .ToDictionary(x => x.Name, x => x.idx);
 
             var scheduledMatches = KnockoutStageHelper.ScheduleTournamentMatches(
                 matches,
                 m => m.Type,
-                m => categoryOrder.TryGetValue(m.Category, out int idx) ? idx : 0,
+                m => categoryRank.TryGetValue(m.Category, out int idx) ? idx : 0,
                 m => m.Id,
                 m => m.Type == RoundType.Knockouts
                     ? KnockoutStageHelper.GetStagePhasePriority(m.StageName, m.IsBronzeMatch)

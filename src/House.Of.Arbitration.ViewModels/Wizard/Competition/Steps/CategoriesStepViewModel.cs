@@ -306,7 +306,10 @@ public partial class CategoriesStepViewModel : WizardStepViewModel<CompetitionMo
                     var index = Categories.IndexOf(cat);
                     if (index >= 0)
                     {
+                        var ageRange = editCategory.AgeRange;
+                        editCategory.AgeRange = null;
                         await _repository.UpdateAsync(editCategory);
+                        editCategory.AgeRange = ageRange;
                         await _warningService.UpdateWarningsForCategoryAsync(editCategory.Id);
                         await DeleteDrawAsync(editCategory.Id);
 

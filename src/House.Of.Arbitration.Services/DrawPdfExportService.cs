@@ -232,9 +232,14 @@ public class DrawPdfExportService : IDrawPdfExportService
         doc.Open();
         bool isFirstPage = true;
 
-        // Trier les tirages selon l'ordre chronologique de leur premier combat (puis nom de catégorie)
+        // Trier les tirages selon l'ordre officiel :
+        // 1. Ordre chronologique du premier combat (GetFirstMatchOrder)
+        // 2. Femmes en premier, puis âge croissant (KnockoutStageHelper.GetCategoryPriority)
+        // 3. Nom de catégorie
         var orderedDraws = draws
             .OrderBy(d => GetFirstMatchOrder(d))
+            .ThenBy(d => KnockoutStageHelper.GetCategoryPriority(d.Category).GenderPriority)
+            .ThenBy(d => KnockoutStageHelper.GetCategoryPriority(d.Category).MinAge)
             .ThenBy(d => d.Category?.Name ?? string.Empty)
             .ToList();
 

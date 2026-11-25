@@ -1053,6 +1053,14 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                     }
                     else
                     {
+                        if (competition.Categories != null)
+                        {
+                            foreach (var cat in competition.Categories)
+                            {
+                                cat.AgeRange = null;
+                            }
+                        }
+
                         var existing = await _competitionRepository.GetByIdAsync(competition.Id);
                         if (existing != null)
                             await _competitionRepository.UpdateAsync(competition);

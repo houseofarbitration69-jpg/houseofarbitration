@@ -186,7 +186,11 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                 "Competitors.Competitor.Country",
                 "Competitors.Warnings");
 
-            var compCategories = allCategories?.Where(c => c.CompetitionId == CompetitionId).ToList() ?? new List<CategoryModel>();
+            var compCategories = allCategories?.Where(c => c.CompetitionId == CompetitionId)
+                .OrderBy(c => KnockoutStageHelper.GetCategoryPriority(c).GenderPriority)
+                .ThenBy(c => KnockoutStageHelper.GetCategoryPriority(c).MinAge)
+                .ThenBy(c => c.Id)
+                .ToList() ?? new List<CategoryModel>();
 
             if (Competition != null)
             {
@@ -230,9 +234,10 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                 {
                     if (category.RoundType == RoundType.Knockouts && existingDraw.DrawKnockouts != null && existingDraw.DrawKnockouts.Count > 0)
                     {
-                        int totalMatches = existingDraw.DrawKnockouts.Count;
+                        int totalMatches = existingDraw.DrawKnockouts.Count(x => !x.IsBronzeMatch);
                         foreach (var k in existingDraw.DrawKnockouts.Where(x => !x.IsFinished).OrderBy(x => x.Order))
                         {
+                            k.Draw ??= existingDraw;
                             _allMatches.Add(new DrawMatchItemViewModel
                             {
                                 DrawModel = k,
@@ -298,10 +303,17 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
             }
 
             // Ordonnancement officiel : mélange des catégories par phase, poules espacées d'au moins 3-4 combats
+            // Priorité des catégories : femmes en premier, puis âge croissant
+            var catRank = new Dictionary<int, int>();
+            for (int i = 0; i < _categories.Count; i++)
+            {
+                catRank[_categories[i].Id] = i;
+            }
+
             _allMatches = KnockoutStageHelper.ScheduleTournamentMatches(
                 _allMatches,
                 m => m.RoundType,
-                m => m.CategoryId,
+                m => catRank.TryGetValue(m.CategoryId, out int rank) ? rank : m.CategoryId,
                 m => m.Order,
                 m => m.DrawModel is DrawKnockoutModel ko
                     ? KnockoutStageHelper.GetStagePhasePriority(ko, m.TotalMatchesInCategory)
@@ -378,7 +390,13 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
             {
                 m = 2;
             }
-            int totalMatches = (category.HasBronzeMatch && m >= 4) ? m : (m - 1);
+            int totalMatches = m - 1;
+            var tempDraw = new DrawModel
+            {
+                CategoryId = category.Id,
+                Category = category,
+                DrawKnockouts = new List<DrawKnockoutModel>()
+            };
 
             int matchesInRound = m / 2;
             int matchOffset = 0;
@@ -398,6 +416,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
 
                 var k = new DrawKnockoutModel
                 {
+                    Draw = tempDraw,
                     Order = i + 1,
                     GlobalOrder = 0,
                     Competitor1 = comp1,
@@ -405,6 +424,7 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                     Competitor1Id = comp1?.Id,
                     Competitor2Id = comp2?.Id
                 };
+                tempDraw.DrawKnockouts.Add(k);
 
                 if (compCount == 1 && comp1 != null)
                 {
@@ -440,10 +460,12 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                     // Petite finale avant la finale
                     var bronzeK = new DrawKnockoutModel
                     {
+                        Draw = tempDraw,
                         Order = matchOffset + 1,
                         GlobalOrder = 0,
                         IsBronzeMatch = true
                     };
+                    tempDraw.DrawKnockouts.Add(bronzeK);
 
                     _allMatches.Add(new DrawMatchItemViewModel
                     {
@@ -460,10 +482,12 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                     // Finale
                     var finalK = new DrawKnockoutModel
                     {
+                        Draw = tempDraw,
                         Order = matchOffset + 2,
                         GlobalOrder = 0,
                         IsBronzeMatch = false
                     };
+                    tempDraw.DrawKnockouts.Add(finalK);
 
                     _allMatches.Add(new DrawMatchItemViewModel
                     {
@@ -485,9 +509,11 @@ public partial class DrawsManagementViewModel : BaseViewModel, IQueryAttributabl
                     {
                         var k = new DrawKnockoutModel
                         {
+                            Draw = tempDraw,
                             Order = matchOffset + i + 1,
                             GlobalOrder = 0
                         };
+                        tempDraw.DrawKnockouts.Add(k);
 
                         _allMatches.Add(new DrawMatchItemViewModel
                         {

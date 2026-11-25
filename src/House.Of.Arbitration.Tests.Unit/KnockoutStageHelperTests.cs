@@ -196,4 +196,238 @@ public class KnockoutStageHelperTests
         Assert.False(KnockoutStageHelper.IsByeMatch(match));
         Assert.False(match.IsBye);
     }
+
+    [Fact]
+    public void GetCategoryPriority_WomenBeforeMen_AndYoungerBeforeOlder()
+    {
+        var catCadetsFemmes = new Models.CategoryModel
+        {
+            Id = 1,
+            Genre = Models.Genre.Women,
+            AgeRange = new Models.AgeRangeModel { MinAge = 12, Label = "Cadets" }
+        };
+        var catSeniorsFemmes = new Models.CategoryModel
+        {
+            Id = 2,
+            Genre = Models.Genre.Women,
+            AgeRange = new Models.AgeRangeModel { MinAge = 18, Label = "Seniors" }
+        };
+        var catCadetsHommes = new Models.CategoryModel
+        {
+            Id = 3,
+            Genre = Models.Genre.Men,
+            AgeRange = new Models.AgeRangeModel { MinAge = 12, Label = "Cadets" }
+        };
+        var catSeniorsHommes = new Models.CategoryModel
+        {
+            Id = 4,
+            Genre = Models.Genre.Men,
+            AgeRange = new Models.AgeRangeModel { MinAge = 18, Label = "Seniors" }
+        };
+
+        var list = new List<Models.CategoryModel> { catSeniorsHommes, catSeniorsFemmes, catCadetsHommes, catCadetsFemmes };
+
+        var sorted = list
+            .OrderBy(c => KnockoutStageHelper.GetCategoryPriority(c).GenderPriority)
+            .ThenBy(c => KnockoutStageHelper.GetCategoryPriority(c).MinAge)
+            .ThenBy(c => c.Id)
+            .ToList();
+
+        Assert.Equal(catCadetsFemmes.Id, sorted[0].Id);
+        Assert.Equal(catSeniorsFemmes.Id, sorted[1].Id);
+        Assert.Equal(catCadetsHommes.Id, sorted[2].Id);
+        Assert.Equal(catSeniorsHommes.Id, sorted[3].Id);
+    }
+
+    [Fact]
+    public void ScheduleTournamentDraws_OrdersDrawsWithWomenFirstThenYounger()
+    {
+        var catFemmesCadets = new Models.CategoryModel
+        {
+            Id = 1,
+            Genre = Models.Genre.Women,
+            AgeRange = new Models.AgeRangeModel { MinAge = 12, Label = "Cadets" }
+        };
+        var catHommesCadets = new Models.CategoryModel
+        {
+            Id = 2,
+            Genre = Models.Genre.Men,
+            AgeRange = new Models.AgeRangeModel { MinAge = 12, Label = "Cadets" }
+        };
+
+        var drawFemmes = new Models.DrawModel { Id = 1, CategoryId = 1, Category = catFemmesCadets };
+        var drawHommes = new Models.DrawModel { Id = 2, CategoryId = 2, Category = catHommesCadets };
+
+        // Deux matches de demi-finales dans chaque catégorie (StageName null → phase inconnue → priorité 50 < 70 → section préliminaire)
+        // Les femmes doivent être en premier dans la section préliminaire.
+        var koH1 = new Models.DrawKnockoutModel { Id = 1, DrawId = 2, Draw = drawHommes, Order = 1 };
+        var koH2 = new Models.DrawKnockoutModel { Id = 2, DrawId = 2, Draw = drawHommes, Order = 2 };
+        var koF1 = new Models.DrawKnockoutModel { Id = 3, DrawId = 1, Draw = drawFemmes, Order = 1 };
+        var koF2 = new Models.DrawKnockoutModel { Id = 4, DrawId = 1, Draw = drawFemmes, Order = 2 };
+
+        var allKnockouts = new List<Models.DrawKnockoutModel> { koH1, koH2, koF1, koF2 };
+
+        var scheduled = KnockoutStageHelper.ScheduleTournamentDraws(allKnockouts);
+
+        // Les femmes doivent être programmées en premier au sein de la phase préliminaire
+        Assert.Equal(koF1.Id, scheduled[0].Id);
+        Assert.Equal(koF2.Id, scheduled[1].Id);
+        Assert.Equal(koH1.Id, scheduled[2].Id);
+        Assert.Equal(koH2.Id, scheduled[3].Id);
+    }
+
+    [Fact]
+    public void ScheduleTournamentDraws_DirectFinalesGoToEnd_WomenBeforeMen()
+    {
+        // Catégorie femmes : 1 seul match = Finale directe
+        // → StageName calculé depuis Draw.DrawKnockouts : 1 match non-bronze → GetStageName(1, 1) = "Finale" (priorité 80 ≥ 70 → section finale)
+        // Catégorie hommes : 2 demis + 1 finale
+        // → Demis : GetStageName(1,2)="Demi-finale 1", GetStageName(2,2)="Demi-finale 2" (priorité 60 → section prélim)
+        // → Finale : GetStageName(3,3... ou 1 restant) = "Finale" (priorité 80 → section finale)
+        var catFemmes = new Models.CategoryModel
+        {
+            Id = 1,
+            Genre = Models.Genre.Women,
+            AgeRange = new Models.AgeRangeModel { MinAge = 18, Label = "Seniors" }
+        };
+        var catHommes = new Models.CategoryModel
+        {
+            Id = 2,
+            Genre = Models.Genre.Men,
+            AgeRange = new Models.AgeRangeModel { MinAge = 18, Label = "Seniors" }
+        };
+
+        // Finale directe féminine — 1 seul match dans DrawKnockouts → StageName = "Finale"
+        var drawFemmes = new Models.DrawModel { Id = 1, CategoryId = 1, Category = catFemmes };
+        var koFemFinale = new Models.DrawKnockoutModel { Id = 1, DrawId = 1, Draw = drawFemmes, Order = 1 };
+        drawFemmes.DrawKnockouts = new System.Collections.Generic.List<Models.DrawKnockoutModel> { koFemFinale };
+
+        // Tableau masculin : 2 demis + 1 finale → 3 matchs → StageName calculé comme Demi-finale 1, Demi-finale 2, Finale
+        var drawHommes = new Models.DrawModel { Id = 2, CategoryId = 2, Category = catHommes };
+        var koHSemi1 = new Models.DrawKnockoutModel { Id = 2, DrawId = 2, Draw = drawHommes, Order = 1 };
+        var koHSemi2 = new Models.DrawKnockoutModel { Id = 3, DrawId = 2, Draw = drawHommes, Order = 2 };
+        var koHFinale = new Models.DrawKnockoutModel { Id = 4, DrawId = 2, Draw = drawHommes, Order = 3 };
+        drawHommes.DrawKnockouts = new System.Collections.Generic.List<Models.DrawKnockoutModel> { koHSemi1, koHSemi2, koHFinale };
+
+        // Vérifier les StageName calculés (GetStageName appelé avec includeIndex=false)
+        Assert.Equal("Finale", koFemFinale.StageName);    // 1 match non-bronze → Finale
+        Assert.Equal("Demi-finale", koHSemi1.StageName);  // 3 matchs, rank 1 → Demi-finale (sans numéro car includeIndex=false)
+        Assert.Equal("Demi-finale", koHSemi2.StageName);  // rank 2 → Demi-finale
+        Assert.Equal("Finale", koHFinale.StageName);       // rank 3 → Finale
+
+        var all = new System.Collections.Generic.List<Models.DrawKnockoutModel>
+            { koHSemi1, koHSemi2, koHFinale, koFemFinale };
+        var scheduled = KnockoutStageHelper.ScheduleTournamentDraws(all);
+
+        // Ordre attendu :
+        // 1. Demis masculines (section préliminaire, phase priorité 60 < 70)
+        // 2. Finale féminine (section finale, femmes en premier car getCategoryId femmes < hommes)
+        // 3. Finale masculine (section finale, hommes en second)
+        Assert.Equal(koHSemi1.Id, scheduled[0].Id); // Demi-finale 1 homme (préliminaire)
+        Assert.Equal(koHSemi2.Id, scheduled[1].Id); // Demi-finale 2 homme (préliminaire)
+        Assert.Equal(koFemFinale.Id, scheduled[2].Id); // Finale femme (section finale, femme d'abord)
+        Assert.Equal(koHFinale.Id, scheduled[3].Id);   // Finale homme (section finale, homme ensuite)
+    }
+
+    [Fact]
+    public void ScheduleTournamentDraws_QuartsAlwaysBeforeSemis_AcrossDifferentSizedCategories()
+    {
+        // Catégorie femmes (prioritaire) : 2 demis + 1 finale (pas de quarts)
+        // Catégorie hommes : 4 quarts + 2 demis + 1 finale
+        // Règle : TOUS les quarts de finale doivent passer AVANT TOUTES les demi-finales !
+        var catFemmes = new Models.CategoryModel
+        {
+            Id = 1,
+            Genre = Models.Genre.Women,
+            AgeRange = new Models.AgeRangeModel { MinAge = 18, Label = "Seniors" }
+        };
+        var catHommes = new Models.CategoryModel
+        {
+            Id = 2,
+            Genre = Models.Genre.Men,
+            AgeRange = new Models.AgeRangeModel { MinAge = 18, Label = "Seniors" }
+        };
+
+        var drawFemmes = new Models.DrawModel { Id = 1, CategoryId = 1, Category = catFemmes };
+        var koFSemi1 = new Models.DrawKnockoutModel { Id = 1, DrawId = 1, Draw = drawFemmes, Order = 1 };
+        var koFSemi2 = new Models.DrawKnockoutModel { Id = 2, DrawId = 1, Draw = drawFemmes, Order = 2 };
+        var koFFinale = new Models.DrawKnockoutModel { Id = 3, DrawId = 1, Draw = drawFemmes, Order = 3 };
+        drawFemmes.DrawKnockouts = new List<Models.DrawKnockoutModel> { koFSemi1, koFSemi2, koFFinale };
+
+        var drawHommes = new Models.DrawModel { Id = 2, CategoryId = 2, Category = catHommes };
+        var koHQ1 = new Models.DrawKnockoutModel { Id = 4, DrawId = 2, Draw = drawHommes, Order = 1 };
+        var koHQ2 = new Models.DrawKnockoutModel { Id = 5, DrawId = 2, Draw = drawHommes, Order = 2 };
+        var koHQ3 = new Models.DrawKnockoutModel { Id = 6, DrawId = 2, Draw = drawHommes, Order = 3 };
+        var koHQ4 = new Models.DrawKnockoutModel { Id = 7, DrawId = 2, Draw = drawHommes, Order = 4 };
+        var koHSemi1 = new Models.DrawKnockoutModel { Id = 8, DrawId = 2, Draw = drawHommes, Order = 5 };
+        var koHSemi2 = new Models.DrawKnockoutModel { Id = 9, DrawId = 2, Draw = drawHommes, Order = 6 };
+        var koHFinale = new Models.DrawKnockoutModel { Id = 10, DrawId = 2, Draw = drawHommes, Order = 7 };
+        drawHommes.DrawKnockouts = new List<Models.DrawKnockoutModel>
+            { koHQ1, koHQ2, koHQ3, koHQ4, koHSemi1, koHSemi2, koHFinale };
+
+        var all = new List<Models.DrawKnockoutModel>
+            { koFSemi1, koFSemi2, koFFinale, koHQ1, koHQ2, koHQ3, koHQ4, koHSemi1, koHSemi2, koHFinale };
+
+        var scheduled = KnockoutStageHelper.ScheduleTournamentDraws(all);
+
+        // 1. Les 4 quarts hommes (priorité 50)
+        Assert.Equal(new[] { koHQ1.Id, koHQ2.Id, koHQ3.Id, koHQ4.Id },
+            scheduled.Take(4).Select(m => m.Id).ToArray());
+
+        // 2. Les 2 demis femmes avant les 2 demis hommes (priorité 60, femmes en premier)
+        Assert.Equal(new[] { koFSemi1.Id, koFSemi2.Id },
+            scheduled.Skip(4).Take(2).Select(m => m.Id).ToArray());
+        Assert.Equal(new[] { koHSemi1.Id, koHSemi2.Id },
+            scheduled.Skip(6).Take(2).Select(m => m.Id).ToArray());
+
+        // 3. Les finales : femmes puis hommes (priorité 80)
+        Assert.Equal(new[] { koFFinale.Id, koHFinale.Id },
+            scheduled.Skip(8).Take(2).Select(m => m.Id).ToArray());
+    }
+
+    [Fact]
+    public void ScheduleTournamentDraws_WhenDrawKnockoutsNotLoaded_StillOrdersQuartsBeforeSemis()
+    {
+        // Simule un chargement EF Core où Draw.DrawKnockouts est null sur chaque DrawModel
+        var catFemmes = new Models.CategoryModel
+        {
+            Id = 1,
+            Genre = Models.Genre.Women,
+            AgeRange = new Models.AgeRangeModel { MinAge = 18, Label = "Seniors" }
+        };
+        var catHommes = new Models.CategoryModel
+        {
+            Id = 2,
+            Genre = Models.Genre.Men,
+            AgeRange = new Models.AgeRangeModel { MinAge = 18, Label = "Seniors" }
+        };
+
+        var drawFemmes = new Models.DrawModel { Id = 1, CategoryId = 1, Category = catFemmes, DrawKnockouts = null };
+        var koFSemi1 = new Models.DrawKnockoutModel { Id = 1, DrawId = 1, Draw = drawFemmes, Order = 1 };
+        var koFSemi2 = new Models.DrawKnockoutModel { Id = 2, DrawId = 1, Draw = drawFemmes, Order = 2 };
+        var koFFinale = new Models.DrawKnockoutModel { Id = 3, DrawId = 1, Draw = drawFemmes, Order = 3 };
+
+        var drawHommes = new Models.DrawModel { Id = 2, CategoryId = 2, Category = catHommes, DrawKnockouts = null };
+        var koHQ1 = new Models.DrawKnockoutModel { Id = 4, DrawId = 2, Draw = drawHommes, Order = 1 };
+        var koHQ2 = new Models.DrawKnockoutModel { Id = 5, DrawId = 2, Draw = drawHommes, Order = 2 };
+        var koHQ3 = new Models.DrawKnockoutModel { Id = 6, DrawId = 2, Draw = drawHommes, Order = 3 };
+        var koHQ4 = new Models.DrawKnockoutModel { Id = 7, DrawId = 2, Draw = drawHommes, Order = 4 };
+        var koHSemi1 = new Models.DrawKnockoutModel { Id = 8, DrawId = 2, Draw = drawHommes, Order = 5 };
+        var koHSemi2 = new Models.DrawKnockoutModel { Id = 9, DrawId = 2, Draw = drawHommes, Order = 6 };
+        var koHFinale = new Models.DrawKnockoutModel { Id = 10, DrawId = 2, Draw = drawHommes, Order = 7 };
+
+        var all = new List<Models.DrawKnockoutModel>
+            { koFSemi1, koFSemi2, koFFinale, koHQ1, koHQ2, koHQ3, koHQ4, koHSemi1, koHSemi2, koHFinale };
+
+        var scheduled = KnockoutStageHelper.ScheduleTournamentDraws(all);
+
+        Assert.Equal(new[] { koHQ1.Id, koHQ2.Id, koHQ3.Id, koHQ4.Id },
+            scheduled.Take(4).Select(m => m.Id).ToArray());
+        Assert.Equal(new[] { koFSemi1.Id, koFSemi2.Id },
+            scheduled.Skip(4).Take(2).Select(m => m.Id).ToArray());
+        Assert.Equal(new[] { koHSemi1.Id, koHSemi2.Id },
+            scheduled.Skip(6).Take(2).Select(m => m.Id).ToArray());
+        Assert.Equal(new[] { koFFinale.Id, koHFinale.Id },
+            scheduled.Skip(8).Take(2).Select(m => m.Id).ToArray());
+    }
 }

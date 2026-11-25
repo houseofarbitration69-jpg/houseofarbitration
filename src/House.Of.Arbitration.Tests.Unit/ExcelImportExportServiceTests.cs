@@ -1,6 +1,7 @@
 using ClosedXML.Excel;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Models;
+using House.Of.Arbitration.Server.Cli;
 using House.Of.Arbitration.Services;
 using NSubstitute;
 using Xunit;
@@ -225,6 +226,236 @@ public class ExcelImportExportServiceTests
         Assert.Equal(10, capturedDraw.CategoryId);
         Assert.NotNull(capturedDraw.DrawKnockouts);
         Assert.NotEmpty(capturedDraw.DrawKnockouts);
+    }
+
+    [Fact]
+    public async Task ImportAsync_DetachesCategoryBeforeDrawPersist_ToPreventAgeRangeUniqueConstraintError()
+    {
+        var compRepo = Substitute.For<IRepository<CompetitionModel>>();
+        var catRepo = Substitute.For<IRepository<CategoryModel>>();
+        var comporRepo = Substitute.For<IRepository<CompetitorModel>>();
+        var compCatRepo = Substitute.For<IRepository<CompetitorCategoryModel>>();
+        var drawRepo = Substitute.For<IRepository<DrawModel>>();
+
+        compRepo.AddAsync(Arg.Any<CompetitionModel>()).Returns(call =>
+        {
+            var c = call.Arg<CompetitionModel>();
+            c.Id = 1;
+            return Task.FromResult<CompetitionModel?>(c);
+        });
+
+        catRepo.AddAsync(Arg.Any<CategoryModel>()).Returns(call =>
+        {
+            var cat = call.Arg<CategoryModel>();
+            cat.Id = 10;
+            return Task.FromResult<CategoryModel?>(cat);
+        });
+
+        comporRepo.AddAsync(Arg.Any<CompetitorModel>()).Returns(call =>
+        {
+            var comp = call.Arg<CompetitorModel>();
+            comp.Id = 20;
+            return Task.FromResult<CompetitorModel?>(comp);
+        });
+
+        compCatRepo.AddAsync(Arg.Any<CompetitorCategoryModel>()).Returns(call =>
+            Task.FromResult<CompetitorCategoryModel?>(call.Arg<CompetitorCategoryModel>()));
+
+        CategoryModel? categoryAttachedAtAddAsync = null;
+        drawRepo.AddAsync(Arg.Any<DrawModel>()).Returns(call =>
+        {
+            var draw = call.Arg<DrawModel>();
+            categoryAttachedAtAddAsync = draw.Category;
+            draw.Id = 50;
+            return Task.FromResult<DrawModel?>(draw);
+        });
+
+        var service = new ExcelImportExportService(compRepo, catRepo, comporRepo, compCatRepo, drawRepo);
+
+        using var workbook = new XLWorkbook();
+        var wsComp = workbook.Worksheets.Add("Compétition");
+        wsComp.Cell(1, 1).Value = "Nom";
+        wsComp.Cell(1, 2).Value = "Date (JJ/MM/AAAA)";
+        wsComp.Cell(1, 3).Value = "Type";
+        wsComp.Cell(2, 1).Value = "Compétition Test";
+        wsComp.Cell(2, 2).Value = "15/03/2026";
+        wsComp.Cell(2, 3).Value = "Sanda";
+
+        var wsCat = workbook.Worksheets.Add("Catégories");
+        wsCat.Cell(1, 1).Value = "TypeCategorie";
+        wsCat.Cell(1, 2).Value = "Genre";
+        wsCat.Cell(1, 3).Value = "PoidsMin";
+        wsCat.Cell(1, 4).Value = "PoidsMax";
+        wsCat.Cell(1, 5).Value = "TrancheAge";
+        wsCat.Cell(1, 6).Value = "TypeRound";
+        wsCat.Cell(1, 7).Value = "NomCategorie (auto)";
+
+        wsCat.Cell(2, 1).Value = "Sanda";
+        wsCat.Cell(2, 2).Value = "Women";
+        wsCat.Cell(2, 3).Value = "50";
+        wsCat.Cell(2, 4).Value = "55";
+        wsCat.Cell(2, 5).Value = "Seniors";
+        wsCat.Cell(2, 6).Value = "Knockouts";
+        wsCat.Cell(2, 7).Value = "Sanda Seniors Femmes -55kg";
+
+        var wsCompetitors = workbook.Worksheets.Add("Compétiteurs");
+        wsCompetitors.Cell(1, 1).Value = "Prénom";
+        wsCompetitors.Cell(1, 2).Value = "Nom";
+        wsCompetitors.Cell(1, 3).Value = "Genre";
+        wsCompetitors.Cell(1, 4).Value = "DateNaissance (JJ/MM/AAAA)";
+        wsCompetitors.Cell(1, 5).Value = "Club";
+        wsCompetitors.Cell(1, 6).Value = "PaysISO";
+        wsCompetitors.Cell(1, 7).Value = "Poids (kg)";
+        wsCompetitors.Cell(1, 8).Value = "Catégorie";
+
+        wsCompetitors.Cell(2, 1).Value = "Alice";
+        wsCompetitors.Cell(2, 2).Value = "Durand";
+        wsCompetitors.Cell(2, 3).Value = "Women";
+        wsCompetitors.Cell(2, 4).Value = "15/03/2000";
+        wsCompetitors.Cell(2, 5).Value = "Club Paris";
+        wsCompetitors.Cell(2, 6).Value = "FRA";
+        wsCompetitors.Cell(2, 7).Value = "52";
+        wsCompetitors.Cell(2, 8).Value = "Sanda Seniors Femmes -55kg";
+
+        using var ms = new MemoryStream();
+        workbook.SaveAs(ms);
+        ms.Position = 0;
+
+        var result = await service.ImportAsync(ms);
+
+        Assert.True(result.Success, string.Join("; ", result.Errors));
+        // draw.Category MUST be null when passed to drawRepo.AddAsync to avoid EF Core cascaded insertion of AgeRanges (SQLite Error 19)
+        Assert.Null(categoryAttachedAtAddAsync);
+    }
+
+    [Fact]
+    public void LoadFromFile_Sanda2026_WomenMustComeFirst()
+    {
+        var result = ExcelCompetitionLoader.LoadFromFile(@"C:\Works\KungFu\houseofarbitration\Documents\Sanda2026.xlsx");
+        Assert.True(result.Success, result.ErrorMessage);
+        Assert.NotEmpty(result.Matches);
+
+        var womenCategoryNames = result.Categories
+            .Where(c => c.Genre == Models.Genre.Women)
+            .Select(c => c.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        Assert.True(womenCategoryNames.Count > 0, "Il doit y avoir au moins une catégorie féminine dans Sanda2026.xlsx");
+
+        var nonByeMatches = result.Matches
+            .Where(m => m.BlueCompetitor != "[EXEMPTÉ / BYE]" && m.RedCompetitor != "[EXEMPTÉ / BYE]")
+            .ToList();
+
+        // --- Règle 1a : Dans la section des finales (Finale uniquement), les femmes passent avant les hommes ---
+        // Les Finales directes des catégories féminines doivent venir AVANT les finales masculines.
+        // On exclut les IsBronzeMatch (petites finales, priorité 70) car ils passent avant les finales (priorité 80) — c'est correct par conception.
+        var finaleMatches = nonByeMatches
+            .Where(m => m.Type == Models.RoundType.Knockouts
+                     && m.StageName?.StartsWith("Finale", StringComparison.OrdinalIgnoreCase) == true
+                     && !m.IsBronzeMatch)
+            .ToList();
+
+        if (finaleMatches.Count > 0)
+        {
+            int firstMenFinaleIdx = finaleMatches
+                .Select((m, idx) => (m, idx))
+                .Where(x => !womenCategoryNames.Contains(x.m.Category))
+                .Select(x => (int?)x.idx)
+                .FirstOrDefault() ?? int.MaxValue;
+
+            int lastWomenFinaleIdx = finaleMatches
+                .Select((m, idx) => (m, idx))
+                .Where(x => womenCategoryNames.Contains(x.m.Category))
+                .Select(x => (int?)x.idx)
+                .LastOrDefault() ?? -1;
+
+            if (lastWomenFinaleIdx >= 0 && firstMenFinaleIdx < int.MaxValue)
+            {
+                Assert.True(lastWomenFinaleIdx < firstMenFinaleIdx,
+                    $"Dans la section des finales, les femmes doivent passer AVANT les hommes.\n"
+                    + $"Dernière finale féminine à l'index {lastWomenFinaleIdx} dans la liste des finales, "
+                    + $"première finale masculine à l'index {firstMenFinaleIdx}.");
+            }
+        }
+
+        // --- Règle 1b : Dans la section préliminaire (non-finales, non-bronze), si des femmes ont des matchs, elles passent avant les hommes ---
+        // On exclut les IsBronzeMatch car ils sont dans la section finale (priorité 70), pas préliminaire.
+        var prelimNonByeMatches = nonByeMatches
+            .Where(m => !(m.Type == Models.RoundType.Knockouts
+                        && (m.StageName?.StartsWith("Finale", StringComparison.OrdinalIgnoreCase) == true
+                         || m.IsBronzeMatch)))
+            .ToList();
+
+        int firstMenPrelimIdx = prelimNonByeMatches
+            .Select((m, idx) => (m, idx))
+            .Where(x => !womenCategoryNames.Contains(x.m.Category))
+            .Select(x => (int?)x.idx)
+            .FirstOrDefault() ?? int.MaxValue;
+
+        int lastWomenPrelimIdx = prelimNonByeMatches
+            .Select((m, idx) => (m, idx))
+            .Where(x => womenCategoryNames.Contains(x.m.Category))
+            .Select(x => (int?)x.idx)
+            .LastOrDefault() ?? -1;
+
+        if (lastWomenPrelimIdx >= 0 && firstMenPrelimIdx < int.MaxValue)
+        {
+            Assert.True(lastWomenPrelimIdx < firstMenPrelimIdx,
+                $"Dans la section préliminaire, les femmes doivent passer AVANT les hommes.\n"
+                + $"Dernière fem. préliminaire à l'index {lastWomenPrelimIdx}, première masc. à l'index {firstMenPrelimIdx}.");
+        }
+
+        // --- Règle 2 : Pour chaque catégorie KO, les matchs d'une même phase sont consécutifs ---
+        var koCategoryGroups = nonByeMatches
+            .Where(m => m.Type == Models.RoundType.Knockouts)
+            .GroupBy(m => m.Category);
+
+        foreach (var catGroup in koCategoryGroups)
+        {
+            var byPhase = catGroup
+                .GroupBy(m => m.StageName ?? string.Empty)
+                .ToList();
+
+            foreach (var phaseGroup in byPhase)
+            {
+                var positions = phaseGroup.Select(m => m.Id).OrderBy(id => id).ToList();
+                if (positions.Count <= 1) continue;
+
+                for (int i = 1; i < positions.Count; i++)
+                {
+                    int prev = positions[i - 1];
+                    int curr = positions[i];
+
+                    var matchesBetween = nonByeMatches
+                        .Where(m => m.Id > prev && m.Id < curr && m.Category != catGroup.Key)
+                        .ToList();
+
+                    Assert.True(matchesBetween.Count == 0,
+                        $"[{catGroup.Key}] Phase '{phaseGroup.Key}' : {matchesBetween.Count} match(s) d'autres catégories s'intercalent entre #{prev} et #{curr} :\n"
+                        + string.Join("\n", matchesBetween.Select(m => $"  #{m.Id} [{m.Category}] {m.StageName}")));
+                }
+            }
+        }
+
+        // --- Règle 3 : Ordre chronologique global des phases KO (32èmes ≤ 16èmes ≤ 8èmes ≤ Quarts ≤ Demis ≤ Petites finales ≤ Finales) ---
+        var koMatchesInOrder = nonByeMatches
+            .Where(m => m.Type == Models.RoundType.Knockouts)
+            .ToList();
+
+        int maxPhaseSeen = 0;
+        string maxPhaseLabel = string.Empty;
+        foreach (var m in koMatchesInOrder)
+        {
+            int phasePriority = Models.Helpers.KnockoutStageHelper.GetStagePhasePriority(m.StageName, m.IsBronzeMatch);
+            Assert.True(phasePriority >= maxPhaseSeen,
+                $"Désordre de phase détecté : #{m.Id} [{m.Category}] '{m.StageName}' (priorité {phasePriority}) "
+                + $"apparaît après '{maxPhaseLabel}' (priorité {maxPhaseSeen}).");
+            if (phasePriority > maxPhaseSeen)
+            {
+                maxPhaseSeen = phasePriority;
+                maxPhaseLabel = $"#{m.Id} [{m.Category}] {m.StageName}";
+            }
+        }
     }
 
     [Fact]

@@ -290,7 +290,12 @@ public class ExcelImportExportService : IExcelImportExportService
         {
             foreach (var draw in draws)
             {
-                try { await _drawRepository.DeleteAsync(draw); } catch { }
+                try 
+                { 
+                    draw.Category = null;
+                    await _drawRepository.DeleteAsync(draw); 
+                } 
+                catch { }
             }
             foreach (var link in links)
             {
@@ -302,7 +307,12 @@ public class ExcelImportExportService : IExcelImportExportService
             }
             foreach (var cat in categories)
             {
-                try { await _categoryRepository.DeleteAsync(cat); } catch { }
+                try 
+                { 
+                    cat.AgeRange = null;
+                    await _categoryRepository.DeleteAsync(cat); 
+                } 
+                catch { }
             }
             if (competition != null)
             {
@@ -714,11 +724,17 @@ public class ExcelImportExportService : IExcelImportExportService
                     return BuildResult(false, 0, 0, 0, errors, warnings);
                 }
 
-                // Génération des tirages pour chaque catégorie
+                // Génération des tirages pour chaque catégorie (ordre officiel : femmes en premier, âge croissant)
                 int globalOrder = 1;
                 var generatedDraws = new List<(DrawModel Draw, string CategoryName)>();
 
-                foreach (var category in persistedCategories)
+                var sortedPersistedCategories = persistedCategories
+                    .OrderBy(c => KnockoutStageHelper.GetCategoryPriority(c).GenderPriority)
+                    .ThenBy(c => KnockoutStageHelper.GetCategoryPriority(c).MinAge)
+                    .ThenBy(c => c.Id)
+                    .ToList();
+
+                foreach (var category in sortedPersistedCategories)
                 {
                     try
                     {
@@ -779,10 +795,14 @@ public class ExcelImportExportService : IExcelImportExportService
                 {
                     try
                     {
+                        var categoryBackup = draw.Category;
+                        // Détacher Category pour éviter qu'EF Core ne tente d'insérer Category et son AgeRange
+                        draw.Category = null;
                         _drawRepository.ClearTracker();
                         var persistedDraw = await _drawRepository.AddAsync(draw);
                         if (persistedDraw != null)
                         {
+                            persistedDraw.Category = categoryBackup;
                             persistedDraws.Add(persistedDraw);
                             importedDraws++;
                         }
@@ -844,6 +864,7 @@ public class ExcelImportExportService : IExcelImportExportService
         var draw = new DrawModel
         {
             CategoryId = category.Id,
+            Category = category,
             DrawKnockouts = new List<DrawKnockoutModel>(),
             DrawPools = new List<DrawPoolsModel>(),
             DrawOrders = new List<DrawOrderModel>()

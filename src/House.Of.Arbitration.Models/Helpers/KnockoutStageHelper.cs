@@ -167,12 +167,24 @@ public static class KnockoutStageHelper
         if (match.IsBronzeMatch) return 70;
 
         string? stage = match.StageName;
-        if (string.IsNullOrWhiteSpace(stage) || stage == "Combat")
+        if (string.IsNullOrWhiteSpace(stage) || stage.StartsWith("Combat", StringComparison.OrdinalIgnoreCase))
         {
-            int total = totalMatches > 0 ? totalMatches : (match.Draw?.DrawKnockouts?.Count ?? 0);
-            if (match.Order > 0 && total > 0)
+            var nonBronze = match.Draw?.DrawKnockouts?
+                .Where(k => !k.IsBronzeMatch)
+                .OrderBy(k => k.Order)
+                .ToList();
+
+            if (nonBronze != null && nonBronze.Count > 0)
             {
-                stage = GetStageName(match.Order, total, false);
+                int rank = nonBronze.IndexOf(match) + 1;
+                if (rank > 0)
+                {
+                    stage = GetStageName(rank, nonBronze.Count, false);
+                }
+            }
+            else if (match.Order > 0 && totalMatches > 0)
+            {
+                stage = GetStageName(match.Order, totalMatches, false);
             }
         }
 
@@ -285,13 +297,50 @@ public static class KnockoutStageHelper
     }
 
     /// <summary>
+    /// Calcule la priorité de tri d'une catégorie :
+    /// 1. Femmes en premier (Genre.Women = 0, Mixte = 1, Men = 2, autre = 3).
+    /// 2. Par ordre croissant d'âge (AgeRange.MinAge).
+    /// </summary>
+    public static (int GenderPriority, int MinAge, int CategoryId) GetCategoryPriority(CategoryModel? category, int fallbackId = 0)
+    {
+        if (category == null) return (3, int.MaxValue, fallbackId);
+
+        int genderPriority = category.Genre switch
+        {
+            Genre.Women => 0,
+            Genre.Mixte => 1,
+            Genre.Men   => 2,
+            _           => 3
+        };
+
+        int minAge = category.AgeRange?.MinAge ?? (category.AgeRangeId switch
+        {
+            1 => 12, // Cadets
+            2 => 15, // Juniors
+            4 => 18, // Espoirs
+            3 => 18, // Seniors
+            5 => 35, // Veterans
+            _ => int.MaxValue / 2
+        });
+
+        return (genderPriority, minAge, category.Id != 0 ? category.Id : fallbackId);
+    }
+
+    /// <summary>
     /// Ordonne l'ensemble des combats d'un tournoi selon les règles officielles :
-    /// 1. Les matches du premier tour sans adversaire (Byes / Exemptions) ne sont pas combattus (GlobalOrder = 0).
-    /// 2. Les catégories en éliminatoire sont ordonnées par phase chronologique (32èmes, 16èmes, 8èmes, quarts, demis),
-    ///    en alternant/mélangeant les catégories au sein de chaque phase.
-    /// 3. Les matches de poules sont mélangés avec les combats éliminatoires préliminaires,
-    ///    avec un espacement d'au moins 3 ou 4 combats entre deux matches d'une même poule.
-    /// 4. Les petites finales et finales de toutes les catégories se déroulent à la toute fin du tournoi.
+    /// 1. Les matches du premier tour sans adversaire (Byes / Exemptions) ne sont pas combattus.
+    /// 2. Structure en deux grandes sections :
+    ///    - Section préliminaire (phases &lt; 70 : 32èmes, 16èmes, 8èmes, quarts, demis + poules + ordre de passage) :
+    ///      Tri par (roundIndex, catégorie, ordre local).
+    ///    - Section finale (phases ≥ 70 : petites finales et finales, y compris les finales directes des catégories à 2 compétiteurs) :
+    ///      Toujours en toute fin de tournoi. Femmes en premier au sein de chaque type de phase.
+    /// 3. Au sein de la section préliminaire, les matchs KO sont ordonnés par leur priorité de phase absolue
+    ///    (64èmes=10, 32èmes=20, 16èmes=30, 8èmes=40, Quarts=50, Demis=60) afin qu'aucune demi-finale ne passe
+    ///    jamais avant un quart de finale d'une autre catégorie.
+    ///    Pour les poules : rang = tour du match dans la catégorie (match 1 → 10, match 2 → 20, ...).
+    /// 4. Au sein de chaque (phase, catégorie), TOUS les matchs sont consécutifs (localOrder croissant).
+    ///    Ex : tous les quarts de finale de C1 se déroulent à la suite, puis tous les quarts de C2.
+    /// 5. getCategoryId doit retourner un rang pré-calculé avec Femmes en premier (valeur plus petite = plus prioritaire).
     /// </summary>
     public static List<T> ScheduleTournamentMatches<T>(
         IEnumerable<T> allMatches,
@@ -302,76 +351,170 @@ public static class KnockoutStageHelper
         Func<T, bool> isBye)
     {
         var rawList = allMatches?.ToList() ?? new List<T>();
-        if (rawList.Count == 0) return new List<T>();
+        if (rawList.Count == 0) return rawList;
 
         var byes = new List<T>();
         var activeMatches = new List<T>();
-
         foreach (var m in rawList)
         {
-            if (isBye(m))
-            {
-                byes.Add(m);
-            }
+            if (isBye(m)) byes.Add(m); else activeMatches.Add(m);
+        }
+
+        int n = activeMatches.Count;
+        if (n == 0) return byes;
+
+        // --- Séparation : finales (≥ 70) vs préliminaires (< 70 + poules + ordre) ---
+        // Les Finales directes (catégorie à 2 compétiteurs, 1 seul match = Finale) ont priorité 80 ≥ 70
+        // → elles vont dans la section finale, à la fin du tournoi.
+        const int finalsThreshold = 70;
+
+        var finalsMatches = new List<T>();
+        var prelimMatches = new List<T>();
+
+        foreach (var m in activeMatches)
+        {
+            if (getRoundType(m) == RoundType.Knockouts && getStagePhasePriority(m) >= finalsThreshold)
+                finalsMatches.Add(m);
             else
+                prelimMatches.Add(m);
+        }
+
+        // ---- Section préliminaire : tri par (phasePriority, catégorie, ordre local) ----
+        int np = prelimMatches.Count;
+        var roundIndices = new int[np];
+
+        // KO prelims (priority < 70) : priorité de phase absolue (10, 20, 30, 40, 50=Quarts, 60=Demis)
+        // Garantit que tous les quarts de toutes les catégories passent avant toutes les demi-finales.
+        for (int i = 0; i < np; i++)
+        {
+            if (getRoundType(prelimMatches[i]) == RoundType.Knockouts)
             {
-                activeMatches.Add(m);
+                roundIndices[i] = getStagePhasePriority(prelimMatches[i]);
             }
         }
 
-        // 1. Finales et Petites finales éliminatoires (Priorité >= 70 : 70 = Petites finales, 80 = Finales)
-        var finals = activeMatches
-            .Where(m => getRoundType(m) == RoundType.Knockouts && getStagePhasePriority(m) >= 70)
-            .OrderBy(m => getStagePhasePriority(m)) // 70 d'abord (petites finales), puis 80 (finales)
-            .ThenBy(m => getCategoryId(m))
+        // Poules : rang dans le calendrier de la catégorie (match 1 → 10, match 2 → 20, ...)
+        var poolIndicesByCat = new Dictionary<int, List<int>>();
+        for (int i = 0; i < np; i++)
+        {
+            if (getRoundType(prelimMatches[i]) == RoundType.Pools)
+            {
+                int catId = getCategoryId(prelimMatches[i]);
+                if (!poolIndicesByCat.TryGetValue(catId, out var lst))
+                    poolIndicesByCat[catId] = lst = new List<int>();
+                lst.Add(i);
+            }
+        }
+
+        foreach (var (_, indices) in poolIndicesByCat)
+        {
+            int rank = 1;
+            foreach (int i in indices.OrderBy(i => getLocalOrder(prelimMatches[i])))
+                roundIndices[i] = (rank++) * 10;
+        }
+
+        // Ordre de passage (Taolu) : ordre local = numéro de tour
+        for (int i = 0; i < np; i++)
+        {
+            if (getRoundType(prelimMatches[i]) == RoundType.Order)
+                roundIndices[i] = getLocalOrder(prelimMatches[i]);
+        }
+
+        var prelimScheduled = prelimMatches
+            .Select((m, i) => (Match: m, RoundIndex: roundIndices[i]))
+            .OrderBy(x => x.RoundIndex)
+            .ThenBy(x => getCategoryId(x.Match))
+            .ThenBy(x => getLocalOrder(x.Match))
+            .Select(x => x.Match)
+            .ToList();
+
+        // ---- Section finale : petites finales (70) puis finales (80) ----
+        // Au sein de chaque sous-section, Femmes en premier (getCategoryId croissant).
+        var finalsScheduled = finalsMatches
+            .OrderBy(m => getStagePhasePriority(m))  // 70 (petites finales) avant 80 (finales)
+            .ThenBy(m => getCategoryId(m))            // Femmes en premier
             .ThenBy(m => getLocalOrder(m))
             .ToList();
 
-        // 2. Combats éliminatoires préliminaires (Priorité < 70 : 32èmes, 16èmes, 8èmes, quarts, demis)
-        var koPrelims = activeMatches
-            .Where(m => getRoundType(m) == RoundType.Knockouts && getStagePhasePriority(m) < 70)
-            .ToList();
-
-        // Mélange des catégories au sein de chaque phase éliminatoire (round-robin entre catégories)
-        var orderedKoPrelims = InterleaveKnockoutPhases(koPrelims, getStagePhasePriority, getCategoryId, getLocalOrder);
-
-        // 3. Matches de poules (groupés par catégorie, ordonnés par ordre local)
-        var poolMatches = activeMatches
-            .Where(m => getRoundType(m) == RoundType.Pools)
-            .ToList();
-
-        var poolQueues = poolMatches
-            .GroupBy(m => getCategoryId(m))
-            .ToDictionary(g => g.Key, g => new Queue<T>(g.OrderBy(m => getLocalOrder(m))));
-
-        // 4. Matches d'ordre de passage (Taolu / passages individuels)
-        var orderMatches = new Queue<T>(activeMatches
-            .Where(m => getRoundType(m) == RoundType.Order)
-            .OrderBy(m => getCategoryId(m))
-            .ThenBy(m => getLocalOrder(m)));
-
-        // 5. Entrelacement des poules et des éliminatoires préliminaires
-        // Règle : espacer les combats d'une même poule d'au moins 3 ou 4 combats
-        var prelimScheduled = InterleavePoolsAndPrelims(orderedKoPrelims, poolQueues, orderMatches);
-
-        // 6. Assemblage final : Préliminaires entrelacés + Petites finales & Finales + Byes (non combattus)
-        var finalSchedule = new List<T>(rawList.Count);
-        finalSchedule.AddRange(prelimScheduled);
-        finalSchedule.AddRange(finals);
-        finalSchedule.AddRange(byes);
-
-        return finalSchedule;
+        var result = new List<T>(n + byes.Count);
+        result.AddRange(prelimScheduled);
+        result.AddRange(finalsScheduled);
+        result.AddRange(byes);
+        return result;
     }
 
     /// <summary>
     /// Ordonne l'ensemble des tirages (IDrawModel) d'une compétition selon les règles de tournoi.
+    /// Les catégories sont ordonnées avec priorité aux femmes, puis par âge croissant.
     /// </summary>
     public static List<T> ScheduleTournamentDraws<T>(IEnumerable<T> draws) where T : IDrawModel
     {
+        var drawsList = draws?.ToList() ?? new List<T>();
+        if (drawsList.Count == 0) return drawsList;
+
+        // Pré-calculer l'ordre de priorité des catégories (Femmes en premier, puis âge croissant)
+        var categories = drawsList
+            .Select(d => d.Draw?.Category)
+            .Where(c => c != null)
+            .DistinctBy(c => c!.Id)
+            .OrderBy(c => GetCategoryPriority(c).GenderPriority)
+            .ThenBy(c => GetCategoryPriority(c).MinAge)
+            .ThenBy(c => c!.Id)
+            .ToList();
+
+        var catRank = new Dictionary<int, int>();
+        for (int i = 0; i < categories.Count; i++)
+        {
+            catRank[categories[i]!.Id] = i;
+        }
+
+        // Pré-calculer la priorité de phase pour chaque DrawKnockoutModel en se basant sur
+        // l'ensemble des matchs non-bronze du même tableau (même si Draw.DrawKnockouts n'est pas chargé par EF Core).
+        var koPhasePriority = new Dictionary<DrawKnockoutModel, int>();
+        var koGroups = drawsList
+            .OfType<DrawKnockoutModel>()
+            .GroupBy(k => k.Draw?.CategoryId ?? k.DrawId);
+
+        foreach (var group in koGroups)
+        {
+            var nonBronze = group
+                .Where(k => !k.IsBronzeMatch)
+                .OrderBy(k => k.Order)
+                .ToList();
+
+            foreach (var ko in group)
+            {
+                if (ko.IsBronzeMatch)
+                {
+                    koPhasePriority[ko] = 70;
+                    continue;
+                }
+
+                // Si Draw.DrawKnockouts est déjà complet et donne une phase explicite, l'utiliser ;
+                // sinon calculer à partir du groupe non-bronze de drawsList.
+                if (ko.Draw?.DrawKnockouts != null && ko.Draw.DrawKnockouts.Count >= group.Count())
+                {
+                    koPhasePriority[ko] = GetStagePhasePriority(ko);
+                }
+                else if (nonBronze.Count > 0)
+                {
+                    int rank = nonBronze.IndexOf(ko) + 1;
+                    string stage = rank > 0
+                        ? GetStageName(rank, nonBronze.Count, false)
+                        : GetStageName(ko.Order, nonBronze.Count, false);
+                    koPhasePriority[ko] = GetStagePhasePriority(stage, false);
+                }
+                else
+                {
+                    koPhasePriority[ko] = GetStagePhasePriority(ko);
+                }
+            }
+        }
+
         return ScheduleTournamentMatches(
-            draws,
+            drawsList,
             d => d.Type,
-            d => d.Draw?.CategoryId ?? 0,
+            d => d.Draw?.CategoryId != null && catRank.TryGetValue(d.Draw.CategoryId, out int rank) ? rank : (d.Draw?.CategoryId ?? 0),
             d => d switch
             {
                 DrawKnockoutModel ko => ko.Order,
@@ -381,157 +524,11 @@ public static class KnockoutStageHelper
             },
             d => d switch
             {
-                DrawKnockoutModel ko => GetStagePhasePriority(ko),
+                DrawKnockoutModel ko => koPhasePriority.TryGetValue(ko, out int prio) ? prio : GetStagePhasePriority(ko),
                 _ => 0
             },
             d => d is DrawKnockoutModel ko && IsByeMatch(ko)
         );
     }
 
-    private static List<T> InterleaveKnockoutPhases<T>(
-        List<T> koMatches,
-        Func<T, int> getStagePhasePriority,
-        Func<T, int> getCategoryId,
-        Func<T, int> getLocalOrder)
-    {
-        var result = new List<T>(koMatches.Count);
-
-        // Regrouper par phase éliminatoire (ordre chronologique strict : 10, 20, 30, 40, 50, 60)
-        var phases = koMatches
-            .GroupBy(m => getStagePhasePriority(m))
-            .OrderBy(g => g.Key);
-
-        foreach (var phaseGroup in phases)
-        {
-            // Au sein d'une même phase : tous les matches de C1 ensemble, puis tous ceux de C2, etc.
-            // (Les poules seront intercalées entre ces blocs par InterleavePoolsAndPrelims)
-            var catGroups = phaseGroup
-                .GroupBy(m => getCategoryId(m))
-                .OrderBy(g => g.Key);
-
-            foreach (var catGroup in catGroups)
-            {
-                foreach (var m in catGroup.OrderBy(m => getLocalOrder(m)))
-                {
-                    result.Add(m);
-                }
-            }
-        }
-
-        return result;
-    }
-
-    private static List<T> InterleavePoolsAndPrelims<T>(
-        List<T> orderedKoPrelims,
-        Dictionary<int, Queue<T>> poolQueues,
-        Queue<T> orderMatches)
-    {
-        var koQueue = new Queue<T>(orderedKoPrelims);
-        int totalPoolMatches = poolQueues.Values.Sum(q => q.Count);
-        int totalOtherMatches = koQueue.Count + orderMatches.Count;
-        int totalToSchedule = totalPoolMatches + totalOtherMatches;
-
-        var result = new List<T>(totalToSchedule);
-        if (totalToSchedule == 0) return result;
-
-        var lastPlacedIndex = new Dictionary<int, int>();
-
-        const int minSpacing = 3;    // Minimum 3 combats entre deux matches de la même poule
-        const int targetSpacing = 4; // Cible recommandée : 4 combats d'espacement
-
-        for (int i = 0; i < totalToSchedule; i++)
-        {
-            var activePools = poolQueues.Where(kvp => kvp.Value.Count > 0).ToList();
-            int remainingOther = koQueue.Count + orderMatches.Count;
-
-            int? selectedPoolCatId = null;
-
-            if (activePools.Count > 0)
-            {
-                var candidates = new List<(int CatId, int Distance, bool IsCritical, int RemInPool)>();
-
-                foreach (var kvp in activePools)
-                {
-                    int catId = kvp.Key;
-                    int remInPool = kvp.Value.Count;
-                    int otherAvailable = remainingOther + activePools.Where(p => p.Key != catId).Sum(p => p.Value.Count);
-
-                    int dist = lastPlacedIndex.TryGetValue(catId, out int lastIdx)
-                        ? (i - lastIdx - 1)
-                        : (int.MaxValue / 2);
-
-                    bool isEligible = dist >= minSpacing;
-                    bool isCritical = remInPool > 1 && otherAvailable <= (remInPool - 1) * minSpacing;
-
-                    candidates.Add((catId, dist, isCritical, remInPool));
-                }
-
-                // 1. Si une poule est critique et éligible, la planifier en priorité pour préserver l'espacement futur
-                var criticalCandidates = candidates.Where(c => c.Distance >= minSpacing && c.IsCritical).ToList();
-                if (criticalCandidates.Count > 0)
-                {
-                    selectedPoolCatId = criticalCandidates
-                        .OrderByDescending(c => c.RemInPool)
-                        .ThenByDescending(c => c.Distance)
-                        .First().CatId;
-                }
-                else
-                {
-                    // 2. Poules prêtes pour leur tour normal (distance >= targetSpacing ou espacement idéal)
-                    var readyCandidates = candidates.Where(c =>
-                    {
-                        if (c.Distance < minSpacing) return false;
-                        if (c.Distance >= targetSpacing) return true;
-
-                        int otherAvailable = remainingOther + activePools.Where(p => p.Key != c.CatId).Sum(p => p.Value.Count);
-                        int idealSpacing = c.RemInPool > 0 ? (otherAvailable + c.RemInPool) / c.RemInPool : targetSpacing;
-                        return c.Distance >= Math.Max(minSpacing, idealSpacing);
-                    }).ToList();
-
-                    if (readyCandidates.Count > 0)
-                    {
-                        // Priorité à la poule qui a attendu le plus longtemps
-                        selectedPoolCatId = readyCandidates
-                            .OrderByDescending(c => c.Distance)
-                            .ThenByDescending(c => c.RemInPool)
-                            .First().CatId;
-                    }
-                    else if (remainingOther == 0)
-                    {
-                        // Plus d'autres matches disponibles : prendre la poule la plus reposée
-                        selectedPoolCatId = candidates
-                            .OrderByDescending(c => c.Distance)
-                            .ThenByDescending(c => c.RemInPool)
-                            .First().CatId;
-                    }
-                }
-            }
-
-            if (selectedPoolCatId.HasValue)
-            {
-                var match = poolQueues[selectedPoolCatId.Value].Dequeue();
-                result.Add(match);
-                lastPlacedIndex[selectedPoolCatId.Value] = i;
-            }
-            else if (koQueue.Count > 0)
-            {
-                result.Add(koQueue.Dequeue());
-            }
-            else if (orderMatches.Count > 0)
-            {
-                result.Add(orderMatches.Dequeue());
-            }
-            else if (activePools.Count > 0)
-            {
-                var fallbackCatId = activePools.OrderByDescending(p =>
-                    lastPlacedIndex.TryGetValue(p.Key, out int lastIdx) ? (i - lastIdx) : int.MaxValue
-                ).First().Key;
-                var match = poolQueues[fallbackCatId].Dequeue();
-                result.Add(match);
-                lastPlacedIndex[fallbackCatId] = i;
-            }
-        }
-
-        return result;
-    }
 }

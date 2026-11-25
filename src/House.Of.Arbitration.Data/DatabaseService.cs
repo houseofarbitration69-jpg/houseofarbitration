@@ -132,19 +132,26 @@ public class DatabaseService : IDatabaseService
             // Save new age ranges if any
             foreach (var ar in ageRanges.Values)
             {
-                var existingAr = await _context.AgeRanges.FirstOrDefaultAsync(a => a.Id == ar.Id);
+                var existingAr = await _context.AgeRanges.FirstOrDefaultAsync(a => a.Id == ar.Id || a.Label == ar.Label);
                 if (existingAr == null)
                 {
-                    _context.AgeRanges.Add(new AgeRangeModel
+                    try
                     {
-                        Id = ar.Id,
-                        Label = ar.Label,
-                        MinAge = ar.MinAge,
-                        MaxAge = ar.MaxAge
-                    });
+                        _context.AgeRanges.Add(new AgeRangeModel
+                        {
+                            Id = ar.Id,
+                            Label = ar.Label,
+                            MinAge = ar.MinAge,
+                            MaxAge = ar.MaxAge
+                        });
+                        await _context.SaveChangesAsync();
+                    }
+                    catch
+                    {
+                        _context.ChangeTracker.Clear();
+                    }
                 }
             }
-            await _context.SaveChangesAsync();
             _context.ChangeTracker.Clear();
 
             // 4. Save Competition
