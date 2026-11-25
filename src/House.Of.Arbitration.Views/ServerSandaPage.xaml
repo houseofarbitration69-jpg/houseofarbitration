@@ -331,7 +331,7 @@
         >
             <Grid 
                 Grid.Column="0"
-                RowDefinitions="Auto,*" 
+                RowDefinitions="Auto,Auto,*" 
                 RowSpacing="10"
                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
             >
@@ -466,8 +466,27 @@
                     </Border>
                 </HorizontalStackLayout>
 
-                <CollectionView 
+                <!-- COMPTEUR COMBATS RESTANTS -->
+                <Border
                     Grid.Row="1"
+                    Padding="10,6"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="{DynamicResource SurfaceElevation4}"
+                    Stroke="{DynamicResource BorderMuted}"
+                    StrokeThickness="1"
+                >
+                    <Label
+                        Text="{Binding RemainingMatchesCount, StringFormat='Combats restants : {0}'}"
+                        FontAttributes="Bold"
+                        FontSize="14"
+                        TextColor="{DynamicResource PrimaryTextColor}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                    />
+                </Border>
+
+                <CollectionView 
+                    Grid.Row="2"
                     ItemsSource="{Binding Draws}"
                     ItemTemplate="{StaticResource DrawTemplateSelector}"
                     IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
@@ -548,6 +567,27 @@
                                 IsVisible="{Binding CurrentMatchStageName, Converter={StaticResource EmptyToBoolConverter}}"
                             />
                         </VerticalStackLayout>
+                    </Border>
+
+                    <!-- COMBATS RESTANTS (PHONE) -->
+                    <Border
+                        Grid.Column="2"
+                        Padding="10,4"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="End"
+                        IsVisible="{OnIdiom Tablet='false', Phone='true'}"
+                    >
+                        <Label
+                            Text="{Binding RemainingMatchesCount, StringFormat='Restants : {0}'}"
+                            FontAttributes="Bold"
+                            FontSize="12"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            VerticalOptions="Center"
+                        />
                     </Border>
                 </Grid>
 
@@ -1703,11 +1743,11 @@
                                         HeightRequest="40"
                                         WidthRequest="130"
                                         VerticalOptions="End"
-                                        IsVisible="{OnIdiom Tablet='true', Phone='false'}"                                         
+                                        IsVisible="{OnIdiom Tablet='true', Phone='false'}"
                                     />
 
                                     <Button 
-                                        Text="Next Match" 
+                                        Text="Match Suiv." 
                                         Command="{Binding BindingContext.NextMatchCommand, Source={x:Reference this}}"
                                         BackgroundColor="{DynamicResource SurfaceElevation6}"
                                         BorderColor="{DynamicResource Gray400}"

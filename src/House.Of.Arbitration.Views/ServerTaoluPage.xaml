@@ -302,7 +302,7 @@
         >
             <Grid 
                 Grid.Column="0"
-                RowDefinitions="Auto,*" 
+                RowDefinitions="Auto,Auto,*" 
                 RowSpacing="10"
                 IsVisible="{OnIdiom Tablet='true', Phone='false'}"
             >
@@ -437,9 +437,28 @@
                     </Border>
                 </HorizontalStackLayout>
 
+                <!-- COMPTEUR COMBATS RESTANTS -->
+                <Border
+                    Grid.Row="1"
+                    Padding="10,6"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="{DynamicResource SurfaceElevation4}"
+                    Stroke="{DynamicResource BorderMuted}"
+                    StrokeThickness="1"
+                >
+                    <Label
+                        Text="{Binding RemainingMatchesCount, StringFormat='Combats restants : {0}'}"
+                        FontAttributes="Bold"
+                        FontSize="14"
+                        TextColor="{DynamicResource PrimaryTextColor}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                    />
+                </Border>
+
                 <!-- DRAWS -->
                 <CollectionView 
-                    Grid.Row="1"
+                    Grid.Row="2"
                     ItemsSource="{Binding Draws}"
                     ItemTemplate="{StaticResource DrawTemplateSelector}"
                 >

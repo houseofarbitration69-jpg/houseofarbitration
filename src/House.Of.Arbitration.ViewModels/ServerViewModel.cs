@@ -85,6 +85,7 @@ public partial class ServerViewModel : BaseViewModel
     private IDispatcherTimer? _timer;
     private int _competitionId;
     private int _totalMatches;
+    private int _remainingMatchesCount;
     private int _currentMatchNumber;
     private CompetitionModel? _currentCompetition;
     private readonly ConcurrentDictionary<string, JudgeModel> _clientJudgeMapping = new();
@@ -229,6 +230,15 @@ public partial class ServerViewModel : BaseViewModel
     {
         get => _totalMatches;
         set => SetProperty(ref _totalMatches, value);
+    }
+
+    /// <summary>
+    /// Obtient ou définit le nombre de combats restants (hors exemptions)
+    /// </summary>
+    public int RemainingMatchesCount
+    {
+        get => _remainingMatchesCount;
+        set => SetProperty(ref _remainingMatchesCount, value);
     }
 
     /// <summary>
@@ -1413,6 +1423,7 @@ public partial class ServerViewModel : BaseViewModel
         }
 
         TotalMatches = sortedDraws.Count(d => !(d is DrawKnockoutModel k && KnockoutStageHelper.IsByeMatch(k)));
+        RemainingMatchesCount = sortedDraws.Count(d => !d.IsFinished && !(d is DrawKnockoutModel k && KnockoutStageHelper.IsByeMatch(k)));
 
         var firstUnfinished = sortedDraws.FirstOrDefault(d => !d.IsFinished);
         CurrentDraw = firstUnfinished;

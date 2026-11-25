@@ -499,4 +499,57 @@ public class ServerDrawsOrderingTests
         Assert.NotNull(petiteFinaleInVm.Competitor1);
         Assert.Equal("Martin", petiteFinaleInVm.Competitor1.LastName);
     }
+
+    [Fact]
+    public async Task Init_UpdatesRemainingMatchesCount_WhenMatchFinishes()
+    {
+        var (vm, koRepo, compRepo) = CreateViewModel();
+
+        var competition = new CompetitionModel { Id = 1, Name = "Sanda", Type = CompetitionType.Sanda };
+        compRepo.GetAllAsync(Arg.Any<string[]>()).Returns((IReadOnlyList<CompetitionModel>)new List<CompetitionModel> { competition });
+
+        var category = new CategoryModel
+        {
+            Id = 10,
+            Type = CategoryType.Sanda,
+            Genre = Genre.Men,
+            CompetitionId = 1,
+            RoundType = RoundType.Knockouts
+        };
+        var draw = new DrawModel { Id = 100, CategoryId = category.Id, Category = category };
+
+        var c1 = new CompetitorModel { Id = 1, LastName = "A", FirstName = "1" };
+        var c2 = new CompetitorModel { Id = 2, LastName = "B", FirstName = "2" };
+        var c3 = new CompetitorModel { Id = 3, LastName = "C", FirstName = "3" };
+
+        // 1 bye (finished) + 1 demi-finale + 1 finale = 2 vrais combats restants
+        var byeMatch = new DrawKnockoutModel
+        {
+            Id = 1, Order = 1, GlobalOrder = 0, DrawId = draw.Id, Draw = draw,
+            Competitor1Id = c1.Id, Competitor1 = c1, IsFinished = true, WinnerId = c1.Id
+        };
+        var semiMatch = new DrawKnockoutModel
+        {
+            Id = 2, Order = 2, GlobalOrder = 1, DrawId = draw.Id, Draw = draw,
+            Competitor1Id = c2.Id, Competitor1 = c2, Competitor2Id = c3.Id, Competitor2 = c3, IsFinished = false
+        };
+        var finalMatch = new DrawKnockoutModel
+        {
+            Id = 3, Order = 3, GlobalOrder = 2, DrawId = draw.Id, Draw = draw,
+            Competitor1Id = c1.Id, Competitor1 = c1, IsFinished = false
+        };
+        draw.DrawKnockouts = new List<DrawKnockoutModel> { byeMatch, semiMatch, finalMatch };
+
+        koRepo.GetAllAsync(Arg.Any<string[]>()).Returns((IReadOnlyList<DrawKnockoutModel>)draw.DrawKnockouts);
+
+        await vm.Init();
+        Assert.Equal(2, vm.TotalMatches);
+        Assert.Equal(2, vm.RemainingMatchesCount);
+
+        // Simuler la fin de la demi-finale et rappel de Init()
+        semiMatch.IsFinished = true;
+        await vm.Init();
+        Assert.Equal(2, vm.TotalMatches);
+        Assert.Equal(1, vm.RemainingMatchesCount);
+    }
 }
