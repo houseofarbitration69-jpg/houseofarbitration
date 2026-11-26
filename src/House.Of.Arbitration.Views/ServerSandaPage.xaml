@@ -390,6 +390,31 @@
                         </Border.GestureRecognizers>
                     </Border>
 
+                    <!-- BOUTON TIRAGES / CORRECTIONS -->
+                    <Border
+                        StrokeShape="RoundRectangle 50"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
+                        ToolTipProperties.Text="Afficher et modifier les tirages"
+                    >
+                        <Label
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.SITEMAP}"
+                            FontSize="20"
+                            TextColor="{DynamicResource Primary}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                        />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenServerDrawsCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
                     <!-- INDICATEUR STATUT SERVEUR -->
                     <Border
                         Grid.Column="{OnIdiom Tablet='2', Phone='1'}"

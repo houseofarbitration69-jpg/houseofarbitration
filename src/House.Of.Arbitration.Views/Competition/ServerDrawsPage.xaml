@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Competition;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    x:TypeArguments="vm:ServerDrawsViewModel"
+    x:Class="House.Of.Arbitration.Views.Competition.ServerDrawsPage"
+    x:DataType="vm:ServerDrawsViewModel"
+    BackgroundColor="{DynamicResource PageBackgroundColor}"
+    Shell.PresentationMode="ModalAnimated">
+
+    <base:BasePage.Resources>
+        <DataTemplate x:Key="KnockoutMatchCardTemplate" x:DataType="vm:ServerKnockoutMatchItem">
+            <Grid ColumnDefinitions="16, 290, 16" HeightRequest="{Binding BracketSlotHeight}">
+                <!-- Connecteur entrant (gauche) -->
+                <BoxView
+                    Grid.Column="0"
+                    IsVisible="{Binding ShowLeftConnector}"
+                    HeightRequest="2"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Center"
+                    Color="{DynamicResource BorderDark}" />
+
+                <!-- Carte du match -->
+                <Border
+                    Grid.Column="1"
+                    VerticalOptions="Center"
+                    Padding="10"
+                    BackgroundColor="{DynamicResource SurfaceColor}"
+                    Stroke="{DynamicResource BorderDark}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 10"
+                >
+                    <VerticalStackLayout Spacing="6">
+                        <!-- Entête match + Reset -->
+                        <Grid ColumnDefinitions="*, Auto">
+                            <Label
+                                Grid.Column="0"
+                                Text="{Binding StageLabel}"
+                                FontSize="12"
+                                FontAttributes="Bold"
+                                TextColor="{DynamicResource SecondaryTextColor}"
+                                VerticalOptions="Center" />
+                            <Button
+                                Grid.Column="1"
+                                Text="↺"
+                                FontSize="14"
+                                Padding="8, 2"
+                                HeightRequest="28"
+                                MinimumHeightRequest="28"
+                                BackgroundColor="{DynamicResource SurfaceElevation5}"
+                                TextColor="{DynamicResource PrimaryTextColor}"
+                                IsVisible="{Binding CanReset}"
+                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=ResetKnockoutMatchCommand}"
+                                CommandParameter="{Binding .}"
+                                ToolTipProperties.Text="Réinitialiser ce combat" />
+                        </Grid>
+
+                        <!-- Slot 1 (Rouge) -->
+                        <Border
+                            Padding="8, 6"
+                            BackgroundColor="{DynamicResource SurfaceLightAlt}"
+                            Stroke="{DynamicResource BorderMuted}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 6"
+                        >
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding Slot1.IsWinner}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <DragGestureRecognizer
+                                    CanDrag="{Binding Slot1.HasCompetitor}"
+                                    DragStarting="OnDragStarting"
+                                    DropCompleted="OnDragCompleted"
+                                    DragStartingCommandParameter="{Binding Slot1}" 
+                                />
+                                <DropGestureRecognizer
+                                    AllowDrop="True"
+                                    DragOver="OnDragOver"
+                                    DragLeave="OnDragLeave"
+                                    Drop="OnDrop"
+                                    DropCommandParameter="{Binding Slot1}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="6" InputTransparent="True" CascadeInputTransparent="False">
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" InputTransparent="True">
+                                    <Label 
+                                        Text="{Binding Slot1.CompetitorName}" 
+                                        FontSize="13" 
+                                        FontAttributes="Bold" 
+                                        TextColor="{DynamicResource InverseTextColor}" 
+                                        LineBreakMode="TailTruncation" 
+                                    />
+                                    <Label 
+                                        Text="{Binding Slot1.Club}" 
+                                        FontSize="11" 
+                                        TextColor="{DynamicResource SecondaryTextColor}" 
+                                        IsVisible="{Binding Slot1.HasCompetitor}" 
+                                        LineBreakMode="TailTruncation" 
+                                    />
+                                </VerticalStackLayout>
+                                <Label
+                                    Grid.Column="1"
+                                    Text="🏆"
+                                    Padding="8, 2"
+                                    HeightRequest="30"
+                                    MinimumHeightRequest="30"
+                                    FontSize="13"
+                                    IsVisible="{Binding Slot1.HasCompetitor}"
+                                >
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SetKnockoutWinnerCommand}" CommandParameter="{Binding Slot1}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </Grid>
+                        </Border>
+
+                        <!-- Slot 2 (Bleu) -->
+                        <Border
+                            Padding="8, 6"
+                            BackgroundColor="{DynamicResource SurfaceLightAlt}"
+                            Stroke="{DynamicResource BorderMuted}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 6"
+                        >
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding Slot2.IsWinner}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{DynamicResource SuccessBg}" />
+                                    <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <DragGestureRecognizer
+                                    CanDrag="{Binding Slot2.HasCompetitor}"
+                                    DragStarting="OnDragStarting"
+                                    DropCompleted="OnDragCompleted"
+                                    DragStartingCommandParameter="{Binding Slot2}" 
+                                />
+                                <DropGestureRecognizer
+                                    AllowDrop="True"
+                                    DragOver="OnDragOver"
+                                    DragLeave="OnDragLeave"
+                                    Drop="OnDrop"
+                                    DropCommandParameter="{Binding Slot2}" 
+                                />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="*, Auto" ColumnSpacing="6" InputTransparent="True" CascadeInputTransparent="False">
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center" InputTransparent="True">
+                                    <Label 
+                                        Text="{Binding Slot2.CompetitorName}" 
+                                        FontSize="13" 
+                                        FontAttributes="Bold" 
+                                        TextColor="{DynamicResource InverseTextColor}" 
+                                        LineBreakMode="TailTruncation" 
+                                    />
+                                    <Label 
+                                        Text="{Binding Slot2.Club}" 
+                                        FontSize="11" 
+                                        TextColor="{DynamicResource SecondaryTextColor}" 
+                                        IsVisible="{Binding Slot2.HasCompetitor}" 
+                                        LineBreakMode="TailTruncation" 
+                                    />
+                                </VerticalStackLayout>
+                                <Label
+                                    Grid.Column="1"
+                                    Text="🏆"
+                                    Padding="8, 2"
+                                    HeightRequest="30"
+                                    MinimumHeightRequest="30"
+                                    FontSize="13"
+                                    IsVisible="{Binding Slot2.HasCompetitor}"
+                                >
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SetKnockoutWinnerCommand}" CommandParameter="{Binding Slot2}"/>
+                                    </Label.GestureRecognizers>
+                                </Label>
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Connecteur sortant (droite) -->
+                <Grid Grid.Column="2" IsVisible="{Binding ShowRightConnector}">
+                    <BoxView
+                        HeightRequest="2"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Center"
+                        Color="{DynamicResource BorderDark}" />
+                    <BoxView
+                        IsVisible="{Binding IsTopFeederConnector}"
+                        WidthRequest="2"
+                        HeightRequest="{Binding HalfSlotHeight}"
+                        HorizontalOptions="End"
+                        VerticalOptions="End"
+                        Color="{DynamicResource BorderDark}" />
+                    <BoxView
+                        IsVisible="{Binding IsBottomFeederConnector}"
+                        WidthRequest="2"
+                        HeightRequest="{Binding HalfSlotHeight}"
+                        HorizontalOptions="End"
+                        VerticalOptions="Start"
+                        Color="{DynamicResource BorderDark}" />
+                </Grid>
+            </Grid>
+        </DataTemplate>
+    </base:BasePage.Resources>
+
+    <Grid RowDefinitions="Auto, Auto, *" Padding="16" RowSpacing="12">
+
+        <!-- EN-TÊTE -->
+        <Grid Grid.Row="0" ColumnDefinitions="*, Auto" ColumnSpacing="12">
+            <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                <Label
+                    Text="Tirages &amp; Corrections"
+                    FontSize="22"
+                    FontAttributes="Bold"
+                    TextColor="{DynamicResource PrimaryTextColor}" />
+                <Label
+                    Text="{Binding CompetitionName}"
+                    FontSize="13"
+                    TextColor="{DynamicResource SecondaryTextColor}" />
+            </VerticalStackLayout>
+
+            <Button
+                Grid.Column="1"
+                Text="Fermer"
+                Command="{Binding CloseCommand}"
+                BackgroundColor="{DynamicResource SurfaceElevation4}"
+                TextColor="{DynamicResource PrimaryTextColor}"
+                CornerRadius="8"
+                Padding="16, 8"
+                VerticalOptions="Center" />
+        </Grid>
+
+        <!-- SÉLECTEUR DE CATÉGORIE -->
+        <Border
+            Grid.Row="1"
+            Padding="12, 8"
+            BackgroundColor="{DynamicResource SurfaceColor}"
+            Stroke="{DynamicResource BorderMuted}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 10">
+            <Grid ColumnDefinitions="Auto, *" ColumnSpacing="12">
+                <Label
+                    Grid.Column="0"
+                    Text="Catégorie :"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    VerticalOptions="Center" />
+                <Picker
+                    Grid.Column="1"
+                    ItemsSource="{Binding Categories}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedCategory}"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    Title="Sélectionner une catégorie"
+                    VerticalOptions="Center" />
+            </Grid>
+        </Border>
+
+        <!-- CONTENU SELON TYPE DE TIRAGE -->
+        <ScrollView Grid.Row="2">
+            <VerticalStackLayout Spacing="16">
+
+                <!-- 1. ÉLIMINATOIRES (KNOCKOUTS) -->
+                <VerticalStackLayout IsVisible="{Binding IsKnockouts}" Spacing="12">
+                    <Label
+                        Text="Glissez-déposez un compétiteur pour modifier le tableau, désignez un vainqueur (🏆) ou réinitialisez un combat (↺). Les tours suivants sont mis à jour automatiquement."
+                        FontSize="12"
+                        TextColor="{DynamicResource SecondaryTextColor}" />
+
+                    <ScrollView Orientation="Horizontal">
+                        <HorizontalStackLayout BindableLayout.ItemsSource="{Binding KnockoutRounds}" Spacing="0" Padding="4">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ServerKnockoutRoundItem">
+                                    <VerticalStackLayout WidthRequest="322" Spacing="0">
+                                        <!-- Titre du tour -->
+                                        <Border
+                                            Margin="16, 0, 16, 12"
+                                            Padding="10, 6"
+                                            BackgroundColor="{DynamicResource Primary}"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 8">
+                                            <Label
+                                                Text="{Binding Name}"
+                                                TextColor="{DynamicResource White}"
+                                                FontAttributes="Bold"
+                                                FontSize="14"
+                                                HorizontalOptions="Center" />
+                                        </Border>
+
+                                        <!-- Matchs du tour -->
+                                        <VerticalStackLayout
+                                            BindableLayout.ItemsSource="{Binding Matches}"
+                                            BindableLayout.ItemTemplate="{StaticResource KnockoutMatchCardTemplate}"
+                                            Spacing="0" />
+                                    </VerticalStackLayout>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
+                    </ScrollView>
+
+                    <!-- Petite finale (3e place) -->
+                    <VerticalStackLayout IsVisible="{Binding HasBronzeMatch}" Spacing="6" Margin="0, 8, 0, 0">
+                        <Label
+                            Text="🥉 Petite finale (3e place)"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="{DynamicResource PrimaryTextColor}"
+                            Margin="16, 0, 0, 0" />
+                        <HorizontalStackLayout
+                            BindableLayout.ItemsSource="{Binding BronzeMatches}"
+                            BindableLayout.ItemTemplate="{StaticResource KnockoutMatchCardTemplate}" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- 2. POULES (POOLS) -->
+                <VerticalStackLayout IsVisible="{Binding IsPools}" Spacing="14">
+                    <!-- Classement de la poule -->
+                    <Border
+                        Padding="12"
+                        BackgroundColor="{DynamicResource SurfaceColor}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 10">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Classement de la poule" FontSize="15" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding PoolStandings}" Spacing="4">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ServerPoolStandingItem">
+                                        <Grid ColumnDefinitions="60, *, Auto" ColumnSpacing="8">
+                                            <Label Grid.Column="0" Text="{Binding RankDisplay}" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                            <Label Grid.Column="1" Text="{Binding CompetitorName}" TextColor="{DynamicResource PrimaryTextColor}" />
+                                            <Label Grid.Column="2" Text="{Binding Wins, StringFormat='{0} V'}" FontAttributes="Bold" TextColor="{DynamicResource SuccessColor}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Rencontres de poule -->
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding PoolMatches}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ServerPoolMatchItem">
+                                <Border
+                                    Padding="12"
+                                    BackgroundColor="{DynamicResource SurfaceColor}"
+                                    Stroke="{DynamicResource BorderDark}"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 10">
+                                    <Grid ColumnDefinitions="Auto, *, Auto, *, Auto" ColumnSpacing="10">
+                                        <Label Grid.Column="0" Text="{Binding MatchLabel}" FontAttributes="Bold" TextColor="{DynamicResource SecondaryTextColor}" VerticalOptions="Center" />
+
+                                        <Button
+                                            Grid.Column="1"
+                                            Text="{Binding Competitor1Name}"
+                                            BackgroundColor="{DynamicResource SurfaceElevation4}"
+                                            TextColor="{DynamicResource PrimaryTextColor}"
+                                            CornerRadius="8"
+                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SetPoolWinner1Command}"
+                                            CommandParameter="{Binding .}">
+                                            <Button.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsCompetitor1Winner}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource SuccessColor}" />
+                                                    <Setter Property="TextColor" Value="{DynamicResource White}" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+                                        </Button>
+
+                                        <Label Grid.Column="2" Text="VS" FontAttributes="Bold" TextColor="{DynamicResource SecondaryTextColor}" VerticalOptions="Center" />
+
+                                        <Button
+                                            Grid.Column="3"
+                                            Text="{Binding Competitor2Name}"
+                                            BackgroundColor="{DynamicResource SurfaceElevation4}"
+                                            TextColor="{DynamicResource PrimaryTextColor}"
+                                            CornerRadius="8"
+                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SetPoolWinner2Command}"
+                                            CommandParameter="{Binding .}">
+                                            <Button.Triggers>
+                                                <DataTrigger TargetType="Button" Binding="{Binding IsCompetitor2Winner}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{DynamicResource SuccessColor}" />
+                                                    <Setter Property="TextColor" Value="{DynamicResource White}" />
+                                                </DataTrigger>
+                                            </Button.Triggers>
+                                        </Button>
+
+                                        <Button
+                                            Grid.Column="4"
+                                            Text="↺"
+                                            BackgroundColor="{DynamicResource SurfaceElevation5}"
+                                            TextColor="{DynamicResource PrimaryTextColor}"
+                                            IsVisible="{Binding CanReset}"
+                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=ResetPoolMatchCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- 3. TAOLU (ORDRE DE PASSAGE + NOTES) -->
+                <VerticalStackLayout IsVisible="{Binding IsOrder}" Spacing="12">
+                    <Border
+                        Padding="12"
+                        BackgroundColor="{DynamicResource SuccessBg}"
+                        Stroke="{DynamicResource SuccessColor}"
+                        StrokeThickness="1.5"
+                        StrokeShape="RoundRectangle 10">
+                        <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
+                            <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                <Label Text="Vainqueur actuel (Taolu)" FontSize="12" TextColor="{DynamicResource SecondaryTextColor}" />
+                                <Label Text="{Binding TaoluWinnerName}" FontSize="17" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                            </VerticalStackLayout>
+                            <Button
+                                Grid.Column="1"
+                                Text="Recalculer tout"
+                                BackgroundColor="{DynamicResource Primary}"
+                                TextColor="{DynamicResource White}"
+                                CornerRadius="8"
+                                Command="{Binding RecalculateAllOrderScoresCommand}"
+                                VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding OrderItems}" Spacing="8">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ServerOrderItem">
+                                <Border
+                                    Padding="12, 8"
+                                    BackgroundColor="{DynamicResource SurfaceColor}"
+                                    Stroke="{DynamicResource BorderDark}"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 10">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding IsWinner}" Value="True">
+                                            <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
+                                            <Setter Property="StrokeThickness" Value="2" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Grid ColumnDefinitions="50, 70, *, 110, Auto" ColumnSpacing="10">
+                                        <Label Grid.Column="0" Text="{Binding Order, StringFormat='#{0}'}" FontAttributes="Bold" TextColor="{DynamicResource SecondaryTextColor}" VerticalOptions="Center" />
+                                        <Label Grid.Column="1" Text="{Binding RankDisplay}" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" VerticalOptions="Center" />
+                                        <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
+                                            <Label Text="{Binding CompetitorName}" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
+                                            <Label Text="{Binding Club}" FontSize="11" TextColor="{DynamicResource SecondaryTextColor}" />
+                                        </VerticalStackLayout>
+                                        <Border Grid.Column="3" Padding="6, 2" BackgroundColor="{DynamicResource SurfaceLightAlt}" Stroke="{DynamicResource BorderMuted}" StrokeShape="RoundRectangle 6" VerticalOptions="Center">
+                                            <Entry
+                                                Text="{Binding ScoreText}"
+                                                Keyboard="Numeric"
+                                                Placeholder="Note"
+                                                HorizontalTextAlignment="Center"
+                                                TextColor="{DynamicResource PrimaryTextColor}" />
+                                        </Border>
+                                        <Button
+                                            Grid.Column="4"
+                                            Text="Valider"
+                                            BackgroundColor="{DynamicResource Primary}"
+                                            TextColor="{DynamicResource White}"
+                                            CornerRadius="8"
+                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SaveOrderScoreCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</base:BasePage>

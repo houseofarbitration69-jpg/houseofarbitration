@@ -171,7 +171,7 @@ internal static class Program
 
         session.PongReceived += (_, latency) =>
         {
-            LogColor(ConsoleColor.Cyan, $"[PONG] Réponse du serveur en {latency.TotalMilliseconds:F0} ms");
+            //LogColor(ConsoleColor.Cyan, $"[PONG] Réponse du serveur en {latency.TotalMilliseconds:F0} ms");
         };
 
         session.MatchUpdated += (_, match) =>

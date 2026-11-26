@@ -89,6 +89,7 @@ public partial class ServerViewModel : BaseViewModel
     private int _currentMatchNumber;
     private CompetitionModel? _currentCompetition;
     private readonly ConcurrentDictionary<string, JudgeModel> _clientJudgeMapping = new();
+    private readonly ConcurrentDictionary<string, byte> _monitorClients = new();
     private readonly SemaphoreSlim _dbSemaphore = new(1, 1);
     private readonly object _judgesLock = new();
     private List<JudgeModel> _judgesSnapshot = new();
@@ -760,6 +761,16 @@ public partial class ServerViewModel : BaseViewModel
                             await SaveRefereeData(judge, competitor.Id, scoreData.Score, false, scoreData.Code, scoreData.Round);
                         }
                     }
+
+                    // Relayer la note aux moniteurs enregistrés via SendToAllAsync
+                    if (!_monitorClients.IsEmpty)
+                    {
+                        try
+                        {
+                            await _bluetoothServer.SendToAllAsync(args.Message);
+                        }
+                        catch { }
+                    }
                 }
             }
             catch (Exception ex)
@@ -858,10 +869,227 @@ public partial class ServerViewModel : BaseViewModel
                 _logger.LogError(ex, "Error processing judge sync state from client {ClientId}", args.ClientId);
             }
         }
+        else if (args.Message.StartsWith(Constants.Message.MONITOR_REGISTER))
+        {
+            // Le Monitor s'enregistre : on le mémorise pour relayer les notes des juges et on lui envoie l'état courant
+            _monitorClients[args.ClientId] = 1;
+            try
+            {
+                await SendCompetitionDataToClientAsync(args.ClientId);
+                if (CurrentDraw != null)
+                {
+                    var matchData = CreateMatchInfoData(CurrentDraw);
+                    var json = JsonSerializer.Serialize(matchData, _jsonOptions);
+                    await _bluetoothServer.SendToClientAsync($"{Constants.Message.MATCH_INFO}{json}", args.ClientId);
+                    await _bluetoothServer.SendToClientAsync($"{Constants.Message.TIMER_SET}{TimeLeftDisplay}", args.ClientId);
+                    if (IsTimerRunning)
+                        await _bluetoothServer.SendToClientAsync(Constants.Message.TIMER_START, args.ClientId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending initial state to monitor client {ClientId}", args.ClientId);
+            }
+        }
+        else if (args.Message.StartsWith(Constants.Message.CORRECTION_WINNER))
+        {
+            try
+            {
+                var json = args.Message[Constants.Message.CORRECTION_WINNER.Length..];
+                var correction = JsonSerializer.Deserialize<WinnerCorrectionModel>(json, _jsonOptions);
+                if (correction != null)
+                {
+                    _logger.LogInformation("CORRECTION_WINNER reçue : match #{MatchId} → {Side} (raison: {Reason})",
+                        correction.MatchId, correction.WinningSide, correction.Reason ?? "—");
+                    await ApplyWinnerCorrectionAsync(correction);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur traitement CORRECTION_WINNER de {ClientId}", args.ClientId);
+            }
+        }
+        else if (args.Message.StartsWith(Constants.Message.CORRECTION_SCORE))
+        {
+            try
+            {
+                var json = args.Message[Constants.Message.CORRECTION_SCORE.Length..];
+                var correction = JsonSerializer.Deserialize<ScoreCorrectionModel>(json, _jsonOptions);
+                if (correction != null)
+                {
+                    _logger.LogInformation("CORRECTION_SCORE reçue : match #{MatchId} | juge {JudgePos} → {Score} (raison: {Reason})",
+                        correction.MatchId, correction.JudgePosition, correction.NewScore, correction.Reason ?? "—");
+                    await ApplyScoreCorrectionAsync(correction);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur traitement CORRECTION_SCORE de {ClientId}", args.ClientId);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Applique une correction de vainqueur sur le match spécifié (en cours ou déjà terminé).
+    /// </summary>
+    private async Task ApplyWinnerCorrectionAsync(WinnerCorrectionModel correction)
+    {
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            try
+            {
+                bool isRed = correction.WinningSide == Constants.Side.Red;
+                string color = isRed ? "Red" : "Blue";
+
+                // Cas 1 : le match à corriger est le match en cours
+                if (CurrentDraw != null && (correction.MatchId == 0 || CurrentDraw.Id == correction.MatchId))
+                {
+                    if (CurrentDraw.Type != RoundType.Order)
+                    {
+                        RoundResults.Clear();
+                        RoundResults.Add(new RoundResultModel { RoundNumber = 1, WinnerColor = color });
+                        RoundResults.Add(new RoundResultModel { RoundNumber = 2, WinnerColor = color });
+                    }
+                    await SetWinner(color);
+                    _logger.LogInformation("CORRECTION_WINNER appliquée sur le match courant #{MatchId} → {Side}", CurrentDraw?.Id, correction.WinningSide);
+                    return;
+                }
+
+                // Cas 2 : match passé (Knockout)
+                var allKo = await _drawKnockoutService.GetAllAsync("Draw", "Competitor1", "Competitor2");
+                var ko = allKo?.FirstOrDefault(k => k.Id == correction.MatchId);
+                if (ko != null)
+                {
+                    var winner = isRed ? ko.Competitor1 : ko.Competitor2;
+                    var looser = isRed ? ko.Competitor2 : ko.Competitor1;
+
+                    if (winner == null && correction.WinnerCompetitorId.HasValue)
+                    {
+                        winner = ko.Competitor1Id == correction.WinnerCompetitorId ? ko.Competitor1 : ko.Competitor2;
+                        looser = winner == ko.Competitor1 ? ko.Competitor2 : ko.Competitor1;
+                    }
+
+                    if (winner == null)
+                    {
+                        _logger.LogWarning("CORRECTION_WINNER : compétiteur {Side} introuvable pour le match Knockout #{MatchId}.", correction.WinningSide, correction.MatchId);
+                        return;
+                    }
+
+                    int targetDrawId = ko.DrawId > 0 ? ko.DrawId : (ko.Draw?.Id ?? 0);
+                    await _drawKnockoutService.UpdateAsync(new DrawKnockoutModel
+                    {
+                        Id = ko.Id,
+                        DrawId = targetDrawId,
+                        Order = ko.Order,
+                        IsBronzeMatch = ko.IsBronzeMatch,
+                        CurrentRound = ko.CurrentRound,
+                        RoundResultsJson = ko.RoundResultsJson,
+                        Competitor1Id = ko.Competitor1Id,
+                        Competitor2Id = ko.Competitor2Id,
+                        WinnerId = winner.Id,
+                        LooserId = looser?.Id,
+                        IsFinished = true,
+                        GlobalOrder = ko.GlobalOrder
+                    });
+
+                    await PropagateKnockoutWinnerAsync(ko, winner, looser, targetDrawId);
+                    await Init();
+                    _logger.LogInformation("CORRECTION_WINNER Knockout appliquée : match #{MatchId} → {Winner}", ko.Id, winner.Name);
+                    return;
+                }
+
+                // Cas 3 : match passé (Pools)
+                var allPools = await _drawPoolsModel.GetAllAsync("Draw", "Competitor1", "Competitor2");
+                var pool = allPools?.FirstOrDefault(p => p.Id == correction.MatchId);
+                if (pool != null)
+                {
+                    var winner = isRed ? pool.Competitor1 : pool.Competitor2;
+                    var looser = isRed ? pool.Competitor2 : pool.Competitor1;
+                    if (winner == null)
+                    {
+                        _logger.LogWarning("CORRECTION_WINNER : compétiteur {Side} introuvable pour le match Poule #{MatchId}.", correction.WinningSide, correction.MatchId);
+                        return;
+                    }
+
+                    await _drawPoolsModel.UpdateAsync(new DrawPoolsModel
+                    {
+                        Id = pool.Id,
+                        DrawId = pool.DrawId,
+                        Order = pool.Order,
+                        CurrentRound = pool.CurrentRound,
+                        RoundResultsJson = pool.RoundResultsJson,
+                        Competitor1Id = pool.Competitor1Id,
+                        Competitor2Id = pool.Competitor2Id,
+                        WinnerId = winner.Id,
+                        LooserId = looser?.Id,
+                        IsFinished = true,
+                        GlobalOrder = pool.GlobalOrder
+                    });
+
+                    await Init();
+                    _logger.LogInformation("CORRECTION_WINNER Poule appliquée : match #{MatchId} → {Winner}", pool.Id, winner.Name);
+                    return;
+                }
+
+                _logger.LogWarning("CORRECTION_WINNER : match #{MatchId} introuvable.", correction.MatchId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur application CORRECTION_WINNER");
+            }
+        });
+    }
+
+    /// <summary>
+    /// Applique une correction de score d'un juge.
+    /// </summary>
+    private Task ApplyScoreCorrectionAsync(ScoreCorrectionModel correction)
+    {
+        return MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            try
+            {
+                List<JudgeModel> judgesSnapshot;
+                lock (_judgesLock) { judgesSnapshot = _judgesSnapshot; }
+
+                // Trouver le juge par position
+                JudgeModel? judge = null;
+                var parts = correction.JudgePosition.Split('_');
+                if (parts.Length == 2 && int.TryParse(parts[1], out int num))
+                    judge = judgesSnapshot.FirstOrDefault(j => j.Group == parts[0] && j.Number == num);
+                else if (int.TryParse(correction.JudgePosition, out int posNum))
+                    judge = judgesSnapshot.FirstOrDefault(j => j.Number == posNum);
+                else
+                    judge = judgesSnapshot.FirstOrDefault(j => j.Name == correction.JudgePosition);
+
+                if (judge == null)
+                {
+                    _logger.LogWarning("CORRECTION_SCORE : juge '{JudgePos}' introuvable.", correction.JudgePosition);
+                    return;
+                }
+
+                // Appliquer le nouveau score
+                if (correction.Side == Constants.Side.Red)
+                    judge.RedPoints = correction.NewScore;
+                else if (correction.Side == Constants.Side.Blue)
+                    judge.BluePoints = correction.NewScore;
+                else
+                    judge.Score = correction.NewScore;
+
+                UpdateCurrentRoundVotes();
+                _logger.LogInformation("CORRECTION_SCORE appliquée : juge {Judge} → {Score}", judge.Name, correction.NewScore);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur application CORRECTION_SCORE");
+            }
+        });
     }
     #endregion
 
     #region Override Methods
+    private bool _needsRefreshOnAppearing;
+
     public override async Task OnAppearing()
     {
         _bluetoothServer.DeviceConnected -= OnDeviceConnected;
@@ -874,8 +1102,9 @@ public partial class ServerViewModel : BaseViewModel
 
         CheckBluetoothAvailabilityCommand.Execute(null);
 
-        if (!IsServerStarted)
+        if (!IsServerStarted || _needsRefreshOnAppearing)
         {
+            _needsRefreshOnAppearing = false;
             await Init();
         }
     }
@@ -1928,107 +2157,7 @@ public partial class ServerViewModel : BaseViewModel
                 await _drawKnockoutService.UpdateAsync(updateKo);
 
                 // Propagation logic for Knockouts
-                if (targetDrawId == 0)
-                {
-                    var existingK = (await _drawKnockoutService.GetAllAsync("Draw"))?.FirstOrDefault(k => k.Id == knockout.Id);
-                    if (existingK != null)
-                    {
-                        targetDrawId = existingK.DrawId > 0 ? existingK.DrawId : (existingK.Draw?.Id ?? 0);
-                    }
-                }
-
-                var allKnockouts = (await _drawKnockoutService.GetAllAsync("Draw", "Competitor1", "Competitor2"))?
-                    .Where(k => targetDrawId > 0 ? (k.DrawId == targetDrawId || (k.Draw != null && k.Draw.Id == targetDrawId)) : true)
-                    .OrderBy(k => k.Order)
-                    .ToList();
-                if (allKnockouts != null && allKnockouts.Count > 0)
-                {
-                    int m = allKnockouts.Max(k => k.Order) + 1;
-                    int currentOrder = knockout.Order;
-                    int roundStart = 0;
-                    int matchesInRound = m / 2;
-
-                    while (matchesInRound > 0)
-                    {
-                        if (currentOrder > roundStart && currentOrder <= roundStart + matchesInRound)
-                        {
-                            int localIndex = currentOrder - roundStart;
-                            int nextRoundStart = roundStart + matchesInRound;
-                            int nextMatchesInRound = matchesInRound / 2;
-
-                            if (nextMatchesInRound > 0)
-                            {
-                                DrawKnockoutModel? nextMatch;
-                                if (matchesInRound == 2)
-                                {
-                                    // Le vainqueur de demi-finale va en Finale (qui a lieu APRÈS la petite finale)
-                                    nextMatch = allKnockouts.LastOrDefault(k => !k.IsBronzeMatch);
-                                }
-                                else
-                                {
-                                    int nextMatchOrder = nextRoundStart + (localIndex + 1) / 2;
-                                    nextMatch = allKnockouts.FirstOrDefault(k => k.Order == nextMatchOrder);
-                                }
-
-                                if (nextMatch != null)
-                                {
-                                    int targetNextDrawId = (targetDrawId > 0 && nextMatch.DrawId == 0) ? targetDrawId : nextMatch.DrawId;
-                                    int? nextComp1Id = (localIndex % 2 != 0) ? winner.Id : nextMatch.Competitor1Id;
-                                    int? nextComp2Id = (localIndex % 2 == 0) ? winner.Id : nextMatch.Competitor2Id;
-
-                                    var updateNextMatch = new DrawKnockoutModel
-                                    {
-                                        Id = nextMatch.Id,
-                                        DrawId = targetNextDrawId,
-                                        Order = nextMatch.Order,
-                                        IsBronzeMatch = nextMatch.IsBronzeMatch,
-                                        CurrentRound = nextMatch.CurrentRound,
-                                        RoundResultsJson = nextMatch.RoundResultsJson,
-                                        Competitor1Id = nextComp1Id,
-                                        Competitor2Id = nextComp2Id,
-                                        WinnerId = nextMatch.WinnerId,
-                                        LooserId = nextMatch.LooserId,
-                                        IsFinished = nextMatch.IsFinished,
-                                        GlobalOrder = nextMatch.GlobalOrder
-                                    };
-                                    await _drawKnockoutService.UpdateAsync(updateNextMatch);
-                                }
-
-                                if (matchesInRound == 2 && looser != null)
-                                {
-                                    // Le perdant de demi-finale va en Petite finale (qui a lieu AVANT la finale)
-                                    var bronzeMatch = allKnockouts.FirstOrDefault(k => k.IsBronzeMatch);
-                                    if (bronzeMatch != null)
-                                    {
-                                        int targetBronzeDrawId = (targetDrawId > 0 && bronzeMatch.DrawId == 0) ? targetDrawId : bronzeMatch.DrawId;
-                                        int? bronzeComp1Id = (localIndex % 2 != 0) ? looser.Id : bronzeMatch.Competitor1Id;
-                                        int? bronzeComp2Id = (localIndex % 2 == 0) ? looser.Id : bronzeMatch.Competitor2Id;
-
-                                        var updateBronze = new DrawKnockoutModel
-                                        {
-                                            Id = bronzeMatch.Id,
-                                            DrawId = targetBronzeDrawId,
-                                            Order = bronzeMatch.Order,
-                                            IsBronzeMatch = bronzeMatch.IsBronzeMatch,
-                                            CurrentRound = bronzeMatch.CurrentRound,
-                                            RoundResultsJson = bronzeMatch.RoundResultsJson,
-                                            Competitor1Id = bronzeComp1Id,
-                                            Competitor2Id = bronzeComp2Id,
-                                            WinnerId = bronzeMatch.WinnerId,
-                                            LooserId = bronzeMatch.LooserId,
-                                            IsFinished = bronzeMatch.IsFinished,
-                                            GlobalOrder = bronzeMatch.GlobalOrder
-                                        };
-                                        await _drawKnockoutService.UpdateAsync(updateBronze);
-                                    }
-                                }
-                            }
-                            break;
-                        }
-                        roundStart += matchesInRound;
-                        matchesInRound /= 2;
-                    }
-                }
+                await PropagateKnockoutWinnerAsync(knockout, winner, looser, targetDrawId);
             }
         }
         else if (CurrentDraw is DrawPoolsModel pool)
@@ -2086,6 +2215,24 @@ public partial class ServerViewModel : BaseViewModel
 
         if (winner != null)
         {
+            if (!_monitorClients.IsEmpty && CurrentDraw != null)
+            {
+                try
+                {
+                    var matchResult = new MatchResultModel
+                    {
+                        MatchId = CurrentDraw.Id,
+                        WinnerId = winner.Id,
+                        WinnerName = winner.Name,
+                        WinnerSide = color == "Red" ? Constants.Side.Red : Constants.Side.Blue,
+                        IsFinished = true
+                    };
+                    var resJson = JsonSerializer.Serialize(matchResult, _jsonOptions);
+                    await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_RESULT}{resJson}");
+                }
+                catch { }
+            }
+
             ResetJudgeScores();
 
             if (_useTimer)
@@ -2094,6 +2241,102 @@ public partial class ServerViewModel : BaseViewModel
             }
 
             await Init();
+        }
+    }
+
+    /// <summary>
+    /// Propage le vainqueur (et le perdant vers le match de bronze en demi-finale) dans l'arbre Knockout.
+    /// </summary>
+    private async Task PropagateKnockoutWinnerAsync(DrawKnockoutModel knockout, CompetitorModel winner, CompetitorModel? looser, int targetDrawId)
+    {
+        if (targetDrawId == 0)
+        {
+            var existingK = (await _drawKnockoutService.GetAllAsync("Draw"))?.FirstOrDefault(k => k.Id == knockout.Id);
+            if (existingK != null)
+            {
+                targetDrawId = existingK.DrawId > 0 ? existingK.DrawId : (existingK.Draw?.Id ?? 0);
+            }
+        }
+
+        var allKnockouts = (await _drawKnockoutService.GetAllAsync("Draw", "Competitor1", "Competitor2"))?
+            .Where(k => targetDrawId <= 0 || (k.DrawId == targetDrawId || (k.Draw != null && k.Draw.Id == targetDrawId)))
+            .OrderBy(k => k.Order)
+            .ToList();
+        if (allKnockouts == null || allKnockouts.Count == 0) return;
+
+        int m = allKnockouts.Max(k => k.Order) + 1;
+        int currentOrder = knockout.Order;
+        int roundStart = 0;
+        int matchesInRound = m / 2;
+
+        while (matchesInRound > 0)
+        {
+            if (currentOrder > roundStart && currentOrder <= roundStart + matchesInRound)
+            {
+                int localIndex = currentOrder - roundStart;
+                int nextRoundStart = roundStart + matchesInRound;
+                int nextMatchesInRound = matchesInRound / 2;
+
+                if (nextMatchesInRound > 0)
+                {
+                    DrawKnockoutModel? nextMatch = matchesInRound == 2
+                        ? allKnockouts.LastOrDefault(k => !k.IsBronzeMatch)
+                        : allKnockouts.FirstOrDefault(k => k.Order == nextRoundStart + (localIndex + 1) / 2);
+
+                    if (nextMatch != null)
+                    {
+                        int targetNextDrawId = (targetDrawId > 0 && nextMatch.DrawId == 0) ? targetDrawId : nextMatch.DrawId;
+                        int? nextComp1Id = (localIndex % 2 != 0) ? winner.Id : nextMatch.Competitor1Id;
+                        int? nextComp2Id = (localIndex % 2 == 0) ? winner.Id : nextMatch.Competitor2Id;
+
+                        await _drawKnockoutService.UpdateAsync(new DrawKnockoutModel
+                        {
+                            Id = nextMatch.Id,
+                            DrawId = targetNextDrawId,
+                            Order = nextMatch.Order,
+                            IsBronzeMatch = nextMatch.IsBronzeMatch,
+                            CurrentRound = nextMatch.CurrentRound,
+                            RoundResultsJson = nextMatch.RoundResultsJson,
+                            Competitor1Id = nextComp1Id,
+                            Competitor2Id = nextComp2Id,
+                            WinnerId = nextMatch.WinnerId,
+                            LooserId = nextMatch.LooserId,
+                            IsFinished = nextMatch.IsFinished,
+                            GlobalOrder = nextMatch.GlobalOrder
+                        });
+                    }
+
+                    if (matchesInRound == 2 && looser != null)
+                    {
+                        var bronzeMatch = allKnockouts.FirstOrDefault(k => k.IsBronzeMatch);
+                        if (bronzeMatch != null)
+                        {
+                            int targetBronzeDrawId = (targetDrawId > 0 && bronzeMatch.DrawId == 0) ? targetDrawId : bronzeMatch.DrawId;
+                            int? bronzeComp1Id = (localIndex % 2 != 0) ? looser.Id : bronzeMatch.Competitor1Id;
+                            int? bronzeComp2Id = (localIndex % 2 == 0) ? looser.Id : bronzeMatch.Competitor2Id;
+
+                            await _drawKnockoutService.UpdateAsync(new DrawKnockoutModel
+                            {
+                                Id = bronzeMatch.Id,
+                                DrawId = targetBronzeDrawId,
+                                Order = bronzeMatch.Order,
+                                IsBronzeMatch = bronzeMatch.IsBronzeMatch,
+                                CurrentRound = bronzeMatch.CurrentRound,
+                                RoundResultsJson = bronzeMatch.RoundResultsJson,
+                                Competitor1Id = bronzeComp1Id,
+                                Competitor2Id = bronzeComp2Id,
+                                WinnerId = bronzeMatch.WinnerId,
+                                LooserId = bronzeMatch.LooserId,
+                                IsFinished = bronzeMatch.IsFinished,
+                                GlobalOrder = bronzeMatch.GlobalOrder
+                            });
+                        }
+                    }
+                }
+                break;
+            }
+            roundStart += matchesInRound;
+            matchesInRound /= 2;
         }
     }
 
@@ -2586,6 +2829,29 @@ public partial class ServerViewModel : BaseViewModel
         {
             IsBusy = false;
         }
+    }
+
+    /// <summary>
+    /// Ouvre la vue modale des tirages de la compétition avec la catégorie courante sélectionnée par défaut.
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenServerDraws()
+    {
+        if (_currentCompetition == null) return;
+
+        int currentCategoryId = CurrentDraw?.Draw?.CategoryId
+            ?? CurrentDraw?.Draw?.Category?.Id
+            ?? 0;
+
+        _needsRefreshOnAppearing = true;
+
+        var parameters = new Dictionary<string, object>
+        {
+            { Constants.Navigation.Parameter.COMPETITION_ID, _currentCompetition.Id },
+            { Constants.Navigation.Parameter.CATEGORY_ID, currentCategoryId }
+        };
+
+        await Shell.Current.GoToAsync(Constants.Navigation.Page.SERVER_DRAWS, parameters);
     }
 
     private static string SanitizeFileName(string name)

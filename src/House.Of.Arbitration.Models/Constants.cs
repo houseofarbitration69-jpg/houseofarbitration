@@ -48,6 +48,12 @@ public static class Constants
         public static string PING = "PING";
         public static string PONG = "PONG";
         public static string SERVER_STOPPED = "SERVER_STOPPED";
+
+        // Messages Monitor CLI → Serveur
+        public static string MONITOR_REGISTER = "MONITOR_REGISTER";
+        public static string CORRECTION_WINNER = "CORRECTION_WINNER:";
+        public static string CORRECTION_SCORE = "CORRECTION_SCORE:";
+        public static string MATCH_RESULT = "MATCH_RESULT:";
     }
 
     public static class Navigation
@@ -55,6 +61,7 @@ public static class Constants
         public static class Parameter
         {
             public const string COMPETITION_ID = "COMPETITION_ID";
+            public const string CATEGORY_ID = "CATEGORY_ID";
             public const string COMPETITION = "COMPETITION";
             public const string SERVER_ID = "SERVER_ID";
             public const string SERVER_NAME = "SERVER_NAME";
@@ -68,6 +75,7 @@ public static class Constants
             public const string DRAWS_MANAGEMENT = "DRAWS_MANAGEMENT";
             public const string SERVER_TAOLU = "SERVER_TAOLU";
             public const string SERVER_SANDA = "SERVER_SANDA";
+            public const string SERVER_DRAWS = "SERVER_DRAWS";
             public const string HOME = "HOME";
             public const string MASTER = "MASTER";
             public const string JUDGE_CONNECTION = "JUDGE_CONNECTION";

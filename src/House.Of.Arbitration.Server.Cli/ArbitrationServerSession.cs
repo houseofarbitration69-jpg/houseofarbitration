@@ -45,6 +45,7 @@ public class ArbitrationServerSession : IDisposable
         ReferenceHandler = ReferenceHandler.IgnoreCycles
     };
     private readonly Dictionary<string, JudgeModel> _clientJudgeMapping = new();
+    private readonly HashSet<string> _monitorClients = new();
     private readonly List<MatchItem> _matches = new();
     private readonly List<CategoryModel> _loadedCategories = new();
     private readonly List<JudgeScoreEntry> _judgeScoreHistory = new();
@@ -531,6 +532,7 @@ public class ArbitrationServerSession : IDisposable
                 match.DecisionReason = $"Égalité {redWins}-{blueWins} à l'issue de {match.CurrentRound} round(s)";
                 StatusChanged?.Invoke(this, $"⚖️ [MATCH NUL] Match #{match.Id} : {match.DecisionReason}");
                 WinnerDeclared?.Invoke(this, (match, match.Winner, match.DecisionReason));
+                _ = BroadcastMatchResultAsync(match);
             }
 
             await StopTimerAsync();
@@ -739,6 +741,7 @@ public class ArbitrationServerSession : IDisposable
 
         StatusChanged?.Invoke(this, $"🏆 [VAINQUEUR DÉCLARÉ] Match #{match.Id} : {match.Winner} ({side}) - {match.DecisionReason}");
         WinnerDeclared?.Invoke(this, (match, match.Winner, match.DecisionReason));
+        _ = BroadcastMatchResultAsync(match);
 
         return Task.FromResult(true);
     }
@@ -838,6 +841,7 @@ public class ArbitrationServerSession : IDisposable
 
         StatusChanged?.Invoke(this, $"🏆 [SCORE TAOLU VALIDÉ] Match #{match.Id} - {match.RedCompetitor} : {reason}");
         WinnerDeclared?.Invoke(this, (match, match.RedCompetitor, reason));
+        _ = BroadcastMatchResultAsync(match);
 
         return Task.FromResult(true);
     }
@@ -1805,14 +1809,14 @@ public class ArbitrationServerSession : IDisposable
                     {
                         judge.RedPoints += scoreModel.Score;
                         string desc = $"+{scoreModel.Score:F0} Rouge (Total: {judge.RedPoints:F0})";
-                        RecordJudgeScore(judge, scoreModel.Side, scoreModel.Score, judge.RedPoints, null, "Point Rouge", desc, scoreModel.Round);
+                        RecordJudgeScore(judge, scoreModel.Side, scoreModel.Score, judge.RedPoints, null, "Point Rouge", desc, scoreModel.Round, relayToMonitors: false);
                         ScoreUpdated?.Invoke(this, (judge, desc));
                     }
                     else if (scoreModel.Side == Constants.Side.Blue)
                     {
                         judge.BluePoints += scoreModel.Score;
                         string desc = $"+{scoreModel.Score:F0} Bleu (Total: {judge.BluePoints:F0})";
-                        RecordJudgeScore(judge, scoreModel.Side, scoreModel.Score, judge.BluePoints, null, "Point Bleu", desc, scoreModel.Round);
+                        RecordJudgeScore(judge, scoreModel.Side, scoreModel.Score, judge.BluePoints, null, "Point Bleu", desc, scoreModel.Round, relayToMonitors: false);
                         ScoreUpdated?.Invoke(this, (judge, desc));
                     }
                     else
@@ -1822,15 +1826,23 @@ public class ArbitrationServerSession : IDisposable
                         {
                             judge.Codes.Insert(0, scoreModel.Code);
                             string desc = $"Déduction {scoreModel.Code.Code?.Code} (-{scoreModel.Code.Code?.Value:F1}) => Nouveau score: {judge.Score:F2}";
-                            RecordJudgeScore(judge, null, -(scoreModel.Code.Code?.Value ?? 0), judge.Score, scoreModel.Code, "Déduction", desc, scoreModel.Round);
+                            RecordJudgeScore(judge, null, -(scoreModel.Code.Code?.Value ?? 0), judge.Score, scoreModel.Code, "Déduction", desc, scoreModel.Round, relayToMonitors: false);
                             ScoreUpdated?.Invoke(this, (judge, desc));
                         }
                         else
                         {
                             string desc = $"Score fixé à {judge.Score:F2}";
-                            RecordJudgeScore(judge, null, scoreModel.Score, judge.Score, null, "Score", desc, scoreModel.Round);
+                            RecordJudgeScore(judge, null, scoreModel.Score, judge.Score, null, "Score", desc, scoreModel.Round, relayToMonitors: false);
                             ScoreUpdated?.Invoke(this, (judge, desc));
                         }
+                    }
+
+                    // Relayer la note aux moniteurs enregistrés via SendToAllAsync
+                    // (nécessaire lorsque Judge.Cli et Monitor.Cli partagent le même adaptateur BLE)
+                    if (_monitorClients.Count > 0)
+                    {
+                        try { await _bluetoothServer.SendToAllAsync(message); }
+                        catch { }
                     }
                 }
             }
@@ -1904,6 +1916,67 @@ public class ArbitrationServerSession : IDisposable
                 foreach (var k in keysToRemove)
                 {
                     _clientJudgeMapping.Remove(k);
+                }
+            }
+            else if (message.StartsWith(Constants.Message.MONITOR_REGISTER))
+            {
+                _monitorClients.Add(clientId);
+                StatusChanged?.Invoke(this, $"[MONITOR] Client Monitor enregistré : [{clientId}] (total: {_monitorClients.Count})");
+            }
+            else if (message.StartsWith(Constants.Message.CORRECTION_WINNER))
+            {
+                var payload = message.Substring(Constants.Message.CORRECTION_WINNER.Length);
+                var correction = JsonSerializer.Deserialize<WinnerCorrectionModel>(payload, _jsonOptions);
+                if (correction != null)
+                {
+                    var match = correction.MatchId == 0
+                        ? CurrentMatch
+                        : _matches.FirstOrDefault(m => m.Id == correction.MatchId);
+
+                    if (match != null)
+                    {
+                        match.WinnerSide = correction.WinningSide;
+                        match.Winner = correction.WinningSide == Constants.Side.Red ? match.RedCompetitor : match.BlueCompetitor;
+                        match.IsFinished = true;
+                        match.DecisionReason = $"[CORRECTION MONITOR] {correction.Reason ?? correction.WinningSide.ToString()}";
+                        PropagateWinnerToNextMatch(match);
+                        StatusChanged?.Invoke(this, $"🛠 [CORRECTION WINNER] Match #{match.Id} → {match.Winner ?? "?"} ({correction.WinningSide})");
+                        WinnerDeclared?.Invoke(this, (match, match.Winner ?? string.Empty, match.DecisionReason ?? string.Empty));
+                        await BroadcastMatchResultAsync(match);
+                        await BroadcastMatchInfoAsync();
+                    }
+                    else
+                    {
+                        StatusChanged?.Invoke(this, $"[CORRECTION WINNER] Match #{correction.MatchId} introuvable.");
+                    }
+                }
+            }
+            else if (message.StartsWith(Constants.Message.CORRECTION_SCORE))
+            {
+                var payload = message.Substring(Constants.Message.CORRECTION_SCORE.Length);
+                var correction = JsonSerializer.Deserialize<ScoreCorrectionModel>(payload, _jsonOptions);
+                if (correction != null)
+                {
+                    var judge = Judges.FirstOrDefault(j =>
+                        string.Equals(j.Name, correction.JudgePosition, StringComparison.OrdinalIgnoreCase) ||
+                        j.Number.ToString() == correction.JudgePosition ||
+                        $"{j.Group}_{j.Number}" == correction.JudgePosition);
+
+                    if (judge != null)
+                    {
+                        if (correction.Side == Constants.Side.Red) judge.RedPoints = correction.NewScore;
+                        else if (correction.Side == Constants.Side.Blue) judge.BluePoints = correction.NewScore;
+                        else judge.Score = correction.NewScore;
+
+                        string desc = $"[CORRECTION MONITOR] Score → {correction.NewScore:F2}";
+                        RecordJudgeScore(judge, correction.Side, correction.NewScore, correction.NewScore, null, "Correction", desc, correction.Round);
+                        ScoreUpdated?.Invoke(this, (judge, desc));
+                        StatusChanged?.Invoke(this, $"🛠 [CORRECTION SCORE] Juge {judge.Name} ({correction.Side?.ToString() ?? "Global"}) → {correction.NewScore:F2}");
+                    }
+                    else
+                    {
+                        StatusChanged?.Invoke(this, $"[CORRECTION SCORE] Juge '{correction.JudgePosition}' introuvable.");
+                    }
                 }
             }
         }
@@ -2498,7 +2571,8 @@ public class ArbitrationServerSession : IDisposable
         MvtTimeCodeModel? deductionCode,
         string actionType,
         string description,
-        int? round = null)
+        int? round = null,
+        bool relayToMonitors = true)
     {
         var match = CurrentMatch;
         int nextId = _judgeScoreHistory.Count + 1;
@@ -2537,7 +2611,61 @@ public class ArbitrationServerSession : IDisposable
 
         _judgeScoreHistory.Add(entry);
         JudgeScoreRecorded?.Invoke(this, entry);
+
+        if (relayToMonitors && _monitorClients.Count > 0)
+        {
+            var transferModel = new TransfertScoreModel
+            {
+                Score = CurrentCompetitionType == CompetitionType.Taolu ? resultingScore : deltaPoints,
+                Side = side,
+                Code = deductionCode,
+                JudgePosition = !string.IsNullOrEmpty(judge.Group) ? $"{judge.Group}_{judge.Number}" : judge.Number.ToString(),
+                Round = roundNumber
+            };
+            string json = JsonSerializer.Serialize(transferModel, _jsonOptions);
+            string msg = $"{Constants.Message.JUDGE_SCORE}{json}";
+            _ = Task.Run(async () =>
+            {
+                try { await _bluetoothServer.SendToAllAsync(msg); }
+                catch { }
+            });
+        }
+
         return entry;
+    }
+
+    /// <summary>
+    /// Diffuse le résultat d'un match terminé aux clients (notamment Monitor CLI).
+    /// </summary>
+    private async Task BroadcastMatchResultAsync(MatchItem match)
+    {
+        if (_monitorClients.Count == 0) return;
+
+        int? winnerId = null;
+        if (!string.IsNullOrWhiteSpace(match.Winner))
+        {
+            var winnerComp = FindCompetitor(match.Winner);
+            winnerId = winnerComp?.Id;
+        }
+
+        var result = new MatchResultModel
+        {
+            MatchId = match.Id,
+            WinnerId = winnerId,
+            WinnerName = match.Winner,
+            WinnerSide = match.WinnerSide,
+            RedScore = match.RedScore,
+            BlueScore = match.BlueScore,
+            Reason = match.DecisionReason,
+            IsFinished = match.IsFinished
+        };
+
+        string json = JsonSerializer.Serialize(result, _jsonOptions);
+        try
+        {
+            await _bluetoothServer.SendToAllAsync($"{Constants.Message.MATCH_RESULT}{json}");
+        }
+        catch { }
     }
 
     /// <summary>

@@ -69,7 +69,7 @@ public partial class DrawKnockoutModel : ObservableObject, IDrawModel
         get
         {
             if (IsBronzeMatch) return "Petite finale";
-            var nonBronzeMatches = Draw?.DrawKnockouts?.Where(k => !k.IsBronzeMatch).OrderBy(k => k.Order).ToList();
+            var nonBronzeMatches = Draw?.DrawKnockouts?.Where(k => k != null && !k.IsBronzeMatch).OrderBy(k => k.Order).ToList();
             if (nonBronzeMatches != null && nonBronzeMatches.Count > 0)
             {
                 int rankInNonBronze = nonBronzeMatches.IndexOf(this) + 1;

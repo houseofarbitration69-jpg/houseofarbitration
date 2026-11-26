@@ -15,6 +15,7 @@
       <Deploy />
     </Project>
     <Project Path="House.Of.Arbitration.Judge.Cli/House.Of.Arbitration.Judge.Cli.csproj" />
+    <Project Path="House.Of.Arbitration.Monitor.Cli/House.Of.Arbitration.Monitor.Cli.csproj" />
     <Project Path="House.Of.Arbitration.Server.Cli/House.Of.Arbitration.Server.Cli.csproj" />
   </Folder>
   <Folder Name="/03 - Models/">
