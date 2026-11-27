@@ -123,6 +123,9 @@ namespace House.Of.Arbitration.App
 #endif
             });
 
+            // Permettre de personnaliser la couleur du trait sous les Picker
+            House.Of.Arbitration.Controls.PickerExtensions.ConfigureHandler();
+
             var app = builder.Build();
 
             app.SetDefaultCulture();

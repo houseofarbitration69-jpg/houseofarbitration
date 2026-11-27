@@ -234,4 +234,84 @@ public class ServerDrawsViewModelTests
         Assert.Equal(2, vm.OrderItems[1].Rank);
         Assert.Contains("Li Wei", vm.TaoluWinnerName);
     }
+
+    [Fact]
+    public async Task Taolu_LoadAndSaveJudgeScore_UpdatesRefereeDataRecalculatesTotalAndRankings()
+    {
+        var vm = CreateVm(out var compRepo, out var catRepo, out var drawRepo, out _, out _, out var orderRepo, out var refRepo);
+
+        var c1 = new CompetitorModel { Id = 1, FirstName = "Li", LastName = "Wei" };
+        var c2 = new CompetitorModel { Id = 2, FirstName = "Chen", LastName = "Yu" };
+
+        var o1 = new DrawOrderModel
+        {
+            Id = 401,
+            DrawId = 8,
+            Order = 1,
+            CompetitorId = 1,
+            Competitor = c1,
+            RoundResultsJson = "9.20",
+            IsFinished = true,
+            RefereeDatas = new List<RefereeDataModel>
+            {
+                // Deux entrées pour A_1 : la plus récente (4.60) doit être retenue
+                new() { Id = 1, Referee = "A_1", Score = 4.80, Date = new DateTime(2026, 1, 1, 10, 0, 0), DrawOrderId = 401, CompetitorId = 1 },
+                new() { Id = 2, Referee = "A_1", Score = 4.60, Date = new DateTime(2026, 1, 1, 10, 1, 0), DrawOrderId = 401, CompetitorId = 1 },
+                new() { Id = 3, Referee = "B_1", Score = 2.80, Date = new DateTime(2026, 1, 1, 10, 1, 0), DrawOrderId = 401, CompetitorId = 1 },
+                new() { Id = 4, Referee = "C_1", Score = 1.80, Date = new DateTime(2026, 1, 1, 10, 1, 0), DrawOrderId = 401, CompetitorId = 1 }
+            }
+        };
+        var o2 = new DrawOrderModel
+        {
+            Id = 402,
+            DrawId = 8,
+            Order = 2,
+            CompetitorId = 2,
+            Competitor = c2,
+            RoundResultsJson = "9.30",
+            IsFinished = true
+        };
+
+        compRepo.GetByIdAsync(1).Returns(new CompetitionModel { Id = 1, Name = "Open" });
+        catRepo.GetAllAsync(Arg.Any<string[]>()).Returns(new List<CategoryModel>
+        {
+            new() { Id = 40, CompetitionId = 1, RoundType = RoundType.Order }
+        });
+        drawRepo.GetAllAsync(Arg.Any<string[]>()).Returns(new List<DrawModel>
+        {
+            new() { Id = 8, CategoryId = 40, DrawOrders = new List<DrawOrderModel> { o1, o2 } }
+        });
+
+        vm.CompetitionId = 1;
+        vm.CurrentCategoryId = 40;
+        await vm.LoadCategoriesAsync();
+
+        // Vérifier que les 9 juges Taolu (A_1..A_3, B_1..B_3, C_1..C_3) sont affichés, avec la note la plus récente ou la note par défaut
+        Assert.True(vm.OrderItems[0].HasJudgeScores);
+        Assert.Equal(9, vm.OrderItems[0].JudgeScores.Count);
+        Assert.Equal("A_1", vm.OrderItems[0].JudgeScores[0].RefereeName);
+        Assert.Equal("4.60", vm.OrderItems[0].JudgeScores[0].ScoreText);
+        Assert.Equal("A_2", vm.OrderItems[0].JudgeScores[1].RefereeName);
+        Assert.Equal("5.00", vm.OrderItems[0].JudgeScores[1].ScoreText);
+        Assert.Equal("C_3", vm.OrderItems[0].JudgeScores[8].RefereeName);
+        Assert.Equal("2.00", vm.OrderItems[0].JudgeScores[8].ScoreText);
+        Assert.True(vm.OrderItems[1].HasJudgeScores);
+        Assert.Equal(9, vm.OrderItems[1].JudgeScores.Count);
+
+        // Modifier la note de A_1 de 4.60 à 4.90 -> Moy(A)=(4.90+5.00+5.00)/3=4.97, Moy(B)=(2.80+3.00+3.00)/3=2.93, Moy(C)=(1.80+2.00+2.00)/3=1.93 -> Total=9.83
+        vm.OrderItems[0].JudgeScores[0].ScoreText = "4.90";
+        await vm.SaveJudgeScore(vm.OrderItems[0].JudgeScores[0]);
+
+        await refRepo.Received(1).UpdateAsync(Arg.Is<RefereeDataModel>(r => r.Id == 2 && r.Score == 4.90 && r.IsCorrection));
+        await orderRepo.Received(1).UpdateAsync(Arg.Is<DrawOrderModel>(d => d.Id == 401 && d.RoundResultsJson == "9.83"));
+        Assert.Equal("9.83", vm.OrderItems[0].ScoreText);
+        Assert.True(vm.OrderItems[0].IsWinner);
+        Assert.Equal(1, vm.OrderItems[0].Rank);
+        Assert.Contains($"Li Wei ({9.83:F2} pts)", vm.TaoluWinnerName);
+
+        // Modifier un juge sans enregistrement préalable (A_2) doit créer un RefereeDataModel via AddAsync
+        vm.OrderItems[0].JudgeScores[1].ScoreText = "4.70";
+        await vm.SaveJudgeScore(vm.OrderItems[0].JudgeScores[1]);
+        await refRepo.Received(1).AddAsync(Arg.Is<RefereeDataModel>(r => r.Referee == "A_2" && r.Score == 4.70 && r.DrawOrderId == 401 && r.IsCorrection));
+    }
 }

@@ -136,15 +136,16 @@
                     <Border Padding="10" Margin="0,2" BackgroundColor="{DynamicResource SurfaceLight}" StrokeShape="RoundRectangle 5">
                         <Grid>
                             <Grid 
-                            ColumnDefinitions="120, 100, 150, 60, 60, *, 60"
-                            ColumnSpacing="10"
-                            IsVisible="{OnIdiom Tablet=True, Phone=False}"
-                        >
+                                ColumnDefinitions="120, 100, 150, 60, 60, *, 60"
+                                ColumnSpacing="10"
+                                IsVisible="{OnIdiom Tablet=True, Phone=False}"
+                            >
                                 <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
                                     <Label 
                                         Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" 
                                         FontSize="12" 
                                     />
+                                    
                                     <Label 
                                         Text="{Binding MatchTimerDisplay, StringFormat='Chrono: {0}'}" 
                                         FontSize="11" 
@@ -152,12 +153,14 @@
                                         TextColor="{DynamicResource PrimaryColor}" 
                                     />
                                 </VerticalStackLayout>
+                                
                                 <Label 
                                     Grid.Column="1" 
                                     Text="{Binding Referee}" 
                                     VerticalOptions="Center" 
                                     FontAttributes="Bold" 
                                 />
+                                
                                 <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
                                     <Label 
                                         Text="{Binding Competitor.LastName}" 
@@ -166,6 +169,7 @@
                                     />
                                     <Label Text="{Binding Competitor.FirstName}" FontSize="12" />
                                 </VerticalStackLayout>
+                                
                                 <Label 
                                     Grid.Column="3" 
                                     Text="{Binding Score}" 
@@ -175,6 +179,7 @@
                                     FontAttributes="Bold" 
                                     TextColor="{Binding Score, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='-1'}" 
                                 />
+
                                 <Label 
                                     Grid.Column="4" 
                                     Text="{Binding Round}" 

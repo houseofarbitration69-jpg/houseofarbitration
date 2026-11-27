@@ -270,7 +270,8 @@ public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
                 "DrawPools.Competitor2",
                 "DrawPools.Winner",
                 "DrawPools.RefereeDatas",
-                "DrawOrders.Competitor");
+                "DrawOrders.Competitor",
+                "DrawOrders.RefereeDatas");
 
             _currentDrawModel = allDraws.FirstOrDefault(d => d.CategoryId == SelectedCategory.Id);
             if (_currentDrawModel == null) return;
@@ -285,7 +286,14 @@ public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
             }
             else if (IsOrder)
             {
-                BuildOrderItems(_currentDrawModel.DrawOrders.OrderBy(o => o.Order).ToList());
+                var orders = _currentDrawModel.DrawOrders.OrderBy(o => o.Order).ToList();
+                var allRefDatas = await _refereeDataRepository.GetAllAsync();
+                var refDatasByOrder = (allRefDatas ?? Array.Empty<RefereeDataModel>())
+                    .Where(r => r.DrawOrderId.HasValue)
+                    .GroupBy(r => r.DrawOrderId!.Value)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                BuildOrderItems(orders, refDatasByOrder);
             }
         }
         catch (Exception ex)
@@ -808,7 +816,7 @@ public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
     #endregion
 
     #region Taolu (Order + Recalcul du vainqueur)
-    private void BuildOrderItems(List<DrawOrderModel> orders)
+    private void BuildOrderItems(List<DrawOrderModel> orders, Dictionary<int, List<RefereeDataModel>>? refDatasByOrder = null)
     {
         var items = new List<ServerOrderItem>();
         foreach (var o in orders)
@@ -820,7 +828,7 @@ public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
                 score = Math.Round(parsed, 2);
             }
 
-            items.Add(new ServerOrderItem
+            var orderItem = new ServerOrderItem
             {
                 Model = o,
                 Order = o.Order,
@@ -829,7 +837,39 @@ public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
                 NumericScore = score,
                 ScoreText = score.HasValue ? score.Value.ToString("F2", CultureInfo.InvariantCulture) : string.Empty,
                 IsFinished = o.IsFinished
-            });
+            };
+
+            var orderRefDatas = (o.RefereeDatas != null && o.RefereeDatas.Count > 0)
+                ? o.RefereeDatas
+                : (refDatasByOrder != null && refDatasByOrder.TryGetValue(o.Id, out var fromRepo)
+                    ? fromRepo
+                    : Enumerable.Empty<RefereeDataModel>());
+
+            var latestByJudge = orderRefDatas
+                .Where(r => !string.IsNullOrWhiteSpace(r.Referee))
+                .GroupBy(r => r.Referee, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderByDescending(r => r.Date).ThenByDescending(r => r.Id).First(),
+                    StringComparer.OrdinalIgnoreCase);
+
+            // Toujours afficher les 9 juges Taolu (A_1..A_3, B_1..B_3, C_1..C_3)
+            foreach (var (refName, group, defaultScore) in GetDefaultTaoluJudges())
+            {
+                latestByJudge.TryGetValue(refName, out var latest);
+                double judgeScore = latest != null ? Math.Round(latest.Score, 2) : defaultScore;
+                orderItem.JudgeScores.Add(new ServerTaoluJudgeScoreItem
+                {
+                    OrderItem = orderItem,
+                    LatestRecord = latest,
+                    RefereeName = refName,
+                    Group = group,
+                    NumericScore = judgeScore,
+                    ScoreText = judgeScore.ToString("F2", CultureInfo.InvariantCulture)
+                });
+            }
+
+            items.Add(orderItem);
         }
 
         RecalculateOrderRankings(items);
@@ -888,6 +928,97 @@ public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
     }
 
     [RelayCommand]
+    public async Task SaveJudgeScore(ServerTaoluJudgeScoreItem? judgeItem)
+    {
+        if (judgeItem == null || _currentDrawModel == null) return;
+
+        if (!double.TryParse((judgeItem.ScoreText ?? string.Empty).Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out double parsed) || parsed < 0)
+        {
+            await _alertService.ShowAlert("Note invalide", "Veuillez saisir une note de juge valide (ex: 4.80).", "OK");
+            return;
+        }
+
+        await PersistJudgeScoreAsync(judgeItem, parsed);
+
+        var orderItem = judgeItem.OrderItem;
+        double totalScore = ComputeTaoluTotalScore(orderItem.JudgeScores);
+        orderItem.NumericScore = totalScore;
+        orderItem.ScoreText = totalScore.ToString("F2", CultureInfo.InvariantCulture);
+        orderItem.IsFinished = true;
+        orderItem.Model.RoundResultsJson = orderItem.ScoreText;
+        orderItem.Model.IsFinished = true;
+        await _drawOrderRepository.UpdateAsync(ToDetachedOrder(orderItem.Model));
+
+        var list = OrderItems.ToList();
+        RecalculateOrderRankings(list);
+        OrderItems = new ObservableCollection<ServerOrderItem>(list);
+    }
+
+    private async Task PersistJudgeScoreAsync(ServerTaoluJudgeScoreItem judgeItem, double parsedScore)
+    {
+        double rounded = Math.Round(parsedScore, 2);
+        judgeItem.NumericScore = rounded;
+        judgeItem.ScoreText = rounded.ToString("F2", CultureInfo.InvariantCulture);
+
+        if (judgeItem.LatestRecord != null)
+        {
+            judgeItem.LatestRecord.Score = rounded;
+            judgeItem.LatestRecord.IsCorrection = true;
+
+            await _refereeDataRepository.UpdateAsync(new RefereeDataModel
+            {
+                Id = judgeItem.LatestRecord.Id,
+                Referee = judgeItem.LatestRecord.Referee,
+                Date = judgeItem.LatestRecord.Date,
+                MatchTimer = judgeItem.LatestRecord.MatchTimer,
+                Score = rounded,
+                Round = judgeItem.LatestRecord.Round,
+                Data = judgeItem.LatestRecord.Data,
+                IsCorrection = true,
+                CompetitorId = judgeItem.LatestRecord.CompetitorId,
+                DrawKnockoutId = judgeItem.LatestRecord.DrawKnockoutId,
+                DrawOrderId = judgeItem.LatestRecord.DrawOrderId,
+                DrawPoolsId = judgeItem.LatestRecord.DrawPoolsId
+            });
+        }
+        else
+        {
+            var newRecord = new RefereeDataModel
+            {
+                Referee = judgeItem.RefereeName,
+                Date = DateTime.UtcNow,
+                Score = rounded,
+                Round = judgeItem.OrderItem.Model.CurrentRound > 0 ? judgeItem.OrderItem.Model.CurrentRound : 1,
+                Data = string.Empty,
+                IsCorrection = true,
+                CompetitorId = judgeItem.OrderItem.Model.CompetitorId,
+                DrawOrderId = judgeItem.OrderItem.Model.Id
+            };
+            await _refereeDataRepository.AddAsync(newRecord);
+            judgeItem.LatestRecord = newRecord;
+        }
+    }
+
+    private static IEnumerable<(string RefereeName, string Group, double DefaultScore)> GetDefaultTaoluJudges()
+    {
+        for (int i = 1; i <= 3; i++) yield return ($"A_{i}", "A", Constants.DEFAULT_SCORE_GROUP_A);
+        for (int i = 1; i <= 3; i++) yield return ($"B_{i}", "B", Constants.DEFAULT_SCORE_GROUP_B);
+        for (int i = 1; i <= 3; i++) yield return ($"C_{i}", "C", Constants.DEFAUTL_SCORE_GROUP_C);
+    }
+
+    /// <summary>
+    /// Calcule la note totale Taolu à partir des notes des juges :
+    /// moyenne par groupe (A, B, C) arrondie à 2 décimales, puis somme des groupes.
+    /// </summary>
+    public static double ComputeTaoluTotalScore(IEnumerable<ServerTaoluJudgeScoreItem> judgeScores)
+    {
+        double total = judgeScores
+            .GroupBy(j => j.Group, StringComparer.OrdinalIgnoreCase)
+            .Sum(g => Math.Round(g.Average(j => j.NumericScore), 2));
+        return Math.Round(total, 2);
+    }
+
+    [RelayCommand]
     public async Task RecalculateAllOrderScores()
     {
         if (_currentDrawModel == null) return;
@@ -895,7 +1026,31 @@ public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
         var list = OrderItems.ToList();
         foreach (var item in list)
         {
-            if (double.TryParse((item.ScoreText ?? string.Empty).Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out double parsed) && parsed >= 0)
+            bool judgeEdited = false;
+            foreach (var j in item.JudgeScores)
+            {
+                if (double.TryParse((j.ScoreText ?? string.Empty).Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out double jParsed) && jParsed >= 0)
+                {
+                    double jRounded = Math.Round(jParsed, 2);
+                    if (Math.Abs(jRounded - j.NumericScore) > 0.0001)
+                    {
+                        await PersistJudgeScoreAsync(j, jRounded);
+                        judgeEdited = true;
+                    }
+                }
+            }
+
+            if (judgeEdited && item.JudgeScores.Count > 0)
+            {
+                double totalScore = ComputeTaoluTotalScore(item.JudgeScores);
+                item.NumericScore = totalScore;
+                item.ScoreText = totalScore.ToString("F2", CultureInfo.InvariantCulture);
+                item.IsFinished = true;
+                item.Model.RoundResultsJson = item.ScoreText;
+                item.Model.IsFinished = true;
+                await _drawOrderRepository.UpdateAsync(ToDetachedOrder(item.Model));
+            }
+            else if (double.TryParse((item.ScoreText ?? string.Empty).Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out double parsed) && parsed >= 0)
             {
                 double rounded = Math.Round(parsed, 2);
                 item.NumericScore = rounded;
@@ -1008,5 +1163,21 @@ public partial class ServerOrderItem : ObservableObject
     private bool _isWinner;
 
     public string RankDisplay => Rank.HasValue ? (IsWinner ? $"🏆 #{Rank}" : $"#{Rank}") : "—";
+
+    public ObservableCollection<ServerTaoluJudgeScoreItem> JudgeScores { get; set; } = new();
+
+    public bool HasJudgeScores => JudgeScores.Count > 0;
+}
+
+public partial class ServerTaoluJudgeScoreItem : ObservableObject
+{
+    public ServerOrderItem OrderItem { get; set; } = null!;
+    public RefereeDataModel? LatestRecord { get; set; }
+    public string RefereeName { get; set; } = string.Empty;
+    public string Group { get; set; } = string.Empty;
+    public double NumericScore { get; set; }
+
+    [ObservableProperty]
+    private string _scoreText = string.Empty;
 }
 #endregion

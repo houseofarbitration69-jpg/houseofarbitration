@@ -601,8 +601,9 @@ public partial class ServerViewModel : BaseViewModel
 
                         if (allData != null)
                         {
+                            string refereeKey = GetJudgeRefereeKey(judge);
                             var judgeHistory = allData
-                                .Where(d => d.Referee == judge.Name &&
+                                .Where(d => d.Referee == refereeKey &&
                                     ((CurrentDraw is DrawOrderModel o && d.DrawOrderId == o.Id) ||
                                      (CurrentDraw is DrawKnockoutModel k && d.DrawKnockoutId == k.Id) ||
                                      (CurrentDraw is DrawPoolsModel p && d.DrawPoolsId == p.Id)))
@@ -871,8 +872,9 @@ public partial class ServerViewModel : BaseViewModel
                                     _dbSemaphore.Release();
                                 }
 
+                                string refereeKey = GetJudgeRefereeKey(judge);
                                 var savedDates = existingData?
-                                    .Where(d => d.Referee == judge.Name &&
+                                    .Where(d => d.Referee == refereeKey &&
                                         ((CurrentDraw is DrawOrderModel o && d.DrawOrderId == o.Id) ||
                                          (CurrentDraw is DrawKnockoutModel k && d.DrawKnockoutId == k.Id) ||
                                          (CurrentDraw is DrawPoolsModel p && d.DrawPoolsId == p.Id)))
@@ -1777,6 +1779,43 @@ public partial class ServerViewModel : BaseViewModel
     /// <param name="isCorrection"></param>
     /// <param name="code"></param>
     /// <returns></returns>
+    private static string GetJudgeRefereeKey(JudgeModel judge)
+        => !string.IsNullOrEmpty(judge.Group) ? $"{judge.Group}_{judge.Number}" : judge.Name;
+
+    private async Task PersistTaoluFinalJudgeScoresAsync(DrawOrderModel order)
+    {
+        if (order.Id <= 0 || Judges.Count == 0) return;
+
+        IReadOnlyList<RefereeDataModel>? allRefDatas = null;
+        await _dbSemaphore.WaitAsync();
+        try
+        {
+            allRefDatas = await _refereeDataRepository.GetAllAsync();
+        }
+        finally
+        {
+            _dbSemaphore.Release();
+        }
+
+        var latestByReferee = (allRefDatas ?? Array.Empty<RefereeDataModel>())
+            .Where(r => r.DrawOrderId == order.Id && !string.IsNullOrWhiteSpace(r.Referee))
+            .GroupBy(r => r.Referee, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(r => r.Date).ThenByDescending(r => r.Id).First(),
+                StringComparer.OrdinalIgnoreCase);
+
+        foreach (var judge in Judges.Where(j => !string.IsNullOrEmpty(j.Group)).ToList())
+        {
+            string key = GetJudgeRefereeKey(judge);
+            double roundedScore = Math.Round(judge.Score, 2);
+            if (!latestByReferee.TryGetValue(key, out var existing) || Math.Abs(existing.Score - roundedScore) > 0.0001)
+            {
+                await SaveRefereeData(judge, order.CompetitorId, roundedScore, false, null, order.CurrentRound);
+            }
+        }
+    }
+
     private async Task SaveRefereeData(JudgeModel judge, int? competitorId, double score, bool isCorrection = false, MvtTimeCodeModel? code = null, int? round = null)
     {
         if (CurrentDraw == null)
@@ -1799,7 +1838,7 @@ public partial class ServerViewModel : BaseViewModel
         {
             Date = DateTime.Now,
             MatchTimer = elapsed,
-            Referee = judge.Name,
+            Referee = GetJudgeRefereeKey(judge),
             Score = score,
             Data = (code != null) ? JsonSerializer.Serialize(code) : String.Empty,
             IsCorrection = isCorrection,
@@ -2277,6 +2316,9 @@ public partial class ServerViewModel : BaseViewModel
                 GlobalOrder = order.GlobalOrder
             };
             await _drawOrderService.UpdateAsync(updateOrder);
+
+            // S'assurer que la note finale de chacun des 9 juges Taolu est bien persistée dans RefereeDatas
+            await PersistTaoluFinalJudgeScoresAsync(order);
         }
 
         if (winner != null)

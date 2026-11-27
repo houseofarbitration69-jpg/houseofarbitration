@@ -6,6 +6,7 @@
     xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels.Competition;assembly=House.Of.Arbitration.ViewModels"
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     x:TypeArguments="vm:ServerDrawsViewModel"
     x:Class="House.Of.Arbitration.Views.Competition.ServerDrawsPage"
     x:DataType="vm:ServerDrawsViewModel"
@@ -263,6 +264,7 @@
                 />
                 
                 <Picker
+                    controls:PickerExtensions.UnderlineColor="White"
                     Grid.Column="1"
                     ItemsSource="{Binding Categories}"
                     ItemDisplayBinding="{Binding Name}"
@@ -424,12 +426,14 @@
                         BackgroundColor="{DynamicResource SuccessBg}"
                         Stroke="{DynamicResource SuccessColor}"
                         StrokeThickness="1.5"
-                        StrokeShape="RoundRectangle 10">
+                        StrokeShape="RoundRectangle 10"
+                    >
                         <Grid ColumnDefinitions="*, Auto" ColumnSpacing="10">
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
                                 <Label Text="Vainqueur actuel (Taolu)" FontSize="12" TextColor="{DynamicResource SecondaryTextColor}" />
                                 <Label Text="{Binding TaoluWinnerName}" FontSize="17" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
                             </VerticalStackLayout>
+                    
                             <Button
                                 Grid.Column="1"
                                 Text="Recalculer tout"
@@ -437,7 +441,8 @@
                                 TextColor="{DynamicResource White}"
                                 CornerRadius="8"
                                 Command="{Binding RecalculateAllOrderScoresCommand}"
-                                VerticalOptions="Center" />
+                                VerticalOptions="Center" 
+                            />
                         </Grid>
                     </Border>
 
@@ -457,63 +462,128 @@
                                             <Setter Property="StrokeThickness" Value="2" />
                                         </DataTrigger>
                                     </Border.Triggers>
-                                    <Grid ColumnDefinitions="50, 70, *, 110, Auto" ColumnSpacing="10">
-                                        <Label 
-                                            Grid.Column="0" 
-                                            Text="{Binding Order, StringFormat='#{0}'}" 
-                                            FontAttributes="Bold" 
-                                            TextColor="{DynamicResource SecondaryTextColor}" 
-                                            VerticalOptions="Center" 
-                                        />
-                                        
-                                        <Label 
-                                            Grid.Column="1" 
-                                            Text="{Binding RankDisplay}" 
-                                            FontAttributes="Bold" 
-                                            TextColor="{DynamicResource PrimaryTextColor}" 
-                                            VerticalOptions="Center" 
-                                        />
-                                        
-                                        <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
+                                    <VerticalStackLayout Spacing="8">
+                                        <Grid ColumnDefinitions="50, 70, *, 110, Auto" ColumnSpacing="10">
                                             <Label 
-                                                Text="{Binding CompetitorName}" 
+                                                Grid.Column="0" 
+                                                Text="{Binding Order, StringFormat='#{0}'}" 
                                                 FontAttributes="Bold" 
-                                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                                TextColor="{DynamicResource SecondaryTextColor}" 
+                                                VerticalOptions="Center" 
                                             />
                                             
                                             <Label 
-                                                Text="{Binding Club}" 
-                                                FontSize="11" 
-                                                TextColor="{DynamicResource SecondaryTextColor}" 
+                                                Grid.Column="1" 
+                                                Text="{Binding RankDisplay}" 
+                                                FontAttributes="Bold" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                                VerticalOptions="Center" 
                                             />
-                                        </VerticalStackLayout>
-                                        
-                                        <Border 
-                                            Grid.Column="3" 
-                                            Padding="6, 2" 
-                                            BackgroundColor="{DynamicResource SurfaceLightAlt}" 
-                                            Stroke="{DynamicResource BorderMuted}" 
-                                            StrokeShape="RoundRectangle 6" 
-                                            VerticalOptions="Center"
+                                            
+                                            <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
+                                                <Label 
+                                                    Text="{Binding CompetitorName}" 
+                                                    FontAttributes="Bold" 
+                                                    TextColor="{DynamicResource PrimaryTextColor}" 
+                                                />
+                                                
+                                                <Label 
+                                                    Text="{Binding Club}" 
+                                                    FontSize="11" 
+                                                    TextColor="{DynamicResource SecondaryTextColor}" 
+                                                />
+                                            </VerticalStackLayout>
+                                            
+                                            <Border 
+                                                Grid.Column="3" 
+                                                Padding="6, 2" 
+                                                BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                                Stroke="{DynamicResource BorderMuted}" 
+                                                StrokeShape="RoundRectangle 6" 
+                                                VerticalOptions="Center"
+                                            >
+                                                <Entry
+                                                    Text="{Binding ScoreText}"
+                                                    Keyboard="Numeric"
+                                                    Placeholder="Note"
+                                                    HorizontalTextAlignment="Center"
+                                                    TextColor="{DynamicResource InverseTextColor}" 
+                                                />
+                                            </Border>
+                                            <Button
+                                                Grid.Column="4"
+                                                Text="Valider"
+                                                BackgroundColor="{DynamicResource Primary}"
+                                                TextColor="{DynamicResource White}"
+                                                CornerRadius="8"
+                                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SaveOrderScoreCommand}"
+                                                CommandParameter="{Binding .}" 
+                                            />
+                                        </Grid>
+
+                                        <!-- Deuxième ligne : notes individuelles des juges modifiables -->
+                                        <FlexLayout
+                                            IsVisible="{Binding HasJudgeScores}"
+                                            Wrap="Wrap"
+                                            JustifyContent="Start"
+                                            AlignItems="Center"
+                                            BindableLayout.ItemsSource="{Binding JudgeScores}"
                                         >
-                                            <Entry
-                                                Text="{Binding ScoreText}"
-                                                Keyboard="Numeric"
-                                                Placeholder="Note"
-                                                HorizontalTextAlignment="Center"
-                                                TextColor="{DynamicResource InverseTextColor}" 
-                                            />
-                                        </Border>
-                                        <Button
-                                            Grid.Column="4"
-                                            Text="Valider"
-                                            BackgroundColor="{DynamicResource Primary}"
-                                            TextColor="{DynamicResource White}"
-                                            CornerRadius="8"
-                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SaveOrderScoreCommand}"
-                                            CommandParameter="{Binding .}" 
-                                        />
-                                    </Grid>
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="vm:ServerTaoluJudgeScoreItem">
+                                                    <Border
+                                                        Margin="0,4,8,0"
+                                                        Padding="8,4"
+                                                        BackgroundColor="{DynamicResource SurfaceElevation3}"
+                                                        Stroke="{DynamicResource BorderMuted}"
+                                                        StrokeThickness="1"
+                                                        StrokeShape="RoundRectangle 8"
+                                                    >
+                                                        <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                                            <Label
+                                                                Text="{Binding RefereeName}"
+                                                                FontSize="12"
+                                                                FontAttributes="Bold"
+                                                                TextColor="{DynamicResource SecondaryTextColor}"
+                                                                VerticalOptions="Center"
+                                                            />
+                                                            <Border
+                                                                Padding="4,0"
+                                                                BackgroundColor="{DynamicResource SurfaceLightAlt}"
+                                                                Stroke="{DynamicResource BorderMuted}"
+                                                                StrokeShape="RoundRectangle 5"
+                                                                VerticalOptions="Center"
+                                                            >
+                                                                <Entry
+                                                                    Text="{Binding ScoreText}"
+                                                                    Keyboard="Numeric"
+                                                                    WidthRequest="58"
+                                                                    HeightRequest="32"
+                                                                    FontSize="12"
+                                                                    HorizontalTextAlignment="Center"
+                                                                    TextColor="{DynamicResource InverseTextColor}"
+                                                                />
+                                                            </Border>
+                                                            <Button
+                                                                Text="✔"
+                                                                FontSize="12"
+                                                                Padding="8,2"
+                                                                HeightRequest="30"
+                                                                MinimumHeightRequest="30"
+                                                                MinimumWidthRequest="30"
+                                                                BackgroundColor="{DynamicResource ValidColor}"
+                                                                TextColor="Black"
+                                                                CornerRadius="6"
+                                                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SaveJudgeScoreCommand}"
+                                                                CommandParameter="{Binding .}"
+                                                                ToolTipProperties.Text="Enregistrer la note du juge"
+                                                            />
+                                                        </HorizontalStackLayout>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </FlexLayout>
+                                    </VerticalStackLayout>
                                 </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
