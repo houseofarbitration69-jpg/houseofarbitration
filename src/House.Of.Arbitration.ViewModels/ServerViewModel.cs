@@ -1745,32 +1745,6 @@ public partial class ServerViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Calcule la priorité de phase pour un tirage : 32èmes (20), 16èmes (30), 8èmes (40), Quarts (50), Demis (60), Petites finales (70), Finales (80)
-    /// </summary>
-    private static int GetDrawPhasePriority(IDrawModel draw)
-    {
-        if (draw is DrawKnockoutModel ko)
-        {
-            return KnockoutStageHelper.GetStagePhasePriority(ko);
-        }
-        return 0;
-    }
-
-    /// <summary>
-    /// Retourne l'ordre local du combat dans sa catégorie
-    /// </summary>
-    private static int GetDrawLocalOrder(IDrawModel draw)
-    {
-        return draw switch
-        {
-            DrawKnockoutModel ko => ko.Order,
-            DrawPoolsModel pool => pool.Order,
-            DrawOrderModel order => order.Order,
-            _ => 0
-        };
-    }
-
-    /// <summary>
     /// 
     /// </summary>
     /// <param name="judge"></param>
@@ -1916,7 +1890,6 @@ public partial class ServerViewModel : BaseViewModel
             await _bluetoothServer.SendToAllAsync(Constants.Message.PASSAGE_START);
         });
     }
-
     #endregion
 
     #region Commands
@@ -1961,7 +1934,6 @@ public partial class ServerViewModel : BaseViewModel
 
         await Task.CompletedTask;
     }
-
     #endregion
 
     #region Commands Timer
@@ -2090,7 +2062,6 @@ public partial class ServerViewModel : BaseViewModel
             }
         }
     }
-
 
     /// <summary>
     /// Commande permettant d'arrêter le serveur
@@ -2465,7 +2436,6 @@ public partial class ServerViewModel : BaseViewModel
         }
     }
 
-
     /// <summary>
     /// 
     /// </summary>
@@ -2720,7 +2690,6 @@ public partial class ServerViewModel : BaseViewModel
 
     #region SideSheet logic
     private bool _isSideSheetOpen;
-
 
     public bool IsSideSheetOpen
     {
@@ -2983,6 +2952,29 @@ public partial class ServerViewModel : BaseViewModel
         };
 
         await Shell.Current.GoToAsync(Constants.Navigation.Page.SERVER_HISTORIC, parameters);
+    }
+
+    /// <summary>
+    /// Ouvre la vue des historiques des notes
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenServerResults()
+    {
+        if (_currentCompetition == null) return;
+
+        int currentCategoryId = CurrentDraw?.Draw?.CategoryId
+            ?? CurrentDraw?.Draw?.Category?.Id
+            ?? 0;
+
+        _needsRefreshOnAppearing = true;
+
+        var parameters = new Dictionary<string, object>
+        {
+            { Constants.Navigation.Parameter.COMPETITION_ID, _currentCompetition.Id },
+            { Constants.Navigation.Parameter.CATEGORY_ID, currentCategoryId }
+        };
+
+        await Shell.Current.GoToAsync(Constants.Navigation.Page.SERVER_RESULTS, parameters);
     }
 
     private static string SanitizeFileName(string name)

@@ -78,7 +78,7 @@ public partial class MasterViewModel : BaseViewModel
     }
     #endregion
 
-    #region Commands
+    #region Private Methods
     /// <summary>
     /// Vérifie si une action peut être exécutée sur la compétition spécifiée
     /// </summary>
@@ -96,12 +96,12 @@ public partial class MasterViewModel : BaseViewModel
     private void NotifyCompetitionCommandsCanExecuteChanged()
     {
         EditCompetitionCommand.NotifyCanExecuteChanged();
-        DrawsCommand.NotifyCanExecuteChanged();
-        ResultsCommand.NotifyCanExecuteChanged();
         DeleteCompetitionCommand.NotifyCanExecuteChanged();
-        StartCompetitionCommand.NotifyCanExecuteChanged();
+        ShowCompetitionCommand.NotifyCanExecuteChanged();
     }
+    #endregion
 
+    #region Commands
     /// <summary>
     /// Commande permettant d'editer une compétition
     /// </summary>
@@ -180,68 +180,12 @@ public partial class MasterViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Commande permettant d'afficher les tirages d'une compétition
-    /// </summary>
-    /// <param name="competition">Compétition dont on veut afficher les tirages</param>
-    /// <returns></returns>
-    [RelayCommand(CanExecute = nameof(CanExecuteCompetitionAction), AllowConcurrentExecutions = true)]
-    private async Task Draws(CompetitionModel competition)
-    {
-        if (competition == null) return;
-        if (!_busyCompetitionIds.Add(competition.Id)) return;
-        NotifyCompetitionCommandsCanExecuteChanged();
-
-        try
-        {
-            var navigationParameter = new Dictionary<string, object>
-            {
-                { Constants.Navigation.Parameter.COMPETITION_ID, competition.Id }
-            };
-
-            await Shell.Current.GoToAsync(Constants.Navigation.Page.DRAWS_MANAGEMENT, navigationParameter);
-        }
-        finally
-        {
-            _busyCompetitionIds.Remove(competition.Id);
-            NotifyCompetitionCommandsCanExecuteChanged();
-        }
-    }
-
-    /// <summary>
-    /// Commande permettant d'afficher les résultats d'une compétition
-    /// </summary>
-    /// <param name="competition">Compétition dont on veut afficher les résultats</param>
-    /// <returns></returns>
-    [RelayCommand(CanExecute = nameof(CanExecuteCompetitionAction), AllowConcurrentExecutions = true)]
-    private async Task Results(CompetitionModel competition)
-    {
-        if (competition == null) return;
-        if (!_busyCompetitionIds.Add(competition.Id)) return;
-        NotifyCompetitionCommandsCanExecuteChanged();
-
-        try
-        {
-            var navigationParameter = new Dictionary<string, object>
-            {
-                { Constants.Navigation.Parameter.COMPETITION_ID, competition.Id }
-            };
-
-            await Shell.Current.GoToAsync(Constants.Navigation.Page.RESULTS, navigationParameter);
-        }
-        finally
-        {
-            _busyCompetitionIds.Remove(competition.Id);
-            NotifyCompetitionCommandsCanExecuteChanged();
-        }
-    }
-
-    /// <summary>
     /// Commande permettant de démarrer une compétition
     /// </summary>
     /// <param name="competition">Compétition qu'on veut démarrer</param>
     /// <returns></returns>
     [RelayCommand(CanExecute = nameof(CanExecuteCompetitionAction), AllowConcurrentExecutions = true)]
-    private async Task StartCompetition(CompetitionModel competition)
+    private async Task ShowCompetition(CompetitionModel competition)
     {
         if (competition == null) return;
         if (!_busyCompetitionIds.Add(competition.Id)) return;

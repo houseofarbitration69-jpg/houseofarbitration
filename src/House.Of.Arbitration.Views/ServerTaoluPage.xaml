@@ -296,15 +296,14 @@
 
     <Grid x:Name="RootGrid">
         <Grid 
-            ColumnDefinitions="{OnIdiom Tablet='300,*', Phone='*'}" 
+            ColumnDefinitions="300,*" 
             ColumnSpacing="15" 
-            Margin="{OnIdiom Tablet='10,5,10,10', Phone='5,0,5,0'}"
+            Margin="10,5,10,10"
         >
             <Grid 
                 Grid.Column="0"
-                RowDefinitions="Auto,Auto,*" 
+                RowDefinitions="Auto,Auto,Auto,*" 
                 RowSpacing="10"
-                IsVisible="{OnIdiom Tablet='true', Phone='false'}"
             >
                 <HorizontalStackLayout 
                     Grid.Row="0" 
@@ -336,7 +335,7 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <!-- BOUTON EXPORT PDF -->
+                    <!-- EXPORT PDF -->
                     <Border
                         StrokeShape="RoundRectangle 50"
                         HeightRequest="50"
@@ -361,7 +360,7 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <!-- BOUTON TIRAGES / CORRECTIONS -->
+                    <!-- TIRAGES / CORRECTIONS -->
                     <Border
                         StrokeShape="RoundRectangle 50"
                         HeightRequest="50"
@@ -386,7 +385,7 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <!-- BOUTON HISTORIQUE -->
+                    <!-- HISTORIQUE -->
                     <Border
                         StrokeShape="RoundRectangle 50"
                         HeightRequest="50"
@@ -411,85 +410,91 @@
                         </Border.GestureRecognizers>
                     </Border>
 
-                    <!-- INDICATEUR STATUT SERVEUR -->
+                    <!-- RESULTATS -->
                     <Border
-                        Grid.Column="{OnIdiom Tablet='2', Phone='1'}"
-                        HorizontalOptions="End"
+                        StrokeShape="RoundRectangle 50"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
                         VerticalOptions="Center"
-                        StrokeShape="RoundRectangle 18"
+                        HorizontalOptions="Start"
+                        ToolTipProperties.Text="Afficher et modifier les tirages"
+                    >
+                        <Label
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.TROPHY}"
+                            FontSize="20"
+                            TextColor="{DynamicResource SuccessColor}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                        />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenServerResultsCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+                </HorizontalStackLayout>
+
+                <!-- ETAT DU SERVEUR -->
+                <Grid
+                    Grid.Row="1"
+                >
+                    <!-- Démarré -->
+                    <Border
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Center"
+                        StrokeShape="RoundRectangle 5"
                         Padding="12,6"
                         StrokeThickness="1.5"
                         BackgroundColor="{DynamicResource SuccessBg}"
                         Stroke="{DynamicResource SuccessColor}"
                         IsVisible="{Binding IsServerStarted}"
                     >
-                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <!-- Pastille de statut -->
-                            <BoxView
-                                WidthRequest="10"
-                                HeightRequest="10"
-                                CornerRadius="5"
-                                VerticalOptions="Center"
-                                Color="{DynamicResource SuccessColor}"
-                            />
-
-                            <!-- Texte statut DEMARRE -->
-                            <HorizontalStackLayout Spacing="4" VerticalOptions="Center">
-                                <Label
-                                    Text="Serveur actif"
-                                    TextColor="{DynamicResource SuccessLight}"
-                                    FontAttributes="Bold"
-                                    FontSize="13"
-                                    VerticalOptions="Center"
-                                />
-                            </HorizontalStackLayout>
-                        </HorizontalStackLayout>
+                        <Label
+                            Text="SERVEUR ACTIF"
+                            TextColor="{DynamicResource SuccessLight}"
+                            FontAttributes="Bold"
+                            FontSize="13"
+                            VerticalTextAlignment="Center"
+                            HorizontalTextAlignment="Center"
+                        />
 
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding StopServerCommand}" />
                         </Border.GestureRecognizers>
                     </Border>
 
+                    <!-- Arrêté -->
                     <Border
-                        Grid.Column="{OnIdiom Tablet='2', Phone='1'}"
-                        HorizontalOptions="End"
+                        HorizontalOptions="Fill"
                         VerticalOptions="Center"
-                        StrokeShape="RoundRectangle 18"
+                        StrokeShape="RoundRectangle 5"
                         Padding="12,6"
                         StrokeThickness="1.5"
                         BackgroundColor="{DynamicResource ErrorBg}"
                         Stroke="{DynamicResource ErrorColor}"
                         IsVisible="{Binding IsServerStarted, Converter={StaticResource InvertBoolConverter}}"
                     >
-                        <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
-                            <!-- Pastille de statut -->
-                            <BoxView
-                                WidthRequest="10"
-                                HeightRequest="10"
-                                CornerRadius="5"
-                                VerticalOptions="Center"
-                                Color="{DynamicResource ErrorColor}"
-                            />
-
-                            <!-- Texte statut ARRETE -->
-                            <Label
-                                Text="Serveur arrêté"
-                                TextColor="{DynamicResource ErrorLight}"
-                                FontAttributes="Bold"
-                                FontSize="13"
-                                VerticalOptions="Center"
-                            />
-                        </HorizontalStackLayout>
+                        <!-- Texte -->
+                        <Label
+                            Text="SERVEUR ARRÊTÉ"
+                            TextColor="{DynamicResource ErrorLight}"
+                            FontAttributes="Bold"
+                            FontSize="13"
+                            VerticalTextAlignment="Center"
+                            HorizontalTextAlignment="Center"
+                        />
 
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding StartServerCommand}" />
                         </Border.GestureRecognizers>
                     </Border>
-                </HorizontalStackLayout>
+                </Grid>
 
                 <!-- COMPTEUR COMBATS RESTANTS -->
                 <Border
-                    Grid.Row="1"
+                    Grid.Row="2"
                     Padding="10,6"
                     StrokeShape="RoundRectangle 8"
                     BackgroundColor="{DynamicResource SurfaceElevation4}"
@@ -508,7 +513,7 @@
 
                 <!-- DRAWS -->
                 <CollectionView 
-                    Grid.Row="2"
+                    Grid.Row="3"
                     ItemsSource="{Binding Draws}"
                     ItemTemplate="{StaticResource DrawTemplateSelector}"
                 >
@@ -520,9 +525,9 @@
 
             <Grid 
                 Grid.Column="1" 
-                RowDefinitions="{OnIdiom Tablet='60,150,*,50', Phone='60,280,*,50'}" 
-                RowSpacing="{OnIdiom Tablet='15', Phone='5'}" 
-                ColumnDefinitions="{OnIdiom Tablet='85,80,*,80,85', Phone='*'}"
+                RowDefinitions="60,150,*,50" 
+                RowSpacing="15" 
+                ColumnDefinitions="85,80,*,80,85"
                 IsVisible="{Binding CurrentDraw, Converter={StaticResource EmptyToBoolConverter}}"
             >
                 <!-- CATEGORIE -->
@@ -551,7 +556,6 @@
                 <Grid
                     Grid.Row="1"
                     Grid.ColumnSpan="5"
-                    IsVisible="{OnIdiom Tablet=True, Phone=False}"
                     Margin="0,-15,0,0"
                 >
                     <FlexLayout
@@ -660,104 +664,9 @@
                     </FlexLayout>
                 </Grid>
 
-                <VerticalStackLayout
-                    Grid.Row="2"
-                    BindableLayout.ItemsSource="{Binding JudgeGroups}"
-                    IsVisible="{OnIdiom Tablet=False, Phone=True}"
-                >
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="models:JudgeGroupModel">
-                            <Border 
-                                Stroke="{DynamicResource BorderDark}"
-                                StrokeShape="RoundRectangle 10"
-                                BackgroundColor="{DynamicResource SurfaceElevation6}"
-                                Padding="0,2,5,2"
-                                Margin="0,0,2,2"
-                            >
-                                <VerticalStackLayout>
-                                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Start" Padding="10,0,0,0">
-                                        <Label 
-                                            Text="{Binding Name}" 
-                                            TextColor="White" 
-                                            FontAttributes="Bold" 
-                                            FontSize="18" 
-                                            VerticalOptions="Center"
-                                        />
-                                        <Border 
-                                            BackgroundColor="DodgerBlue" 
-                                            StrokeShape="RoundRectangle 5" 
-                                            Padding="5,2"
-                                        >
-                                            <Label 
-                                                Text="{Binding GlobalScore}" 
-                                                TextColor="White" 
-                                                FontAttributes="Bold" 
-                                                FontSize="16"
-                                            />
-                                        </Border>
-                                    </HorizontalStackLayout>
-
-                                    <VerticalStackLayout 
-                                        BindableLayout.ItemsSource="{Binding Judges}"
-                                    >
-                                        <BindableLayout.ItemTemplate>
-                                            <DataTemplate x:DataType="models:JudgeModel">
-                                                <VerticalStackLayout 
-                                                    Margin="5,0,5,0"
-                                                >
-                                                    <Border 
-                                                        Background="LightGray"
-                                                        StrokeShape="RoundRectangle 5"
-                                                    >
-                                                        <Border.Triggers>
-                                                            <DataTrigger TargetType="Border" Binding="{Binding IsConnected}" Value="True">
-                                                                <Setter Property="Background" Value="Green" />
-                                                                <Setter Property="Stroke" Value="Lime" />
-                                                                <Setter Property="StrokeThickness" Value="2" />
-                                                            </DataTrigger>
-                                                        </Border.Triggers>
-                                                        <Grid ColumnDefinitions="*,*">
-                                                            <Label 
-                                                                Grid.Column="0"
-                                                                Text="{Binding Name}"
-                                                                FontAttributes="Bold"
-                                                                HorizontalOptions="Center"
-                                                                TextColor="Black"
-                                                                FontSize="18"
-                                                            />
-                                                            <Label 
-                                                                Grid.Column="1"
-                                                                Text="{Binding Score}"
-                                                                FontSize="18"
-                                                                TextColor="Black"
-                                                                HorizontalOptions="Center"
-                                                            />
-                                                        </Grid>
-                                                        <Border.GestureRecognizers>
-                                                            <TapGestureRecognizer Command="{Binding BindingContext.OpenJudgePopupCommand, Source={x:Reference this}}" CommandParameter="{Binding .}" />
-                                                        </Border.GestureRecognizers>
-                                                    </Border>
-                                                </VerticalStackLayout>
-                                            </DataTemplate>
-                                        </BindableLayout.ItemTemplate>
-                                    </VerticalStackLayout>
-
-                                    <Label 
-                                            Text="{Binding Description}"
-                                            HorizontalOptions="Center"
-                                            TextColor="White"
-                                            FontSize="12"
-                                            FontAttributes="Italic"
-                                        />
-                                </VerticalStackLayout>
-                            </Border>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
-
                 <!-- MATCH -->
                 <Grid 
-                    Grid.Row="{OnIdiom Tablet='2', Phone='1'}"
+                    Grid.Row="2"
                     Grid.Column="1" 
                     Grid.ColumnSpan="3"
                     x:DataType="vm:ServerViewModel"
@@ -795,22 +704,24 @@
                                 <!-- Circular Photo / Icon -->
                                 <Border 
                                     StrokeShape="RoundRectangle 50" 
-                                    HeightRequest="{OnIdiom Tablet='100', Phone='50'}" 
-                                    WidthRequest="{OnIdiom Tablet='100', Phone='50'}" 
+                                    HeightRequest="100" 
+                                    WidthRequest="100" 
                                     HorizontalOptions="Center" 
                                     Stroke="White" 
                                     BackgroundColor="White"
                                     StrokeThickness="3"
                                     IsVisible="{Binding Competitor.Photo, Converter={StaticResource IsNullOrEmptyConverter}, ConverterParameter='Invert'}"
                                 >
-                                    <Image Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=5}" 
-                                           Aspect="AspectFill" />
+                                    <Image 
+                                        Source="{Binding Competitor, Converter={StaticResource GenreToImageConverter}, ConverterParameter=5}" 
+                                        Aspect="AspectFill" 
+                                    />
                                 </Border>
 
                                 <Border 
                                     StrokeShape="RoundRectangle 50" 
-                                    HeightRequest="{OnIdiom Tablet='100', Phone='50'}" 
-                                    WidthRequest="{OnIdiom Tablet='100', Phone='50'}" 
+                                    HeightRequest="100" 
+                                    WidthRequest="100" 
                                     HorizontalOptions="Center" 
                                     Stroke="White" 
                                     StrokeThickness="3"
@@ -820,7 +731,7 @@
                                     <Label 
                                         Text="{Binding Competitor.Genre, Converter={StaticResource GenreToFontConverter}}" 
                                         FontFamily="{x:Static helpers:FontHelper.CUSTOM_NAME}" 
-                                        FontSize="{OnIdiom Tablet='90', Phone='45'}" 
+                                        FontSize="90" 
                                         HorizontalOptions="Center"
                                         VerticalOptions="Center"
                                         HorizontalTextAlignment="Center"
@@ -833,13 +744,13 @@
                                     <controls:ScrollingText 
                                         Text="{Binding Competitor.LastName}" 
                                         Style="{StaticResource MainCompetitorNameStyle}" 
-                                        FontSize="{OnIdiom Tablet='28', Phone='20'}" 
+                                        FontSize="28" 
                                     />
 
                                     <controls:ScrollingText 
                                         Text="{Binding Competitor.FirstName}" 
                                         Style="{StaticResource MainCompetitorNameStyle}" 
-                                        FontSize="{OnIdiom Tablet='32', Phone='20'}" 
+                                        FontSize="32" 
                                         Margin="0,-5,0,0" 
                                     />
                                 </VerticalStackLayout>
@@ -849,7 +760,7 @@
                                     <controls:ScrollingText 
                                         Text="{Binding Competitor.Club}" 
                                         Style="{StaticResource MainCompetitorClubStyle}" 
-                                        FontSize="{OnIdiom Tablet='18', Phone='16'}" 
+                                        FontSize="18" 
                                     />
 
                                     <HorizontalStackLayout HorizontalOptions="Center" Spacing="8">
@@ -911,59 +822,6 @@
                         </Grid>
                     </Grid>
                 </Grid>
-
-                <HorizontalStackLayout
-                    Grid.Row="4"
-                    Spacing="10"
-                    IsVisible="{OnIdiom Tablet='False', Phone='True'}"
-                >
-                    <!-- RETOUR -->
-                    <Border
-                        StrokeShape="RoundRectangle 50"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        BackgroundColor="{DynamicResource SurfaceElevation4}"
-                        Stroke="{DynamicResource BorderMuted}"
-                    >
-                        <Label 
-                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
-                            Text="{x:Static helpers:FontAwesomeIcons.ARROW_LEFT}" 
-                            FontSize="20" 
-                            TextColor="{DynamicResource PrimaryTextColor}" 
-                            VerticalOptions="Center"
-                            HorizontalOptions="Center"
-                            FontAttributes="Bold"
-                        />
-
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding RequestBackNavigationCommand}"/>
-                        </Border.GestureRecognizers>
-                    </Border>
-
-                    <!-- MENU -->
-                    <Border
-                        StrokeShape="RoundRectangle 50"
-                        HeightRequest="50"
-                        WidthRequest="50"
-                        BackgroundColor="{StaticResource ValidColor}"
-                        Stroke="{StaticResource ValidColor}"
-                    >
-                        <Label 
-                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
-                            Text="{x:Static helpers:FontAwesomeIcons.BARS}" 
-                            FontSize="25" 
-                            TextColor="{DynamicResource PrimaryTextColor}" 
-                            IsVisible="{Binding Type, Converter={StaticResource CompetitionTypeToBoolConverter}, ConverterParameter='Taolu'}"
-                            VerticalOptions="Center"
-                            HorizontalOptions="Center"
-                            FontAttributes="Bold"
-                        />
-
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding ToggleSideSheetCommand}"/>
-                        </Border.GestureRecognizers>
-                    </Border>
-                </HorizontalStackLayout>
             </Grid>
 
             <!-- PAS DE MATCH DISPONIBLE -->

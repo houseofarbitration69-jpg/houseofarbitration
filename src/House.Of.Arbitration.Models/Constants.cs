@@ -87,6 +87,7 @@ public static class Constants
             public const string SERVER_SANDA = "SERVER_SANDA";
             public const string SERVER_DRAWS = "SERVER_DRAWS";
             public const string SERVER_HISTORIC = "SERVER_HISTORIC";
+            public const string SERVER_RESULTS = "SERVER_RESULTS";
             public const string HOME = "HOME";
             public const string MASTER = "MASTER";
             public const string JUDGE_CONNECTION = "JUDGE_CONNECTION";

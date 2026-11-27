@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging;
 
 namespace House.Of.Arbitration.ViewModels.Competition;
 
+[QueryProperty(nameof(CompetitionId), Constants.Navigation.Parameter.COMPETITION_ID)]
+[QueryProperty(nameof(CurrentCategoryId), Constants.Navigation.Parameter.CATEGORY_ID)]
 public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
@@ -26,8 +28,10 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
     private readonly IFileDownloadService _fileDownloadService;
     #endregion
 
-    #region Fields
+    #region Attributs
     private int _competitionId;
+    private int _currentCategoryId;
+
     private CompetitionModel? _competition;
     private ObservableCollection<CategoryModel> _categories = new();
     private CategoryModel? _selectedCategory;
@@ -45,6 +49,12 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
     {
         get => _competitionId;
         set => SetProperty(ref _competitionId, value);
+    }
+
+    public int CurrentCategoryId
+    {
+        get => _currentCategoryId;
+        set => SetProperty(ref _currentCategoryId, value);
     }
 
     public CompetitionModel? Competition
@@ -151,16 +161,16 @@ public partial class ResultsViewModel : BaseViewModel, IQueryAttributable
                 CompetitionId = parsedId;
             }
         }
+
+        if (query.TryGetValue(Constants.Navigation.Parameter.CATEGORY_ID, out var catObj) &&
+            int.TryParse(catObj?.ToString(), out int catId))
+        {
+            CurrentCategoryId = catId;
+        }
     }
     #endregion
 
     #region Commands
-    [RelayCommand]
-    private async Task Back()
-    {
-        await Shell.Current.GoToAsync("..");
-    }
-
     [RelayCommand]
     private async Task ExportToExcel()
     {

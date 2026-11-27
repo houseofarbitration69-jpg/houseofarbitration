@@ -38,4 +38,6 @@ public static class FontAwesomeIcons
     public const string ARROW_LEFT = "\uf060";
     public const string FILE_PDF = "\uf1c1";
     public const string BOOKS = "\uf02d";
+    public const string TROPHY = "\uf091";
+    public const string EYE = "\uf06e";
 }

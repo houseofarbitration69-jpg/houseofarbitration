@@ -11,7 +11,7 @@ namespace House.Of.Arbitration.Tests.Unit;
 
 public class ServerDrawsViewModelTests
 {
-    private static ServerDrawsViewModel CreateVm(
+    private static DrawsViewModel CreateVm(
         out IRepository<CompetitionModel> compRepo,
         out IRepository<CategoryModel> catRepo,
         out IRepository<DrawModel> drawRepo,
@@ -31,8 +31,8 @@ public class ServerDrawsViewModelTests
         var resourceProvider = Substitute.For<ResourceProvider>();
         var popupService = Substitute.For<IPopupService>();
 
-        return new ServerDrawsViewModel(
-            NullLogger<ServerDrawsViewModel>.Instance,
+        return new DrawsViewModel(
+            NullLogger<DrawsViewModel>.Instance,
             resourceProvider,
             popupService,
             compRepo,

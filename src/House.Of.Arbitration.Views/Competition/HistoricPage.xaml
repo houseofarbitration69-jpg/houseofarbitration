@@ -8,9 +8,9 @@
     xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
-    x:TypeArguments="vm:ServerHistoricViewModel"
-    x:Class="House.Of.Arbitration.Views.ServerHistoricPage"
-    x:DataType="vm:ServerHistoricViewModel"
+    x:TypeArguments="vm:HistoricViewModel"
+    x:Class="House.Of.Arbitration.Views.HistoricPage"
+    x:DataType="vm:HistoricViewModel"
     Title="Notes des Arbitres">
 
     <base:BasePage.Resources>
@@ -59,22 +59,28 @@
         </Border>
 
         <!-- Filters -->
-        <HorizontalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center" IsVisible="{OnIdiom Tablet=True, Phone=False}">
+        <HorizontalStackLayout 
+            Grid.Row="1" 
+            Spacing="20"
+            VerticalOptions="Center" 
+            IsVisible="{OnIdiom Tablet=True, Phone=False}"
+        >
             <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
                 <Label 
                     Text="Catégorie :" 
                     VerticalOptions="Center" 
                     FontAttributes="Bold" 
-                    TextColor="White"
+                    TextColor="{DynamicResource PrimaryTextColor}"
                 />
 
                 <Picker 
+                    controls:PickerExtensions.UnderlineColor="White"
                     ItemsSource="{Binding Categories}"
-                    SelectedItem="{Binding SelectedCategory}"
                     ItemDisplayBinding="{Binding Name}"
-                    WidthRequest="250"
-                    Title="Toutes" 
-                    TextColor="White"
+                    SelectedItem="{Binding SelectedCategory}"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    Title="Sélectionner une catégorie"
+                    VerticalOptions="Center" 
                 />
             </HorizontalStackLayout>
         </HorizontalStackLayout>

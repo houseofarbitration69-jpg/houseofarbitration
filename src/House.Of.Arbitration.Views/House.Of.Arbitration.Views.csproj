@@ -35,8 +35,11 @@
     <Compile Update="Competition\CompetitionsPage.xaml.cs">
       <DependentUpon>CompetitionsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="Competition\ServerHistoricPage.xaml.cs">
-      <DependentUpon>ServerHistoricPage.xaml</DependentUpon>
+    <Compile Update="Competition\DrawsPage.xaml.cs">
+      <DependentUpon>DrawsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Competition\HistoricPage.xaml.cs">
+      <DependentUpon>HistoricPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="Competition\ResultsPage.xaml.cs">
       <DependentUpon>ResultsPage.xaml</DependentUpon>
@@ -53,11 +56,17 @@
     <Compile Update="JudgePositionPage.xaml.cs">
       <DependentUpon>JudgePositionPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="ServerSandaPagePhone.xaml.cs">
+      <DependentUpon>ServerSandaPagePhone.xaml</DependentUpon>
+    </Compile>
     <Compile Update="ServerSandaPage.xaml.cs">
       <DependentUpon>ServerSandaPage.xaml</DependentUpon>
     </Compile>
     <Compile Update="MasterPage.xaml.cs">
       <DependentUpon>MasterPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="ServerTaoluPagePhone.xaml.cs">
+      <DependentUpon>ServerTaoluPagePhone.xaml</DependentUpon>
     </Compile>
     <Compile Update="TestPage.xaml.cs">
       <DependentUpon>TestPage.xaml</DependentUpon>
@@ -80,7 +89,7 @@
     <MauiXaml Update="Competition\CompetitionsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-    <MauiXaml Update="Competition\ServerHistoricPage.xaml">
+    <MauiXaml Update="Competition\HistoricPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Competition\ResultsPage.xaml">
@@ -98,10 +107,16 @@
     <MauiXaml Update="JudgePositionPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Update="ServerSandaPagePhone.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="ServerSandaPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="MasterPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="ServerTaoluPagePhone.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="TestPage.xaml">

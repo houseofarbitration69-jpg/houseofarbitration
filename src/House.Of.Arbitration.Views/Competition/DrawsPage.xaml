@@ -7,9 +7,9 @@
     xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
     xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
     xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
-    x:TypeArguments="vm:ServerDrawsViewModel"
-    x:Class="House.Of.Arbitration.Views.Competition.ServerDrawsPage"
-    x:DataType="vm:ServerDrawsViewModel"
+    x:TypeArguments="vm:DrawsViewModel"
+    x:Class="House.Of.Arbitration.Views.Competition.DrawsPage"
+    x:DataType="vm:DrawsViewModel"
     BackgroundColor="{DynamicResource PageBackgroundColor}"
     Shell.PresentationMode="ModalAnimated"
 >
@@ -55,7 +55,7 @@
                                 BackgroundColor="{DynamicResource SurfaceElevation5}"
                                 TextColor="{DynamicResource PrimaryTextColor}"
                                 IsVisible="{Binding CanReset}"
-                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=ResetKnockoutMatchCommand}"
+                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawsViewModel}}, Path=ResetKnockoutMatchCommand}"
                                 CommandParameter="{Binding .}"
                                 ToolTipProperties.Text="Réinitialiser ce combat" />
                         </Grid>
@@ -116,7 +116,7 @@
                                     IsVisible="{Binding Slot1.HasCompetitor}"
                                 >
                                     <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SetKnockoutWinnerCommand}" CommandParameter="{Binding Slot1}"/>
+                                        <TapGestureRecognizer Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawsViewModel}}, Path=SetKnockoutWinnerCommand}" CommandParameter="{Binding Slot1}"/>
                                     </Label.GestureRecognizers>
                                 </Label>
                             </Grid>
@@ -179,7 +179,7 @@
                                     IsVisible="{Binding Slot2.HasCompetitor}"
                                 >
                                     <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SetKnockoutWinnerCommand}" CommandParameter="{Binding Slot2}"/>
+                                        <TapGestureRecognizer Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawsViewModel}}, Path=SetKnockoutWinnerCommand}" CommandParameter="{Binding Slot2}"/>
                                     </Label.GestureRecognizers>
                                 </Label>
                             </Grid>
@@ -376,7 +376,7 @@
                                             BackgroundColor="{DynamicResource SurfaceElevation4}"
                                             TextColor="{DynamicResource PrimaryTextColor}"
                                             CornerRadius="8"
-                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SetPoolWinner1Command}"
+                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawsViewModel}}, Path=SetPoolWinner1Command}"
                                             CommandParameter="{Binding .}">
                                             <Button.Triggers>
                                                 <DataTrigger TargetType="Button" Binding="{Binding IsCompetitor1Winner}" Value="True">
@@ -394,7 +394,7 @@
                                             BackgroundColor="{DynamicResource SurfaceElevation4}"
                                             TextColor="{DynamicResource PrimaryTextColor}"
                                             CornerRadius="8"
-                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SetPoolWinner2Command}"
+                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawsViewModel}}, Path=SetPoolWinner2Command}"
                                             CommandParameter="{Binding .}">
                                             <Button.Triggers>
                                                 <DataTrigger TargetType="Button" Binding="{Binding IsCompetitor2Winner}" Value="True">
@@ -410,7 +410,7 @@
                                             BackgroundColor="{DynamicResource SurfaceElevation5}"
                                             TextColor="{DynamicResource PrimaryTextColor}"
                                             IsVisible="{Binding CanReset}"
-                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=ResetPoolMatchCommand}"
+                                            Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawsViewModel}}, Path=ResetPoolMatchCommand}"
                                             CommandParameter="{Binding .}" />
                                     </Grid>
                                 </Border>
@@ -516,7 +516,7 @@
                                                 BackgroundColor="{DynamicResource Primary}"
                                                 TextColor="{DynamicResource White}"
                                                 CornerRadius="8"
-                                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SaveOrderScoreCommand}"
+                                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawsViewModel}}, Path=SaveOrderScoreCommand}"
                                                 CommandParameter="{Binding .}" 
                                             />
                                         </Grid>
@@ -574,7 +574,7 @@
                                                                 BackgroundColor="{DynamicResource ValidColor}"
                                                                 TextColor="Black"
                                                                 CornerRadius="6"
-                                                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SaveJudgeScoreCommand}"
+                                                                Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:DrawsViewModel}}, Path=SaveJudgeScoreCommand}"
                                                                 CommandParameter="{Binding .}"
                                                                 ToolTipProperties.Text="Enregistrer la note du juge"
                                                             />

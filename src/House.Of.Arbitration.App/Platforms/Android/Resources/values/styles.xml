@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <resources>
-  <!-- Thème principal : hérite de Maui.MainTheme.Base (lui-même basé sur Theme.MaterialComponents.DayNight)
-       pour conserver toutes les définitions MAUI (boutons, checkbox, app bar, etc.) tout en appliquant
-       les exigences MaterialComponents nécessaires aux composants natifs (DisplayPromptAsync, dialogues, popups). -->
-  <style name="Maui.MainTheme" parent="Maui.MainTheme.Base">
+  <!-- Thème principal : hérite directement de Theme.MaterialComponents.DayNight.NoActionBar
+       afin de garantir que tous les attributs TextAppearance requis par BottomNavigationView
+       (et autres composants MaterialComponents natifs) soient toujours présents, indépendamment
+       de la version Android ou de la chaîne d'héritage interne MAUI. -->
+  <style name="Maui.MainTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
     <item name="android:navigationBarColor">#121212</item>
     <item name="android:windowLightNavigationBar">false</item>
     <item name="android:windowDrawsSystemBarBackgrounds">true</item>
     <item name="isMaterialTheme">true</item>
+
+    <!-- Attributs TextAppearance requis par NavigationBarView / BottomNavigationView -->
+    <item name="textAppearanceBody1">@style/TextAppearance.MaterialComponents.Body1</item>
+    <item name="textAppearanceBody2">@style/TextAppearance.MaterialComponents.Body2</item>
+    <item name="textAppearanceCaption">@style/TextAppearance.MaterialComponents.Caption</item>
+    <item name="textAppearanceButton">@style/TextAppearance.MaterialComponents.Button</item>
+    <item name="textAppearanceSubtitle1">@style/TextAppearance.MaterialComponents.Subtitle1</item>
+    <item name="textAppearanceSubtitle2">@style/TextAppearance.MaterialComponents.Subtitle2</item>
 
     <!-- Thèmes des dialogues, popups et alertes (DisplayPromptAsync, DisplayAlert, etc.) -->
     <item name="android:dialogTheme">@style/AppDialogTheme</item>

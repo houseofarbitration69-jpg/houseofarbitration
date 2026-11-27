@@ -1,14 +1,23 @@
+#region Imports
 using House.Of.Arbitration.ViewModels.Competition;
+#endregion
 
 namespace House.Of.Arbitration.Views.Competition;
 
-public partial class ServerDrawsPage
+public partial class DrawsPage
 {
-    public ServerDrawsPage(ServerDrawsViewModel viewModel) : base(viewModel)
+    #region Constructors
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="viewModel"></param>
+    public DrawsPage(DrawsViewModel viewModel) : base(viewModel)
     {
         InitializeComponent();
     }
+    #endregion
 
+    #region Drag'N'Drop
     private void OnDragStarting(object sender, DragStartingEventArgs e)
     {
         var gestures = (sender as Border)?.GestureRecognizers;
@@ -17,7 +26,7 @@ public partial class ServerDrawsPage
         {
             e.Data.Text = "slot";
             e.Data.Properties["slot"] = slot;
-            if (BindingContext is ServerDrawsViewModel vm)
+            if (BindingContext is DrawsViewModel vm)
             {
                 vm.DraggedSlot = slot;
                 vm.IsDragging = true;
@@ -27,7 +36,7 @@ public partial class ServerDrawsPage
 
     private void OnDragCompleted(object sender, DropCompletedEventArgs e)
     {
-        if (BindingContext is ServerDrawsViewModel vm)
+        if (BindingContext is DrawsViewModel vm)
         {
             vm.IsDragging = false;
             vm.DraggedSlot = null;
@@ -61,7 +70,7 @@ public partial class ServerDrawsPage
             border.StrokeThickness = 1;
         }
 
-        if (BindingContext is ServerDrawsViewModel vm)
+        if (BindingContext is DrawsViewModel vm)
         {
             vm.IsDragging = false;
             var dropGesture = (sender as Border)?.GestureRecognizers.OfType<DropGestureRecognizer>().FirstOrDefault();
@@ -71,4 +80,5 @@ public partial class ServerDrawsPage
             }
         }
     }
+    #endregion
 }

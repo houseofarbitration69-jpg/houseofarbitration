@@ -35,13 +35,9 @@ public class MasterViewModelTests
         // Act & Assert
         Assert.True(viewModel.EditCompetitionCommand.CanExecute(comp1));
         Assert.True(viewModel.EditCompetitionCommand.CanExecute(comp2));
-        Assert.True(viewModel.DrawsCommand.CanExecute(comp1));
-        Assert.True(viewModel.DrawsCommand.CanExecute(comp2));
-        Assert.True(viewModel.ResultsCommand.CanExecute(comp1));
-        Assert.True(viewModel.ResultsCommand.CanExecute(comp2));
         Assert.True(viewModel.DeleteCompetitionCommand.CanExecute(comp1));
         Assert.True(viewModel.DeleteCompetitionCommand.CanExecute(comp2));
-        Assert.True(viewModel.StartCompetitionCommand.CanExecute(comp1));
-        Assert.True(viewModel.StartCompetitionCommand.CanExecute(comp2));
+        Assert.True(viewModel.ShowCompetitionCommand.CanExecute(comp1));
+        Assert.True(viewModel.ShowCompetitionCommand.CanExecute(comp2));
     }
 }

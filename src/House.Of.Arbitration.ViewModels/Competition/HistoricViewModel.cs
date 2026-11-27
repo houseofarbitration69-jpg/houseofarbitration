@@ -13,7 +13,7 @@ namespace House.Of.Arbitration.ViewModels;
 
 [QueryProperty(nameof(CompetitionId), Constants.Navigation.Parameter.COMPETITION_ID)]
 [QueryProperty(nameof(CurrentCategoryId), Constants.Navigation.Parameter.CATEGORY_ID)]
-public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
+public partial class HistoricViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
     private readonly IRepository<RefereeDataModel> _refereeDataRepository;
@@ -26,6 +26,7 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
     #region Attributs
     private int _competitionId;
     private int _currentCategoryId;
+    private string _competitionName = string.Empty;
 
     private ObservableCollection<RefereeDataModel> _refereeDatas = new();
     private ObservableCollection<CompetitionModel> _competitions = new();
@@ -35,6 +36,10 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
     private List<RefereeDataModel> _allDatas = new();
     private List<CategoryModel> _allCategories = new();
     private int? _targetCompetitionId;
+
+    private bool _isLoadingCategories;
+
+    private CompetitionModel? _competition;
     #endregion
 
     #region Properties
@@ -48,6 +53,12 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
     {
         get => _currentCategoryId;
         set => SetProperty(ref _currentCategoryId, value);
+    }
+
+    public string CompetitionName
+    {
+        get => _competitionName;
+        set => SetProperty(ref _competitionName, value);
     }
 
     public ObservableCollection<RefereeDataModel> RefereeDatas
@@ -68,20 +79,6 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
         set => SetProperty(ref _categories, value);
     }
 
-    public CompetitionModel? SelectedCompetition
-    {
-        get => _selectedCompetition;
-        set
-        {
-            if (SetProperty(ref _selectedCompetition, value))
-            {
-                UpdateCategories();
-                SelectedCategory = null;
-                FilterDatas();
-            }
-        }
-    }
-
     public CategoryModel? SelectedCategory
     {
         get => _selectedCategory;
@@ -93,10 +90,16 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
             }
         }
     }
+
+    public CompetitionModel? Competition
+    {
+        get => _competition;
+        set => SetProperty(ref _competition, value);
+    }
     #endregion
 
     #region Constructors
-    public ServerHistoricViewModel(
+    public HistoricViewModel(
         ILogger<RefereeDataViewModel> logger,
         ResourceProvider resourceProvider,
         CommunityToolkit.Maui.IPopupService popupService,
@@ -130,6 +133,17 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
                 _targetCompetitionId = parsedId;
             }
         }
+
+        if (query.TryGetValue(Constants.Navigation.Parameter.CATEGORY_ID, out var catObj) &&
+            int.TryParse(catObj?.ToString(), out int catId))
+        {
+            CurrentCategoryId = catId;
+        }
+
+        if (Categories.Count == 0 && CompetitionId > 0)
+        {
+            MainThread.BeginInvokeOnMainThread(async () => await LoadCategoriesAsync());
+        }
     }
     #endregion
 
@@ -139,25 +153,22 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
         IsBusy = true;
         try
         {
-            var comps = await _competitionRepository.GetAllAsync();
-            if (comps != null)
+            if (CompetitionId > 0)
             {
-                Competitions = new ObservableCollection<CompetitionModel>(comps);
+                Competition = await _competitionRepository.GetByIdAsync(CompetitionId);
             }
 
-            var cats = await _categoryRepository.GetAllAsync();
-            if (cats != null)
+            if (Categories.Count == 0)
             {
-                _allCategories = cats.ToList();
-                UpdateCategories();
+                await LoadCategoriesAsync();
             }
 
             var datas = await _refereeDataRepository.GetAllAsync(
-                "DrawKnockoutModel.Draw.Category", 
-                "DrawOrder.Draw.Category", 
-                "DrawPools.Draw.Category", 
+                "DrawKnockoutModel.Draw.Category",
+                "DrawOrder.Draw.Category",
+                "DrawPools.Draw.Category",
                 "Competitor");
-            
+
             if (datas != null)
             {
                 _allDatas = datas
@@ -168,14 +179,7 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
                     .ToList();
             }
 
-            if (_targetCompetitionId.HasValue && Competitions != null)
-            {
-                SelectedCompetition = Competitions.FirstOrDefault(c => c.Id == _targetCompetitionId.Value);
-            }
-            else
-            {
-                FilterDatas();
-            }
+            FilterDatas();
         }
         finally
         {
@@ -189,7 +193,6 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
     private void ResetFilter()
     {
         _targetCompetitionId = null;
-        SelectedCompetition = null;
         SelectedCategory = null;
     }
 
@@ -243,13 +246,15 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
                 })
                 .ToList();
 
-            string competitionName = SelectedCompetition?.Name ?? "Toutes compétitions";
-            DateTime? competitionDate = SelectedCompetition?.Date;
+            //string competitionName = SelectedCompetition?.Name ?? "Toutes compétitions";
+            //DateTime? competitionDate = SelectedCompetition?.Date;
 
-            var stream = await _excelService.ExportRefereeDataAsync(competitionName, competitionDate, grouped);
+            //var stream = await _excelService.ExportRefereeDataAsync(competitionName, competitionDate, grouped);
+
+            var stream = await _excelService.ExportRefereeDataAsync(CompetitionName, null, grouped);
 
             string suffix = SelectedCategory != null ? $"_{SanitizeFileName(SelectedCategory.Name ?? "")}" : string.Empty;
-            string fileName = $"NotesArbitres_{SanitizeFileName(competitionName)}{suffix}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
+            string fileName = $"NotesArbitres_{SanitizeFileName(CompetitionName)}{suffix}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx";
 
             string? savedPath = await _fileDownloadService.SaveToDownloadsAsync(
                 stream, fileName,
@@ -271,34 +276,19 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
         }
     }
 
-    private void UpdateCategories()
-    {
-        if (SelectedCompetition == null)
-        {
-            Categories = new ObservableCollection<CategoryModel>(_allCategories);
-        }
-        else
-        {
-            Categories = new ObservableCollection<CategoryModel>(_allCategories.Where(c => c.CompetitionId == SelectedCompetition.Id));
-        }
-    }
-
     private void FilterDatas()
     {
         var filtered = _allDatas.AsEnumerable();
 
-        if (SelectedCompetition != null)
-        {
-            filtered = filtered.Where(d => 
-                (d.DrawKnockoutModel?.Draw?.Category?.CompetitionId == SelectedCompetition.Id) ||
-                (d.DrawOrder?.Draw?.Category?.CompetitionId == SelectedCompetition.Id) ||
-                (d.DrawPools?.Draw?.Category?.CompetitionId == SelectedCompetition.Id)
-            );
-        }
+        filtered = filtered.Where(d =>
+            (d.DrawKnockoutModel?.Draw?.Category?.CompetitionId == CompetitionId) ||
+            (d.DrawOrder?.Draw?.Category?.CompetitionId == CompetitionId) ||
+            (d.DrawPools?.Draw?.Category?.CompetitionId == CompetitionId)
+        );
 
         if (SelectedCategory != null)
         {
-            filtered = filtered.Where(d => 
+            filtered = filtered.Where(d =>
                 (d.DrawKnockoutModel?.Draw?.CategoryId == SelectedCategory.Id) ||
                 (d.DrawOrder?.Draw?.CategoryId == SelectedCategory.Id) ||
                 (d.DrawPools?.Draw?.CategoryId == SelectedCategory.Id)
@@ -320,6 +310,45 @@ public partial class ServerHistoricViewModel : BaseViewModel, IQueryAttributable
     {
         var invalid = System.IO.Path.GetInvalidFileNameChars();
         return new string(name.Where(c => !invalid.Contains(c)).ToArray()).Replace(' ', '_');
+    }
+    #endregion
+
+    #region Load Data
+    public async Task LoadCategoriesAsync()
+    {
+        if (_isLoadingCategories) return;
+
+        _isLoadingCategories = true;
+
+        try
+        {
+            IsBusy = true;
+            if (CompetitionId > 0)
+            {
+                var comp = await _competitionRepository.GetByIdAsync(CompetitionId);
+                if (comp != null) CompetitionName = comp.Name;
+            }
+
+            var allCats = await _categoryRepository.GetAllAsync("AgeRange");
+            var filtered = allCats
+                .Where(c => CompetitionId <= 0 || c.CompetitionId == CompetitionId)
+                .OrderBy(c => c.Id)
+                .ToList();
+
+            Categories = new ObservableCollection<CategoryModel>(filtered);
+
+            var defaultCat = filtered.FirstOrDefault(c => c.Id == CurrentCategoryId) ?? filtered.FirstOrDefault();
+            SelectedCategory = defaultCat;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erreur chargement catégories dans ServerDrawsViewModel");
+        }
+        finally
+        {
+            _isLoadingCategories = false;
+            IsBusy = false;
+        }
     }
     #endregion
 }

@@ -252,7 +252,10 @@ public class DrawPdfExportService : IDrawPdfExportService
                     doc.SetPageSize(PageSize.A4.Rotate());
                     doc.NewPage();
                 }
-                AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", "Tableau éliminatoire (Sanda)");
+
+                //AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", "Tableau éliminatoire (Sanda)");
+                AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", String.Empty);
+
                 doc.Add(new Paragraph(" ") { SpacingAfter = 5 });
                 BuildKnockoutBracket(doc, draw.DrawKnockouts);
                 isFirstPage = false;
@@ -265,7 +268,10 @@ public class DrawPdfExportService : IDrawPdfExportService
                     doc.SetPageSize(PageSize.A4);
                     doc.NewPage();
                 }
-                AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", "Tableau de poules (Sanda)");
+                
+                //AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", "Tableau de poules (Sanda)");
+                AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", String.Empty);
+
                 doc.Add(new Paragraph(" ") { SpacingAfter = 5 });
                 BuildPoolsTable(doc, draw.DrawPools);
                 isFirstPage = false;
@@ -278,7 +284,10 @@ public class DrawPdfExportService : IDrawPdfExportService
                     doc.SetPageSize(PageSize.A4);
                     doc.NewPage();
                 }
-                AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", "Ordre de passage & Notes (Taolu)");
+
+                //AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", "Ordre de passage & Notes (Taolu)");
+                AddTitleBanner(doc, competitionName, draw.Category?.Name ?? "Catégorie", String.Empty);
+
                 doc.Add(new Paragraph(" ") { SpacingAfter = 5 });
                 BuildTaoluTable(doc, draw.DrawOrders);
                 isFirstPage = false;
@@ -873,11 +882,17 @@ public class DrawPdfExportService : IDrawPdfExportService
             {
                 BackgroundColor = bg,
                 Padding = 5,
-                HorizontalAlignment = Element.ALIGN_CENTER
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                VerticalAlignment = Element.ALIGN_MIDDLE
             });
 
-            table.AddCell(CreateCompetitorInfoCell(pool.Competitor1, bg));
-            table.AddCell(CreateCompetitorInfoCell(pool.Competitor2, bg));
+            var cell = CreateCompetitorInfoCell(pool.Competitor1, bg);
+            cell.VerticalAlignment = Element.ALIGN_MIDDLE;
+            table.AddCell(cell);
+
+            cell = CreateCompetitorInfoCell(pool.Competitor2, bg);
+            cell.VerticalAlignment = Element.ALIGN_MIDDLE;
+            table.AddCell(cell);
 
             // Vainqueur
             CompetitorModel? winner = pool.WinnerId == pool.Competitor1Id ? pool.Competitor1
@@ -888,7 +903,8 @@ public class DrawPdfExportService : IDrawPdfExportService
             table.AddCell(new PdfPCell(new Phrase(winnerText, winnerFont))
             {
                 BackgroundColor = bg,
-                Padding = 5
+                Padding = 5,
+                VerticalAlignment = Element.ALIGN_MIDDLE
             });
 
             // État
@@ -898,7 +914,8 @@ public class DrawPdfExportService : IDrawPdfExportService
             {
                 BackgroundColor = bg,
                 Padding = 5,
-                HorizontalAlignment = Element.ALIGN_CENTER
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                VerticalAlignment = Element.ALIGN_MIDDLE
             });
         }
 
@@ -961,7 +978,8 @@ public class DrawPdfExportService : IDrawPdfExportService
             {
                 BackgroundColor = bg,
                 Padding = 4,
-                HorizontalAlignment = Element.ALIGN_CENTER
+                HorizontalAlignment = Element.ALIGN_CENTER,
+                VerticalAlignment = Element.ALIGN_CENTER
             });
 
             var athletePhrase = new Phrase();
@@ -1097,7 +1115,8 @@ public class DrawPdfExportService : IDrawPdfExportService
         var cell = new PdfPCell
         {
             BackgroundColor = bg,
-            Padding = 5
+            Padding = 5,
+            VerticalAlignment = Element.ALIGN_MIDDLE
         };
 
         if (competitor == null)
@@ -1113,15 +1132,18 @@ public class DrawPdfExportService : IDrawPdfExportService
         {
             flagImg.ScaleToFit(14f, 10f);
             p.Add(new Chunk(flagImg, 0, -1.5f));
-            p.Add(new Chunk("   "));
+            p.Add(new Chunk(" "));
         }
 
         p.Add(new Chunk($"{competitor.LastName?.ToUpperInvariant()} {competitor.FirstName}", new Font(_bfHelveticaBold, 9, Font.NORMAL, BaseColor.Black)));
-        if (!string.IsNullOrEmpty(competitor.CountryIsoCode))
-        {
-            p.Add(new Chunk($"  [{competitor.CountryIsoCode}]", new Font(_bfHelvetica, 7, Font.NORMAL, ColorMuted)));
-        }
+
+        //if (!string.IsNullOrEmpty(competitor.CountryIsoCode))
+        //{
+        //    p.Add(new Chunk($"  [{competitor.CountryIsoCode}]", new Font(_bfHelvetica, 7, Font.NORMAL, ColorMuted)));
+        //}
+        
         cell.AddElement(p);
+        
         return cell;
     }
 

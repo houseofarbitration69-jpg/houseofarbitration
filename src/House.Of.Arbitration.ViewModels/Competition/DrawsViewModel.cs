@@ -7,7 +7,6 @@ using CommunityToolkit.Mvvm.Input;
 using House.Of.Arbitration.Data.Abstractions;
 using House.Of.Arbitration.Localization;
 using House.Of.Arbitration.Models;
-using House.Of.Arbitration.Models.Helpers;
 using House.Of.Arbitration.Services.Abstractions;
 using House.Of.Arbitration.ViewModels.Core;
 using Microsoft.Extensions.Logging;
@@ -17,7 +16,7 @@ namespace House.Of.Arbitration.ViewModels.Competition;
 
 [QueryProperty(nameof(CompetitionId), Constants.Navigation.Parameter.COMPETITION_ID)]
 [QueryProperty(nameof(CurrentCategoryId), Constants.Navigation.Parameter.CATEGORY_ID)]
-public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
+public partial class DrawsViewModel : BaseViewModel, IQueryAttributable
 {
     #region Services
     private readonly IRepository<CompetitionModel> _competitionRepository;
@@ -151,8 +150,8 @@ public partial class ServerDrawsViewModel : BaseViewModel, IQueryAttributable
     #endregion
 
     #region Constructor
-    public ServerDrawsViewModel(
-        ILogger<ServerDrawsViewModel> logger,
+    public DrawsViewModel(
+        ILogger<DrawsViewModel> logger,
         ResourceProvider resourceProvider,
         IPopupService popupService,
         IRepository<CompetitionModel> competitionRepository,
