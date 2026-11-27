@@ -352,7 +352,7 @@
                             FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
                             Text="{x:Static helpers:FontAwesomeIcons.FILE_PDF}" 
                             FontSize="22" 
-                            TextColor="#D32F2F"
+                            TextColor="{DynamicResource SuccessColor}"
                             VerticalOptions="Center"
                             HorizontalOptions="Center"
                         />
@@ -377,12 +377,37 @@
                             FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
                             Text="{x:Static helpers:FontAwesomeIcons.SITEMAP}"
                             FontSize="20"
-                            TextColor="{DynamicResource Primary}"
+                            TextColor="{DynamicResource SuccessColor}"
                             VerticalOptions="Center"
                             HorizontalOptions="Center"
                         />
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding OpenServerDrawsCommand}"/>
+                        </Border.GestureRecognizers>
+                    </Border>
+
+                    <!-- BOUTON HISTORIQUE -->
+                    <Border
+                        StrokeShape="RoundRectangle 50"
+                        HeightRequest="50"
+                        WidthRequest="50"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1"
+                        VerticalOptions="Center"
+                        HorizontalOptions="Start"
+                        ToolTipProperties.Text="Afficher et modifier les tirages"
+                    >
+                        <Label
+                            FontFamily="{x:Static helpers:FontHelper.FONTAWESOME_SOLID_NAME}"
+                            Text="{x:Static helpers:FontAwesomeIcons.BOOKS}"
+                            FontSize="20"
+                            TextColor="{DynamicResource SuccessColor}"
+                            VerticalOptions="Center"
+                            HorizontalOptions="Center"
+                        />
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenServerHistoricCommand}"/>
                         </Border.GestureRecognizers>
                     </Border>
 
@@ -843,19 +868,39 @@
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
 
-                                <!-- Finish Button for Order mode -->
-                                <Button 
-                                    Text="VALIDER LE PASSAGE" 
-                                    Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
-                                    CommandParameter="Finish"
-                                    BackgroundColor="{DynamicResource ValidColor}"
-                                    TextColor="Black"
-                                    FontAttributes="Bold"
-                                    CornerRadius="20"
-                                    HeightRequest="50"
-                                    WidthRequest="250"
-                                    Margin="0,0,0,0" 
-                                />
+                                <!-- Passage Taolu controls -->
+                                <VerticalStackLayout 
+                                    Spacing="8"
+                                    HorizontalOptions="Center"
+                                    x:DataType="{x:Null}"
+                                >
+                                    <!-- DÉMARRER LE PASSAGE — visible quand passage fermé -->
+                                    <Button 
+                                        Text="▶  DÉMARRER LE PASSAGE"
+                                        Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=StartPassageCommand}"
+                                        BackgroundColor="{DynamicResource PrimaryColor}"
+                                        TextColor="White"
+                                        FontAttributes="Bold"
+                                        CornerRadius="20"
+                                        HeightRequest="50"
+                                        WidthRequest="260"
+                                        IsVisible="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=CanStartPassage}"
+                                    />
+
+                                    <!-- VALIDER LE PASSAGE — visible uniquement quand passage ouvert -->
+                                    <Button 
+                                        Text="✔  VALIDER LE PASSAGE"
+                                        Command="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=SetWinnerCommand}"
+                                        CommandParameter="Finish"
+                                        BackgroundColor="{DynamicResource ValidColor}"
+                                        TextColor="Black"
+                                        FontAttributes="Bold"
+                                        CornerRadius="20"
+                                        HeightRequest="50"
+                                        WidthRequest="260"
+                                        IsVisible="{Binding x:DataType='vm:ServerViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerViewModel}}, Path=CanValidatePassage}"
+                                    />
+                                </VerticalStackLayout>
                             </VerticalStackLayout>
 
                             <Grid.Triggers>

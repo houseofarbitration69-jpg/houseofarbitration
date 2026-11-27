@@ -551,7 +551,7 @@ public class JudgeTaoluModeTests
     }
 
     [Fact]
-    public void JudgeViewModel_InTaoluMode_CanSendScoreIsTrueWithoutStartingTimer_WhenDrawIsActive()
+    public async Task JudgeViewModel_InTaoluMode_CanSendScoreDependsOnPassageOpen_WithoutStartingTimer()
     {
         var vm = CreateViewModel();
         vm.Competition = new CompetitionModel { Id = 1, Type = CompetitionType.Taolu };
@@ -560,20 +560,27 @@ public class JudgeTaoluModeTests
         Assert.Null(vm.CurrentDraw);
         Assert.False(vm.CanSendScore);
 
-        // Avec un tirage actif en Taolu
+        // Avec un tirage actif en Taolu, mais passage pas encore démarré : CanSendScore reste false
         vm.CurrentDraw = new DrawOrderModel { Id = 10, Order = 1 };
-
-        // Le chrono n'a PAS été démarré
         Assert.False(vm.IsTimerRunning);
-
-        // CanSendScore doit être true immédiatement !
         Assert.True(vm.IsTaolu);
         Assert.True(vm.HasActiveMatch);
+        Assert.False(vm.IsPassageOpen);
+        Assert.False(vm.CanSendScore);
+
+        // Réception de PASSAGE_START depuis le serveur : CanSendScore devient true sans chrono
+        await vm.HandleMessageAsync(Constants.Message.PASSAGE_START);
+        Assert.True(vm.IsPassageOpen);
         Assert.True(vm.CanSendScore);
+
+        // Réception de PASSAGE_END : CanSendScore redevient false
+        await vm.HandleMessageAsync(Constants.Message.PASSAGE_END);
+        Assert.False(vm.IsPassageOpen);
+        Assert.False(vm.CanSendScore);
     }
 
     [Fact]
-    public async Task JudgeViewModel_InTaoluMode_DeductPointsSucceedsWithoutTimerRunning()
+    public async Task JudgeViewModel_InTaoluMode_DeductPointsSucceedsWithoutTimerRunning_WhenPassageIsOpen()
     {
         var vm = CreateViewModel();
         vm.ServerId = "server-001";
@@ -582,8 +589,12 @@ public class JudgeTaoluModeTests
         vm.CurrentDraw = new DrawOrderModel { Id = 10, Order = 1 };
         vm.Score = 5.0;
 
-        // Le chrono n'est pas démarré
+        // Le chrono n'est pas démarré; tant que le passage n'est pas ouvert, la déduction est bloquée
         Assert.False(vm.IsTimerRunning);
+        Assert.False(vm.CanSendScore);
+
+        // Ouverture du passage par le serveur
+        await vm.HandleMessageAsync(Constants.Message.PASSAGE_START);
         Assert.True(vm.CanSendScore);
 
         // Appliquer une déduction directe
@@ -597,7 +608,7 @@ public class JudgeTaoluModeTests
     }
 
     [Fact]
-    public void JudgeSession_InTaoluMode_CanSendScoreIsTrueWithoutTimerRunning()
+    public void JudgeSession_InTaoluMode_CanSendScoreFollowsPassageStartAndEndWithoutTimer()
     {
         using var client = new WindowsBluetoothClient();
         using var session = new House.Of.Arbitration.Judge.Cli.JudgeSession(client);
@@ -605,21 +616,31 @@ public class JudgeTaoluModeTests
         var onMsgMethod = typeof(House.Of.Arbitration.Judge.Cli.JudgeSession).GetMethod("OnBluetoothMessageReceived", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         Assert.NotNull(onMsgMethod);
 
-        // Réception d'un match Taolu (RoundType.Order)
+        // Réception d'un match Taolu (RoundType.Order) avec passage fermé
         var taoluMatch = new MatchInfoData
         {
             Id = 30,
             Type = RoundType.Order,
-            CategoryName = "Taolu Changquan"
+            CategoryName = "Taolu Changquan",
+            IsPassageOpen = false
         };
         onMsgMethod.Invoke(session, new object?[] { null, $"{Constants.Message.MATCH_INFO}{System.Text.Json.JsonSerializer.Serialize(taoluMatch)}" });
 
         Assert.NotNull(session.CurrentMatch);
         Assert.Equal(RoundType.Order, session.CurrentMatch.Type);
         Assert.False(session.IsTimerRunning);
+        Assert.False(session.IsPassageOpen);
+        Assert.False(session.CanSendScore);
 
-        // En Taolu, le juge doit pouvoir envoyer des notes sans chrono
+        // Ouverture du passage par le serveur (PASSAGE_START)
+        onMsgMethod.Invoke(session, new object?[] { null, Constants.Message.PASSAGE_START });
+        Assert.True(session.IsPassageOpen);
         Assert.True(session.CanSendScore);
+
+        // Fermeture du passage (PASSAGE_END)
+        onMsgMethod.Invoke(session, new object?[] { null, Constants.Message.PASSAGE_END });
+        Assert.False(session.IsPassageOpen);
+        Assert.False(session.CanSendScore);
     }
 
     [Fact]
@@ -656,5 +677,55 @@ public class JudgeTaoluModeTests
 
         // Le score NE DOIT PAS être refusé
         Assert.DoesNotContain("[SCORE REFUSÉ]", lastStatus);
+    }
+
+    [Fact]
+    public async Task ServerViewModel_StartPassageAndValidatePassage_TogglesIsPassageOpenAndBroadcasts()
+    {
+        var bluetoothServer = Substitute.For<IBluetoothServer>();
+        bluetoothServer.InstanceId.Returns(Guid.NewGuid());
+        var drawKnockoutRepo = Substitute.For<IRepository<DrawKnockoutModel>>();
+        var drawOrderRepo = Substitute.For<IRepository<DrawOrderModel>>();
+        var drawPoolsRepo = Substitute.For<IRepository<DrawPoolsModel>>();
+        drawKnockoutRepo.GetAllAsync(Arg.Any<string[]>()).Returns((IReadOnlyList<DrawKnockoutModel>)new List<DrawKnockoutModel>());
+        drawOrderRepo.GetAllAsync(Arg.Any<string[]>()).Returns((IReadOnlyList<DrawOrderModel>)new List<DrawOrderModel>());
+        drawPoolsRepo.GetAllAsync(Arg.Any<string[]>()).Returns((IReadOnlyList<DrawPoolsModel>)new List<DrawPoolsModel>());
+
+        var serverVm = new ServerViewModel(
+            Substitute.For<ILogger<ServerViewModel>>(),
+            new ResourceProvider(),
+            Substitute.For<CommunityToolkit.Maui.IPopupService>(),
+            Substitute.For<IAlertService>(),
+            Substitute.For<IBluetoothService>(),
+            bluetoothServer,
+            Substitute.For<IRepository<CompetitionModel>>(),
+            drawKnockoutRepo,
+            drawOrderRepo,
+            drawPoolsRepo,
+            Substitute.For<IRepository<RefereeDataModel>>(),
+            Substitute.For<IDrawPdfExportService>(),
+            Substitute.For<IFileDownloadService>()
+        );
+
+        var competitor = new CompetitorModel { Id = 42, FirstName = "Li", LastName = "Wei" };
+        serverVm.CurrentDraw = new DrawOrderModel { Id = 7, DrawId = 1, Order = 1, CompetitorId = 42, Competitor = competitor };
+
+        Assert.False(serverVm.IsPassageOpen);
+        Assert.True(serverVm.CanStartPassage);
+        Assert.False(serverVm.CanValidatePassage);
+
+        await serverVm.StartPassageCommand.ExecuteAsync(null);
+        await Task.Delay(120);
+
+        Assert.True(serverVm.IsPassageOpen);
+        Assert.False(serverVm.CanStartPassage);
+        Assert.True(serverVm.CanValidatePassage);
+        await bluetoothServer.Received().SendToAllAsync(Constants.Message.PASSAGE_START);
+
+        await serverVm.SetWinnerCommand.ExecuteAsync("Finish");
+        await Task.Delay(120);
+
+        Assert.False(serverVm.IsPassageOpen);
+        await bluetoothServer.Received().SendToAllAsync(Constants.Message.PASSAGE_END);
     }
 }

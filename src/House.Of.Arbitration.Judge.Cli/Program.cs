@@ -816,13 +816,13 @@ internal static class Program
     {
         if (args.Length == 0)
         {
-            LogError("Usage: bots <nombre_de_juges_1_a_5> [serveur]");
+            LogError("Usage: bots <nombre_de_juges_1_a_9> [serveur]");
             return;
         }
 
-        if (!int.TryParse(args[0], out int count) || count < 1 || count > 5)
+        if (!int.TryParse(args[0], out int count) || count < 1 || count > 9)
         {
-            LogError("Le nombre de robots doit être compris entre 1 et 5.");
+            LogError("Le nombre de robots doit être compris entre 1 et 9.");
             return;
         }
 

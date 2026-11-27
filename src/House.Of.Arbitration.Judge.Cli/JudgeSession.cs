@@ -64,10 +64,17 @@ public class JudgeSession : IDisposable
     public string ServerName { get; private set; } = string.Empty;
     public string TimerDisplay { get; private set; } = "02:00";
     public bool IsTimerRunning { get; private set; }
+
+    /// <summary>
+    /// Vrai si un passage Taolu est ouvert (notation autorisée par le serveur via PASSAGE_START).
+    /// </summary>
+    public bool IsPassageOpen { get; private set; }
+
     public bool CanSendScore =>
         CurrentMatch != null &&
         ((CurrentMatch.Type == RoundType.Order || CurrentCompetition?.Type == CompetitionType.Taolu)
-        || (IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00"));
+            ? IsPassageOpen
+            : (IsTimerRunning && TimerDisplay != "00:00" && TimerDisplay != "0:00"));
 
     public List<MvtTimeCodeModel> DeductionsHistory { get; } = new();
 
@@ -885,11 +892,18 @@ public class JudgeSession : IDisposable
                     string matchDesc = !string.IsNullOrEmpty(c2Name) ? $"{c1Name} vs {c2Name}" : c1Name;
                     string catDesc = !string.IsNullOrEmpty(catName) ? $" [{catName}]" : "";
                     NotificationReceived?.Invoke(this, $"Match / Round reçu : #{matchData.Id} (Round {CurrentMatch.Round}, {matchData.Type}){catDesc} {matchDesc}");
+
+                    // Synchroniser l'état du passage depuis MATCH_INFO (utile lors de la reconnexion)
+                    if (matchData.Type == RoundType.Order || CurrentCompetition?.Type == CompetitionType.Taolu)
+                    {
+                        IsPassageOpen = matchData.IsPassageOpen;
+                    }
                 }
                 else
                 {
                     CurrentMatch = null;
                     IsTimerRunning = false;
+                    IsPassageOpen = false;
                     DeductionsHistory.Clear();
                     RedPoints = 0;
                     BluePoints = 0;
@@ -951,6 +965,18 @@ public class JudgeSession : IDisposable
                 _consecutiveFailedPings = 0;
                 TimeSpan latency = _pingStopwatch?.Elapsed ?? TimeSpan.Zero;
                 PongReceived?.Invoke(this, latency);
+            }
+            else if (message.Trim() == Constants.Message.PASSAGE_START)
+            {
+                IsPassageOpen = true;
+                Console.WriteLine($"Juge {JudgePosition} : Passage OUVERT — notation autorisée.");
+                NotificationReceived?.Invoke(this, "Passage OUVERT.");
+            }
+            else if (message.Trim() == Constants.Message.PASSAGE_END)
+            {
+                IsPassageOpen = false;
+                Console.WriteLine($"Juge {JudgePosition} : Passage FERMÉ — notation désactivée.");
+                NotificationReceived?.Invoke(this, "Passage FERMÉ.");
             }
             else if (message.StartsWith(Constants.Message.SERVER_NAME))
             {

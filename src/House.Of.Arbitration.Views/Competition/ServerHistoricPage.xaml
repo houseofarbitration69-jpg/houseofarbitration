@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<base:BasePage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:base="clr-namespace:House.Of.Arbitration.Views.Core;assembly=House.Of.Arbitration.Views.Core"
+    xmlns:vm="clr-namespace:House.Of.Arbitration.ViewModels;assembly=House.Of.Arbitration.ViewModels"
+    xmlns:models="clr-namespace:House.Of.Arbitration.Models;assembly=House.Of.Arbitration.Models"
+    xmlns:converters="clr-namespace:House.Of.Arbitration.Controls.Converters;assembly=House.Of.Arbitration.Controls"
+    xmlns:controls="clr-namespace:House.Of.Arbitration.Controls;assembly=House.Of.Arbitration.Controls"
+    xmlns:helpers="clr-namespace:House.Of.Arbitration.Models.Helpers;assembly=House.Of.Arbitration.Models"
+    x:TypeArguments="vm:ServerHistoricViewModel"
+    x:Class="House.Of.Arbitration.Views.ServerHistoricPage"
+    x:DataType="vm:ServerHistoricViewModel"
+    Title="Notes des Arbitres">
+
+    <base:BasePage.Resources>
+        <ResourceDictionary>
+            <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+            <converters:EmptyToBoolConverter x:Key="EmptyToBoolConverter" />
+        </ResourceDictionary>
+    </base:BasePage.Resources>
+
+    <Grid RowDefinitions="Auto, Auto, *" Margin="10" RowSpacing="15">
+        <!-- Header / Title -->
+        <Border 
+            Grid.Row="0" 
+            Padding="15" 
+            BackgroundColor="{DynamicResource SurfaceElevation6}" 
+            StrokeShape="RoundRectangle 10" 
+            Stroke="{DynamicResource BorderStrong}" 
+            StrokeThickness="1"
+        >
+            <Grid ColumnDefinitions="*, Auto">
+                <Label 
+                    Grid.Column="0"
+                    Text="HISTORIQUE"
+                    TextColor="{DynamicResource PrimaryTextColor}"
+                    FontSize="24"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" 
+                />
+
+                <controls:IconButton
+                    Grid.Column="1"
+                    Text="Télécharger"
+                    Style="{StaticResource PrimaryButtonStyle}"
+                    Command="{Binding ExportToExcelCommand}"
+                >
+                    <controls:IconButton.Icons>
+                        <controls:IconInfo 
+                            Icon="{x:Static helpers:FontCustomIcons.DOWNLOAD}" 
+                            Color="{StaticResource InverseTextColor}" 
+                            FontSize="16" 
+                        />
+                    </controls:IconButton.Icons>
+                </controls:IconButton>
+            </Grid>
+        </Border>
+
+        <!-- Filters -->
+        <HorizontalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center" IsVisible="{OnIdiom Tablet=True, Phone=False}">
+            <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                <Label 
+                    Text="Catégorie :" 
+                    VerticalOptions="Center" 
+                    FontAttributes="Bold" 
+                    TextColor="White"
+                />
+
+                <Picker 
+                    ItemsSource="{Binding Categories}"
+                    SelectedItem="{Binding SelectedCategory}"
+                    ItemDisplayBinding="{Binding Name}"
+                    WidthRequest="250"
+                    Title="Toutes" 
+                    TextColor="White"
+                />
+            </HorizontalStackLayout>
+        </HorizontalStackLayout>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="20" VerticalOptions="Center" IsVisible="{OnIdiom Tablet=False, Phone=True}">
+            <HorizontalStackLayout Spacing="5" VerticalOptions="Center">
+                <Label 
+                    Text="Catégorie :" 
+                    VerticalOptions="Center" 
+                    FontAttributes="Bold" 
+                />
+                
+                <Picker 
+                    ItemsSource="{Binding Categories}"
+                    SelectedItem="{Binding SelectedCategory}"
+                    ItemDisplayBinding="{Binding Name}"
+                    WidthRequest="250"
+                    Title="Toutes" 
+                />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+
+
+        <!-- List -->
+        <CollectionView Grid.Row="2" ItemsSource="{Binding RefereeDatas}">
+            <CollectionView.Header>
+                <Border Padding="10" BackgroundColor="{DynamicResource SurfaceElevation8}" StrokeShape="RoundRectangle 5" Margin="0,0,0,10">
+                    <Grid>
+                        <Grid 
+                            ColumnDefinitions="120, 100, 150, 60, 60, *, 60"
+                            ColumnSpacing="10"
+                            IsVisible="{OnIdiom Tablet=True, Phone=False}"
+                        >
+                            <Label Grid.Column="0" Text="DATE" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold"/>
+                            <Label Grid.Column="1" Text="ARBITRE" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold"/>
+                            <Label Grid.Column="2" Text="COMPÉTITEUR" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold"/>
+                            <Label Grid.Column="3" Text="VALEUR" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold"/>
+                            <Label Grid.Column="4" Text="ROUND" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold"/>
+                            <Label Grid.Column="5" Text="MATCH" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold" HorizontalOptions="Center"/>
+                            <Label Grid.Column="6" Text="CORR." TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold"/>
+                        </Grid>
+
+                        <Grid 
+                            ColumnDefinitions="50, 56, 95, 55, *"
+                            ColumnSpacing="5"
+                            IsVisible="{OnIdiom Tablet=False, Phone=True}"
+                        >
+                            <Label Grid.Column="0" Text="DATE" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold" />
+                            <Label Grid.Column="1" Text="ARBITRE" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold" />
+                            <Label Grid.Column="2" Text="COMPÉTITEUR" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold" />
+                            <Label Grid.Column="3" Text="VALEUR" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold" HorizontalOptions="Center" />
+                            <Label Grid.Column="4" Text="CATEGORIE" TextColor="{DynamicResource PrimaryTextColor}" FontAttributes="Bold" />
+                        </Grid>
+                    </Grid>
+                </Border>
+            </CollectionView.Header>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:RefereeDataModel">
+                    <Border Padding="10" Margin="0,2" BackgroundColor="{DynamicResource SurfaceLight}" StrokeShape="RoundRectangle 5">
+                        <Grid>
+                            <Grid 
+                            ColumnDefinitions="120, 100, 150, 60, 60, *, 60"
+                            ColumnSpacing="10"
+                            IsVisible="{OnIdiom Tablet=True, Phone=False}"
+                        >
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" 
+                                        FontSize="12" 
+                                    />
+                                    <Label 
+                                        Text="{Binding MatchTimerDisplay, StringFormat='Chrono: {0}'}" 
+                                        FontSize="11" 
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryColor}" 
+                                    />
+                                </VerticalStackLayout>
+                                <Label 
+                                    Grid.Column="1" 
+                                    Text="{Binding Referee}" 
+                                    VerticalOptions="Center" 
+                                    FontAttributes="Bold" 
+                                />
+                                <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Competitor.LastName}" 
+                                        FontAttributes="Bold" 
+                                        FontSize="14" 
+                                    />
+                                    <Label Text="{Binding Competitor.FirstName}" FontSize="12" />
+                                </VerticalStackLayout>
+                                <Label 
+                                    Grid.Column="3" 
+                                    Text="{Binding Score}" 
+                                    HorizontalTextAlignment="Center" 
+                                    VerticalTextAlignment="Center" 
+                                    FontSize="18" 
+                                    FontAttributes="Bold" 
+                                    TextColor="{Binding Score, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='-1'}" 
+                                />
+                                <Label 
+                                    Grid.Column="4" 
+                                    Text="{Binding Round}" 
+                                    HorizontalTextAlignment="Center" 
+                                    VerticalTextAlignment="Center" 
+                                    FontSize="18" 
+                                    FontAttributes="Bold" 
+                                    TextColor="{Binding Score, Converter={StaticResource EmptyToBoolConverter}, ConverterParameter='-1'}" 
+                                />
+                                <VerticalStackLayout Grid.Column="5" VerticalOptions="Center">
+                                    <Label Text="{Binding DrawKnockoutModel.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource InverseTextColor}" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    <Label Text="{Binding DrawOrder.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource InverseTextColor}" IsVisible="{Binding DrawOrderId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    <Label Text="{Binding DrawPools.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource InverseTextColor}" IsVisible="{Binding DrawPoolsId, Converter={StaticResource EmptyToBoolConverter}}" />
+
+                                    <HorizontalStackLayout Spacing="5">
+                                        <Label Text="ID:" FontAttributes="Bold" FontSize="11" />
+                                        <Label Text="{Binding DrawKnockoutId}" FontSize="11" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                        <Label Text="{Binding DrawOrderId}" FontSize="11" IsVisible="{Binding DrawOrderId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                        <Label Text="{Binding DrawPoolsId}" FontSize="11" IsVisible="{Binding DrawPoolsId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    </HorizontalStackLayout>
+                                    <Label FontSize="12" FontAttributes="Italic">
+                                        <Label.Text>
+                                            <MultiBinding StringFormat="Ordre global: {0}{1}{2}">
+                                                <Binding Path="DrawKnockoutModel.GlobalOrder" />
+                                                <Binding Path="DrawOrder.GlobalOrder" />
+                                                <Binding Path="DrawPools.GlobalOrder" />
+                                            </MultiBinding>
+                                        </Label.Text>
+                                    </Label>
+                                </VerticalStackLayout>
+                                <CheckBox Grid.Column="6" IsChecked="{Binding IsCorrection}" IsEnabled="False" HorizontalOptions="Center" VerticalOptions="Center" Color="{DynamicResource RedCornerColor}" />
+                            </Grid>
+
+                            <Grid 
+                                ColumnDefinitions="50, 56, 95, 55, *"
+                                ColumnSpacing="5"
+                                IsVisible="{OnIdiom Tablet=False, Phone=True}"
+                            >
+                                <VerticalStackLayout Grid.Column="0" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Date, StringFormat='{0:dd/MM HH:mm:ss}'}" 
+                                        FontSize="11" 
+                                        TextColor="{DynamicResource InverseTextColor}" 
+                                    />
+                                    <Label 
+                                        Text="{Binding MatchTimerDisplay, StringFormat='Chrono: {0}'}" 
+                                        FontSize="10" 
+                                        FontAttributes="Bold"
+                                        TextColor="{DynamicResource PrimaryColor}" 
+                                    />
+                                </VerticalStackLayout>
+                                <Label 
+                                    Grid.Column="1" 
+                                    Text="{Binding Referee}" 
+                                    VerticalOptions="Center" 
+                                    FontAttributes="Bold" 
+                                    FontSize="12" 
+                                    TextColor="{DynamicResource InverseTextColor}"
+                                />
+                                <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Competitor.LastName}" 
+                                        FontAttributes="Bold" 
+                                        FontSize="12" 
+                                        TextColor="{DynamicResource InverseTextColor}"
+                                    />
+                                    <Label
+                                        Text="{Binding Competitor.FirstName}" 
+                                        FontSize="12" 
+                                        TextColor="{DynamicResource InverseTextColor}"
+                                    />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="3" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <Label 
+                                        Text="{Binding Score}" 
+                                        HorizontalOptions="Center" 
+                                        FontAttributes="Bold" 
+                                        TextColor="{DynamicResource InverseTextColor}" 
+                                    />
+                                    <Label 
+                                        Text="{Binding Round, StringFormat='R{0}'}" 
+                                        HorizontalOptions="Center" 
+                                        FontSize="10" 
+                                        TextColor="{DynamicResource PrimaryColor}" 
+                                        FontAttributes="Bold"
+                                    />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="4" VerticalOptions="Center">
+                                    <Label Text="{Binding DrawKnockoutModel.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource InverseTextColor}" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    <Label Text="{Binding DrawOrder.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource InverseTextColor}" IsVisible="{Binding DrawOrderId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    <Label Text="{Binding DrawPools.Draw.Category.Name}" FontSize="12" FontAttributes="Bold" TextColor="{DynamicResource InverseTextColor}" IsVisible="{Binding DrawPoolsId, Converter={StaticResource EmptyToBoolConverter}}" />
+
+                                    <HorizontalStackLayout Spacing="5">
+                                        <Label Text="ID:" FontAttributes="Bold" FontSize="11" />
+                                        <Label Text="{Binding DrawKnockoutId}" FontSize="11" IsVisible="{Binding DrawKnockoutId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                        <Label Text="{Binding DrawOrderId}" FontSize="11" IsVisible="{Binding DrawOrderId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                        <Label Text="{Binding DrawPoolsId}" FontSize="11" IsVisible="{Binding DrawPoolsId, Converter={StaticResource EmptyToBoolConverter}}" />
+                                    </HorizontalStackLayout>
+                                    <Label FontSize="12" FontAttributes="Italic">
+                                        <Label.Text>
+                                            <MultiBinding StringFormat="Ordre global: {0}{1}{2}">
+                                                <Binding Path="DrawKnockoutModel.GlobalOrder" />
+                                                <Binding Path="DrawOrder.GlobalOrder" />
+                                                <Binding Path="DrawPools.GlobalOrder" />
+                                            </MultiBinding>
+                                        </Label.Text>
+                                    </Label>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Loading Indicator Overlay -->
+        <Border 
+            Grid.RowSpan="3"
+            IsVisible="{Binding IsBusy}" 
+            BackgroundColor="{DynamicResource OverlayModalColor}" 
+            StrokeThickness="0"
+            HorizontalOptions="Fill" 
+            VerticalOptions="Fill"
+            InputTransparent="False"
+        >
+            <Border 
+                BackgroundColor="{DynamicResource SurfaceColor}" 
+                Stroke="{DynamicResource Primary}" 
+                StrokeThickness="2" 
+                StrokeShape="RoundRectangle 16"
+                Padding="24, 20" 
+                HorizontalOptions="Center" 
+                VerticalOptions="Center"
+            >
+                <VerticalStackLayout Spacing="14" HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="True" Color="{DynamicResource Primary}" WidthRequest="44" HeightRequest="44"/>
+                    
+                    <Label 
+                        Text="Chargement des données d'arbitrage..." 
+                        TextColor="{DynamicResource PrimaryTextColor}" 
+                        FontSize="13" 
+                        FontAttributes="Bold" 
+                        HorizontalOptions="Center"
+                    />
+                </VerticalStackLayout>
+            </Border>
+        </Border>
+    </Grid>
+</base:BasePage>

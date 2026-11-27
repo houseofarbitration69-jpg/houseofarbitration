@@ -146,23 +146,60 @@
                 </Grid>
             </Border>
 
-            <!-- Row 1: Category Name Header -->
-            <Border 
-                Grid.Row="1" 
-                HorizontalOptions="Center" 
-                Padding="10,10,10,10" 
-                BackgroundColor="{DynamicResource SurfaceElevation6}" 
-                Stroke="{StaticResource PrimaryTextColor}" 
-                StrokeThickness="2" 
-                StrokeShape="RoundRectangle 15"
-            >
-                <controls:ScrollingText 
-                    Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE MATCH'}" 
-                    TextColor="{StaticResource PrimaryTextColor}" 
-                    FontSize="36" 
-                    FontAttributes="Bold" 
-                />
-            </Border>
+            <!-- Row 1: Category Name Header + Passage Status -->
+            <VerticalStackLayout Grid.Row="1" Spacing="8" HorizontalOptions="Center">
+                <Border 
+                    HorizontalOptions="Center" 
+                    Padding="10,10,10,10" 
+                    BackgroundColor="{DynamicResource SurfaceElevation6}" 
+                    Stroke="{StaticResource PrimaryTextColor}" 
+                    StrokeThickness="2" 
+                    StrokeShape="RoundRectangle 15"
+                >
+                    <controls:ScrollingText 
+                        Text="{Binding CategoryName, FallbackValue='EN ATTENTE DE MATCH'}" 
+                        TextColor="{StaticResource PrimaryTextColor}" 
+                        FontSize="36" 
+                        FontAttributes="Bold" 
+                    />
+                </Border>
+
+                <!-- Indicateur état du passage Taolu -->
+                <Grid HorizontalOptions="Center" IsVisible="{Binding HasActiveMatch}">
+                    <Border
+                        IsVisible="{Binding IsPassageOpen}"
+                        BackgroundColor="{DynamicResource SuccessBg}"
+                        Stroke="{DynamicResource SuccessColor}"
+                        StrokeThickness="1.5"
+                        Padding="14,6"
+                        StrokeShape="RoundRectangle 16"
+                    >
+                        <Label
+                            Text="🟢 PASSAGE EN COURS — NOTATION OUVERTE"
+                            TextColor="{DynamicResource SuccessColor}"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                        />
+                    </Border>
+                    <Border
+                        IsVisible="{Binding IsPassageOpen, Converter={StaticResource InvertBoolConverter}}"
+                        BackgroundColor="{DynamicResource SurfaceElevation4}"
+                        Stroke="{DynamicResource BorderMuted}"
+                        StrokeThickness="1.5"
+                        Padding="14,6"
+                        StrokeShape="RoundRectangle 16"
+                    >
+                        <Label
+                            Text="⏳ EN ATTENTE DU DÉBUT DU PASSAGE"
+                            TextColor="{DynamicResource SecondaryTextColor}"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                        />
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
 
             <!-- Row 2: Main Match Display (The Ring) -->
             <Grid 

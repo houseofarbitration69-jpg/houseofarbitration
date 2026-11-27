@@ -56,4 +56,10 @@ public class MatchInfoData
     /// Données complètes du match si mode ordre de passage (Order / Taolu)
     /// </summary>
     public DrawOrderModel? DrawOrder { get; set; }
+
+    /// <summary>
+    /// Indique si le passage Taolu est ouvert (notation autorisée par le serveur).
+    /// Toujours <c>false</c> pour les modes Sanda (chrono utilisé à la place).
+    /// </summary>
+    public bool IsPassageOpen { get; set; }
 }

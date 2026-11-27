@@ -35,6 +35,9 @@
     <Compile Update="Competition\CompetitionsPage.xaml.cs">
       <DependentUpon>CompetitionsPage.xaml</DependentUpon>
     </Compile>
+    <Compile Update="Competition\ServerHistoricPage.xaml.cs">
+      <DependentUpon>ServerHistoricPage.xaml</DependentUpon>
+    </Compile>
     <Compile Update="Competition\ResultsPage.xaml.cs">
       <DependentUpon>ResultsPage.xaml</DependentUpon>
     </Compile>
@@ -75,6 +78,9 @@
 
   <ItemGroup>
     <MauiXaml Update="Competition\CompetitionsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Competition\ServerHistoricPage.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
     <MauiXaml Update="Competition\ResultsPage.xaml">

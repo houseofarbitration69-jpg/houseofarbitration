@@ -10,8 +10,8 @@
     x:Class="House.Of.Arbitration.Views.Competition.ServerDrawsPage"
     x:DataType="vm:ServerDrawsViewModel"
     BackgroundColor="{DynamicResource PageBackgroundColor}"
-    Shell.PresentationMode="ModalAnimated">
-
+    Shell.PresentationMode="ModalAnimated"
+>
     <base:BasePage.Resources>
         <DataTemplate x:Key="KnockoutMatchCardTemplate" x:DataType="vm:ServerKnockoutMatchItem">
             <Grid ColumnDefinitions="16, 290, 16" HeightRequest="{Binding BracketSlotHeight}">
@@ -221,11 +221,14 @@
                     Text="Tirages &amp; Corrections"
                     FontSize="22"
                     FontAttributes="Bold"
-                    TextColor="{DynamicResource PrimaryTextColor}" />
+                    TextColor="{DynamicResource PrimaryTextColor}" 
+                />
+                
                 <Label
                     Text="{Binding CompetitionName}"
                     FontSize="13"
-                    TextColor="{DynamicResource SecondaryTextColor}" />
+                    TextColor="{DynamicResource SecondaryTextColor}" 
+                />
             </VerticalStackLayout>
 
             <Button
@@ -236,7 +239,8 @@
                 TextColor="{DynamicResource PrimaryTextColor}"
                 CornerRadius="8"
                 Padding="16, 8"
-                VerticalOptions="Center" />
+                VerticalOptions="Center" 
+            />
         </Grid>
 
         <!-- SÉLECTEUR DE CATÉGORIE -->
@@ -246,7 +250,8 @@
             BackgroundColor="{DynamicResource SurfaceColor}"
             Stroke="{DynamicResource BorderMuted}"
             StrokeThickness="1"
-            StrokeShape="RoundRectangle 10">
+            StrokeShape="RoundRectangle 10"
+        >
             <Grid ColumnDefinitions="Auto, *" ColumnSpacing="12">
                 <Label
                     Grid.Column="0"
@@ -254,7 +259,9 @@
                     FontSize="15"
                     FontAttributes="Bold"
                     TextColor="{DynamicResource PrimaryTextColor}"
-                    VerticalOptions="Center" />
+                    VerticalOptions="Center" 
+                />
+                
                 <Picker
                     Grid.Column="1"
                     ItemsSource="{Binding Categories}"
@@ -262,7 +269,8 @@
                     SelectedItem="{Binding SelectedCategory}"
                     TextColor="{DynamicResource PrimaryTextColor}"
                     Title="Sélectionner une catégorie"
-                    VerticalOptions="Center" />
+                    VerticalOptions="Center" 
+                />
             </Grid>
         </Border>
 
@@ -441,7 +449,8 @@
                                     BackgroundColor="{DynamicResource SurfaceColor}"
                                     Stroke="{DynamicResource BorderDark}"
                                     StrokeThickness="1"
-                                    StrokeShape="RoundRectangle 10">
+                                    StrokeShape="RoundRectangle 10"
+                                >
                                     <Border.Triggers>
                                         <DataTrigger TargetType="Border" Binding="{Binding IsWinner}" Value="True">
                                             <Setter Property="Stroke" Value="{DynamicResource SuccessColor}" />
@@ -449,19 +458,51 @@
                                         </DataTrigger>
                                     </Border.Triggers>
                                     <Grid ColumnDefinitions="50, 70, *, 110, Auto" ColumnSpacing="10">
-                                        <Label Grid.Column="0" Text="{Binding Order, StringFormat='#{0}'}" FontAttributes="Bold" TextColor="{DynamicResource SecondaryTextColor}" VerticalOptions="Center" />
-                                        <Label Grid.Column="1" Text="{Binding RankDisplay}" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" VerticalOptions="Center" />
+                                        <Label 
+                                            Grid.Column="0" 
+                                            Text="{Binding Order, StringFormat='#{0}'}" 
+                                            FontAttributes="Bold" 
+                                            TextColor="{DynamicResource SecondaryTextColor}" 
+                                            VerticalOptions="Center" 
+                                        />
+                                        
+                                        <Label 
+                                            Grid.Column="1" 
+                                            Text="{Binding RankDisplay}" 
+                                            FontAttributes="Bold" 
+                                            TextColor="{DynamicResource PrimaryTextColor}" 
+                                            VerticalOptions="Center" 
+                                        />
+                                        
                                         <VerticalStackLayout Grid.Column="2" VerticalOptions="Center">
-                                            <Label Text="{Binding CompetitorName}" FontAttributes="Bold" TextColor="{DynamicResource PrimaryTextColor}" />
-                                            <Label Text="{Binding Club}" FontSize="11" TextColor="{DynamicResource SecondaryTextColor}" />
+                                            <Label 
+                                                Text="{Binding CompetitorName}" 
+                                                FontAttributes="Bold" 
+                                                TextColor="{DynamicResource PrimaryTextColor}" 
+                                            />
+                                            
+                                            <Label 
+                                                Text="{Binding Club}" 
+                                                FontSize="11" 
+                                                TextColor="{DynamicResource SecondaryTextColor}" 
+                                            />
                                         </VerticalStackLayout>
-                                        <Border Grid.Column="3" Padding="6, 2" BackgroundColor="{DynamicResource SurfaceLightAlt}" Stroke="{DynamicResource BorderMuted}" StrokeShape="RoundRectangle 6" VerticalOptions="Center">
+                                        
+                                        <Border 
+                                            Grid.Column="3" 
+                                            Padding="6, 2" 
+                                            BackgroundColor="{DynamicResource SurfaceLightAlt}" 
+                                            Stroke="{DynamicResource BorderMuted}" 
+                                            StrokeShape="RoundRectangle 6" 
+                                            VerticalOptions="Center"
+                                        >
                                             <Entry
                                                 Text="{Binding ScoreText}"
                                                 Keyboard="Numeric"
                                                 Placeholder="Note"
                                                 HorizontalTextAlignment="Center"
-                                                TextColor="{DynamicResource PrimaryTextColor}" />
+                                                TextColor="{DynamicResource InverseTextColor}" 
+                                            />
                                         </Border>
                                         <Button
                                             Grid.Column="4"
@@ -470,7 +511,8 @@
                                             TextColor="{DynamicResource White}"
                                             CornerRadius="8"
                                             Command="{Binding x:DataType='vm:ServerDrawsViewModel', Source={RelativeSource AncestorType={x:Type vm:ServerDrawsViewModel}}, Path=SaveOrderScoreCommand}"
-                                            CommandParameter="{Binding .}" />
+                                            CommandParameter="{Binding .}" 
+                                        />
                                     </Grid>
                                 </Border>
                             </DataTemplate>

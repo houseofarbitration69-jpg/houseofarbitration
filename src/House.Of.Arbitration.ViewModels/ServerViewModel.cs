@@ -82,6 +82,7 @@ public partial class ServerViewModel : BaseViewModel
     private TimeSpan _totalRoundTime = TimeSpan.FromMinutes(2);
     private bool _isTimerRunning;
     private bool _isServerStarted;
+    private bool _isPassageOpen;
     private IDispatcherTimer? _timer;
     private int _competitionId;
     private int _totalMatches;
@@ -182,6 +183,33 @@ public partial class ServerViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// Obtient ou définit si le passage Taolu en cours est ouvert (notation autorisée par les juges).
+    /// Passe à <c>true</c> via <see cref="StartPassageCommand"/>, et à <c>false</c> lors de la validation ou du changement de compétiteur.
+    /// </summary>
+    public bool IsPassageOpen
+    {
+        get => _isPassageOpen;
+        set
+        {
+            if (SetProperty(ref _isPassageOpen, value))
+            {
+                OnPropertyChanged(nameof(CanStartPassage));
+                OnPropertyChanged(nameof(CanValidatePassage));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Vrai lorsqu'un passage Taolu peut être démarré (compétiteur actif, passage non encore ouvert).
+    /// </summary>
+    public bool CanStartPassage => CurrentDraw is DrawOrderModel && !IsPassageOpen;
+
+    /// <summary>
+    /// Vrai lorsqu'un passage Taolu peut être validé (passage ouvert).
+    /// </summary>
+    public bool CanValidatePassage => CurrentDraw is DrawOrderModel && IsPassageOpen;
+
+    /// <summary>
     /// Obtient ou définit le tirage courant
     /// </summary>
     public IDrawModel? CurrentDraw
@@ -192,6 +220,8 @@ public partial class ServerViewModel : BaseViewModel
             if (SetProperty(ref _currentDraw, value))
             {
                 OnPropertyChanged(nameof(CurrentMatchStageName));
+                OnPropertyChanged(nameof(CanStartPassage));
+                OnPropertyChanged(nameof(CanValidatePassage));
             }
         }
     }
@@ -1461,7 +1491,8 @@ public partial class ServerViewModel : BaseViewModel
             Type = draw.Type,
             Round = draw.CurrentRound,
             CategoryId = draw.Draw?.CategoryId,
-            CategoryName = draw.Draw?.Category?.Name
+            CategoryName = draw.Draw?.Category?.Name,
+            IsPassageOpen = _isPassageOpen
         };
 
         if (draw is DrawKnockoutModel k)
@@ -1655,6 +1686,10 @@ public partial class ServerViewModel : BaseViewModel
         RemainingMatchesCount = sortedDraws.Count(d => !d.IsFinished && !(d is DrawKnockoutModel k && KnockoutStageHelper.IsByeMatch(k)));
 
         var firstUnfinished = sortedDraws.FirstOrDefault(d => !d.IsFinished);
+
+        // Réinitialiser l'état du passage Taolu à chaque changement de compétiteur
+        IsPassageOpen = false;
+
         CurrentDraw = firstUnfinished;
 
         RoundResults.Clear();
@@ -1820,6 +1855,29 @@ public partial class ServerViewModel : BaseViewModel
 
         await Task.CompletedTask;
     }
+
+    /// <summary>
+    /// Commande permettant de démarrer un passage Taolu :
+    /// ouvre la notation pour tous les juges et broadcast l'état.
+    /// </summary>
+    [RelayCommand]
+    private async Task StartPassage()
+    {
+        if (CurrentDraw is not DrawOrderModel)
+            return;
+
+        IsPassageOpen = true;
+        _logger.LogInformation("Passage démarré pour le tirage #{DrawId}", CurrentDraw?.Id);
+
+        // Broadcaster le MATCH_INFO avec IsPassageOpen=true puis le signal PASSAGE_START
+        await BroadcastMatchInfo();
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(50);
+            await _bluetoothServer.SendToAllAsync(Constants.Message.PASSAGE_START);
+        });
+    }
+
     #endregion
 
     #region Commands
@@ -1864,6 +1922,7 @@ public partial class ServerViewModel : BaseViewModel
 
         await Task.CompletedTask;
     }
+
     #endregion
 
     #region Commands Timer
@@ -2033,6 +2092,13 @@ public partial class ServerViewModel : BaseViewModel
         if (CurrentDraw == null)
         {
             return;
+        }
+
+        // Fermer le passage Taolu si ouvert
+        if (_isPassageOpen)
+        {
+            IsPassageOpen = false;
+            _ = Task.Run(async () => await _bluetoothServer.SendToAllAsync(Constants.Message.PASSAGE_END));
         }
 
         // Optionally, add the final round result before setting the winner
@@ -2852,6 +2918,29 @@ public partial class ServerViewModel : BaseViewModel
         };
 
         await Shell.Current.GoToAsync(Constants.Navigation.Page.SERVER_DRAWS, parameters);
+    }
+
+    /// <summary>
+    /// Ouvre la vue des historiques des notes
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenServerHistoric()
+    {
+        if (_currentCompetition == null) return;
+
+        int currentCategoryId = CurrentDraw?.Draw?.CategoryId
+            ?? CurrentDraw?.Draw?.Category?.Id
+            ?? 0;
+
+        _needsRefreshOnAppearing = true;
+
+        var parameters = new Dictionary<string, object>
+        {
+            { Constants.Navigation.Parameter.COMPETITION_ID, _currentCompetition.Id },
+            { Constants.Navigation.Parameter.CATEGORY_ID, currentCategoryId }
+        };
+
+        await Shell.Current.GoToAsync(Constants.Navigation.Page.SERVER_HISTORIC, parameters);
     }
 
     private static string SanitizeFileName(string name)

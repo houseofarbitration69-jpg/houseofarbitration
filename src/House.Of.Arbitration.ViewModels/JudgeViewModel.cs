@@ -94,6 +94,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     private TimeSpan _timeLeft = TimeSpan.FromMinutes(2);
     private string _timeLeftDisplay = "02:00";
     private bool _isTimerRunning;
+    private bool _isPassageOpen;
     private string _judgeGroup = String.Empty;
     private bool _isReconnecting;
     private int _reconnectingFlag; // 0 = libre, 1 = en cours (Interlocked)
@@ -214,6 +215,22 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// Indique si un match actif est présent
     /// </summary>
     public bool HasActiveMatch => CurrentDraw != null;
+
+    /// <summary>
+    /// Indique si le passage Taolu en cours est ouvert (notation autorisée par le serveur).
+    /// Mise à jour via les messages <c>PASSAGE_START</c> / <c>PASSAGE_END</c> reçus du serveur.
+    /// </summary>
+    public bool IsPassageOpen
+    {
+        get => _isPassageOpen;
+        private set
+        {
+            if (SetProperty(ref _isPassageOpen, value))
+            {
+                OnPropertyChanged(nameof(CanSendScore));
+            }
+        }
+    }
 
     /// <summary>
     /// Obtient ou définit le nom de la catégorie
@@ -393,7 +410,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
     /// En Sanda, le chronomètre doit tourner et être supérieur à 0.
     /// </summary>
     public bool CanSendScore => IsTaolu
-        ? HasActiveMatch
+        ? HasActiveMatch && _isPassageOpen
         : (IsTimerRunning && _timeLeft.TotalSeconds > 0);
 
     /// <summary>
@@ -977,6 +994,12 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                             Score = Constants.DEFAUTL_SCORE_GROUP_C;
                         }
                     }
+
+                    // Synchroniser l'état du passage depuis MATCH_INFO (utile lors de la reconnexion)
+                    if (IsTaolu)
+                    {
+                        IsPassageOpen = matchData.IsPassageOpen;
+                    }
                 }
                 else
                 {
@@ -993,6 +1016,7 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                     Codes.Clear();
                     HasUnsyncedChanges = false;
                     _unsyncedScores.Clear();
+                    IsPassageOpen = false;
                 }
 
                 IsReceivingMatch = false;
@@ -1030,6 +1054,16 @@ public partial class JudgeViewModel : BaseViewModel, IQueryAttributable
                         IsTimerRunning = false;
                     }
                 }
+            }
+            else if (trimmed == Constants.Message.PASSAGE_START)
+            {
+                IsPassageOpen = true;
+                _logger.LogInformation("Passage Taolu OUVERT.");
+            }
+            else if (trimmed == Constants.Message.PASSAGE_END)
+            {
+                IsPassageOpen = false;
+                _logger.LogInformation("Passage Taolu FERMÉ.");
             }
             else if (trimmed.StartsWith(Constants.Message.SERVER_NAME))
             {

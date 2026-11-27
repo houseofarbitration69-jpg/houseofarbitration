@@ -267,4 +267,23 @@ public class ServerTimeAccelerationAndBotTests
         manager.StopAll();
         Assert.All(manager.Bots, b => Assert.False(b.IsRunning));
     }
+
+    [Theory]
+    [InlineData(0, true, "A", 1)]
+    [InlineData(1, true, "A", 2)]
+    [InlineData(2, true, "A", 3)]
+    [InlineData(3, true, "B", 1)]
+    [InlineData(4, true, "B", 2)]
+    [InlineData(5, true, "B", 3)]
+    [InlineData(6, true, "C", 1)]
+    [InlineData(7, true, "C", 2)]
+    [InlineData(8, true, "C", 3)]
+    [InlineData(0, false, "", 1)]
+    [InlineData(4, false, "", 5)]
+    public void JudgeBotManager_GetBotPosition_AssignsTaoluAndSandaPositions(int index, bool isTaolu, string expectedGroup, int expectedPos)
+    {
+        var (group, pos) = JudgeBotManager.GetBotPosition(index, isTaolu);
+        Assert.Equal(expectedGroup, group);
+        Assert.Equal(expectedPos, pos);
+    }
 }

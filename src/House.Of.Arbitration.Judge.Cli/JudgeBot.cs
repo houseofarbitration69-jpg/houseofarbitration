@@ -91,13 +91,15 @@ public class JudgeBot : IDisposable
         {
             try
             {
-                // Vérifier si le chrono est en cours et si on peut noter
-                if (_session.IsTimerRunning && _session.CanSendScore)
+                // Vérifier si on peut noter (chrono actif en Sanda, ou passage ouvert en Taolu)
+                if (_session.CanSendScore)
                 {
                     if (!wasActive)
                     {
                         wasActive = true;
-                        BotActivity?.Invoke(this, $"🤖 [ROBOT {_session.PositionCode}] Chronomètre actif ! Début de la simulation (Stratégie: {Strategy}, Vitesse: x{SpeedMultiplier}).");
+                        bool isTaolu = _session.CurrentMatch?.Type == RoundType.Order || _session.CurrentCompetition?.Type == CompetitionType.Taolu;
+                        string reason = isTaolu ? "Passage ouvert" : "Chronomètre actif";
+                        BotActivity?.Invoke(this, $"🤖 [ROBOT {_session.PositionCode}] {reason} ! Début de la simulation (Stratégie: {Strategy}, Vitesse: x{SpeedMultiplier}).");
                     }
 
                     int speed = Math.Clamp(SpeedMultiplier, 1, 8);
@@ -107,7 +109,7 @@ public class JudgeBot : IDisposable
                     await Task.Delay(actualInterval, token);
                     if (token.IsCancellationRequested) break;
 
-                    if (!_session.IsTimerRunning || !_session.CanSendScore)
+                    if (!_session.CanSendScore)
                     {
                         continue;
                     }
@@ -145,8 +147,34 @@ public class JudgeBot : IDisposable
                     }
                     else
                     {
-                        // Taolu : Pause plus longue entre les saisies
-                        await Task.Delay(actualInterval * 2, token);
+                        // Taolu : Envoi périodique de codes/déductions réalistes selon le groupe (A, B, C)
+                        double minFloor = _session.JudgeGroup switch
+                        {
+                            "A" => 4.2,
+                            "B" => 2.2,
+                            "C" => 1.4,
+                            _ => 4.0
+                        };
+
+                        if (_session.CurrentScore > minFloor && Random.Shared.Next(100) < 65)
+                        {
+                            bool ok;
+                            if (_session.JudgeGroup == "A" && MvtCodeModel.DefaultCodes.Count > 0)
+                            {
+                                var code = MvtCodeModel.DefaultCodes[Random.Shared.Next(MvtCodeModel.DefaultCodes.Count)];
+                                ok = await _session.ApplyTaoluCodeAsync(code.Code);
+                            }
+                            else
+                            {
+                                ok = await _session.DeductPointsAsync(0.1, "Simulation Taolu");
+                            }
+
+                            if (ok)
+                            {
+                                TotalScoresSent++;
+                                BotActivity?.Invoke(this, $"🤖 [ROBOT {_session.PositionCode}] Taolu note mise à jour : {_session.CurrentScore:F2} (Total {TotalScoresSent})");
+                            }
+                        }
                     }
                 }
                 else
@@ -154,10 +182,10 @@ public class JudgeBot : IDisposable
                     if (wasActive)
                     {
                         wasActive = false;
-                        BotActivity?.Invoke(this, $"🤖 [ROBOT {_session.PositionCode}] Chronomètre arrêté ou en pause. En attente...");
+                        BotActivity?.Invoke(this, $"🤖 [ROBOT {_session.PositionCode}] Notation fermée ou en pause. En attente...");
                     }
 
-                    // Attendre le démarrage du chrono
+                    // Attendre l'ouverture de la notation
                     await Task.Delay(200, token);
                 }
             }

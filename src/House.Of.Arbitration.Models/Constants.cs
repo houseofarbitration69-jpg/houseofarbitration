@@ -49,6 +49,16 @@ public static class Constants
         public static string PONG = "PONG";
         public static string SERVER_STOPPED = "SERVER_STOPPED";
 
+        /// <summary>
+        /// Envoyé par le serveur pour indiquer qu'un passage Taolu est ouvert (notation autorisée).
+        /// </summary>
+        public static string PASSAGE_START = "PASSAGE_START";
+
+        /// <summary>
+        /// Envoyé par le serveur pour indiquer qu'un passage Taolu est terminé (notation fermée).
+        /// </summary>
+        public static string PASSAGE_END = "PASSAGE_END";
+
         // Messages Monitor CLI → Serveur
         public static string MONITOR_REGISTER = "MONITOR_REGISTER";
         public static string CORRECTION_WINNER = "CORRECTION_WINNER:";
@@ -76,6 +86,7 @@ public static class Constants
             public const string SERVER_TAOLU = "SERVER_TAOLU";
             public const string SERVER_SANDA = "SERVER_SANDA";
             public const string SERVER_DRAWS = "SERVER_DRAWS";
+            public const string SERVER_HISTORIC = "SERVER_HISTORIC";
             public const string HOME = "HOME";
             public const string MASTER = "MASTER";
             public const string JUDGE_CONNECTION = "JUDGE_CONNECTION";

@@ -31,6 +31,7 @@ public static class BuilderExtensions
         builder.Services.AddTransient<ResultsPage>();
         builder.Services.AddTransient<DrawsManagementPage>();
         builder.Services.AddTransient<ServerDrawsPage>();
+        builder.Services.AddTransient<ServerHistoricPage>();
         builder.Services.AddTransient<CompetitorsPage>();
         builder.Services.AddTransient<DrawPage>();
         //builder.Services.AddTransient<DragDropPage>();
